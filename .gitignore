@@ -1,0 +1,32 @@
+# ---------------- FRONTEND --------------
+
+# ---------------- BACKEND ---------------
+
+# ---------------- DEVOPS ----------------
+# Terraform state — never commit these
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Vars with secrets
+terraform.tfvars
+*.auto.tfvars
+output.txt
+
+# Terraform working directories
+.terraform/
+.terraform.lock.hcl
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files (local developer overrides)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# SSH keys
+*.pem
+*.key
