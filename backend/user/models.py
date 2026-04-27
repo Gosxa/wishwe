@@ -112,14 +112,18 @@ class Profile(models.Model):
         on_delete=models.CASCADE,
         related_name="profile",
     )
-    username = models.CharField(max_length=60, unique=True)
+    username = models.CharField(
+        max_length=60, unique=True, null=True, blank=True
+    )
     first_name = models.CharField(max_length=60, null=True, blank=True)
     last_name = models.CharField(max_length=60, null=True, blank=True)
     bio = models.TextField(blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
     social_media_url = models.URLField(blank=True, null=True)
-    avatar = models.ImageField(upload_to=upload_profile_picture, null=True, blank=True)
+    avatar = models.ImageField(
+        upload_to=upload_profile_picture, null=True, blank=True
+    )
     updated_at = models.DateTimeField(auto_now=True)
     gender = models.CharField(max_length=20, choices=GenderChoices.choices)
 
