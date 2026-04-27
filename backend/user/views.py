@@ -9,6 +9,11 @@ from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import SocialAccount, Profile
+from django.core.mail import send_mail
+
+from .serializers import RequestCodeSerializer, VerifyCodeSerializer, SetPasswordSerializer
+from .services.auth_service import AuthService
+
 
 User = get_user_model()
 
@@ -94,6 +99,74 @@ def google_auth(request):
 
         if updated:
             profile.save()
+
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+    })
+
+
+@api_view(["POST"])
+def request_code(request):
+    serializer = RequestCodeSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data["email"]
+
+    code = AuthService.send_verification_code(email)
+
+    send_mail(
+        subject="Your verification code",
+        message=f"Your code is {code}",
+        from_email="no-reply@example.com",
+        recipient_list=[email],
+    )
+
+    return Response(
+        {"message": "Verification code sent"},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["POST"])
+def verify_code(request):
+    serializer = VerifyCodeSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    email = serializer.validated_data["email"]
+    code = serializer.validated_data["code"]
+
+    try:
+        token = AuthService.verify_code(email, code)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response(
+        {"verification_token": str(token)},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["POST"])
+def set_password(request):
+    serializer = SetPasswordSerializer(data=request.data)
+
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    token = serializer.validated_data["token"]
+    password = serializer.validated_data["password"]
+
+    try:
+        user = AuthService.create_user_with_token(token, password)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     refresh = RefreshToken.for_user(user)
 
