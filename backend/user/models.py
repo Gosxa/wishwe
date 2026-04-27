@@ -88,6 +88,9 @@ class City(models.Model):
             models.Index(fields=["name"]),
         ]
 
+    def __str__(self):
+        return self.name
+
 
 class GenderChoices(models.TextChoices):
     MALE = "Male"
@@ -96,11 +99,11 @@ class GenderChoices(models.TextChoices):
 
 
 def upload_profile_picture(instance, filename):
-    """Upload a post picture."""
+    """Upload an avatar picture."""
     ext = filename.split(".")[-1]
     filename = f"{slugify(instance.username)}-{uuid.uuid4()}.{ext}"
 
-    return os.path.join("uploads/posts/", filename)
+    return os.path.join("uploads/avatars/", filename)
 
 
 class Profile(models.Model):
