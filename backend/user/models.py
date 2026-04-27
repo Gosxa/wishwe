@@ -122,3 +122,19 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.username
+
+
+class EmailVerification(models.Model):
+    email = models.EmailField()
+    code = models.CharField(max_length=6)
+
+    token = models.UUIDField(null=True, blank=True, unique=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    is_verified = models.BooleanField(default=False)
+    attempts = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.email
