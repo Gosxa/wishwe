@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
@@ -11,7 +12,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import SocialAccount, Profile
 from django.core.mail import send_mail
 
-from .serializers import RequestCodeSerializer, VerifyCodeSerializer, SetPasswordSerializer
+from .permissions import IsOwnerOrReadOnly
+from .serializers import RequestCodeSerializer, VerifyCodeSerializer, SetPasswordSerializer, ProfileSerializer, \
+    ProfileReadSerializer, OnboardingSerializer, AvatarSerializer
 from .services.auth_service import AuthService
 
 
@@ -174,3 +177,67 @@ def set_password(request):
         "access": str(refresh.access_token),
         "refresh": str(refresh),
     })
+
+
+class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Profile.objects.select_related("user", "city")
+    serializer_class = ProfileSerializer
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+
+    def get_serializer_class(self):
+        if self.action in ("list", "retrieve"):
+            return ProfileReadSerializer
+        elif self.action == "onboarding":
+            return OnboardingSerializer
+        elif self.action == "upload_avatar":
+            return AvatarSerializer
+        return ProfileSerializer
+
+    @action(detail=False, methods=["get"])
+    def me(self, request):
+        profile = request.user.profile
+        serializer = self.get_serializer(
+            profile
+        )
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get", "put", "patch"])
+    def update_profile(self, request):
+        profile = request.user.profile
+        serializer = self.get_serializer(
+            profile,
+            data=request.data,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["patch"], url_path="onboarding")
+    def onboarding(self, request):
+        profile = request.user.profile
+
+        serializer = self.get_serializer(
+            profile,
+            data=request.data,
+            partial=True
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get", "put", "patch"], url_path="avatar")
+    def upload_avatar(self, request):
+        serializer = self.get_serializer(
+            request.user.profile,
+            data=request.data,
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)

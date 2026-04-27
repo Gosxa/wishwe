@@ -1,4 +1,5 @@
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -9,9 +10,14 @@ from user.views import (
     google_auth,
     request_code,
     verify_code,
-    set_password
+    set_password,
+    ProfileViewSet
 )
 
+
+router = DefaultRouter()
+
+router.register("profile", ProfileViewSet, basename="profile")
 
 urlpatterns = [
     path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
@@ -20,6 +26,7 @@ urlpatterns = [
     path("auth/request-code/", request_code, name="request_code"),
     path("auth/verify-code/", verify_code, name="verify_code"),
     path("auth/set-password/", set_password, name="set_password"),
+    path("", include(router.urls)),
 ]
 
 app_name = "user"
