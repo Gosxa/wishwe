@@ -125,7 +125,7 @@ class Profile(models.Model):
 
 
 class EmailVerification(models.Model):
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     code = models.CharField(max_length=6)
 
     token = models.UUIDField(null=True, blank=True, unique=True)
