@@ -3,7 +3,7 @@ from rest_framework import serializers
 from user.models import Profile
 
 
-class RequestCodeSerializer(serializers.Serializer):
+class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
 

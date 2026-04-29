@@ -1,24 +1,29 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from .models import SocialAccount, Profile
-from django.core.mail import send_mail
 
 from .permissions import IsOwnerOrReadOnly
-from .serializers import RequestCodeSerializer, VerifyCodeSerializer, SetPasswordSerializer, ProfileSerializer, \
+from .serializers import EmailSerializer, VerifyCodeSerializer, SetPasswordSerializer, ProfileSerializer, \
     ProfileReadSerializer, OnboardingSerializer, AvatarSerializer
 from .services.auth_service import AuthService
 
 
 User = get_user_model()
+
+
+class LoginThrottle(AnonRateThrottle):
+    rate = "5/min"
 
 
 @api_view(["POST"])
@@ -112,25 +117,19 @@ def google_auth(request):
 
 
 @api_view(["POST"])
-def request_code(request):
-    serializer = RequestCodeSerializer(data=request.data)
-
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@throttle_classes([LoginThrottle])
+def email_start(request):
+    serializer = EmailSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
     email = serializer.validated_data["email"]
 
-    code = AuthService.send_verification_code(email)
-
-    send_mail(
-        subject="Your verification code",
-        message=f"Your code is {code}",
-        from_email="no-reply@example.com",
-        recipient_list=[email],
-    )
+    user_exists = User.objects.filter(email=email).exists()
+    if not user_exists:
+        AuthService.send_verification_code(email)
 
     return Response(
-        {"message": "Verification code sent"},
+        {"flow": "login" if user_exists else "register" },
         status=status.HTTP_200_OK
     )
 
@@ -178,6 +177,10 @@ def set_password(request):
         "refresh": str(refresh),
         "is_onboarded": user.profile.is_onboarded,
     })
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    throttle_classes = [LoginThrottle]
 
 
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):

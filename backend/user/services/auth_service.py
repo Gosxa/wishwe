@@ -2,6 +2,7 @@ import uuid
 import random
 from datetime import timedelta
 
+from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -30,6 +31,13 @@ class AuthService:
                 "attempts": 0,
                 "is_verified": False,
             }
+        )
+
+        send_mail(
+            subject="Your verification code",
+            message=f"Your code is {code}",
+            from_email="no-reply@example.com",
+            recipient_list=[email],
         )
 
         return code
