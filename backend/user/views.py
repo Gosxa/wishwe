@@ -73,7 +73,6 @@ def google_auth(request):
 
                 Profile.objects.create(
                     user=user,
-                    username=email.split("@")[0],
                     first_name=first_name,
                     last_name=last_name,
                 )
@@ -108,6 +107,7 @@ def google_auth(request):
     return Response({
         "access": str(refresh.access_token),
         "refresh": str(refresh),
+        "is_onboarded": profile.is_onboarded,
     })
 
 
@@ -176,6 +176,7 @@ def set_password(request):
     return Response({
         "access": str(refresh.access_token),
         "refresh": str(refresh),
+        "is_onboarded": user.profile.is_onboarded,
     })
 
 
@@ -201,10 +202,10 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         )
         return Response(serializer.data)
 
-    @action(detail=False, methods=["get", "put", "patch"])
+    @action(detail=False, methods=["get", "patch"])
     def update_profile(self, request):
         profile = request.user.profile
-        serializer = self.get_serializer(
+        serializer = ProfileSerializer(
             profile,
             data=request.data,
             partial=True
@@ -226,11 +227,20 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         serializer.is_valid(raise_exception=True)
+
+        if serializer.validated_data["username"] == "":
+            return Response(
+                {"error": "username required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer.save()
+        profile.is_onboarded = True
+        profile.save()
 
         return Response(serializer.data)
 
-    @action(detail=False, methods=["get", "put", "patch"], url_path="avatar")
+    @action(detail=False, methods=["patch"], url_path="avatar")
     def upload_avatar(self, request):
         serializer = self.get_serializer(
             request.user.profile,

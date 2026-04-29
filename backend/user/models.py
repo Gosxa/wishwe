@@ -126,6 +126,7 @@ class Profile(models.Model):
     )
     updated_at = models.DateTimeField(auto_now=True)
     gender = models.CharField(max_length=20, choices=GenderChoices.choices)
+    is_onboarded = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
