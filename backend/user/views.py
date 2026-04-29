@@ -156,6 +156,21 @@ def verify_code(request):
 
 
 @api_view(["POST"])
+def resend_code(request):
+    serializer = EmailSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    email = serializer.validated_data["email"]
+
+    try:
+        AuthService.resend_verification_code(email)
+    except ValueError as e:
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({"message": "Code resent"})
+
+
+@api_view(["POST"])
 def set_password(request):
     serializer = SetPasswordSerializer(data=request.data)
 

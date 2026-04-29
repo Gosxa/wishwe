@@ -11,6 +11,7 @@ from user.models import Profile, EmailVerification
 
 
 User = get_user_model()
+COOLDOWN_SECONDS = 60
 
 
 class AuthService:
@@ -41,6 +42,22 @@ class AuthService:
         )
 
         return code
+
+    @staticmethod
+    def resend_verification_code(email: str):
+        verification = EmailVerification.objects.filter(email=email).first()
+
+        if verification:
+            last_sent = verification.updated_at
+
+            if timezone.now() < last_sent + timedelta(seconds=COOLDOWN_SECONDS):
+                remaining = (
+                        last_sent + timedelta(seconds=COOLDOWN_SECONDS) - timezone.now()
+                ).seconds
+
+                raise ValueError(f"Try again in {remaining} seconds")
+
+        return AuthService.send_verification_code(email)
 
     @staticmethod
     def verify_code(email: str, code: str):

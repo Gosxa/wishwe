@@ -139,6 +139,7 @@ class EmailVerification(models.Model):
     token = models.UUIDField(null=True, blank=True, unique=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     expires_at = models.DateTimeField()
 
     is_verified = models.BooleanField(default=False)
