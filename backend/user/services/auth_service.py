@@ -21,7 +21,7 @@ class AuthService:
         return str(random.randint(100000, 999999))
 
     @staticmethod
-    def send_verification_code(email: str):
+    def send_verification_code(email: str, purpose: str = "registration"):
         code = AuthService.generate_code()
 
         verification, _ = EmailVerification.objects.update_or_create(
@@ -31,6 +31,7 @@ class AuthService:
                 "expires_at": timezone.now() + timedelta(minutes=10),
                 "attempts": 0,
                 "is_verified": False,
+                "purpose": purpose,
             }
         )
 
@@ -109,5 +110,38 @@ class AuthService:
             Profile.objects.create(user=user)
 
             verification.delete()
+
+        return user
+
+    @staticmethod
+    def reset_password_confirm(email: str, code: str, new_password: str):
+        verification = EmailVerification.objects.filter(
+            email=email,
+            purpose="reset_password"
+        ).first()
+
+        if not verification:
+            raise ValueError("Invalid request")
+
+        if verification.expires_at < timezone.now():
+            raise ValueError("Code expired")
+
+        if verification.attempts >= 5:
+            raise ValueError("Too many attempts")
+
+        if verification.code != code:
+            verification.attempts += 1
+            verification.save()
+            raise ValueError("Invalid code")
+
+        user = User.objects.filter(email=email).first()
+
+        if not user:
+            raise ValueError("Invalid request")
+
+        user.set_password(new_password)
+        user.save()
+
+        verification.delete()
 
         return user

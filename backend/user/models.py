@@ -144,6 +144,7 @@ class EmailVerification(models.Model):
 
     is_verified = models.BooleanField(default=False)
     attempts = models.IntegerField(default=0)
+    purpose = models.CharField(max_length=20, default="registration")
 
     def __str__(self):
         return self.email

@@ -15,7 +15,7 @@ class VerifyCodeSerializer(serializers.Serializer):
 class SetPasswordSerializer(serializers.Serializer):
     token = serializers.UUIDField()
     password = serializers.CharField(
-        min_length=6,
+        min_length=8,
         write_only=True,
         style={"input_type": "password"}
     )
@@ -54,3 +54,18 @@ class AvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("avatar",)
+
+
+class SetNewPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"}
+    )
+
+    def validate_new_password(self, value):
+        if value.isdigit():
+            raise serializers.ValidationError("Password cannot be only digits")
+        return value

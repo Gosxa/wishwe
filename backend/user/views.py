@@ -14,8 +14,16 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import SocialAccount, Profile
 
 from .permissions import IsOwnerOrReadOnly
-from .serializers import EmailSerializer, VerifyCodeSerializer, SetPasswordSerializer, ProfileSerializer, \
-    ProfileReadSerializer, OnboardingSerializer, AvatarSerializer
+from .serializers import (
+    EmailSerializer,
+    VerifyCodeSerializer,
+    SetPasswordSerializer,
+    ProfileSerializer,
+    ProfileReadSerializer,
+    OnboardingSerializer,
+    AvatarSerializer,
+    SetNewPasswordSerializer
+)
 from .services.auth_service import AuthService
 
 
@@ -192,6 +200,41 @@ def set_password(request):
         "refresh": str(refresh),
         "is_onboarded": user.profile.is_onboarded,
     })
+
+
+@api_view(["POST"])
+def reset_password(request):
+    serializer = EmailSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    email = serializer.validated_data["email"]
+
+    user_exists = User.objects.filter(email=email).exists()
+
+    if user_exists:
+        AuthService.send_verification_code(email, purpose="reset_password")
+
+    return Response(
+        {"message": "Code sent"},
+        status=status.HTTP_200_OK
+    )
+
+
+@api_view(["POST"])
+def set_new_password(request):
+    serializer = SetNewPasswordSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+
+    try:
+        AuthService.reset_password_confirm(
+            email=serializer.validated_data["email"],
+            code=serializer.validated_data["code"],
+            new_password=serializer.validated_data["new_password"]
+        )
+    except ValueError as e:
+        return Response({"error": str(e)}, status=400)
+
+    return Response({"message": "Password updated"})
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
