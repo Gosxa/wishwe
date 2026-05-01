@@ -101,7 +101,7 @@ class GenderChoices(models.TextChoices):
 def upload_profile_picture(instance, filename):
     """Upload an avatar picture."""
     ext = filename.split(".")[-1]
-    filename = f"{slugify(instance.username)}-{uuid.uuid4()}.{ext}"
+    filename = f"{uuid.uuid4()}.{ext}"
 
     return os.path.join("uploads/avatars/", filename)
 
