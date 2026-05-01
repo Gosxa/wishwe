@@ -22,7 +22,8 @@ from .serializers import (
     ProfileReadSerializer,
     OnboardingSerializer,
     AvatarSerializer,
-    SetNewPasswordSerializer
+    SetNewPasswordSerializer,
+    ChangePasswordSerializer
 )
 from .services.auth_service import AuthService
 
@@ -253,6 +254,8 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
             return OnboardingSerializer
         elif self.action == "upload_avatar":
             return AvatarSerializer
+        elif self.action == "change_password":
+            return ChangePasswordSerializer
         return ProfileSerializer
 
     @action(detail=False, methods=["get"])
@@ -312,3 +315,23 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         serializer.save()
 
         return Response(serializer.data)
+
+    @action(detail=False, methods=["post"], url_path="change-password")
+    def change_password(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = request.user
+
+        if not user.check_password(serializer.validated_data["old_password"]):
+            return Response(
+                {"error": "Wrong password"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        if serializer.validated_data["old_password"] == serializer.validated_data["new_password"]:
+            return Response({"error": "New password must be different"}, status=400)
+
+        user.set_password(serializer.validated_data["new_password"])
+        user.save()
+
+        return Response({"message": "Password changed"})

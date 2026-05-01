@@ -69,3 +69,21 @@ class SetNewPasswordSerializer(serializers.Serializer):
         if value.isdigit():
             raise serializers.ValidationError("Password cannot be only digits")
         return value
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"}
+    )
+    new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"}
+    )
+
+    def validate_new_password(self, value):
+        if value.isdigit():
+            raise serializers.ValidationError("Password cannot be only digits")
+        return value
