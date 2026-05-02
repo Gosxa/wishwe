@@ -368,3 +368,58 @@ class FriendshipViewSet(
         FriendshipService.delete_friendship(friendship, request.user)
 
         return Response({"detail": "Deleted"}, status=204)
+
+    @action(detail=False, methods=["post"])
+    def send(self, request):
+        receiver_id = request.data.get("receiver_id")
+
+        FriendshipService.send_request(
+            sender=request.user,
+            receiver=User.objects.get(id=receiver_id)
+        )
+
+        return Response({"status": "request sent"})
+
+    @action(detail=True, methods=["post"])
+    def accept(self, request, pk=None):
+        friendship = self.get_object()
+        user = request.user
+
+        FriendshipService.accept_request(friendship, user)
+
+        return Response(
+            {"Success": f"Now you are friends with {friendship.sender.profile.username}!"},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"])
+    def decline(self, request, pk=None):
+        friendship = self.get_object()
+        user = request.user
+
+        FriendshipService.decline_request(friendship, user)
+
+        return Response(
+            {"success": "You successfully declined friendship request"},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["get"])
+    def incoming(self, request):
+        queryset = FriendshipService.get_incoming_requests(request.user)
+        serializer = FriendshipSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def friends(self, request):
+        user_id = request.query_params.get("user_id")
+
+        if user_id is not None:
+            user = get_object_or_404(User, pk=int(user_id))
+        else:
+            user = request.user
+
+        friends = FriendshipService.get_friends(user)
+
+        serializer = UserShortSerializer(friends, many=True)
+        return Response(serializer.data)
