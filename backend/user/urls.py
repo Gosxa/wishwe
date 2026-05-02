@@ -14,6 +14,7 @@ from user.views import (
     reset_password,
     set_new_password,
     ProfileViewSet,
+    FriendshipViewSet,
     CustomTokenObtainPairView,
 )
 
@@ -21,6 +22,7 @@ from user.views import (
 router = DefaultRouter()
 
 router.register("profile", ProfileViewSet, basename="profile")
+router.register("friendship", FriendshipViewSet, basename="friendship")
 
 urlpatterns = [
     path("token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),

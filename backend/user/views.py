@@ -1,17 +1,24 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import SocialAccount, Profile
+from .models import (
+    SocialAccount,
+    Profile,
+    Friendship
+)
 
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
@@ -23,9 +30,12 @@ from .serializers import (
     OnboardingSerializer,
     AvatarSerializer,
     SetNewPasswordSerializer,
-    ChangePasswordSerializer
+    ChangePasswordSerializer,
+    FriendshipSerializer,
+    UserShortSerializer
 )
 from .services.auth_service import AuthService
+from .services.friendship_service import FriendshipService
 
 
 User = get_user_model()
@@ -335,3 +345,26 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         user.save()
 
         return Response({"message": "Password changed"})
+
+
+class FriendshipViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    GenericViewSet
+):
+    queryset = Friendship.objects.select_related("sender", "receiver")
+    serializer_class = FriendshipSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            Q(sender=self.request.user) | Q(receiver=self.request.user)
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        friendship = self.get_object()
+
+        FriendshipService.delete_friendship(friendship, request.user)
+
+        return Response({"detail": "Deleted"}, status=204)
