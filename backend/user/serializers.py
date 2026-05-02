@@ -1,6 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from user.models import Profile
+from user.models import Profile, Friendship
 
 
 class EmailSerializer(serializers.Serializer):
@@ -87,3 +88,20 @@ class ChangePasswordSerializer(serializers.Serializer):
         if value.isdigit():
             raise serializers.ValidationError("Password cannot be only digits")
         return value
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    sender = serializers.CharField(source="sender.profile.username", read_only=True)
+    receiver = serializers.CharField(source="receiver.profile.username", read_only=True)
+
+    class Meta:
+        model = Friendship
+        fields = ("id", "sender", "receiver", "status")
+
+
+class UserShortSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="profile.username", read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "username",)
