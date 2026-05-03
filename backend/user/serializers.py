@@ -99,9 +99,7 @@ class FriendshipSerializer(serializers.ModelSerializer):
         fields = ("id", "sender", "receiver", "status")
 
 
-class UserShortSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(source="profile.username", read_only=True)
-
-    class Meta:
-        model = get_user_model()
-        fields = ("id", "username",)
+class FriendSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField()
+    friendship_id = serializers.IntegerField()
