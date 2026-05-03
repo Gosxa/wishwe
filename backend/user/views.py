@@ -33,6 +33,7 @@ from .serializers import (
     ChangePasswordSerializer,
     FriendshipSerializer,
     FriendSerializer,
+    UserSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -417,4 +418,19 @@ class FriendshipViewSet(
     def friends(self, request):
         friends = FriendshipService.get_friends(request.user)
         serializer = FriendSerializer(friends, many=True)
+        return Response(serializer.data)
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    @action(detail=True, methods=["get"])
+    def friends(self, request, pk=None):
+        user = self.get_object()
+
+        friends = FriendshipService.get_friends(user)
+        serializer = FriendSerializer(friends, many=True)
+
         return Response(serializer.data)

@@ -103,3 +103,15 @@ class FriendSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField()
     friendship_id = serializers.IntegerField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "id",
+            "email",
+            "is_staff",
+            "is_verified"
+        )
+        read_only_fields = ("id", "email", "is_staff", "is_verified")
