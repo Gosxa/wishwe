@@ -115,3 +115,11 @@ class UserSerializer(serializers.ModelSerializer):
             "is_verified"
         )
         read_only_fields = ("id", "email", "is_staff", "is_verified")
+
+
+class MutualFriendsSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="profile.username", read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "username",)

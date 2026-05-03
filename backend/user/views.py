@@ -33,7 +33,7 @@ from .serializers import (
     ChangePasswordSerializer,
     FriendshipSerializer,
     FriendSerializer,
-    UserSerializer
+    UserSerializer, MutualFriendsSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -433,4 +433,16 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         friends = FriendshipService.get_friends(user)
         serializer = FriendSerializer(friends, many=True)
 
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def mutual_friends(self, request, pk=None):
+        target_user = self.get_object()
+
+        users = FriendshipService.get_mutual_friends(
+            request.user,
+            target_user
+        )
+
+        serializer = MutualFriendsSerializer(users, many=True)
         return Response(serializer.data)
