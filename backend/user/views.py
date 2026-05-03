@@ -32,7 +32,7 @@ from .serializers import (
     SetNewPasswordSerializer,
     ChangePasswordSerializer,
     FriendshipSerializer,
-    UserShortSerializer
+    FriendSerializer,
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -353,7 +353,7 @@ class FriendshipViewSet(
     mixins.DestroyModelMixin,
     GenericViewSet
 ):
-    queryset = Friendship.objects.select_related("sender", "receiver")
+    queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
     serializer_class = FriendshipSerializer
     permission_classes = (IsAuthenticated,)
 
@@ -367,7 +367,7 @@ class FriendshipViewSet(
 
         FriendshipService.delete_friendship(friendship, request.user)
 
-        return Response({"detail": "Deleted"}, status=204)
+        return Response({"detail": "Deleted"}, status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=["post"])
     def send(self, request):
@@ -378,7 +378,10 @@ class FriendshipViewSet(
             receiver=User.objects.get(id=receiver_id)
         )
 
-        return Response({"status": "request sent"})
+        return Response(
+            {"status": "request sent"},
+            status=status.HTTP_201_CREATED
+        )
 
     @action(detail=True, methods=["post"])
     def accept(self, request, pk=None):
@@ -388,7 +391,7 @@ class FriendshipViewSet(
         FriendshipService.accept_request(friendship, user)
 
         return Response(
-            {"Success": f"Now you are friends with {friendship.sender.profile.username}!"},
+            {"detail": f"Accepted"},
             status=status.HTTP_200_OK
         )
 
@@ -400,7 +403,7 @@ class FriendshipViewSet(
         FriendshipService.decline_request(friendship, user)
 
         return Response(
-            {"success": "You successfully declined friendship request"},
+            {"success": "Declined"},
             status=status.HTTP_200_OK
         )
 
@@ -412,14 +415,6 @@ class FriendshipViewSet(
 
     @action(detail=False, methods=["get"])
     def friends(self, request):
-        user_id = request.query_params.get("user_id")
-
-        if user_id is not None:
-            user = get_object_or_404(User, pk=int(user_id))
-        else:
-            user = request.user
-
-        friends = FriendshipService.get_friends(user)
-
-        serializer = UserShortSerializer(friends, many=True)
+        friends = FriendshipService.get_friends(request.user)
+        serializer = FriendSerializer(friends, many=True)
         return Response(serializer.data)

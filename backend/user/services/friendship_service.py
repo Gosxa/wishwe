@@ -57,11 +57,19 @@ class FriendshipService:
         friendships = Friendship.objects.filter(
             Q(sender=user) | Q(receiver=user),
             status=FriendshipStatus.ACCEPTED
-        ).select_related("sender", "receiver")
-        return [
-            f.receiver if f.sender == user else f.sender
-            for f in friendships
-        ]
+        ).select_related("sender__profile", "receiver__profile",)
+
+        result = []
+
+        for f in friendships:
+            friend = f.receiver if f.sender == user else f.sender
+            result.append({
+                "id": friend.id,
+                "username": friend.profile.username,
+                "friendship_id": f.id
+            })
+
+        return result
 
     @staticmethod
     def get_incoming_requests(user):
