@@ -61,7 +61,7 @@ resource "aws_security_group" "web" {
   description = "Security group for web application"
   vpc_id      = aws_vpc.main.id
 
-  # SSH access — restrict to a known CIDR in production!
+  # SSH access
   ingress {
     description = "SSH"
     from_port   = 22
