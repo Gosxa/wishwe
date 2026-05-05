@@ -17,7 +17,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .models import (
     SocialAccount,
     Profile,
-    Friendship
+    Friendship,
+    FriendInvite
 )
 
 from .permissions import IsOwnerOrReadOnly
@@ -33,11 +34,14 @@ from .serializers import (
     ChangePasswordSerializer,
     FriendshipSerializer,
     FriendSerializer,
-    UserSerializer, MutualFriendsSerializer
+    UserSerializer,
+    MutualFriendsSerializer,
+    InviteSerializer,
+    InviteUseSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
-
+from .services.invite_service import InviteService
 
 User = get_user_model()
 
@@ -446,3 +450,34 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
         serializer = MutualFriendsSerializer(users, many=True)
         return Response(serializer.data)
+
+
+class InviteViewSet(
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = FriendInvite.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = InviteSerializer
+
+    def create(self, request, *args, **kwargs):
+        invite = InviteService.create_invite(request.user)
+
+        serializer = InviteSerializer(
+            invite,
+            context={"request": request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["post"])
+    def use(self, request):
+        serializer = InviteUseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        InviteService.use_invite(
+            serializer.validated_data["token"],
+            request.user
+        )
+
+        return Response({"detail": "Invite accepted"})

@@ -16,6 +16,7 @@ from user.views import (
     ProfileViewSet,
     FriendshipViewSet,
     UserViewSet,
+    InviteViewSet,
     CustomTokenObtainPairView,
 )
 
@@ -25,6 +26,7 @@ router = DefaultRouter()
 router.register("profile", ProfileViewSet, basename="profile")
 router.register("friendship", FriendshipViewSet, basename="friendship")
 router.register("users", UserViewSet, basename="user")
+router.register("invite", InviteViewSet, basename="invite")
 
 urlpatterns = [
     path("token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"),

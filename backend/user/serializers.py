@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from user.models import Profile, Friendship
+from user.models import Profile, Friendship, FriendInvite
 
 
 class EmailSerializer(serializers.Serializer):
@@ -123,3 +123,20 @@ class MutualFriendsSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("id", "username",)
+
+
+class InviteSerializer(serializers.ModelSerializer):
+    link = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FriendInvite
+        fields = ("id", "link", "created_at")
+
+    def get_link(self, obj):
+        request = self.context.get("request")
+        base_url = request.build_absolute_uri("/")[:-1]
+        return f"{base_url}/invite/{obj.token}"
+
+
+class InviteUseSerializer(serializers.Serializer):
+    token = serializers.UUIDField()
