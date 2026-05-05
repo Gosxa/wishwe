@@ -23,14 +23,16 @@ jobs:
             cd /var/www/app
             git pull origin main
 
-            # ── Backend ──────────────────────────────────
+            # Backend
             source venv/bin/activate
-            pip install -r requirements.txt
+            pip install -r backend/requirements.txt
+            cd backend
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput
+            cd ..
             sudo systemctl restart gunicorn
 
-            # ── Frontend  ────────────────────────────────
+            # Frontend
             if [ -f "frontend/package.json" ]; then
               cd frontend
               npm install
