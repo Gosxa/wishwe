@@ -6,7 +6,6 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
-# Latest Ubuntu LTS AMI (arm64 owners = Canonical)
 data "aws_ami" "ubuntu" {
   most_recent = true
   owners      = ["099720109477"] # Canonical

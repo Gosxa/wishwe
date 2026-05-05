@@ -41,3 +41,34 @@ output "ami_id" {
   description = "AMI used for the instance"
   value       = data.aws_ami.ubuntu.id
 }
+
+# ── RDS ───────────────────────────────────────────────────────
+output "rds_endpoint" {
+  description = "RDS connection endpoint (host:port)"
+  value       = aws_db_instance.main.endpoint
+}
+
+output "rds_host" {
+  description = "RDS hostname only (without port)"
+  value       = aws_db_instance.main.address
+}
+
+output "rds_port" {
+  description = "RDS port"
+  value       = aws_db_instance.main.port
+}
+
+output "rds_db_name" {
+  description = "PostgreSQL database name"
+  value       = aws_db_instance.main.db_name
+}
+
+output "rds_username" {
+  description = "PostgreSQL master username"
+  value       = aws_db_instance.main.username
+}
+
+output "db_connection_string" {
+  description = "PostgreSQL connection string for your app"
+  value       = "postgresql://${aws_db_instance.main.username}:YOUR_PASSWORD@${aws_db_instance.main.address}:5432/${aws_db_instance.main.db_name}"
+}

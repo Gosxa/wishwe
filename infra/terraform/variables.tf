@@ -42,7 +42,7 @@ variable "public_subnet_cidrs" {
 variable "ssh_allowed_cidr" {
   description = "CIDR allowed to reach port 22. Use your own IP, e.g. 203.0.113.5/32"
   type        = string
-  default     = "0.0.0.0/0" # ⚠️  Tighten this in production!
+  default     = "0.0.0.0/0"
 }
 
 variable "public_key_path" {
@@ -68,4 +68,28 @@ variable "ubuntu_version" {
   description = "Ubuntu LTS version to use for the AMI"
   type        = string
   default     = "24.04"
+}
+# ── RDS ───────────────────────────────────────────────────────
+variable "private_subnet_cidrs" {
+  description = "CIDR blocks for private subnets used by RDS"
+  type        = list(string)
+  default     = ["10.0.3.0/24", "10.0.4.0/24"]
+}
+
+variable "db_name" {
+  description = "Name of the PostgreSQL database"
+  type        = string
+  default     = "appdb"
+}
+
+variable "db_username" {
+  description = "Master username for the RDS instance"
+  type        = string
+  default     = "dbadmin"
+}
+
+variable "db_password" {
+  description = "Master password for the RDS instance. Use a strong password, never commit this!"
+  type        = string
+  sensitive   = true  
 }
