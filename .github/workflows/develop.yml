@@ -22,8 +22,21 @@ jobs:
           script: |
             cd /var/www/app
             git pull origin main
+
+            # ── Backend ──────────────────────────────────
             source venv/bin/activate
             pip install -r requirements.txt
             python manage.py migrate --noinput
             python manage.py collectstatic --noinput
             sudo systemctl restart gunicorn
+
+            # ── Frontend  ────────────────────────────────
+            if [ -f "frontend/package.json" ]; then
+              cd frontend
+              npm install
+              npm run build
+              cp -r dist/* /var/www/app/frontend/
+              cd ..
+            fi
+
+            sudo systemctl reload nginx
