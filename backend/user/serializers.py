@@ -1,6 +1,7 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from user.models import Profile
+from user.models import Profile, Friendship, FriendInvite
 
 
 class EmailSerializer(serializers.Serializer):
@@ -57,18 +58,25 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    code = serializers.CharField(max_length=6)
+    token = serializers.UUIDField()
     new_password = serializers.CharField(
         write_only=True,
         min_length=8,
         style={"input_type": "password"}
     )
+    re_new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"}
+    )
 
-    def validate_new_password(self, value):
-        if value.isdigit():
-            raise serializers.ValidationError("Password cannot be only digits")
-        return value
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["re_new_password"]:
+            raise serializers.ValidationError(
+                {"re_new_password": "Passwords do not match"}
+            )
+
+        return attrs
 
 
 class ChangePasswordSerializer(serializers.Serializer):
@@ -87,3 +95,55 @@ class ChangePasswordSerializer(serializers.Serializer):
         if value.isdigit():
             raise serializers.ValidationError("Password cannot be only digits")
         return value
+
+
+class FriendshipSerializer(serializers.ModelSerializer):
+    sender = serializers.CharField(source="sender.profile.username", read_only=True)
+    receiver = serializers.CharField(source="receiver.profile.username", read_only=True)
+
+    class Meta:
+        model = Friendship
+        fields = ("id", "sender", "receiver", "status")
+
+
+class FriendSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField()
+    friendship_id = serializers.IntegerField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "id",
+            "email",
+            "is_staff",
+            "is_verified"
+        )
+        read_only_fields = ("id", "email", "is_staff", "is_verified")
+
+
+class MutualFriendsSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source="profile.username", read_only=True)
+
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "username",)
+
+
+class InviteSerializer(serializers.ModelSerializer):
+    link = serializers.SerializerMethodField()
+
+    class Meta:
+        model = FriendInvite
+        fields = ("id", "link", "created_at")
+
+    def get_link(self, obj):
+        request = self.context.get("request")
+        base_url = request.build_absolute_uri("/")[:-1]
+        return f"{base_url}/invite/{obj.token}"
+
+
+class InviteUseSerializer(serializers.Serializer):
+    token = serializers.UUIDField()
