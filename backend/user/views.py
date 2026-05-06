@@ -1,12 +1,17 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
+from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from django.core.files.base import ContentFile
+import requests as pyrequests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.viewsets import GenericViewSet
@@ -42,6 +47,9 @@ from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
 from .services.invite_service import InviteService
 
+
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 
@@ -71,6 +79,7 @@ def google_auth(request):
 
     first_name = idinfo.get("given_name")
     last_name = idinfo.get("family_name")
+    avatar_url = idinfo.get("picture")
 
     if not email or not google_id:
         return Response({"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -126,6 +135,22 @@ def google_auth(request):
         if last_name and not profile.last_name:
             profile.last_name = last_name
             updated = True
+
+        if avatar_url and not profile.avatar:
+            try:
+                response = pyrequests.get(avatar_url)
+
+                if response.status_code == 200:
+                    profile.avatar.save(
+                        f"{user.pk}_google_avatar.jpg",
+                        ContentFile(response.content),
+                        save=False
+                    )
+                    updated = True
+
+
+            except RequestException as e:
+                logger.warning(f"Failed to download google avatar: {e}")
 
         if updated:
             profile.save()
