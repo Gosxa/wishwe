@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -481,3 +480,8 @@ class InviteViewSet(
         )
 
         return Response({"detail": "Invite accepted"})
+
+
+@api_view(["GET"])
+def health_check(request):
+    return Response({"status": "ok"}, status=status.HTTP_200_OK)
