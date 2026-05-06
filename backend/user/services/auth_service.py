@@ -115,27 +115,23 @@ class AuthService:
         return user
 
     @staticmethod
-    def reset_password_confirm(email: str, code: str, new_password: str):
+    def reset_password_confirm(token, new_password: str):
         verification = EmailVerification.objects.filter(
-            email=email,
-            purpose="reset_password"
+            token=token,
+            purpose="reset_password",
+            is_verified=True
         ).first()
 
         if not verification:
-            raise ValueError("Invalid request")
+            raise ValueError("Invalid token")
 
         if verification.expires_at < timezone.now():
-            raise ValueError("Code expired")
+            raise ValueError("Token expired")
 
         if verification.attempts >= 5:
             raise ValueError("Too many attempts")
 
-        if verification.code != code:
-            verification.attempts += 1
-            verification.save()
-            raise ValueError("Invalid code")
-
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email=verification.email).first()
 
         if not user:
             raise ValueError("Invalid request")

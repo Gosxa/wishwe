@@ -58,18 +58,25 @@ class AvatarSerializer(serializers.ModelSerializer):
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField()
-    code = serializers.CharField(max_length=6)
+    token = serializers.UUIDField()
     new_password = serializers.CharField(
         write_only=True,
         min_length=8,
         style={"input_type": "password"}
     )
+    re_new_password = serializers.CharField(
+        write_only=True,
+        min_length=8,
+        style={"input_type": "password"}
+    )
 
-    def validate_new_password(self, value):
-        if value.isdigit():
-            raise serializers.ValidationError("Password cannot be only digits")
-        return value
+    def validate(self, attrs):
+        if attrs["new_password"] != attrs["re_new_password"]:
+            raise serializers.ValidationError(
+                {"re_new_password": "Passwords do not match"}
+            )
+
+        return attrs
 
 
 class ChangePasswordSerializer(serializers.Serializer):

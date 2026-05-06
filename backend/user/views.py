@@ -242,14 +242,16 @@ def set_new_password(request):
 
     try:
         AuthService.reset_password_confirm(
-            email=serializer.validated_data["email"],
-            code=serializer.validated_data["code"],
+            token=serializer.validated_data["token"],
             new_password=serializer.validated_data["new_password"]
         )
     except ValueError as e:
-        return Response({"error": str(e)}, status=400)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({"message": "Password updated"})
+    return Response(
+        {"message": "Password updated"},
+        status=status.HTTP_200_OK
+    )
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

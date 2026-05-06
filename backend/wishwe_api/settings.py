@@ -28,6 +28,8 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "wishwe.online",
     "www.wishwe.online",
+    "127.0.0.1",
+    "localhost",
 ]
 
 
