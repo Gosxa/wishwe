@@ -102,19 +102,21 @@ class AuthFlowTests(APITestCase):
     def test_set_new_password(self):
         user = User.objects.create_user(email=self.email, password="oldpass123")
 
-        EmailVerification.objects.create(
+        verification = EmailVerification.objects.create(
             email=self.email,
             code="123456",
             expires_at=timezone.now() + timedelta(minutes=10),
+            token=uuid.uuid4(),
+            is_verified=True,
             purpose="reset_password"
         )
 
         url = reverse("user:set_new_password")
 
         response = self.client.post(url, {
-            "email": self.email,
-            "code": "123456",
-            "new_password": "newpass123"
+            "token": verification.token,
+            "new_password": "newpass123",
+            "re_new_password": "newpass123"
         })
 
         self.assertEqual(response.status_code, 200)

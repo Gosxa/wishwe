@@ -1,17 +1,29 @@
+import logging
+
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.db.models import Q
+from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from google.oauth2 import id_token
 from google.auth.transport import requests
+from django.core.files.base import ContentFile
+import requests as pyrequests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from .models import SocialAccount, Profile
+from .models import (
+    SocialAccount,
+    Profile,
+    Friendship,
+    FriendInvite
+)
 
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (
@@ -23,10 +35,20 @@ from .serializers import (
     OnboardingSerializer,
     AvatarSerializer,
     SetNewPasswordSerializer,
-    ChangePasswordSerializer
+    ChangePasswordSerializer,
+    FriendshipSerializer,
+    FriendSerializer,
+    UserSerializer,
+    MutualFriendsSerializer,
+    InviteSerializer,
+    InviteUseSerializer
 )
 from .services.auth_service import AuthService
+from .services.friendship_service import FriendshipService
+from .services.invite_service import InviteService
 
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -57,6 +79,7 @@ def google_auth(request):
 
     first_name = idinfo.get("given_name")
     last_name = idinfo.get("family_name")
+    avatar_url = idinfo.get("picture")
 
     if not email or not google_id:
         return Response({"error": "Invalid data"}, status=status.HTTP_400_BAD_REQUEST)
@@ -112,6 +135,22 @@ def google_auth(request):
         if last_name and not profile.last_name:
             profile.last_name = last_name
             updated = True
+
+        if avatar_url and not profile.avatar:
+            try:
+                response = pyrequests.get(avatar_url)
+
+                if response.status_code == 200:
+                    profile.avatar.save(
+                        f"{user.pk}_google_avatar.jpg",
+                        ContentFile(response.content),
+                        save=False
+                    )
+                    updated = True
+
+
+            except RequestException as e:
+                logger.warning(f"Failed to download google avatar: {e}")
 
         if updated:
             profile.save()
@@ -228,14 +267,16 @@ def set_new_password(request):
 
     try:
         AuthService.reset_password_confirm(
-            email=serializer.validated_data["email"],
-            code=serializer.validated_data["code"],
+            token=serializer.validated_data["token"],
             new_password=serializer.validated_data["new_password"]
         )
     except ValueError as e:
-        return Response({"error": str(e)}, status=400)
+        return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({"message": "Password updated"})
+    return Response(
+        {"message": "Password updated"},
+        status=status.HTTP_200_OK
+    )
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -335,3 +376,139 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         user.save()
 
         return Response({"message": "Password changed"})
+
+
+class FriendshipViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    GenericViewSet
+):
+    queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
+    serializer_class = FriendshipSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        return self.queryset.filter(
+            Q(sender=self.request.user) | Q(receiver=self.request.user)
+        )
+
+    def destroy(self, request, *args, **kwargs):
+        friendship = self.get_object()
+
+        FriendshipService.delete_friendship(friendship, request.user)
+
+        return Response({"detail": "Deleted"}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["post"])
+    def send(self, request):
+        receiver_id = request.data.get("receiver_id")
+
+        FriendshipService.send_request(
+            sender=request.user,
+            receiver=User.objects.get(id=receiver_id)
+        )
+
+        return Response(
+            {"status": "request sent"},
+            status=status.HTTP_201_CREATED
+        )
+
+    @action(detail=True, methods=["post"])
+    def accept(self, request, pk=None):
+        friendship = self.get_object()
+        user = request.user
+
+        FriendshipService.accept_request(friendship, user)
+
+        return Response(
+            {"detail": f"Accepted"},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=True, methods=["post"])
+    def decline(self, request, pk=None):
+        friendship = self.get_object()
+        user = request.user
+
+        FriendshipService.decline_request(friendship, user)
+
+        return Response(
+            {"success": "Declined"},
+            status=status.HTTP_200_OK
+        )
+
+    @action(detail=False, methods=["get"])
+    def incoming(self, request):
+        queryset = FriendshipService.get_incoming_requests(request.user)
+        serializer = FriendshipSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def friends(self, request):
+        friends = FriendshipService.get_friends(request.user)
+        serializer = FriendSerializer(friends, many=True)
+        return Response(serializer.data)
+
+
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (IsAuthenticated,)
+
+    @action(detail=True, methods=["get"])
+    def friends(self, request, pk=None):
+        user = self.get_object()
+
+        friends = FriendshipService.get_friends(user)
+        serializer = FriendSerializer(friends, many=True)
+
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def mutual_friends(self, request, pk=None):
+        target_user = self.get_object()
+
+        users = FriendshipService.get_mutual_friends(
+            request.user,
+            target_user
+        )
+
+        serializer = MutualFriendsSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+class InviteViewSet(
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
+    queryset = FriendInvite.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = InviteSerializer
+
+    def create(self, request, *args, **kwargs):
+        invite = InviteService.create_invite(request.user)
+
+        serializer = InviteSerializer(
+            invite,
+            context={"request": request}
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=["post"])
+    def use(self, request):
+        serializer = InviteUseSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        InviteService.use_invite(
+            serializer.validated_data["token"],
+            request.user
+        )
+
+        return Response({"detail": "Invite accepted"})
+
+
+@api_view(["GET"])
+def health_check(request):
+    return Response({"status": "ok"}, status=status.HTTP_200_OK)
