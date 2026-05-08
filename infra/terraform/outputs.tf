@@ -72,3 +72,24 @@ output "db_connection_string" {
   description = "PostgreSQL connection string for your app"
   value       = "postgresql://${aws_db_instance.main.username}:YOUR_PASSWORD@${aws_db_instance.main.address}:5432/${aws_db_instance.main.db_name}"
 }
+
+# ── s3-bucket ──────────────────────────────────────────────
+output "bucket_name" {
+  description = "Name of the S3 bucket"
+  value       = aws_s3_bucket.main.bucket
+}
+
+output "bucket_arn" {
+  description = "ARN of the S3 bucket"
+  value       = aws_s3_bucket.main.arn
+}
+
+output "iam_role_arn" {
+  description = "ARN of the IAM role attached to your EC2"
+  value       = aws_iam_role.ec2_s3_role.arn
+}
+
+output "instance_profile_arn" {
+  description = "ARN of the IAM instance profile"
+  value       = aws_iam_instance_profile.ec2_profile.arn
+}

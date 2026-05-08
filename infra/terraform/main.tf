@@ -114,6 +114,11 @@ resource "aws_instance" "web" {
   subnet_id              = aws_subnet.public[0].id
   vpc_security_group_ids = [aws_security_group.web.id]
   key_name               = aws_key_pair.web.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
+
+  lifecycle {
+    ignore_changes = [ami]
+  }
 
   root_block_device {
     volume_type           = "gp3"
@@ -152,3 +157,93 @@ resource "aws_eip" "web" {
 
   depends_on = [aws_internet_gateway.main]
 }
+
+# ── S3 Bucket ───────────────────────────────────────────────
+
+resource "aws_s3_bucket" "main" {
+  bucket = var.bucket_name
+
+  tags = merge(var.tags, {
+    Name = var.bucket_name
+  })
+}
+
+resource "aws_s3_bucket_versioning" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  versioning_configuration {
+    status = var.enable_versioning ? "Enabled" : "Suspended"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "main" {
+  bucket = aws_s3_bucket.main.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+# ── IAM Role + Policy (allows EC2 to access the bucket) ───────────────────────────────
+
+data "aws_iam_policy_document" "ec2_assume_role" {
+  statement {
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "ec2_s3_role" {
+  name               = "${var.bucket_name}-ec2-role"
+  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
+
+  tags = var.tags
+}
+
+data "aws_iam_policy_document" "s3_access" {
+  statement {
+    sid    = "AllowS3BucketAccess"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      aws_s3_bucket.main.arn,
+      "${aws_s3_bucket.main.arn}/*",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "s3_access" {
+  name   = "${var.bucket_name}-s3-policy"
+  role   = aws_iam_role.ec2_s3_role.id
+  policy = data.aws_iam_policy_document.s3_access.json
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "${var.bucket_name}-ec2-profile"
+  role = aws_iam_role.ec2_s3_role.name
+}
+
+# Attach the IAM role to the existing EC2 instance
+

@@ -91,5 +91,27 @@ variable "db_username" {
 variable "db_password" {
   description = "Master password for the RDS instance. Use a strong password, never commit this!"
   type        = string
-  sensitive   = true  
+  sensitive   = true
+}
+# ── s3-bucket ─────────────────────────────────────────────
+variable "bucket_name" {
+  description = "Globally unique name for the S3 bucket"
+  type        = string
+}
+
+variable "enable_versioning" {
+  description = "Enable S3 bucket versioning"
+  type        = bool
+  default     = false
+}
+
+variable "tags" {
+  description = "Tags applied to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "ec2_instance_id" {
+  description = "ID of the existing EC2 instance to attach the bucket role to (e.g. i-0abc123def456)"
+  type        = string
 }
