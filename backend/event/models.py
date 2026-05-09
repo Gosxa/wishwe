@@ -187,3 +187,46 @@ class Event(models.Model):
                 and not self.is_full
                 and not self.is_expired
         )
+
+
+class ParticipationStatus(models.TextChoices):
+    INTERESTED = "interested", "Interested"
+    JOINED = "joined", "Joined"
+    LEFT = "left", "Left"
+
+
+class EventParticipant(models.Model):
+    event = models.ForeignKey(
+        Event,
+        on_delete=models.CASCADE,
+        related_name="participants",
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="event_participations",
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=ParticipationStatus.choices,
+    )
+    joined_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "user"],
+                name="unique_event_user",
+            )
+        ]
+
+        indexes = [
+            models.Index(fields=["event"]),
+            models.Index(fields=["user"]),
+            models.Index(fields=["status"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user} -> {self.event}"
