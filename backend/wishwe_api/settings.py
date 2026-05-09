@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "user.apps.UserConfig",
+    "event"
 ]
 
 MIDDLEWARE = [
