@@ -15,3 +15,175 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class EventType(models.TextChoices):
+    WISH = "wish", "Wish"
+    PLAN = "plan", "Plan"
+
+
+class EventStatus(models.TextChoices):
+    ACTIVE = "active", "Active"
+    CLOSED = "closed", "Closed"
+    COMPLETED = "completed", "Completed"
+    CANCELLED = "cancelled", "Cancelled"
+
+
+def upload_cover_image(instance, filename):
+    """Upload an event picture."""
+    ext = filename.split(".")[-1]
+    filename = f"{uuid.uuid4()}.{ext}"
+
+    return os.path.join("uploads/events/", filename)
+
+
+class Event(models.Model):
+    creator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="created_events",
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="events",
+    )
+    event_type = models.CharField(
+        max_length=10,
+        choices=EventType.choices,
+    )
+    title = models.CharField(
+        max_length=255,
+    )
+    description = models.TextField()
+    cover_image = models.ImageField(
+        upload_to=upload_cover_image,
+        blank=True,
+        null=True,
+    )
+    location = models.CharField(
+        max_length=255,
+    )
+    external_link = models.URLField(
+        blank=True,
+        null=True,
+    )
+    event_date = models.DateField(
+        blank=True,
+        null=True,
+    )
+    event_time = models.TimeField(
+        blank=True,
+        null=True,
+    )
+    timeframe_text = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+    )
+    min_participants = models.PositiveIntegerField(
+        default=1,
+    )
+    max_participants = models.PositiveIntegerField()
+    participants_count = models.PositiveIntegerField(
+        default=0,
+    )
+    interested_count = models.PositiveIntegerField(
+        default=0,
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=EventStatus.choices,
+        default=EventStatus.ACTIVE,
+    )
+    expires_at = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        ordering = ["-created_at"]
+
+        indexes = [
+            models.Index(fields=["creator"]),
+            models.Index(fields=["event_type"]),
+            models.Index(fields=["status"]),
+            models.Index(fields=["event_date"]),
+            models.Index(fields=["created_at"]),
+        ]
+
+    def __str__(self):
+        return self.title
+
+
+    def clean(self):
+        super().clean()
+
+        if self.event_type == EventType.WISH:
+            if not self.timeframe_text:
+                raise ValidationError({
+                    "timeframe_text": "Wish events require timeframe_text."
+                })
+
+        elif self.event_type == EventType.PLAN:
+            if not self.event_date:
+                raise ValidationError({
+                    "event_date": "Plan events require event_date."
+                })
+
+            if not self.event_time:
+                raise ValidationError({
+                    "event_time": "Plan events require event_time."
+                })
+
+        if self.max_participants < self.min_participants:
+            raise ValidationError({
+                "max_participants":
+                    "max_participants cannot be less than min_participants."
+            })
+
+        if self.participants_count > self.max_participants:
+            raise ValidationError({
+                "participants_count":
+                    "participants_count cannot exceed max_participants."
+            })
+
+        if (
+                self.status == EventStatus.COMPLETED
+                and self.event_type == EventType.WISH
+        ):
+            raise ValidationError({
+                "status": "Wish events cannot be completed."
+            })
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    @property
+    def is_full(self):
+        return self.participants_count >= self.max_participants
+
+    @property
+    def is_expired(self):
+        return self.expires_at and self.expires_at < timezone.now()
+
+    @property
+    def available_spots(self):
+        return max((self.max_participants - self.participants_count), 0)
+
+    @property
+    def can_join(self):
+        return (
+                self.status == EventStatus.ACTIVE
+                and not self.is_full
+                and not self.is_expired
+        )
