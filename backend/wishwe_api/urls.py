@@ -7,5 +7,6 @@ from user.views import health_check
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/user/", include("user.urls", namespace="user")),
+    path("api/event/", include("event.urls", namespace="events")),
     path("api/health/", health_check, name="health_check"),
 ] + debug_toolbar_urls()
