@@ -55,9 +55,9 @@ class Event(models.Model):
         choices=EventType.choices,
     )
     title = models.CharField(
-        max_length=255,
+        max_length=50,
     )
-    description = models.TextField()
+    description = models.CharField(max_length=200)
     cover_image = models.ImageField(
         upload_to=upload_cover_image,
         blank=True,
