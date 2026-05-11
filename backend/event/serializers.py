@@ -179,6 +179,12 @@ class PlanWriteSerializer(serializers.ModelSerializer):
             instance.max_participants if instance else None,
         )
 
+        if max_participants < 2:
+            raise serializers.ValidationError({
+                "max_participants":
+                    "Plan events require at least 2 participants."
+            })
+
         if max_participants < min_participants:
             raise serializers.ValidationError({
                 "max_participants":
