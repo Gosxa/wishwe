@@ -57,7 +57,10 @@ class Event(models.Model):
     title = models.CharField(
         max_length=50,
     )
-    description = models.CharField(max_length=200)
+    description = models.CharField(
+        max_length=200,
+        default="No details added by the host."
+    )
     cover_image = models.ImageField(
         upload_to=upload_cover_image,
         blank=True,
