@@ -40,10 +40,11 @@ class EventParticipantSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     creator = serializers.CharField(
-        source="creator.username",
+        source="creator.profile.username",
         read_only=True,
     )
-    category = CategorySerializer(
+    category = serializers.CharField(
+        source="category.name",
         read_only=True,
     )
 
