@@ -15,8 +15,8 @@ import requests as pyrequests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .models import (
     SocialAccount,
@@ -155,13 +155,7 @@ def google_auth(request):
         if updated:
             profile.save()
 
-    refresh = RefreshToken.for_user(user)
-
-    return Response({
-        "access": str(refresh.access_token),
-        "refresh": str(refresh),
-        "is_onboarded": profile.is_onboarded,
-    })
+    return AuthService.create_auth_response(user)
 
 
 @api_view(["POST"])
@@ -233,13 +227,7 @@ def set_password(request):
     except ValueError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    refresh = RefreshToken.for_user(user)
-
-    return Response({
-        "access": str(refresh.access_token),
-        "refresh": str(refresh),
-        "is_onboarded": user.profile.is_onboarded,
-    })
+    return AuthService.create_auth_response(user)
 
 
 @api_view(["POST"])
@@ -279,8 +267,55 @@ def set_new_password(request):
     )
 
 
-class CustomTokenObtainPairView(TokenObtainPairView):
+class CookieTokenObtainPairView(TokenObtainPairView):
     throttle_classes = [LoginThrottle]
+    serializer_class = TokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.user
+
+        return AuthService.create_auth_response(user)
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        serializer = self.get_serializer(data={
+            "refresh": refresh_token
+        })
+
+        serializer.is_valid(raise_exception=True)
+
+        access_token = serializer.validated_data["access"]
+
+        response = Response({"message": "Token refreshed"})
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite="Lax",
+        )
+
+        return response
+
+
+@api_view(["POST"])
+def logout_user(request):
+    response = Response(
+        {"message": "Logged out"},
+        status=status.HTTP_200_OK
+    )
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return response
 
 
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
