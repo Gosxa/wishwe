@@ -54,6 +54,16 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
             "category",
         ).order_by("-created_at")
 
+        event_type = self.request.query_params.get("type")
+
+        if event_type in (
+            EventType.WISH,
+            EventType.PLAN,
+        ):
+            queryset = queryset.filter(
+                event_type=event_type
+            )
+
         return queryset
 
     def get_serializer_class(self):
