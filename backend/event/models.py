@@ -86,7 +86,7 @@ class Event(models.Model):
     min_participants = models.PositiveIntegerField(
         default=1,
     )
-    max_participants = models.PositiveIntegerField()
+    max_participants = models.PositiveIntegerField(null=True, blank=True)
     participants_count = models.PositiveIntegerField(
         default=0,
     )
@@ -123,7 +123,6 @@ class Event(models.Model):
     def __str__(self):
         return self.title
 
-
     def clean(self):
         super().clean()
 
@@ -144,17 +143,23 @@ class Event(models.Model):
                     "event_time": "Plan events require event_time."
                 })
 
-        if self.max_participants < self.min_participants:
-            raise ValidationError({
-                "max_participants":
-                    "max_participants cannot be less than min_participants."
-            })
+            if self.max_participants is None:
+                raise ValidationError({
+                    "max_participants":
+                        "Plan events require max_participants."
+                })
 
-        if self.participants_count > self.max_participants:
-            raise ValidationError({
-                "participants_count":
-                    "participants_count cannot exceed max_participants."
-            })
+            if self.max_participants < self.min_participants:
+                raise ValidationError({
+                    "max_participants":
+                        "max_participants cannot be less than min_participants."
+                })
+
+            if self.participants_count > self.max_participants:
+                raise ValidationError({
+                    "participants_count":
+                        "participants_count cannot exceed max_participants."
+                })
 
         if (
                 self.status == EventStatus.COMPLETED
@@ -169,7 +174,17 @@ class Event(models.Model):
         return super().save(*args, **kwargs)
 
     @property
+    def is_wish(self):
+        return self.event_type == EventType.WISH
+
+    @property
+    def is_plan(self):
+        return self.event_type == EventType.PLAN
+
+    @property
     def is_full(self):
+        if self.is_wish:
+            return False
         return self.participants_count >= self.max_participants
 
     @property
@@ -178,7 +193,9 @@ class Event(models.Model):
 
     @property
     def available_spots(self):
-        return max((self.max_participants - self.participants_count), 0)
+        if self.is_wish:
+            return None
+        return max(0, self.max_participants - self.participants_count)
 
     @property
     def can_join(self):
