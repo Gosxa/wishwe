@@ -7,6 +7,8 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from user.models import Profile, EmailVerification
 
@@ -142,3 +144,30 @@ class AuthService:
         verification.delete()
 
         return user
+
+    @staticmethod
+    def create_auth_response(user):
+        refresh = RefreshToken.for_user(user)
+
+        response = Response({
+            "is_onboarded": user.profile.is_onboarded,
+        })
+
+        response.set_cookie(
+            key="access_token",
+            value=str(refresh.access_token),
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite="Lax",
+            max_age=60 * 60,
+        )
+
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh),
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite="Lax",
+        )
+
+        return response
