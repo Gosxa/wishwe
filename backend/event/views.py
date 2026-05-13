@@ -227,3 +227,21 @@ class EventViewSet(
         return Response(
             EventSerializer(event).data
         )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def copy_wish(self, request, pk=None):
+        event = self.get_object()
+
+        copied_event = EventService.copy_wish(
+            event=event,
+            user=request.user,
+        )
+
+        return Response(
+            EventSerializer(copied_event).data,
+            status=status.HTTP_201_CREATED,
+        )

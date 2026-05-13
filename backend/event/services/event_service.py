@@ -303,3 +303,35 @@ class EventService:
         creator_participant.save(update_fields=["status"])
 
         return event
+
+    @staticmethod
+    @transaction.atomic
+    def copy_wish(*, event, user):
+        EventService._validate_wish_event(event)
+
+        if event.creator == user:
+            raise ValidationError(
+                "Users cannot copy their own wishes."
+            )
+
+        copied_event = Event.objects.create(
+            creator=user,
+            category=event.category,
+            event_type=EventType.WISH,
+            title=event.title,
+            description=event.description,
+            cover_image=event.cover_image,
+            location=event.location,
+            external_link=event.external_link,
+            timeframe_text=event.timeframe_text,
+            expires_at=event.expires_at,
+            interested_count=1,
+        )
+
+        EventParticipant.objects.create(
+            event=copied_event,
+            user=user,
+            status=ParticipationStatus.INTERESTED,
+        )
+
+        return copied_event
