@@ -189,3 +189,43 @@ class EventService:
         )
 
         return event
+
+    @staticmethod
+    @transaction.atomic
+    def interested_in_wish(*, event, user):
+        EventService._validate_wish_event(event)
+        EventService._validate_active_event(event)
+
+        participant, created = (
+            EventParticipant.objects.get_or_create(
+                event=event,
+                user=user,
+                defaults={
+                    "status": ParticipationStatus.INTERESTED,
+                }
+            )
+        )
+
+        if (
+            not created
+            and participant.status == ParticipationStatus.INTERESTED
+        ):
+            raise ValidationError(
+                "User already interested in this wish."
+            )
+
+        if not created:
+            participant.status = (
+                ParticipationStatus.INTERESTED
+            )
+
+            participant.save(
+                update_fields=["status"]
+            )
+
+        event.interested_count += 1
+        event.save(
+            update_fields=["interested_count"]
+        )
+
+        return event
