@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 
 from event.models import (
     Event,
@@ -98,3 +99,39 @@ class EventService:
             visible_users_ids.add(receiver_id)
 
         return visible_users_ids
+
+    @staticmethod
+    def _validate_wish_event(event):
+        if event.event_type != EventType.WISH:
+            raise ValidationError(
+                "This action is available only for wish events."
+            )
+
+    @staticmethod
+    def _validate_plan_event(event):
+        if event.event_type != EventType.PLAN:
+            raise ValidationError(
+                "This action is available only for plan events."
+            )
+
+    @staticmethod
+    @transaction.atomic
+    def update_wish(*, event, validated_data):
+        EventService._validate_wish_event(event)
+        for field, value in validated_data.items():
+            setattr(event, field, value)
+
+        event.save()
+
+        return event
+
+    @staticmethod
+    @transaction.atomic
+    def update_plan(*, event, validated_data):
+        EventService._validate_plan_event(event)
+        for field, value in validated_data.items():
+            setattr(event, field, value)
+
+        event.save()
+
+        return event
