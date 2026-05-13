@@ -135,3 +135,57 @@ class EventService:
         event.save()
 
         return event
+
+    @staticmethod
+    def _validate_active_event(event):
+        if event.status != EventStatus.ACTIVE:
+            raise ValidationError(
+                "Only active events can be joined."
+            )
+
+    @staticmethod
+    @transaction.atomic
+    def join_plan(*, event, user):
+        EventService._validate_plan_event(event)
+        EventService._validate_active_event(event)
+
+        if event.is_full:
+            raise ValidationError(
+                "Event is already full."
+            )
+
+        participant, created = (
+            EventParticipant.objects.get_or_create(
+                event=event,
+                user=user,
+                defaults={
+                    "status": ParticipationStatus.JOINED,
+                }
+            )
+        )
+
+        if (
+            not created
+            and participant.status == ParticipationStatus.JOINED
+        ):
+            raise ValidationError(
+                "User already joined this event."
+            )
+
+        if not created:
+            participant.status = ParticipationStatus.JOINED
+            participant.save(update_fields=["status"])
+
+        event.participants_count += 1
+
+        if event.is_full:
+            event.status = EventStatus.CLOSED
+
+        event.save(
+            update_fields=[
+                "participants_count",
+                "status",
+            ]
+        )
+
+        return event

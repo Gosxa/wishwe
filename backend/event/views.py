@@ -54,7 +54,7 @@ class EventViewSet(
 
         queryset = Event.objects.filter(
             creator_id__in=visible_users_ids,
-            status=EventStatus.ACTIVE,
+            status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
         ).select_related(
             "creator__profile",
             "category",
@@ -159,4 +159,22 @@ class EventViewSet(
         return Response(
             EventSerializer(event).data,
             status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def join_plan(self, request, pk=None):
+        event = self.get_object()
+
+        event = EventService.join_plan(
+            event=event,
+            user=request.user,
+        )
+
+        return Response(
+            EventSerializer(event).data,
+            status=status.HTTP_201_CREATED,
         )
