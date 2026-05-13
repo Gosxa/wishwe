@@ -221,3 +221,36 @@ class PlanWriteSerializer(serializers.ModelSerializer):
         validated_data["event_type"] = EventType.PLAN
 
         return super().create(validated_data)
+
+
+class ConvertWishToPlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = (
+            "event_date",
+            "event_time",
+            "min_participants",
+            "max_participants",
+        )
+
+    def validate(self, attrs):
+        min_participants = attrs.get(
+            "min_participants"
+        )
+        max_participants = attrs.get(
+            "max_participants"
+        )
+
+        if max_participants < min_participants:
+            raise serializers.ValidationError({
+                "max_participants":
+                    "max_participants cannot be less than min_participants."
+            })
+
+        if max_participants < 2:
+            raise serializers.ValidationError({
+                "max_participants":
+                    "Plan events require at least 2 participants."
+            })
+
+        return attrs

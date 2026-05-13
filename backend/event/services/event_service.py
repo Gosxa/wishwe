@@ -277,3 +277,29 @@ class EventService:
         participant.save(update_fields=["status"])
 
         return event
+
+    @staticmethod
+    @transaction.atomic
+    def convert_wish_to_plan(*, event, validated_data,):
+        EventService._validate_wish_event(event)
+        EventService._validate_active_event(event)
+
+        event.event_type = EventType.PLAN
+        event.event_date = validated_data["event_date"]
+        event.event_time = validated_data["event_time"]
+        event.min_participants = (validated_data["min_participants"])
+        event.max_participants = (validated_data["max_participants"])
+        event.participants_count = 1
+        event.interested_count -= 1
+        event.save()
+
+        creator_participant = (
+            EventParticipant.objects.get(
+                event=event,
+                user=event.creator,
+            )
+        )
+        creator_participant.status = ParticipationStatus.JOINED
+        creator_participant.save(update_fields=["status"])
+
+        return event

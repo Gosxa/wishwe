@@ -13,7 +13,8 @@ from event.serializers import (
     CategorySerializer,
     EventSerializer,
     PlanWriteSerializer,
-    WishWriteSerializer
+    WishWriteSerializer,
+    ConvertWishToPlanSerializer
 )
 from event.services.event_service import EventService
 
@@ -79,6 +80,9 @@ class EventViewSet(
         if self.action in ("create_plan", "update_plan"):
             return PlanWriteSerializer
 
+        if self.action == "convert_to_plan":
+            return ConvertWishToPlanSerializer
+
         return EventSerializer
 
     @action(detail=False, methods=["post"])
@@ -115,10 +119,7 @@ class EventViewSet(
             status=status.HTTP_201_CREATED,
         )
 
-    @action(
-        detail=True,
-        methods=["patch"],
-    )
+    @action(detail=True,methods=["patch"], )
     def update_wish(self, request, pk=None):
         event = self.get_object()
         serializer = self.get_serializer(
@@ -138,10 +139,7 @@ class EventViewSet(
             status=status.HTTP_200_OK,
         )
 
-    @action(
-        detail=True,
-        methods=["patch"],
-    )
+    @action(detail=True, methods=["patch"], )
     def update_plan(self, request, pk=None):
         event = self.get_object()
         serializer = self.get_serializer(
@@ -206,6 +204,24 @@ class EventViewSet(
         event = EventService.leave_event(
             event=event,
             user=request.user,
+        )
+
+        return Response(
+            EventSerializer(event).data
+        )
+
+    @action(detail=True, methods=["post"], )
+    def convert_to_plan(self, request, pk=None):
+        event = self.get_object()
+
+        serializer = self.get_serializer(
+            data=request.data
+        )
+        serializer.is_valid(raise_exception=True)
+
+        event = EventService.convert_wish_to_plan(
+            event=event,
+            validated_data=serializer.validated_data,
         )
 
         return Response(
