@@ -194,3 +194,20 @@ class EventViewSet(
         return Response(
             EventSerializer(event).data
         )
+
+    @action(
+        detail=True,
+        methods=["post"],
+        permission_classes=(permissions.IsAuthenticated,),
+    )
+    def leave_event(self, request, pk=None):
+        event = self.get_object()
+
+        event = EventService.leave_event(
+            event=event,
+            user=request.user,
+        )
+
+        return Response(
+            EventSerializer(event).data
+        )

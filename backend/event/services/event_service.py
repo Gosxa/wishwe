@@ -229,3 +229,51 @@ class EventService:
         )
 
         return event
+
+    @staticmethod
+    @transaction.atomic
+    def leave_event(*, event, user):
+        participant = EventParticipant.objects.filter(
+            event=event,
+            user=user,
+        ).first()
+
+        if not participant:
+            raise ValidationError(
+                "User is not participating in this event."
+            )
+
+        if participant.status == ParticipationStatus.LEFT:
+            raise ValidationError(
+                "User already left this event."
+            )
+
+        if participant.status == ParticipationStatus.JOINED:
+            if event.participants_count > 0:
+                event.participants_count -= 1
+
+            if (
+                    event.status == EventStatus.CLOSED
+                    and not event.is_full
+            ):
+                event.status = EventStatus.ACTIVE
+
+            event.save(
+                update_fields=[
+                    "participants_count",
+                    "status",
+                ]
+            )
+        elif participant.status == ParticipationStatus.INTERESTED:
+
+            if event.interested_count > 0:
+                event.interested_count -= 1
+
+            event.save(
+                update_fields=["interested_count"]
+            )
+
+        participant.status = ParticipationStatus.LEFT
+        participant.save(update_fields=["status"])
+
+        return event
