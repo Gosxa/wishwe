@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -8,6 +8,7 @@ from event.models import (
     EventStatus,
     EventType
 )
+from event.permissions import IsOwnerOrReadOnly
 from event.serializers import (
     CategorySerializer,
     EventSerializer,
@@ -28,9 +29,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return [permissions.IsAdminUser()]
 
 
-class EventViewSet(viewsets.ReadOnlyModelViewSet):
+class EventViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
     serializer_class = EventSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     _visible_users_ids = None
 
     def get_visible_users_ids(self):
@@ -67,10 +73,10 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action == "create_wish":
+        if self.action in ("create_wish", "update_wish"):
             return WishWriteSerializer
 
-        if self.action == "create_plan":
+        if self.action in ("create_plan", "update_plan"):
             return PlanWriteSerializer
 
         return EventSerializer
@@ -107,4 +113,50 @@ class EventViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(
             EventSerializer(event).data,
             status=status.HTTP_201_CREATED,
+        )
+
+    @action(
+        detail=True,
+        methods=["patch"],
+    )
+    def update_wish(self, request, pk=None):
+        event = self.get_object()
+        serializer = self.get_serializer(
+            event,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+
+        event = EventService.update_wish(
+            event=event,
+            validated_data=serializer.validated_data,
+        )
+
+        return Response(
+            EventSerializer(event).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
+        methods=["patch"],
+    )
+    def update_plan(self, request, pk=None):
+        event = self.get_object()
+        serializer = self.get_serializer(
+            event,
+            data=request.data,
+            partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+
+        event = EventService.update_plan(
+            event=event,
+            validated_data=serializer.validated_data,
+        )
+
+        return Response(
+            EventSerializer(event).data,
+            status=status.HTTP_200_OK,
         )
