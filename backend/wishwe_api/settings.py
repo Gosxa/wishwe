@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "drf_spectacular",
+    "django_celery_beat",
     "user.apps.UserConfig",
     "event"
 ]
@@ -170,3 +171,9 @@ SPECTACULAR_SETTINGS = {
         "defaultModelExpandDepth": 2,
     },
 }
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Europe/Kyiv"

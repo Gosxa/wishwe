@@ -26,7 +26,6 @@ class EventStatus(models.TextChoices):
     ACTIVE = "active", "Active"
     CLOSED = "closed", "Closed"
     COMPLETED = "completed", "Completed"
-    CANCELLED = "cancelled", "Cancelled"
 
 
 def upload_cover_image(instance, filename):
