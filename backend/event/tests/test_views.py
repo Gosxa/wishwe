@@ -1,15 +1,27 @@
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from event.models import Event, EventStatus, EventType
-from user.models import Friendship, FriendshipStatus
+from event.models import (
+    Event,
+    EventParticipant,
+    EventStatus,
+    EventType,
+    ParticipationStatus,
+)
+
+from user.models import (
+    Friendship,
+    FriendshipStatus,
+)
 
 User = get_user_model()
 
 
 class EventFeedTests(APITestCase):
+
     def setUp(self):
         self.user = User.objects.create_user(
             email="user@test.com",
@@ -73,6 +85,34 @@ class EventFeedTests(APITestCase):
             status=EventStatus.ACTIVE,
         )
 
+        self.plan_event = Event.objects.create(
+            creator=self.friend,
+            event_type=EventType.PLAN,
+            title="Plan event",
+            description="desc",
+            location="Kyiv",
+            event_date="2026-07-20",
+            event_time="18:00",
+            min_participants=2,
+            max_participants=5,
+            participants_count=1,
+            status=EventStatus.ACTIVE,
+        )
+
+        self.completed_event = Event.objects.create(
+            creator=self.friend,
+            event_type=EventType.PLAN,
+            title="Completed event",
+            description="desc",
+            location="Kyiv",
+            event_date="2026-07-20",
+            event_time="18:00",
+            min_participants=2,
+            max_participants=5,
+            participants_count=1,
+            status=EventStatus.COMPLETED,
+        )
+
         self.client.force_authenticate(
             user=self.user
         )
@@ -89,7 +129,7 @@ class EventFeedTests(APITestCase):
 
         titles = [
             event["title"]
-            for event in response.data
+            for event in response.data["results"]
         ]
 
         self.assertIn(
@@ -104,7 +144,7 @@ class EventFeedTests(APITestCase):
 
         titles = [
             event["title"]
-            for event in response.data
+            for event in response.data["results"]
         ]
 
         self.assertIn(
@@ -119,7 +159,7 @@ class EventFeedTests(APITestCase):
 
         titles = [
             event["title"]
-            for event in response.data
+            for event in response.data["results"]
         ]
 
         self.assertNotIn(
@@ -138,8 +178,241 @@ class EventFeedTests(APITestCase):
             status.HTTP_200_OK,
         )
 
-        for event in response.data:
+        for event in response.data["results"]:
             self.assertEqual(
                 event["event_type"],
                 EventType.WISH,
             )
+
+    def test_filter_only_plans(self):
+        response = self.client.get(
+            reverse("events:event-list"),
+            {"type": EventType.PLAN},
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        for event in response.data["results"]:
+            self.assertEqual(
+                event["event_type"],
+                EventType.PLAN,
+            )
+
+    def test_completed_events_not_visible_in_feed(self):
+        response = self.client.get(
+            reverse("events:event-list")
+        )
+
+        titles = [
+            event["title"]
+            for event in response.data["results"]
+        ]
+
+        self.assertNotIn(
+            self.completed_event.title,
+            titles,
+        )
+
+    def test_search_by_title(self):
+        response = self.client.get(
+            reverse("events:event-list"),
+            {"title": "Friend"},
+        )
+
+        titles = [
+            event["title"]
+            for event in response.data["results"]
+        ]
+
+        self.assertIn(
+            self.friend_event.title,
+            titles,
+        )
+
+        self.assertNotIn(
+            self.fof_event.title,
+            titles,
+        )
+
+    def test_join_plan(self):
+        response = self.client.post(
+            reverse(
+                "events:event-join-plan",
+                args=[self.plan_event.id],
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.plan_event.refresh_from_db()
+
+        self.assertEqual(
+            self.plan_event.participants_count,
+            2,
+        )
+
+        participant = EventParticipant.objects.get(
+            event=self.plan_event,
+            user=self.user,
+        )
+
+        self.assertEqual(
+            participant.status,
+            ParticipationStatus.JOINED,
+        )
+
+    def test_interested_in_wish(self):
+        response = self.client.post(
+            reverse(
+                "events:event-interested-in-wish",
+                args=[self.friend_event.id],
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.friend_event.refresh_from_db()
+
+        self.assertEqual(
+            self.friend_event.interested_count,
+            1,
+        )
+
+        participant = EventParticipant.objects.get(
+            event=self.friend_event,
+            user=self.user,
+        )
+
+        self.assertEqual(
+            participant.status,
+            ParticipationStatus.INTERESTED,
+        )
+
+    def test_leave_event(self):
+        EventParticipant.objects.create(
+            event=self.plan_event,
+            user=self.user,
+            status=ParticipationStatus.JOINED,
+        )
+
+        self.plan_event.participants_count = 2
+        self.plan_event.save()
+
+        response = self.client.post(
+            reverse(
+                "events:event-leave-event",
+                args=[self.plan_event.id],
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.plan_event.refresh_from_db()
+
+        self.assertEqual(
+            self.plan_event.participants_count,
+            1,
+        )
+
+        participant = EventParticipant.objects.get(
+            event=self.plan_event,
+            user=self.user,
+        )
+
+        self.assertEqual(
+            participant.status,
+            ParticipationStatus.LEFT,
+        )
+
+    def test_copy_wish(self):
+        response = self.client.post(
+            reverse(
+                "events:event-copy-wish",
+                args=[self.friend_event.id],
+            )
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED,
+        )
+
+        copied_event = Event.objects.get(
+            creator=self.user,
+            title=self.friend_event.title,
+        )
+
+        self.assertEqual(
+            copied_event.event_type,
+            EventType.WISH,
+        )
+
+    def test_convert_wish_to_plan(self):
+        own_wish = Event.objects.create(
+            creator=self.user,
+            event_type=EventType.WISH,
+            title="Wish",
+            description="desc",
+            location="Kyiv",
+            timeframe_text="Tomorrow",
+            status=EventStatus.ACTIVE,
+            interested_count=1,
+        )
+
+        EventParticipant.objects.create(
+            event=own_wish,
+            user=self.user,
+            status=ParticipationStatus.INTERESTED,
+        )
+
+        response = self.client.post(
+            reverse(
+                "events:event-convert-to-plan",
+                args=[own_wish.id],
+            ),
+            {
+                "event_date": "2026-07-20",
+                "event_time": "18:00",
+                "min_participants": 2,
+                "max_participants": 5,
+            }
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        own_wish.refresh_from_db()
+
+        self.assertEqual(
+            own_wish.event_type,
+            EventType.PLAN,
+        )
+
+        self.assertEqual(
+            own_wish.participants_count,
+            1,
+        )
+
+    def test_feed_is_paginated(self):
+        response = self.client.get(
+            reverse("events:event-list")
+        )
+
+        self.assertIn("results", response.data)
+        self.assertIn("count", response.data)
+        self.assertIn("next", response.data)
+        self.assertIn("previous", response.data)
