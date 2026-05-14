@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from common.pagination import DefaultPagination
 from event.models import (
     Category,
     Event,
@@ -38,6 +39,7 @@ class EventViewSet(
 ):
     serializer_class = EventSerializer
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    pagination_class = DefaultPagination
     _visible_users_ids = None
 
     def get_visible_users_ids(self):
