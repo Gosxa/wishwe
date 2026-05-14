@@ -65,6 +65,13 @@ class EventViewSet(
 
         event_type = self.request.query_params.get("type")
         title = self.request.query_params.get("title")
+        sort = self.request.query_params.get("sort")
+
+        if sort == "soonest":
+            queryset = queryset.order_by(
+                "event_date",
+                "event_time",
+            )
 
         if event_type in (
             EventType.WISH,
