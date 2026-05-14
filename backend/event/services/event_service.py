@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+from django.utils import timezone
+
 from django.db import transaction
 from django.db.models import Q
 from rest_framework.exceptions import ValidationError
@@ -13,6 +16,19 @@ from user.models import FriendshipStatus, Friendship
 
 
 class EventService:
+    @staticmethod
+    def calculate_plan_expiration(*, event_date, event_time,):
+        event_datetime = datetime.combine(
+            event_date,
+            event_time,
+        )
+        aware_event_datetime = timezone.make_aware(
+            event_datetime,
+            timezone.get_current_timezone(),
+        )
+
+        return aware_event_datetime + timedelta(minutes=5)
+
     @staticmethod
     @transaction.atomic
     def create_wish(*, creator, validated_data):
@@ -49,13 +65,13 @@ class EventService:
             status=ParticipationStatus.JOINED,
         )
 
-        return event
+        event.expires_at = EventService.calculate_plan_expiration(
+            event_date=event.event_date,
+            event_time=event.event_time,
+        )
+        event.save(update_fields=["expires_at"])
 
-    @staticmethod
-    def _close_if_full(event):
-        if event.is_full:
-            event.status = EventStatus.CLOSED
-            event.save(update_fields=["status"])
+        return event
 
     @staticmethod
     def get_user_friend_ids(user):
@@ -291,6 +307,10 @@ class EventService:
         event.max_participants = (validated_data["max_participants"])
         event.participants_count = 1
         event.interested_count -= 1
+        event.expires_at = EventService.calculate_plan_expiration(
+            event_date=event.event_date,
+            event_time=event.event_time,
+        )
         event.save()
 
         creator_participant = (

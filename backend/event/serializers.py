@@ -102,7 +102,6 @@ class WishWriteSerializer(serializers.ModelSerializer):
             "external_link",
             "timeframe_text",
             "min_participants",
-            "expires_at",
         )
 
     def validate(self, attrs):
@@ -154,7 +153,6 @@ class PlanWriteSerializer(serializers.ModelSerializer):
             "event_time",
             "min_participants",
             "max_participants",
-            "expires_at",
         )
 
     def validate(self, attrs):
