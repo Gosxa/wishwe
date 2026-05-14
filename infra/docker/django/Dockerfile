@@ -24,10 +24,11 @@ COPY . .
 RUN python manage.py collectstatic --noinput
 
 # Create a non-root user
-RUN addgroup --system django && adduser --system --ingroup django django
-USER django
+RUN addgroup --system django && adduser --system --ingroup django django \
+    && mkdir -p /app/staticfiles \
+    && chown -R django:django /app
 
-EXPOSE 8000
+USER django
 
 CMD ["gunicorn", "wishwe_api.wsgi:application", \
      "--bind", "0.0.0.0:8000", \
