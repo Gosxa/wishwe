@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_celery_beat",
     "user.apps.UserConfig",
-    "event"
+    "event.apps.EventConfig",
 ]
 
 MIDDLEWARE = [

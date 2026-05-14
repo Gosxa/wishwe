@@ -111,7 +111,6 @@ class WishWriteSerializer(serializers.ModelSerializer):
             instance
             and instance.status in (
                 EventStatus.COMPLETED,
-                EventStatus.CANCELLED,
             )
         ):
             raise serializers.ValidationError(
@@ -161,7 +160,6 @@ class PlanWriteSerializer(serializers.ModelSerializer):
             instance
             and instance.status in (
                 EventStatus.COMPLETED,
-                EventStatus.CANCELLED,
             )
         ):
             raise serializers.ValidationError(
