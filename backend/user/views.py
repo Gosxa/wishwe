@@ -18,6 +18,9 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from common.pagination import DefaultPagination
+from event.models import Event, EventStatus, EventType
+from event.serializers import EventSerializer
 from .models import (
     SocialAccount,
     Profile,
@@ -455,6 +458,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = DefaultPagination
 
     @action(detail=True, methods=["get"])
     def friends(self, request, pk=None):
@@ -475,6 +479,53 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         serializer = MutualFriendsSerializer(users, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def events(self, request, pk=None):
+        user = self.get_object()
+        events = Event.objects.filter(
+            Q(creator=user) | Q(participants__user=user)
+        ).select_related(
+            "category",
+            "creator__profile",
+        ).distinct()
+        tab = self.request.query_params.get("tab")
+        sort = self.request.query_params.get("sort")
+
+        if sort == "soonest":
+            events = events.order_by(
+                "event_date",
+                "event_time",
+            )
+
+        if tab == "plans":
+            events = events.filter(
+                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                event_type=EventType.PLAN
+            )
+
+        if tab == "wishes":
+            events = events.filter(
+                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                event_type=EventType.WISH
+            )
+
+        if tab == "archive":
+            events = events.filter(
+                status=EventStatus.COMPLETED,
+            )
+
+        page = self.paginate_queryset(events)
+
+        if page is not None:
+            serializer = EventSerializer(page, many=True,)
+            return self.get_paginated_response(
+                serializer.data
+            )
+
+        serializer = EventSerializer(events, many=True,)
+
         return Response(serializer.data)
 
 
