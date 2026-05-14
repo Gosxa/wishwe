@@ -16,13 +16,7 @@ services:
       - backend
     # Run migrations before starting gunicorn
     command: >
-      sh -c "python manage.py migrate --noinput &&
-             gunicorn config.wsgi:application
-             --bind 0.0.0.0:8000
-             --workers 3
-             --timeout 120
-             --access-logfile -
-             --error-logfile -"
+      command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn wishwe_api.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120 --access-logfile - --error-logfile -"
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health/\")'"]
       interval: 30s
