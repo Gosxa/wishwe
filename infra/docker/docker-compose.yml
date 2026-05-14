@@ -2,8 +2,8 @@ services:
 
   django:
     build:
-      context: ./django
-      dockerfile: Dockerfile
+      context: ../../backend
+      dockerfile: ../infra/docker/django/Dockerfile
     restart: unless-stopped
     env_file:
       - /var/www/app/backend/.env
@@ -32,8 +32,8 @@ services:
 
   nginx:
     build:
-      context: ./nginx
-      dockerfile: Dockerfile
+      context: ../../frontend
+      dockerfile: ../infra/docker/nginx/Dockerfile
     restart: unless-stopped
     ports:
       - "80:80"
