@@ -41,6 +41,7 @@ services:
     volumes:
       - static_files:/app/staticfiles:ro
       - media_files:/app/media:ro
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
     depends_on:
