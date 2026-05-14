@@ -148,3 +148,51 @@ class EmailVerification(models.Model):
 
     def __str__(self):
         return self.email
+
+
+class FriendshipStatus(models.TextChoices):
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+
+
+class Friendship(models.Model):
+    sender = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_friend_requests"
+    )
+    receiver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="received_friend_requests"
+    )
+    status = models.CharField(max_length=10, choices=FriendshipStatus.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["sender", "receiver"],
+                name="unique_user_friendship",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.sender} -> {self.receiver}"
+
+
+class FriendInvite(models.Model):
+    inviter = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_invites"
+    )
+    token = models.UUIDField(default=uuid.uuid4, unique=True)
+
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Invite from {self.inviter}"
