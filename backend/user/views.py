@@ -15,9 +15,12 @@ import requests as pyrequests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from common.pagination import DefaultPagination
+from event.models import Event, EventStatus, EventType
+from event.serializers import EventSerializer
 from .models import (
     SocialAccount,
     Profile,
@@ -47,6 +50,8 @@ from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
 from .services.invite_service import InviteService
 
+
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 
@@ -155,13 +160,7 @@ def google_auth(request):
         if updated:
             profile.save()
 
-    refresh = RefreshToken.for_user(user)
-
-    return Response({
-        "access": str(refresh.access_token),
-        "refresh": str(refresh),
-        "is_onboarded": profile.is_onboarded,
-    })
+    return AuthService.create_auth_response(user)
 
 
 @api_view(["POST"])
@@ -233,13 +232,7 @@ def set_password(request):
     except ValueError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    refresh = RefreshToken.for_user(user)
-
-    return Response({
-        "access": str(refresh.access_token),
-        "refresh": str(refresh),
-        "is_onboarded": user.profile.is_onboarded,
-    })
+    return AuthService.create_auth_response(user)
 
 
 @api_view(["POST"])
@@ -279,8 +272,55 @@ def set_new_password(request):
     )
 
 
-class CustomTokenObtainPairView(TokenObtainPairView):
+class CookieTokenObtainPairView(TokenObtainPairView):
     throttle_classes = [LoginThrottle]
+    serializer_class = TokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.user
+
+        return AuthService.create_auth_response(user)
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get("refresh_token")
+
+        serializer = self.get_serializer(data={
+            "refresh": refresh_token
+        })
+
+        serializer.is_valid(raise_exception=True)
+
+        access_token = serializer.validated_data["access"]
+
+        response = Response({"message": "Token refreshed"})
+
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            secure=not settings.DEBUG,
+            samesite="Lax",
+        )
+
+        return response
+
+
+@api_view(["POST"])
+def logout_user(request):
+    response = Response(
+        {"message": "Logged out"},
+        status=status.HTTP_200_OK
+    )
+
+    response.delete_cookie("access_token")
+    response.delete_cookie("refresh_token")
+
+    return response
 
 
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
@@ -455,6 +495,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = DefaultPagination
 
     @action(detail=True, methods=["get"])
     def friends(self, request, pk=None):
@@ -475,6 +516,53 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         serializer = MutualFriendsSerializer(users, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def events(self, request, pk=None):
+        user = self.get_object()
+        events = Event.objects.filter(
+            Q(creator=user) | Q(participants__user=user)
+        ).select_related(
+            "category",
+            "creator__profile",
+        ).distinct()
+        tab = self.request.query_params.get("tab")
+        sort = self.request.query_params.get("sort")
+
+        if sort == "soonest":
+            events = events.order_by(
+                "event_date",
+                "event_time",
+            )
+
+        if tab == "plans":
+            events = events.filter(
+                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                event_type=EventType.PLAN
+            )
+
+        if tab == "wishes":
+            events = events.filter(
+                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                event_type=EventType.WISH
+            )
+
+        if tab == "archive":
+            events = events.filter(
+                status=EventStatus.COMPLETED,
+            )
+
+        page = self.paginate_queryset(events)
+
+        if page is not None:
+            serializer = EventSerializer(page, many=True,)
+            return self.get_paginated_response(
+                serializer.data
+            )
+
+        serializer = EventSerializer(events, many=True,)
+
         return Response(serializer.data)
 
 
