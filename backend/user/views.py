@@ -328,6 +328,15 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     pagination_class = DefaultPagination
 
+    def get_queryset(self):
+        queryset = self.queryset
+        username = self.request.query_params.get("username")
+
+        if username:
+            queryset = queryset.filter(username__icontains=username)
+
+        return queryset
+
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
             return ProfileReadSerializer
