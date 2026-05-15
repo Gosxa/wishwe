@@ -326,6 +326,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Profile.objects.select_related("user", "city")
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    pagination_class = DefaultPagination
 
     def get_serializer_class(self):
         if self.action in ("list", "retrieve"):
@@ -426,6 +427,7 @@ class FriendshipViewSet(
     queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
     serializer_class = FriendshipSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         return self.queryset.filter(
