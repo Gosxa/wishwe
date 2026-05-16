@@ -133,16 +133,9 @@ class MutualFriendsSerializer(serializers.ModelSerializer):
 
 
 class InviteSerializer(serializers.ModelSerializer):
-    link = serializers.SerializerMethodField()
-
     class Meta:
         model = FriendInvite
-        fields = ("id", "link", "created_at")
-
-    def get_link(self, obj):
-        request = self.context.get("request")
-        base_url = request.build_absolute_uri("/")[:-1]
-        return f"{base_url}/invite/{obj.token}"
+        fields = ("id", "token", "created_at")
 
 
 class InviteUseSerializer(serializers.Serializer):

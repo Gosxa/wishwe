@@ -22,18 +22,12 @@ class InviteService:
         except FriendInvite.DoesNotExist:
             raise ValidationError("Invalid invite link")
 
-        if invite.is_used:
-            raise ValidationError("Invite already used")
-
-        if invite.expires_at and invite.expires_at < timezone.now():
+        if invite.expires_at < timezone.now():
             raise ValidationError("Invite expired")
 
         FriendshipService.send_request(
             sender=new_user,
             receiver=invite.inviter
         )
-
-        invite.is_used = True
-        invite.save()
 
         return invite
