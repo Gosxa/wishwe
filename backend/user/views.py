@@ -326,9 +326,19 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Profile.objects.select_related("user", "city")
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        queryset = self.queryset
+        username = self.request.query_params.get("username")
+
+        if username:
+            queryset = queryset.filter(username__icontains=username)
+
+        return queryset
 
     def get_serializer_class(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "me"):
             return ProfileReadSerializer
         elif self.action == "onboarding":
             return OnboardingSerializer
@@ -426,6 +436,7 @@ class FriendshipViewSet(
     queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
     serializer_class = FriendshipSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         return self.queryset.filter(
@@ -486,6 +497,12 @@ class FriendshipViewSet(
     @action(detail=False, methods=["get"])
     def friends(self, request):
         friends = FriendshipService.get_friends(request.user)
+
+        page = self.paginate_queryset(friends)
+        if page is not None:
+            serializer = FriendSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = FriendSerializer(friends, many=True)
         return Response(serializer.data)
 
@@ -499,8 +516,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["get"])
     def friends(self, request, pk=None):
         user = self.get_object()
-
         friends = FriendshipService.get_friends(user)
+
+        page = self.paginate_queryset(friends)
+        if page is not None:
+            serializer = FriendSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = FriendSerializer(friends, many=True)
 
         return Response(serializer.data)

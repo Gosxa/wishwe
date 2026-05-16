@@ -192,7 +192,6 @@ class FriendInvite(models.Model):
     )
     token = models.UUIDField(default=uuid.uuid4, unique=True)
 
-    is_used = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
 
