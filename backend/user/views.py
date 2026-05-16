@@ -338,7 +338,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
     def get_serializer_class(self):
-        if self.action in ("list", "retrieve"):
+        if self.action in ("list", "retrieve", "me"):
             return ProfileReadSerializer
         elif self.action == "onboarding":
             return OnboardingSerializer
@@ -497,6 +497,12 @@ class FriendshipViewSet(
     @action(detail=False, methods=["get"])
     def friends(self, request):
         friends = FriendshipService.get_friends(request.user)
+
+        page = self.paginate_queryset(friends)
+        if page is not None:
+            serializer = FriendSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = FriendSerializer(friends, many=True)
         return Response(serializer.data)
 
@@ -510,8 +516,13 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["get"])
     def friends(self, request, pk=None):
         user = self.get_object()
-
         friends = FriendshipService.get_friends(user)
+
+        page = self.paginate_queryset(friends)
+        if page is not None:
+            serializer = FriendSerializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = FriendSerializer(friends, many=True)
 
         return Response(serializer.data)
