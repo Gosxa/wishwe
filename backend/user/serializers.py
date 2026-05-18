@@ -140,3 +140,18 @@ class InviteSerializer(serializers.ModelSerializer):
 
 class InviteUseSerializer(serializers.Serializer):
     token = serializers.UUIDField()
+
+
+class EmailStartResponseSerializer(
+    serializers.Serializer
+):
+    flow = serializers.CharField()
+
+
+class FriendshipRequestSerializer(
+    serializers.Serializer
+):
+    receiver_id = serializers.PrimaryKeyRelatedField(
+        queryset=get_user_model().objects.all(),
+        source="receiver",
+    )

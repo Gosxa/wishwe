@@ -1,8 +1,11 @@
 import logging
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
 from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
@@ -44,7 +47,8 @@ from .serializers import (
     UserSerializer,
     MutualFriendsSerializer,
     InviteSerializer,
-    InviteUseSerializer
+    InviteUseSerializer,
+    EmailStartResponseSerializer, FriendshipRequestSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -162,6 +166,12 @@ def google_auth(request):
     return AuthService.create_auth_response(user)
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: EmailStartResponseSerializer,
+    },
+)
 @api_view(["POST"])
 @throttle_classes([LoginThrottle])
 def email_start(request):
@@ -180,6 +190,14 @@ def email_start(request):
     )
 
 
+@extend_schema(
+    request=VerifyCodeSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"verification_token: {uuid.uuid4()}",
+        ),
+    },
+)
 @api_view(["POST"])
 def verify_code(request):
     serializer = VerifyCodeSerializer(data=request.data)
@@ -201,6 +219,14 @@ def verify_code(request):
     )
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Code resent",
+        ),
+    }
+)
 @api_view(["POST"])
 def resend_code(request):
     serializer = EmailSerializer(data=request.data)
@@ -216,6 +242,14 @@ def resend_code(request):
     return Response({"message": "Code resent"})
 
 
+@extend_schema(
+    request=SetPasswordSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"is_verified: True/False and set secure cookies",
+        ),
+    }
+)
 @api_view(["POST"])
 def set_password(request):
     serializer = SetPasswordSerializer(data=request.data)
@@ -234,6 +268,14 @@ def set_password(request):
     return AuthService.create_auth_response(user)
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Code sent",
+        ),
+    }
+)
 @api_view(["POST"])
 def reset_password(request):
     serializer = EmailSerializer(data=request.data)
@@ -252,6 +294,17 @@ def reset_password(request):
     )
 
 
+@extend_schema(
+    request=SetNewPasswordSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Password updated",
+        ),
+        400: OpenApiResponse(
+            description=f"Passwords do not match",
+        )
+    }
+)
 @api_view(["POST"])
 def set_new_password(request):
     serializer = SetNewPasswordSerializer(data=request.data)
@@ -260,7 +313,7 @@ def set_new_password(request):
     try:
         AuthService.reset_password_confirm(
             token=serializer.validated_data["token"],
-            new_password=serializer.validated_data["new_password"]
+            new_password=serializer.validated_data["new_password"],
         )
     except ValueError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -309,6 +362,14 @@ class CookieTokenRefreshView(TokenRefreshView):
         return response
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Logout by deleting cookies",
+        ),
+    }
+)
 @api_view(["POST"])
 def logout_user(request):
     response = Response(
@@ -347,6 +408,20 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         elif self.action == "change_password":
             return ChangePasswordSerializer
         return ProfileSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="username",
+                type=OpenApiTypes.STR,
+                description="Filter by username(icontains)",
+            ),
+
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Returns a filtered list of user profiles."""
+        return super(ProfileViewSet, self).list(request, *args, **kwargs)
 
     @action(detail=False, methods=["get"])
     def me(self, request):
@@ -450,13 +525,23 @@ class FriendshipViewSet(
 
         return Response({"detail": "Deleted"}, status=status.HTTP_204_NO_CONTENT)
 
+    @extend_schema(
+        request=FriendshipRequestSerializer,
+        responses={
+            200: OpenApiResponse(description="request sent"),
+            400: OpenApiResponse(
+                description="Friendship request already exists"
+            ),
+        }
+    )
     @action(detail=False, methods=["post"])
     def send(self, request):
-        receiver_id = request.data.get("receiver_id")
+        serializer = FriendshipRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
         FriendshipService.send_request(
             sender=request.user,
-            receiver=User.objects.get(id=receiver_id)
+            receiver=serializer.validated_data["receiver"]
         )
 
         return Response(
@@ -496,6 +581,7 @@ class FriendshipViewSet(
 
     @action(detail=False, methods=["get"])
     def friends(self, request):
+        """Friends of request.user"""
         friends = FriendshipService.get_friends(request.user)
 
         page = self.paginate_queryset(friends)
@@ -539,6 +625,23 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = MutualFriendsSerializer(users, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="tab",
+                type=OpenApiTypes.STR,
+                description="Type of the event to filter in profile plans"
+                            "(example:?tab=plans/wishes/archive)",
+            ),
+            OpenApiParameter(
+                name="sort",
+                type=OpenApiTypes.STR,
+                description="Sort parameter in profile events"
+                            "(recently added -> by default "
+                            "/ ?sort=soonest -> soonest first)",
+            )
+        ]
+    )
     @action(detail=True, methods=["get"])
     def events(self, request, pk=None):
         user = self.get_object()

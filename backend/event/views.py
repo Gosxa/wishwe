@@ -1,3 +1,5 @@
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -97,6 +99,30 @@ class EventViewSet(
             return ConvertWishToPlanSerializer
 
         return EventSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="type",
+                type=OpenApiTypes.STR,
+                description="Type of the event to filter in the feed(plan/wish)",
+            ),
+            OpenApiParameter(
+                name="title",
+                type=OpenApiTypes.STR,
+                description="Filtering by title",
+            ),
+            OpenApiParameter(
+                name="sort",
+                type=OpenApiTypes.STR,
+                description="Sort parameter in feed(recently added -> by default "
+                            "/ ?sort=soonest -> soonest first)",
+            )
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        """Returns a filtered list of events."""
+        return super(EventViewSet, self).list(request, *args, **kwargs)
 
     @action(detail=False, methods=["post"])
     def create_wish(self, request):
