@@ -140,3 +140,9 @@ class InviteSerializer(serializers.ModelSerializer):
 
 class InviteUseSerializer(serializers.Serializer):
     token = serializers.UUIDField()
+
+
+class EmailStartResponseSerializer(
+    serializers.Serializer
+):
+    flow = serializers.CharField()

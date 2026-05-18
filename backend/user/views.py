@@ -1,8 +1,10 @@
 import logging
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
+from drf_spectacular.utils import extend_schema, OpenApiResponse
 from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
@@ -44,7 +46,8 @@ from .serializers import (
     UserSerializer,
     MutualFriendsSerializer,
     InviteSerializer,
-    InviteUseSerializer
+    InviteUseSerializer,
+    EmailStartResponseSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -162,6 +165,12 @@ def google_auth(request):
     return AuthService.create_auth_response(user)
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: EmailStartResponseSerializer,
+    },
+)
 @api_view(["POST"])
 @throttle_classes([LoginThrottle])
 def email_start(request):
@@ -180,6 +189,14 @@ def email_start(request):
     )
 
 
+@extend_schema(
+    request=VerifyCodeSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"verification_token: {uuid.uuid4()}",
+        ),
+    },
+)
 @api_view(["POST"])
 def verify_code(request):
     serializer = VerifyCodeSerializer(data=request.data)
@@ -201,6 +218,14 @@ def verify_code(request):
     )
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Code resent",
+        ),
+    }
+)
 @api_view(["POST"])
 def resend_code(request):
     serializer = EmailSerializer(data=request.data)
@@ -216,6 +241,14 @@ def resend_code(request):
     return Response({"message": "Code resent"})
 
 
+@extend_schema(
+    request=SetPasswordSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"is_verified: True/False and set secure cookies",
+        ),
+    }
+)
 @api_view(["POST"])
 def set_password(request):
     serializer = SetPasswordSerializer(data=request.data)
@@ -234,6 +267,14 @@ def set_password(request):
     return AuthService.create_auth_response(user)
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Code sent",
+        ),
+    }
+)
 @api_view(["POST"])
 def reset_password(request):
     serializer = EmailSerializer(data=request.data)
@@ -252,6 +293,17 @@ def reset_password(request):
     )
 
 
+@extend_schema(
+    request=SetNewPasswordSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Password updated",
+        ),
+        400: OpenApiResponse(
+            description=f"Passwords do not match",
+        )
+    }
+)
 @api_view(["POST"])
 def set_new_password(request):
     serializer = SetNewPasswordSerializer(data=request.data)
@@ -260,7 +312,7 @@ def set_new_password(request):
     try:
         AuthService.reset_password_confirm(
             token=serializer.validated_data["token"],
-            new_password=serializer.validated_data["new_password"]
+            new_password=serializer.validated_data["new_password"],
         )
     except ValueError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -309,6 +361,14 @@ class CookieTokenRefreshView(TokenRefreshView):
         return response
 
 
+@extend_schema(
+    request=EmailSerializer,
+    responses={
+        200: OpenApiResponse(
+            description=f"Logout by deleting cookies",
+        ),
+    }
+)
 @api_view(["POST"])
 def logout_user(request):
     response = Response(
