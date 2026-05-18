@@ -68,24 +68,15 @@ class EventSerializer(serializers.ModelSerializer):
             "max_participants",
             "participants_count",
             "interested_count",
-            "expires_at",
             "created_at",
-            "updated_at",
             "is_full",
-            "is_expired",
             "available_spots",
         )
 
         read_only_fields = (
             "creator",
-            "participants_count",
-            "interested_count",
+            "event_type",
             "status",
-            "created_at",
-            "updated_at",
-            "is_full",
-            "is_expired",
-            "available_spots",
         )
 
 
