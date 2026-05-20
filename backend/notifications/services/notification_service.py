@@ -9,17 +9,15 @@ class NotificationService:
     @staticmethod
     def create_friend_request_notification(
         *,
-        sender,
-        receiver,
         friendship,
     ):
         return Notification.objects.create(
-            recipient=receiver,
-            creator=sender,
+            recipient=friendship.receiver,
+            creator=friendship.sender,
             type=NotificationType.FRIEND_REQUEST,
             title="New friend request",
             message=(
-                f"{sender.profile.username} "
+                f"{friendship.sender.profile.username} "
                 f"sent you a friend request."
             ),
             related_object_type=RelatedObjectType.FRIENDSHIP,
@@ -29,17 +27,15 @@ class NotificationService:
     @staticmethod
     def create_friend_request_accepted_notification(
         *,
-        sender,
-        receiver,
         friendship,
     ):
         return Notification.objects.create(
-            recipient=sender,
-            creator=receiver,
+            recipient=friendship.sender,
+            creator=friendship.receiver,
             type=NotificationType.FRIEND_REQUEST_ACCEPTED,
             title="Friend request accepted",
             message=(
-                f"{receiver.profile.username} "
+                f"{friendship.receiver.profile.username} "
                 f"accepted your friend request."
             ),
             related_object_type=RelatedObjectType.FRIENDSHIP,
@@ -56,7 +52,7 @@ class NotificationService:
             recipient=event.creator,
             creator=user,
             type=NotificationType.JOINED_EVENT,
-            title="New event participant",
+            title="New plan participant",
             message=(
                 f"{user.profile.username} "
                 f"joined your plan."
@@ -75,7 +71,7 @@ class NotificationService:
             recipient=event.creator,
             creator=user,
             type=NotificationType.INTERESTED_EVENT,
-            title="User interested in your event",
+            title="User interested in your wish",
             message=(
                 f"{user.profile.username} "
                 f"is interested in your wish."

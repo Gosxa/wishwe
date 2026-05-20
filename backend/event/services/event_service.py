@@ -12,6 +12,7 @@ from event.models import (
     EventType,
     ParticipationStatus,
 )
+from notifications.services.notification_service import NotificationService
 from user.models import FriendshipStatus, Friendship
 
 
@@ -204,6 +205,10 @@ class EventService:
             ]
         )
 
+        NotificationService.create_joined_event_notification(
+            event=event, user=user
+        )
+
         return event
 
     @staticmethod
@@ -242,6 +247,10 @@ class EventService:
         event.interested_count += 1
         event.save(
             update_fields=["interested_count"]
+        )
+
+        NotificationService.create_interested_event_notification(
+            event=event, user=user
         )
 
         return event
