@@ -93,7 +93,7 @@ class NotificationService:
             type=NotificationType.EVENT_UPDATED,
             title="Event updated",
             message=(
-                f'The {event.event_type} "{event.title}" '
+                f"The {event.event_type} {event.title} "
                 f"has been updated."
             ),
             related_object_type=RelatedObjectType.EVENT,
@@ -113,7 +113,7 @@ class NotificationService:
             type=NotificationType.EVENT_CANCELLED,
             title="Event cancelled",
             message=(
-                f'The event "{event.title}" '
+                f"The event {event.title} "
                 f"has been cancelled."
             ),
             related_object_type=RelatedObjectType.EVENT,
@@ -133,7 +133,7 @@ class NotificationService:
             type=NotificationType.EVENT_PLANNED,
             title="Wish confirmed",
             message=(
-                f'The wish "{event.title}" '
+                f"The wish {event.title} "
                 f"is now planned."
             ),
             related_object_type=RelatedObjectType.EVENT,
@@ -153,7 +153,7 @@ class NotificationService:
             type=NotificationType.EVENT_START_REMINDER,
             title="Event starts soon",
             message=(
-                f'The event "{event.title}" '
+                f"The event {event.title} "
                 f"starts in 24 hours."
             ),
             related_object_type=RelatedObjectType.EVENT,

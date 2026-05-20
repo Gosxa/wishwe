@@ -331,6 +331,18 @@ class EventService:
         creator_participant.status = ParticipationStatus.JOINED
         creator_participant.save(update_fields=["status"])
 
+        interested_participants = EventParticipant.objects.filter(
+            event=event,
+            status=ParticipationStatus.INTERESTED,
+        ).select_related("user")
+
+        for participant in interested_participants:
+            NotificationService.create_event_planned_notification(
+                event=event,
+                creator=event.creator,
+                recipient=participant.user,
+            )
+
         return event
 
     @staticmethod
