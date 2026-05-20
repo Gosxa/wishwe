@@ -414,3 +414,28 @@ class EventService:
         )
 
         return copied_event
+
+    @staticmethod
+    @transaction.atomic
+    def delete_event(*, event):
+        participants = (
+            EventParticipant.objects
+            .filter(
+                event=event,
+                status__in=(
+                    ParticipationStatus.JOINED,
+                    ParticipationStatus.INTERESTED,
+                )
+            )
+            .select_related("user")
+            .exclude(user=event.creator)
+        )
+
+        for participant in participants:
+            NotificationService.create_event_cancelled_notification(
+                event=event,
+                recipient=participant.user,
+                creator=event.creator,
+            )
+
+        event.delete()
