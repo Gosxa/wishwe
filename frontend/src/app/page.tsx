@@ -1,5 +1,5 @@
-import { HomePage } from '@client_pages/home';
+import { OnBoard } from '@/client_pages';
 
 export default function Page() {
-  return <HomePage />;
+  return <OnBoard />;
 }

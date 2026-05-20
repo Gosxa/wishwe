@@ -1,0 +1,112 @@
+@use './colors' as clr;
+@use './typography' as tp;
+
+// TODO: clear selected + leave logic
+@mixin button-base($gap, $width, $height) {
+  display: flex;
+  width: $width;
+  height: $height;
+  border-radius: 8px;
+  border: none;
+  align-items: center;
+  justify-content: center;
+  gap: $gap;
+  transition: all 0.3s ease;
+  outline: none;
+
+  @include tp.text-button;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@mixin button-content($text, $svg) {
+  > span {
+    color: $text;
+  }
+
+  > svg {
+    color: $svg;
+  }
+}
+
+@mixin button-visual($bg, $shadows...) {
+  background: $bg;
+  box-shadow: if(length($shadows) == 0, none, $shadows);
+}
+
+@mixin primary($gap, $width, $height) {
+  @include button-base($gap, $width, $height);
+  @include button-content(clr.$ns-50, clr.$ns-50);
+
+  @include button-visual(clr.$prm);
+
+  &:hover {
+    @include button-visual(clr.$prm-light);
+  }
+
+  &:focus-visible {
+    @include button-visual(clr.$prm, 0 0 0 2px clr.$ns-50, 0 0 0 3px clr.$prm);
+  }
+
+  &:active {
+    @include button-visual(clr.$prm-dark);
+  }
+
+  &:disabled {
+    @include button-content(clr.$ns-500, clr.$ns-500);
+    @include button-visual(clr.$ns-200);
+  }
+}
+
+@mixin secondary($gap, $width, $height) {
+  @include button-base($gap, $width, $height);
+  @include button-content(clr.$prm, clr.$prm);
+
+  @include button-visual(clr.$ns-50, 0 0 0 1px clr.$prm);
+
+  &:hover {
+    @include button-visual(clr.$ns-100, 0 0 0 1px clr.$prm);
+  }
+
+  &:focus-visible {
+    @include button-visual(
+      clr.$ns-50,
+      0 0 0 1px clr.$prm,
+      0 0 0 3px clr.$ns-50,
+      0 0 0 4px clr.$prm
+    );
+  }
+
+  &:active {
+    @include button-visual(#d2cfc5, 0 0 0 1px clr.$prm-dark);
+  }
+
+  &:disabled {
+    @include button-content(clr.$ns-500, clr.$ns-500);
+    @include button-visual(clr.$ns-50, 0 0 0 1px clr.$ns-300);
+  }
+}
+
+@mixin sec-selected {
+  @include button-visual(rgba(clr.$prm-light, 0.1), 0 0 0 1px clr.$prm);
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    @include button-visual(rgba(clr.$prm-light, 0.1), 0 0 0 1px clr.$prm);
+  }
+}
+
+@mixin sec-leave {
+  @include button-content(clr.$err, clr.$err);
+  @include button-visual(rgba(clr.$err, 0.1), 0 0 0 1px clr.$err);
+
+  &:hover,
+  &:focus-visible,
+  &:active {
+    @include button-content(clr.$err, clr.$err);
+    @include button-visual(rgba(clr.$err, 0.1), 0 0 0 1px clr.$err);
+  }
+}

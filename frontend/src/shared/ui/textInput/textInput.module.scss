@@ -1,0 +1,43 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+@mixin input-colors($border, $placeholder) {
+  border-color: $border;
+
+  &::placeholder {
+    color: $placeholder;
+  }
+}
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.input {
+  display: flex;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 9px 16px;
+  color: clr.$ns-900;
+
+  @include typo.text-body;
+  @include input-colors(clr.$ns-300, clr.$ns-300);
+
+  &:hover {
+    border-color: clr.$ns-700;
+  }
+
+  &:focus-visible {
+    @include input-colors(clr.$primary, clr.$ns-900);
+  }
+
+  &:disabled {
+    @include input-colors(clr.$ns-100, clr.$ns-100);
+  }
+}
+
+.error {
+  
+}

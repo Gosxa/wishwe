@@ -1,4 +1,4 @@
-@mixin text-h1 {
+@mixin h1 {
   font-family: var(--font-sk-modernist);
   font-weight: 700;
   font-size: 32px;
@@ -6,7 +6,7 @@
   letter-spacing: 0.01em;
 }
 
-@mixin text-h2 {
+@mixin h2 {
   font-family: var(--font-sk-modernist);
   font-weight: 700;
   font-size: 24px;
