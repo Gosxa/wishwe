@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "user.apps.UserConfig",
     "event.apps.EventConfig",
-    "storages"
+    "storages",
+    "notifications",
 ]
 
 MIDDLEWARE = [
