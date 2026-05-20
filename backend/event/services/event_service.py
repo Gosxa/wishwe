@@ -15,6 +15,14 @@ from event.models import (
 from notifications.services.notification_service import NotificationService
 from user.models import FriendshipStatus, Friendship
 
+IMPORTANT_PLAN_FIELDS = {
+    "event_date",
+    "event_time",
+    "location",
+    "min_participants",
+    "max_participants",
+}
+
 
 class EventService:
     @staticmethod
@@ -29,6 +37,18 @@ class EventService:
         )
 
         return aware_event_datetime + timedelta(minutes=5)
+
+    @staticmethod
+    def has_important_plan_changes(event, validated_data):
+        for field in IMPORTANT_PLAN_FIELDS:
+            if field in validated_data:
+                old_value = getattr(event, field)
+                new_value = validated_data[field]
+
+                if old_value != new_value:
+                    return True
+
+        return False
 
     @staticmethod
     @transaction.atomic
@@ -146,10 +166,28 @@ class EventService:
     @transaction.atomic
     def update_plan(*, event, validated_data):
         EventService._validate_plan_event(event)
+
+        should_notify = EventService.has_important_plan_changes(
+            event,
+            validated_data,
+        )
+
         for field, value in validated_data.items():
             setattr(event, field, value)
 
         event.save()
+
+        if should_notify:
+            event_participants = EventParticipant.objects.filter(
+                event=event,
+                status=ParticipationStatus.JOINED,
+            ).select_related("user").exclude(user=event.creator)
+            for participant in event_participants:
+                NotificationService.create_event_updated_notification(
+                    event=event,
+                    recipient=participant.user,
+                    creator=event.creator,
+                )
 
         return event
 
