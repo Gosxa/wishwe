@@ -11,9 +11,11 @@ class NotificationType(models.TextChoices):
 
     JOINED_EVENT = "joined_event", "Joined Event"
     INTERESTED_EVENT = "interested_event", "Interested Event"
-    EVENT_CONFIRM_REMINDER = (
-        "event_confirm_reminder",
-        "Event Confirm Reminder",
+
+    EVENT_PLANNED = "event_planned", "Event Planned"
+    EVENT_START_REMINDER = (
+        "event_start_reminder",
+        "Event Start Reminder",
     )
 
     EVENT_UPDATED = "event_updated", "Event Updated"
