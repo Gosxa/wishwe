@@ -9,12 +9,10 @@ services:
       - /var/www/app/backend/.env
     volumes:
       - static_files:/app/staticfiles
-      - media_files:/app/media
     expose:
       - "8000"
     networks:
       - backend
-    # Run migrations before starting gunicorn
     command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn wishwe_api.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120 --worker-tmp-dir /tmp --access-logfile - --error-logfile -"
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import socket; s=socket.socket(); s.connect((\"localhost\", 8000))'"]
@@ -23,32 +21,49 @@ services:
       retries: 3
       start_period: 40s
 
-  nginx:
+  nextjs:
     build:
       context: ../../frontend
-      dockerfile: ../infra/docker/nginx/Dockerfile
+      dockerfile: ../infra/docker/frontend/Dockerfile
+    restart: unless-stopped
+    expose:
+      - "3000"
+    networks:
+      - backend
+    env_file:
+      - /var/www/app/frontend/.env
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  nginx:
+    image: nginx:1.27-alpine
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - static_files:/app/staticfiles:ro
-      - media_files:/app/media:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
     depends_on:
       django:
         condition: service_healthy
+      nextjs:
+        condition: service_healthy
     networks:
       - backend
 
   certbot:
     image: certbot/certbot:latest
+    restart: unless-stopped
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    # Renew certificates if due (run by cron, see below)
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
 
   netdata:
@@ -81,13 +96,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /run/dbus:/run/dbus:ro
 
-
 volumes:
   netdataconfig:
   netdatalib:
   netdatacache:
   static_files:
-  media_files:
 
 networks:
   backend:
