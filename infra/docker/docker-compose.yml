@@ -15,16 +15,9 @@ services:
     networks:
       - backend
     # Run migrations before starting gunicorn
-    command: >
-      sh -c "python manage.py migrate --noinput &&
-             gunicorn config.wsgi:application
-             --bind 0.0.0.0:8000
-             --workers 3
-             --timeout 120
-             --access-logfile -
-             --error-logfile -"
+    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn wishwe_api.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120 --worker-tmp-dir /tmp --access-logfile - --error-logfile -"
     healthcheck:
-      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://localhost:8000/health/\")'"]
+      test: ["CMD-SHELL", "python -c 'import socket; s=socket.socket(); s.connect((\"localhost\", 8000))'"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -58,7 +51,41 @@ services:
     # Renew certificates if due (run by cron, see below)
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done'"
 
+  netdata:
+    image: netdata/netdata
+    container_name: netdata
+    pid: host
+    network_mode: host
+    restart: unless-stopped
+    cap_add:
+      - SYS_PTRACE
+      - SYS_ADMIN
+    security_opt:
+      - apparmor:unconfined
+    environment:
+      - NETDATA_CLAIM_TOKEN=v91OQXdvdasmc1pLOVr7T7zgqeNN-78oNwLCspFc9Av_3V0niUEKj03Loz7e1w5css01LiNJ2i0wLkU_jXXsRENP-7yborJ9TXGAxcROZTxuAGttstHMC_SRXh0ZAYFUaOdK4hc
+      - NETDATA_CLAIM_URL=https://app.netdata.cloud
+      - NETDATA_CLAIM_ROOMS=44e7a3bd-0768-495b-a7e4-97ec1f95a39b
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /:/host/root:ro,rslave
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /etc/localtime:/etc/localtime:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/log:/host/var/log:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /run/dbus:/run/dbus:ro
+
+
 volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
   static_files:
   media_files:
 

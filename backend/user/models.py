@@ -125,7 +125,9 @@ class Profile(models.Model):
         upload_to=upload_profile_picture, null=True, blank=True
     )
     updated_at = models.DateTimeField(auto_now=True)
-    gender = models.CharField(max_length=20, choices=GenderChoices.choices)
+    gender = models.CharField(
+        max_length=20, null=True, blank=True, choices=GenderChoices.choices
+    )
     is_onboarded = models.BooleanField(default=False)
 
     def __str__(self):
@@ -190,7 +192,6 @@ class FriendInvite(models.Model):
     )
     token = models.UUIDField(default=uuid.uuid4, unique=True)
 
-    is_used = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
 
