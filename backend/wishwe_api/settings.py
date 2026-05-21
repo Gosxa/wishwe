@@ -42,11 +42,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "debug_toolbar",
-<<<<<<< HEAD
-=======
     "drf_spectacular",
     "django_celery_beat",
->>>>>>> develop
     "user.apps.UserConfig",
     "event.apps.EventConfig",
     "storages",
