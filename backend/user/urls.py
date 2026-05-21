@@ -13,13 +13,10 @@ from user.views import (
     FriendshipViewSet,
     UserViewSet,
     InviteViewSet,
-<<<<<<< HEAD
     CustomTokenObtainPairView,
-=======
     CookieTokenObtainPairView,
     CookieTokenRefreshView,
     logout_user,
->>>>>>> develop
 )
 
 
