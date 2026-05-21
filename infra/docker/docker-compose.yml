@@ -96,6 +96,44 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /run/dbus:/run/dbus:ro
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - backend
+
+  celery_worker:
+    build:
+      context: ../../backend
+      dockerfile: ../infra/docker/django/Dockerfile
+    command: celery -A wishwe_api worker -l info
+    restart: unless-stopped
+    depends_on:
+      django:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - /var/www/app/backend/.env
+    networks:
+      - backend
+
+  celery_beat:
+    build:
+      context: ../../backend
+      dockerfile: ../infra/docker/django/Dockerfile
+    command: celery -A wishwe_api beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    restart: unless-stopped
+    depends_on:
+      django:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    env_file:
+      - /var/www/app/backend/.env
+    networks:
+      - backend
+
 volumes:
   netdataconfig:
   netdatalib:
