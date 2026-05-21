@@ -1,5 +1,7 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 from notifications.models import Notification
 from notifications.serializers import NotificationSerializer
@@ -19,3 +21,22 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         ).order_by("-created_at")
 
         return queryset
+
+    @action(detail=True, methods=["post"])
+    def mark_as_read(self, request, pk=None):
+        notification = self.get_object()
+        notification.is_read = True
+        notification.save()
+
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["post"])
+    def read_all(self, request):
+        updated_count = self.get_queryset().filter(
+            is_read=False
+        ).update(is_read=True)
+
+        return Response(
+            {"updated": updated_count},
+            status=status.HTTP_200_OK,
+        )
