@@ -1,0 +1,111 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+$ERR_SHADOW:
+  inset 0 0 0 1px clr.$err,
+  0 0 8px 0 rgba(#ffb3b3, 0.7);
+
+$SUCESS_SHADOW:
+  inset 0 0 0 1px clr.$success,
+  0 0 8px 0 rgba(clr.$success, 0.2);
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  @include typo.text-body;
+  color: clr.$ns-900;
+
+  > label {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    > svg {
+      color: clr.$err;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.input {
+  display: flex;
+  outline: none;
+  border-radius: 8px;
+  border: none;
+  padding: 9px 16px;
+  color: clr.$ns-900;
+  transition: all 0.3s ease;
+  background-color: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+
+  &::placeholder {
+    color: clr.$ns-300;
+  }
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+
+  &:focus-visible {
+    box-shadow: inset 0 0 0 1px clr.$prm;
+
+    &::placeholder {
+      color: clr.$ns-900;
+    }
+  }
+
+  &:disabled {
+    box-shadow: inset 0 0 0 1px clr.$ns-100;
+
+    &::placeholder {
+      color: clr.$ns-100;
+    }
+  }
+
+  &:not(:placeholder-shown) {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+}
+
+.inputError {
+  box-shadow: $ERR_SHADOW;
+
+  &:not(:placeholder-shown),
+  &:hover,
+  &:focus-visible {
+    box-shadow: $ERR_SHADOW;
+  }
+}
+
+.inputSuccess {
+  box-shadow: $SUCESS_SHADOW;
+
+  &:not(:placeholder-shown),
+  &:hover,
+  &:focus-visible {
+    box-shadow: $SUCESS_SHADOW;
+  }
+}
+
+.message {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+
+  @include typo.text-caption;
+}
+
+.messageHelper {
+  color: clr.$ns-500;
+}
+
+.messageError {
+  color: clr.$err;
+}
+
+.messageSuccess {
+  color: clr.$success;
+}

@@ -1,0 +1,48 @@
+@mixin h1 {
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 38px;
+  letter-spacing: 0.01em;
+}
+
+@mixin h2 {
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 29px;
+  letter-spacing: 0.01em;
+}
+
+@mixin text-accent {
+  font-family: var(--font-instrument-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: 0;
+}
+
+@mixin text-button {
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 19px;
+  letter-spacing: 0.02em;
+}
+
+@mixin text-body {
+  font-family: var(--font-sk-modernist);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 160%;
+  letter-spacing: 0;
+}
+
+@mixin text-caption {
+  font-family: var(--font-sk-modernist);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+}
