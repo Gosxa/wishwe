@@ -53,3 +53,11 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
             {"updated": updated_count},
             status=status.HTTP_200_OK,
         )
+
+    @action(detail=False, methods=["get"])
+    def unread_count(self, request):
+        count = self.get_queryset().filter(
+            is_read=False
+        ).count()
+
+        return Response({"count": count})
