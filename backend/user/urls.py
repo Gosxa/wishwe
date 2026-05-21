@@ -27,8 +27,8 @@ router.register("users", UserViewSet, basename="user")
 router.register("invite", InviteViewSet, basename="invite")
 
 urlpatterns = [
-    path("token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
+    path("auth/token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("auth/token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("auth/logout/", logout_user, name="logout"),
     path("auth/google/", google_auth, name="google"),
     path("auth/email-start/", email_start, name="email_start"),
