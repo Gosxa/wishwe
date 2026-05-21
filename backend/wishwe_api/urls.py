@@ -10,6 +10,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/user/", include("user.urls", namespace="user")),
     path("api/event/", include("event.urls", namespace="events")),
+    path("api/notifications/", include("notifications.urls", namespace="notifications")),
     path("api/health/", health_check, name="health_check"),
     path("api/doc/", SpectacularAPIView.as_view(), name="schema"),
     path("api/doc/swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

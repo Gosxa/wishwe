@@ -100,6 +100,9 @@ class EventViewSet(
 
         return EventSerializer
 
+    def perform_destroy(self, instance):
+        EventService.delete_event(event=instance)
+
     @extend_schema(
         parameters=[
             OpenApiParameter(

@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from django.db import transaction
 from django.db.models import Q
+from django.utils.timezone import make_aware
 from rest_framework.exceptions import ValidationError
 
 from event.models import (
@@ -12,7 +13,17 @@ from event.models import (
     EventType,
     ParticipationStatus,
 )
+from notifications.services.notification_service import NotificationService
+from notifications.tasks import send_event_start_reminder_notifications
 from user.models import FriendshipStatus, Friendship
+
+IMPORTANT_PLAN_FIELDS = {
+    "event_date",
+    "event_time",
+    "location",
+    "min_participants",
+    "max_participants",
+}
 
 
 class EventService:
@@ -28,6 +39,18 @@ class EventService:
         )
 
         return aware_event_datetime + timedelta(minutes=5)
+
+    @staticmethod
+    def has_important_plan_changes(event, validated_data):
+        for field in IMPORTANT_PLAN_FIELDS:
+            if field in validated_data:
+                old_value = getattr(event, field)
+                new_value = validated_data[field]
+
+                if old_value != new_value:
+                    return True
+
+        return False
 
     @staticmethod
     @transaction.atomic
@@ -145,10 +168,28 @@ class EventService:
     @transaction.atomic
     def update_plan(*, event, validated_data):
         EventService._validate_plan_event(event)
+
+        should_notify = EventService.has_important_plan_changes(
+            event,
+            validated_data,
+        )
+
         for field, value in validated_data.items():
             setattr(event, field, value)
 
         event.save()
+
+        if should_notify:
+            event_participants = EventParticipant.objects.filter(
+                event=event,
+                status=ParticipationStatus.JOINED,
+            ).select_related("user").exclude(user=event.creator)
+            for participant in event_participants:
+                NotificationService.create_event_updated_notification(
+                    event=event,
+                    recipient=participant.user,
+                    creator=event.creator,
+                )
 
         return event
 
@@ -204,6 +245,10 @@ class EventService:
             ]
         )
 
+        NotificationService.create_joined_event_notification(
+            event=event, user=user
+        )
+
         return event
 
     @staticmethod
@@ -242,6 +287,10 @@ class EventService:
         event.interested_count += 1
         event.save(
             update_fields=["interested_count"]
+        )
+
+        NotificationService.create_interested_event_notification(
+            event=event, user=user
         )
 
         return event
@@ -322,6 +371,32 @@ class EventService:
         creator_participant.status = ParticipationStatus.JOINED
         creator_participant.save(update_fields=["status"])
 
+        event_datetime = make_aware(
+            datetime.combine(
+                event.event_date,
+                event.event_time,
+            )
+        )
+        reminder_eta = event_datetime - timedelta(hours=24)
+
+        if reminder_eta > timezone.now():
+            send_event_start_reminder_notifications.apply_async(
+                args=(event.id,),
+                eta=reminder_eta,
+            )
+
+        interested_participants = EventParticipant.objects.filter(
+            event=event,
+            status=ParticipationStatus.INTERESTED,
+        ).select_related("user")
+
+        for participant in interested_participants:
+            NotificationService.create_event_planned_notification(
+                event=event,
+                creator=event.creator,
+                recipient=participant.user,
+            )
+
         return event
 
     @staticmethod
@@ -355,3 +430,28 @@ class EventService:
         )
 
         return copied_event
+
+    @staticmethod
+    @transaction.atomic
+    def delete_event(*, event):
+        participants = (
+            EventParticipant.objects
+            .filter(
+                event=event,
+                status__in=(
+                    ParticipationStatus.JOINED,
+                    ParticipationStatus.INTERESTED,
+                )
+            )
+            .select_related("user")
+            .exclude(user=event.creator)
+        )
+
+        for participant in participants:
+            NotificationService.create_event_cancelled_notification(
+                event=event,
+                recipient=participant.user,
+                creator=event.creator,
+            )
+
+        event.delete()
