@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from common.validators import validate_image_type, validate_image_size
 from user.models import Profile, Friendship, FriendInvite
 
 
@@ -52,6 +53,13 @@ class OnboardingSerializer(serializers.ModelSerializer):
 
 
 class AvatarSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(
+        validators=[
+            validate_image_size,
+            validate_image_type,
+        ],
+        required=False,
+    )
     class Meta:
         model = Profile
         fields = ("avatar",)

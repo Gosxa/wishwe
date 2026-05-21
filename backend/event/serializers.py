@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from common.validators import validate_image_size, validate_image_type
 from event.models import (
     Category,
     EventParticipant,
@@ -81,6 +82,13 @@ class EventSerializer(serializers.ModelSerializer):
 
 
 class WishWriteSerializer(serializers.ModelSerializer):
+    cover_image = serializers.ImageField(
+        validators=[
+            validate_image_size,
+            validate_image_type,
+        ],
+        required=False,
+    )
     class Meta:
         model = Event
         fields = (
@@ -129,6 +137,13 @@ class WishWriteSerializer(serializers.ModelSerializer):
 
 
 class PlanWriteSerializer(serializers.ModelSerializer):
+    cover_image = serializers.ImageField(
+        validators=[
+            validate_image_size,
+            validate_image_type,
+        ],
+        required=False,
+    )
     class Meta:
         model = Event
         fields = (
