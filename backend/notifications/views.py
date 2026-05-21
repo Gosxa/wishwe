@@ -3,8 +3,13 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from common.pagination import DefaultPagination
 from notifications.models import Notification
 from notifications.serializers import NotificationSerializer
+
+
+class NotificationPagination(DefaultPagination):
+    page_size = 10
 
 
 class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
@@ -14,11 +19,19 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
     )
     serializer_class = NotificationSerializer
     permission_classes = (IsAuthenticated,)
+    pagination_class = NotificationPagination
 
     def get_queryset(self):
         queryset = self.queryset.filter(
             recipient=self.request.user
         ).order_by("-created_at")
+
+        is_read = self.request.query_params.get("read")
+
+        if is_read is not None:
+            queryset = queryset.filter(
+                is_read=is_read.lower() == "true"
+            )
 
         return queryset
 

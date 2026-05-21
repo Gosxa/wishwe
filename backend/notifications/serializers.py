@@ -24,6 +24,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             "creator",
             "related_object_type",
             "related_object_id",
-            "is_read"
+            "is_read",
+            "created_at",
         )
         read_only_fields = fields
