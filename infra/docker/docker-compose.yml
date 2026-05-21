@@ -19,7 +19,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   nextjs:
     build:
@@ -33,11 +33,11 @@ services:
     env_file:
       - /var/www/app/backend/.env
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
+      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 30s
+      start_period: 60s
 
   nginx:
     image: nginx:1.27-alpine
