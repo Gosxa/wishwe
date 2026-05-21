@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   width: 400px;
+  gap: 16px;
 
   > h1 {
     color: clr.$ns-900;
@@ -19,4 +20,9 @@
 
     @include tp.text-body;
   }
+}
+
+.btn {
+  margin-top: 32px;
+  @include btn.primary(0, 100%, 40px);
 }

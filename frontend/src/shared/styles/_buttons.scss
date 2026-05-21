@@ -110,3 +110,36 @@
     @include button-visual(rgba(clr.$err, 0.1), 0 0 0 1px clr.$err);
   }
 }
+
+@mixin tertiary($gap, $width, $height) {
+  @include button-base($gap, $width, $height);
+  @include button-content(clr.$prm, clr.$prm);
+
+  > span {
+    text-decoration: underline;
+  }
+
+  @include button-visual(transparent);
+
+  &:hover {
+    @include button-visual(clr.$ns-100);
+  }
+
+  &:focus-visible {
+    @include button-visual(
+      clr.$ns-50,
+      0 0 0 1px clr.$ns-200,
+      0 0 0 3px clr.$ns-50,
+      0 0 0 4px clr.$ns-200
+    );
+  }
+
+  &:active {
+    @include button-visual(#d2cfc5);
+  }
+
+  &:disabled {
+    @include button-content(clr.$ns-500, clr.$ns-500);
+    @include button-visual(clr.$ns-50);
+  }
+}
