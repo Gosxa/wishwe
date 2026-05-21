@@ -16,8 +16,6 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-RUN python manage.py collectstatic --noinput
-
 RUN addgroup --system django && adduser --system --ingroup django django \
     && mkdir -p /app/staticfiles \
     && chown -R django:django /app
