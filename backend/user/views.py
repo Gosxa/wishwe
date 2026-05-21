@@ -1,17 +1,12 @@
 import logging
-<<<<<<< HEAD
-=======
 import uuid
->>>>>>> develop
+
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
-<<<<<<< HEAD
-=======
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
->>>>>>> develop
 from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated
@@ -24,18 +19,12 @@ import requests as pyrequests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.viewsets import GenericViewSet
-<<<<<<< HEAD
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-=======
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from common.pagination import DefaultPagination
 from event.models import Event, EventStatus, EventType
 from event.serializers import EventSerializer
->>>>>>> develop
 from .models import (
     SocialAccount,
     Profile,
@@ -59,12 +48,8 @@ from .serializers import (
     UserSerializer,
     MutualFriendsSerializer,
     InviteSerializer,
-<<<<<<< HEAD
-    InviteUseSerializer
-=======
     InviteUseSerializer,
     EmailStartResponseSerializer, FriendshipRequestSerializer
->>>>>>> develop
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -73,11 +58,6 @@ from .services.invite_service import InviteService
 
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD
-=======
-logger = logging.getLogger(__name__)
-
->>>>>>> develop
 User = get_user_model()
 
 
@@ -333,11 +313,7 @@ def set_new_password(request):
     try:
         AuthService.reset_password_confirm(
             token=serializer.validated_data["token"],
-<<<<<<< HEAD
-            new_password=serializer.validated_data["new_password"]
-=======
             new_password=serializer.validated_data["new_password"],
->>>>>>> develop
         )
     except ValueError as e:
         return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -535,10 +511,7 @@ class FriendshipViewSet(
     queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
     serializer_class = FriendshipSerializer
     permission_classes = (IsAuthenticated,)
-<<<<<<< HEAD
-=======
     pagination_class = DefaultPagination
->>>>>>> develop
 
     def get_queryset(self):
         return self.queryset.filter(
@@ -552,15 +525,6 @@ class FriendshipViewSet(
 
         return Response({"detail": "Deleted"}, status=status.HTTP_204_NO_CONTENT)
 
-<<<<<<< HEAD
-    @action(detail=False, methods=["post"])
-    def send(self, request):
-        receiver_id = request.data.get("receiver_id")
-
-        FriendshipService.send_request(
-            sender=request.user,
-            receiver=User.objects.get(id=receiver_id)
-=======
     @extend_schema(
         request=FriendshipRequestSerializer,
         responses={
@@ -578,7 +542,6 @@ class FriendshipViewSet(
         FriendshipService.send_request(
             sender=request.user,
             receiver=serializer.validated_data["receiver"]
->>>>>>> develop
         )
 
         return Response(
@@ -618,9 +581,6 @@ class FriendshipViewSet(
 
     @action(detail=False, methods=["get"])
     def friends(self, request):
-<<<<<<< HEAD
-        friends = FriendshipService.get_friends(request.user)
-=======
         """Friends of request.user"""
         friends = FriendshipService.get_friends(request.user)
 
@@ -629,7 +589,6 @@ class FriendshipViewSet(
             serializer = FriendSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
->>>>>>> develop
         serializer = FriendSerializer(friends, many=True)
         return Response(serializer.data)
 
@@ -638,18 +597,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
-<<<<<<< HEAD
-=======
     pagination_class = DefaultPagination
->>>>>>> develop
 
     @action(detail=True, methods=["get"])
     def friends(self, request, pk=None):
         user = self.get_object()
-<<<<<<< HEAD
-
-        friends = FriendshipService.get_friends(user)
-=======
         friends = FriendshipService.get_friends(user)
 
         page = self.paginate_queryset(friends)
@@ -657,7 +609,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
             serializer = FriendSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
->>>>>>> develop
         serializer = FriendSerializer(friends, many=True)
 
         return Response(serializer.data)
@@ -674,8 +625,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = MutualFriendsSerializer(users, many=True)
         return Response(serializer.data)
 
-<<<<<<< HEAD
-=======
+
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -740,7 +690,6 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(serializer.data)
 
->>>>>>> develop
 
 class InviteViewSet(
     mixins.CreateModelMixin,
