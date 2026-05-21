@@ -3,6 +3,7 @@ from django.utils import timezone
 
 from django.db import transaction
 from django.db.models import Q
+from django.utils.timezone import make_aware
 from rest_framework.exceptions import ValidationError
 
 from event.models import (
@@ -13,6 +14,7 @@ from event.models import (
     ParticipationStatus,
 )
 from notifications.services.notification_service import NotificationService
+from notifications.tasks import send_event_start_reminder_notifications
 from user.models import FriendshipStatus, Friendship
 
 IMPORTANT_PLAN_FIELDS = {
@@ -368,6 +370,20 @@ class EventService:
         )
         creator_participant.status = ParticipationStatus.JOINED
         creator_participant.save(update_fields=["status"])
+
+        event_datetime = make_aware(
+            datetime.combine(
+                event.event_date,
+                event.event_time,
+            )
+        )
+        reminder_eta = event_datetime - timedelta(hours=24)
+
+        if reminder_eta > timezone.now():
+            send_event_start_reminder_notifications.apply_async(
+                args=(event.id,),
+                eta=reminder_eta,
+            )
 
         interested_participants = EventParticipant.objects.filter(
             event=event,
