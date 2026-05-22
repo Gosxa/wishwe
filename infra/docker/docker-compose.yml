@@ -33,10 +33,10 @@ services:
     env_file:
       - /var/www/app/backend/.env
     healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 3000 || exit 1"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health 2>/dev/null || wget -qO- http://localhost:3000 2>/dev/null || exit 1"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 60s
 
   nginx:
@@ -54,7 +54,7 @@ services:
       django:
         condition: service_healthy
       nextjs:
-        condition: service_healthy
+        condition: service_started
     networks:
       - backend
 

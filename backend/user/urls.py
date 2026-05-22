@@ -13,7 +13,6 @@ from user.views import (
     FriendshipViewSet,
     UserViewSet,
     InviteViewSet,
-    CustomTokenObtainPairView,
     CookieTokenObtainPairView,
     CookieTokenRefreshView,
     logout_user,
