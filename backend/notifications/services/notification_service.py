@@ -17,8 +17,8 @@ class NotificationService:
             type=NotificationType.FRIEND_REQUEST,
             title="New friend request",
             message=(
-                f"{friendship.sender.profile.username} "
-                f"sent you a friend request."
+                f"👋 {friendship.sender.profile.username} wants to connect. "
+                f"Accept to see their Wishes and start planning your next hangouts!"
             ),
             related_object_type=RelatedObjectType.FRIENDSHIP,
             related_object_id=friendship.id,
@@ -35,8 +35,8 @@ class NotificationService:
             type=NotificationType.FRIEND_REQUEST_ACCEPTED,
             title="Friend request accepted",
             message=(
-                f"{friendship.receiver.profile.username} "
-                f"accepted your friend request."
+                f"🤝You and {friendship.receiver.profile.username} are now "
+                f"friends! Time to check out what they're up to."
             ),
             related_object_type=RelatedObjectType.FRIENDSHIP,
             related_object_id=friendship.id,
@@ -54,8 +54,8 @@ class NotificationService:
             type=NotificationType.JOINED_EVENT,
             title="New plan participant",
             message=(
-                f"{user.profile.username} "
-                f"joined your plan."
+                f"🔥 {user.profile.username} just "
+                f"joined '{event.title}'. See you there!"
             ),
             related_object_type=RelatedObjectType.EVENT,
             related_object_id=event.id,
@@ -73,8 +73,8 @@ class NotificationService:
             type=NotificationType.INTERESTED_EVENT,
             title="User interested in your wish",
             message=(
-                f"{user.profile.username} "
-                f"is interested in your wish."
+                f"👀 {user.profile.username} is also down for '{event.title}'."
+                f" Time to turn this Wish into a real plan?"
             ),
             related_object_type=RelatedObjectType.EVENT,
             related_object_id=event.id,
@@ -93,8 +93,8 @@ class NotificationService:
             type=NotificationType.EVENT_UPDATED,
             title="Event updated",
             message=(
-                f"The {event.event_type} {event.title} "
-                f"has been updated."
+                f"✍️ The details for '{event.title}' just got updated."
+                f" Take a quick look to stay in the loop."
             ),
             related_object_type=RelatedObjectType.EVENT,
             related_object_id=event.id,
@@ -113,8 +113,8 @@ class NotificationService:
             type=NotificationType.EVENT_CANCELLED,
             title="Event cancelled",
             message=(
-                f"The event {event.title} "
-                f"has been cancelled."
+                f"😔 '{event.title}' is off. It happens! Perfect excuse "
+                f"to drop a new Wish for this weekend, though."
             ),
             related_object_type=RelatedObjectType.EVENT,
             related_object_id=event.id,
@@ -133,8 +133,8 @@ class NotificationService:
             type=NotificationType.EVENT_PLANNED,
             title="Wish confirmed",
             message=(
-                f"The wish {event.title} "
-                f"is now planned."
+                f"🚀 {creator.profile.username} made '{event.title}' official."
+                f" You liked this Wish — now it's time to hit 'Join'!"
             ),
             related_object_type=RelatedObjectType.EVENT,
             related_object_id=event.id,
@@ -153,8 +153,8 @@ class NotificationService:
             type=NotificationType.EVENT_START_REMINDER,
             title="Event starts soon",
             message=(
-                f"The event {event.title} "
-                f"starts in 24 hours."
+                f"⏰ Don't forget about '{event.title}' tomorrow! "
+                f"Check the plan for the exact time and location."
             ),
             related_object_type=RelatedObjectType.EVENT,
             related_object_id=event.id,
