@@ -31,7 +31,7 @@ services:
     networks:
       - backend
     env_file:
-      - /var/www/app/frontend/.env
+      - /var/www/app/backend/.env
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/ || exit 1"]
       interval: 30s
