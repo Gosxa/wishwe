@@ -6,10 +6,10 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiExample
 from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
 from google.oauth2 import id_token
@@ -18,6 +18,7 @@ from django.core.files.base import ContentFile
 import requests as pyrequests
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
+from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
@@ -725,3 +726,79 @@ class InviteViewSet(
 @api_view(["GET"])
 def health_check(request):
     return Response({"status": "ok"}, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    summary="Check username availability",
+    description=(
+        "Checks whether the provided username is available for registration."
+    ),
+    parameters=[
+        OpenApiParameter(
+            name="username",
+            type=str,
+            location=OpenApiParameter.QUERY,
+            required=True,
+            description="Username to check.",
+        ),
+    ],
+    responses={
+        200: OpenApiResponse(
+            description="Username availability status.",
+            response={
+                "type": "object",
+                "properties": {
+                    "available": {
+                        "type": "boolean",
+                        "example": True,
+                    },
+                },
+            },
+        ),
+        400: OpenApiResponse(
+            description="Validation error.",
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            "Username available",
+            value={"available": True},
+            response_only=True,
+            status_codes=["200"],
+        ),
+        OpenApiExample(
+            "Username taken",
+            value={"available": False},
+            response_only=True,
+            status_codes=["200"],
+        ),
+        OpenApiExample(
+            "Missing username",
+            value={"detail": "username is required"},
+            response_only=True,
+            status_codes=["400"],
+        ),
+    ],
+)
+class UsernameAvailabilityAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        username = request.query_params.get("username")
+
+        if not username:
+            return Response(
+                {"detail": "username is required"},
+                status=400,
+            )
+
+        if len(username) < 3:
+            return Response({"available": False})
+
+        is_taken = Profile.objects.filter(
+            username__iexact=username
+        ).exists()
+
+        return Response({
+            "available": not is_taken
+        })
