@@ -1,0 +1,43 @@
+'use client';
+
+import { useState } from 'react';
+import { SearchIcon } from '@shared/ui/icons';
+import s from '../header.module.scss';
+
+type Props = {
+  value?: string;
+  onChange?: (value: string) => void;
+  onSearch?: (q: string) => void;
+};
+
+export const SearchBar = ({ value, onChange, onSearch }: Props) => {
+  const [localValue, setLocalValue] = useState('');
+
+  const controlled = value !== undefined;
+  const current = controlled ? value : localValue;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const next = e.target.value;
+
+    if (!controlled) setLocalValue(next);
+    onChange?.(next);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') onSearch?.(current);
+  };
+
+  return (
+    <div className={s.searchBar}>
+      <SearchIcon />
+      <input
+        className={s.searchInput}
+        type="text"
+        placeholder="Search"
+        value={current}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+      />
+    </div>
+  );
+};

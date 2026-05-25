@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Cropper from 'react-easy-crop';
 import { useState, useRef } from 'react';
 import type { Area } from 'react-easy-crop';
@@ -51,7 +52,14 @@ export const AvatarCrop = ({ onChange }: Props) => {
         onClick={() => inputRef.current?.click()}
       >
         {previewUrl ? (
-          <img src={previewUrl} alt="Avatar preview" className={s.preview} />
+          <Image
+            src={previewUrl}
+            alt="Avatar preview"
+            width={120}
+            height={120}
+            unoptimized
+            className={s.preview}
+          />
         ) : (
           <Avatar />
         )}
