@@ -14,7 +14,6 @@
 
 .logoSlot {
   display: flex;
-  align-items: center;
   justify-content: center;
   grid-column: 1;
 }
@@ -57,7 +56,6 @@
 
 .searchInput {
   flex: 1;
-  display: flex;
   min-width: 0;
   border: none;
   outline: none;
@@ -89,9 +87,6 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: none;
-  background: transparent;
-  cursor: pointer;
   border-radius: 8px;
   color: clr.$ns-700;
   transition: background 0.2s ease;
@@ -99,4 +94,52 @@
   &:hover {
     background: clr.$ns-100;
   }
+}
+
+.settings {
+  position: relative;
+}
+
+.settingsMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  width: 160px;
+  padding: 12px 15px 13px;
+  border: 1px solid #858769;
+  border-radius: 10px;
+  background: clr.$ns-50;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.settingsTitle {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e6da;
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.settingsItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e6da;
+  color: clr.$ns-700;
+  font-family: var(--font-sk-modernist);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.danger {
+  color: clr.$err;
 }
