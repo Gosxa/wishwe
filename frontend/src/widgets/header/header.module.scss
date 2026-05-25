@@ -1,0 +1,102 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+
+.header {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) repeat(12, minmax(0, 1fr));
+  column-gap: 16px;
+  padding-right: var(--page-margin);
+  align-items: center;
+  height: 72px;
+  border-bottom: 1px solid clr.$ns-300;
+}
+
+.logoSlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-column: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  grid-column: 13 / -1;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  grid-column: 3 / 7;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+  color: clr.$ns-300;
+  background: clr.$ns-50;
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+
+  &:focus-within {
+    box-shadow: inset 0 0 0 1px clr.$prm;
+    color: clr.$ns-900;
+  }
+
+  &:has(.searchInput:not(:placeholder-shown)) {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+}
+
+.searchInput {
+  flex: 1;
+  display: flex;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: clr.$ns-900;
+
+  @include tp.text-body;
+
+  &::placeholder {
+    color: clr.$ns-300;
+  }
+
+  &:focus-visible::placeholder {
+    color: clr.$ns-900;
+  }
+}
+
+.createBtn {
+  @include btn.primary(8px, auto, 40px);
+  grid-column: 11 / 13;
+  width: 100%;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 8px;
+  color: clr.$ns-700;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+}

@@ -1,0 +1,45 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  grid-column: 1;
+  padding: 12px 0;
+  width: var(--sidebar-width);
+  border-right: 1px solid clr.$ns-300;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: clr.$ns-700;
+  transition: background 0.2s ease;
+  width: 100%;
+
+  &:hover {
+    background: clr.$acc-beige;
+  }
+}
+
+.active {
+  background: clr.$acc-beige;
+  color: clr.$prm;
+
+  &:hover {
+    background: clr.$acc-beige;
+  }
+}
+
+.label {
+  @include tp.text-caption;
+  color: clr.$ns-700;
+}
