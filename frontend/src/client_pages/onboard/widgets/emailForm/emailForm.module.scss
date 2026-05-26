@@ -1,0 +1,18 @@
+@use '@shared/styles/buttons' as btn;
+
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+}
+
+.btn {
+  margin-top: 32px;
+  @include btn.primary(0, 100%, 40px);
+}
+
+.back {
+  margin-top: 8px;
+  @include btn.tertiary(0, 100%, 40px);
+}

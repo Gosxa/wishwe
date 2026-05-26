@@ -5,6 +5,7 @@ export const getCroppedImg = async (
   pixelCrop: Area,
 ): Promise<string> => {
   const image = new Image();
+
   image.src = imageSrc;
 
   await new Promise<void>(resolve => {
@@ -12,6 +13,7 @@ export const getCroppedImg = async (
   });
 
   const canvas = document.createElement('canvas');
+
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 

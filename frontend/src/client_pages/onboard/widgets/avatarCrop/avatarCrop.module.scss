@@ -13,7 +13,7 @@
   height: 120px;
   border-radius: 50%;
   background-color: clr.$ns-100;
-  border: none;
+  border: 2px solid clr.$ns-300;
   cursor: pointer;
   overflow: hidden;
   display: flex;
@@ -31,6 +31,10 @@
     width: 32px;
     height: 32px;
   }
+}
+
+.avatarHasPhoto {
+  border-color: clr.$success;
 }
 
 .preview {

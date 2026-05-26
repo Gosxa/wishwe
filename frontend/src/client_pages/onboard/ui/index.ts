@@ -1,2 +1,2 @@
-export { LoginScreen } from './login_screen/LoginScreen';
-export { RegisterGoogle } from './register_google/RegisterGoogle';
+export { LoginScreen } from './loginScreen/LoginScreen';
+export { DoneScreen } from './doneScreen/DoneScreen';

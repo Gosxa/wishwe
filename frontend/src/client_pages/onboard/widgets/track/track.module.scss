@@ -1,0 +1,18 @@
+.viewport {
+  display: flex;
+
+  width: 400px;
+  height: 100%;
+  align-items: center;
+  gap: 40px;
+  margin: auto;
+  overflow-x: hidden;
+  transition: all 0.3s ease-in-out;
+}
+
+.track {
+  display: flex;
+  flex-direction: row;
+  gap: 40px;
+  transition: all 0.3s ease-in-out;
+}
