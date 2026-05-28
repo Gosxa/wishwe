@@ -1,4 +1,2 @@
-export * from './onboardConfig';
-export * from './OnboardContext';
-export * from './useOnboard';
-export * from './useOnboardDataStore';
+export * from './hooks/TrackContext';
+export * from './hooks/useOnboardDataStore';

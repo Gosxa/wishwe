@@ -10,9 +10,11 @@ $SUCESS_SHADOW:
   0 0 8px 0 rgba(clr.$success, 0.2);
 
 .wrapper {
+  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
+  padding-bottom: 20px;
   @include typo.text-body;
   color: clr.$ns-900;
 
@@ -67,45 +69,37 @@ $SUCESS_SHADOW:
   &:not(:placeholder-shown) {
     box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
-}
 
-.inputError {
-  box-shadow: $ERR_SHADOW;
-
-  &:not(:placeholder-shown),
-  &:hover,
-  &:focus-visible {
+  &.inputError {
     box-shadow: $ERR_SHADOW;
+
+    &:not(:placeholder-shown),
+    &:hover,
+    &:focus-visible {
+      box-shadow: $ERR_SHADOW;
+    }
   }
-}
 
-.inputSuccess {
-  box-shadow: $SUCESS_SHADOW;
-
-  &:not(:placeholder-shown),
-  &:hover,
-  &:focus-visible {
+  &.inputSuccess {
     box-shadow: $SUCESS_SHADOW;
+
+    &:not(:placeholder-shown),
+    &:hover,
+    &:focus-visible {
+      box-shadow: $SUCESS_SHADOW;
+    }
   }
 }
 
-.message {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-
+.helperText {
+  position: absolute;
+  bottom: 0;
+  left: 0;
   @include typo.text-caption;
-}
-
-.messageHelper {
   color: clr.$ns-500;
+  min-height: 16px;
 }
 
-.messageError {
+.helperTextError {
   color: clr.$err;
-}
-
-.messageSuccess {
-  color: clr.$success;
 }
