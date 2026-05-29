@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Q, Case, When, F, Subquery
 from rest_framework.exceptions import PermissionDenied, ValidationError
-
+from notifications.services.notification_service import NotificationService
 from user.models import Friendship, FriendshipStatus
 
 
@@ -29,11 +29,18 @@ class FriendshipService:
             existing.save()
             return existing
 
-        return Friendship.objects.create(
+
+        friendship = Friendship.objects.create(
             sender=sender,
             receiver=receiver,
             status=FriendshipStatus.PENDING
         )
+
+        NotificationService.create_friend_request_notification(
+            friendship=friendship
+        )
+
+        return friendship
 
     @staticmethod
     def accept_request(friendship: Friendship, user):
@@ -43,6 +50,10 @@ class FriendshipService:
             raise ValidationError("Request is not pending")
         friendship.status = FriendshipStatus.ACCEPTED
         friendship.save()
+
+        NotificationService.create_friend_request_accepted_notification(
+            friendship=friendship
+        )
 
     @staticmethod
     def decline_request(friendship: Friendship, user):

@@ -167,6 +167,9 @@ pyrightconfig.json
 
 
 # ---------------- DEVOPS ----------------
+
+infra/docker/certbot/
+
 # Terraform state — never commit these
 *.tfstate
 *.tfstate.*
