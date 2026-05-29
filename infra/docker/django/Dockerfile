@@ -16,13 +16,6 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-<<<<<<< HEAD
-# Collect static files
-RUN python manage.py collectstatic --noinput
-
-# Create a non-root user
-=======
->>>>>>> recovered-rebase
 RUN addgroup --system django && adduser --system --ingroup django django \
     && mkdir -p /app/staticfiles \
     && chown -R django:django /app
