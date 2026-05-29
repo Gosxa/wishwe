@@ -13,6 +13,5 @@
 }
 
 .back {
-  @include btn.tertiary(8px, auto, 40px);
-  align-self: center;
+  @include btn.tertiary(8px, 100%, 40px);
 }

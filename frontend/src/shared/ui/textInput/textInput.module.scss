@@ -10,11 +10,9 @@ $SUCESS_SHADOW:
   0 0 8px 0 rgba(clr.$success, 0.2);
 
 .wrapper {
-  position: relative;
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-bottom: 20px;
   @include typo.text-body;
   color: clr.$ns-900;
 
@@ -31,8 +29,13 @@ $SUCESS_SHADOW:
   }
 }
 
+.inputWrapper {
+  position: relative;
+}
+
 .input {
   display: flex;
+  width: 100%;
   outline: none;
   border-radius: 8px;
   border: none;
@@ -91,15 +94,3 @@ $SUCESS_SHADOW:
   }
 }
 
-.helperText {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  @include typo.text-caption;
-  color: clr.$ns-500;
-  min-height: 16px;
-}
-
-.helperTextError {
-  color: clr.$err;
-}

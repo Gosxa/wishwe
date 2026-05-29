@@ -1,12 +1,42 @@
 'use client';
 
 import { useCallback, useMemo, useRef } from 'react';
-import {
-  summon,
-  erase,
-  moveTrack,
-  ANIMATION_SPEED,
-} from '../../lib/trackActions';
+
+const ANIMATION_SPEED = 300;
+const SCREEN_PLUS_GAP = 440;
+
+type Screens = (HTMLElement | null)[];
+
+const summon = (screens: Screens, index: number) => {
+  const el = screens[index];
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display = 'flex';
+  el.removeAttribute('inert');
+};
+
+const erase = (screens: Screens, index: number) => {
+  const el = screens[index];
+
+  if (!el) {
+    return;
+  }
+
+  el.style.display = 'none';
+  el.setAttribute('inert', '');
+};
+
+const moveTrack = (track: HTMLElement | null, step: number) => {
+  if (!track) {
+    return;
+  }
+
+  // eslint-disable-next-line no-param-reassign
+  track.style.transform = `translateX(-${step * SCREEN_PLUS_GAP}px)`;
+};
 
 export const useTrack = () => {
   const stepRef = useRef(0);

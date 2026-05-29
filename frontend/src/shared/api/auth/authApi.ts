@@ -3,7 +3,7 @@ import { CheckMailRes, VerifyMailRes } from './types';
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 const authGoogle = async (idToken: string) => {
-  const res = await fetch(`${baseURL}/user/auth/google/`, {
+  const res = await fetch(`${baseURL}/user/auth/google`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: idToken }),
@@ -15,7 +15,7 @@ const authGoogle = async (idToken: string) => {
 };
 
 const sendCode = async (email: string): Promise<CheckMailRes> => {
-  const res = await fetch(`${baseURL}/user/auth/email-start/`, {
+  const res = await fetch(`${baseURL}/user/auth/email-start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email: email }),
@@ -32,7 +32,7 @@ const verifyCode = async (
   email: string,
   code: string,
 ): Promise<VerifyMailRes> => {
-  const res = await fetch(`${baseURL}/user/auth/verify-code/`, {
+  const res = await fetch(`${baseURL}/user/auth/verify-code`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, code }),
@@ -46,7 +46,7 @@ const verifyCode = async (
 };
 
 const getTokens = async (email: string, password: string) => {
-  const res = await fetch(`${baseURL}/user/auth/token/`, {
+  const res = await fetch(`${baseURL}/user/auth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -58,7 +58,7 @@ const getTokens = async (email: string, password: string) => {
 };
 
 const createPassword = async (token: string, password: string) => {
-  const res = await fetch(`${baseURL}/user/auth/set-password/`, {
+  const res = await fetch(`${baseURL}/user/auth/set-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, password }),
@@ -70,7 +70,7 @@ const createPassword = async (token: string, password: string) => {
 };
 
 const resetPassword = async (email: string): Promise<void> => {
-  const res = await fetch(`${baseURL}/user/auth/reset-password/`, {
+  const res = await fetch(`${baseURL}/user/auth/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
@@ -85,7 +85,7 @@ const setNewPassword = async (
   token: string,
   newPassword: string,
 ): Promise<void> => {
-  const res = await fetch(`${baseURL}/user/auth/set-new-password/`, {
+  const res = await fetch(`${baseURL}/user/auth/set-new-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

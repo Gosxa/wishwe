@@ -1,2 +1,2 @@
-export * from './hooks/TrackContext';
-export * from './hooks/useOnboardDataStore';
+export * from './TrackContext';
+export * from './useOnboardDataStore';

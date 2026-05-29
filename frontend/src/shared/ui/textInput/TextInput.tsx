@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { type ChangeEvent } from 'react';
 import { Asterisk } from '../icons';
+import { HelperText } from '../helperText/HelperText';
 import s from './textInput.module.scss';
 
 type Props = {
@@ -27,28 +28,33 @@ export const TextInput = ({
   helperText,
   error,
   isSuccess = false,
-}: Props) => (
-  <div className={s.wrapper}>
-    <label htmlFor={id}>
-      {label}
-      {required && <Asterisk />}
-    </label>
-    <input
-      id={id}
-      type="text"
-      placeholder={placeholder}
-      required={required}
-      value={value}
-      onChange={onChange}
-      onBlur={onBlur}
-      className={clsx(
-        s.input,
-        error && s.inputError,
-        isSuccess && s.inputSuccess,
-      )}
-    />
-    <span className={clsx(s.helperText, error && s.helperTextError)}>
-      {error ?? helperText}
-    </span>
-  </div>
-);
+}: Props) => {
+  const helperContent = error ?? helperText;
+  const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
+
+  return (
+    <div className={s.wrapper}>
+      <label htmlFor={id}>
+        {label}
+        {required && <Asterisk />}
+      </label>
+      <div className={s.inputWrapper}>
+        <input
+          id={id}
+          type="text"
+          placeholder={placeholder}
+          required={required}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          className={clsx(
+            s.input,
+            error && s.inputError,
+            isSuccess && s.inputSuccess,
+          )}
+        />
+        {helperContent && <HelperText text={helperContent} type={helperType} />}
+      </div>
+    </div>
+  );
+};
