@@ -62,7 +62,7 @@ export const useCreatePassword = () => {
 
       try {
         await api.auth.setNewPassword(verificationToken ?? '', password);
-        move.goForward(SCREEN_INDEX.PERSONAL_DATA);
+        move.goForward(SCREEN_INDEX.DONE_SCREEN);
       } catch {
         setSubmitError('Service temporarily unavailable');
       } finally {

@@ -14,8 +14,8 @@ const HELPER_TEXT = '3-30 characters. Letters, numbers, "." and "_" only.';
 
 const nicknameSchema = z
   .string()
-  .min(3, HELPER_TEXT)
-  .max(30, HELPER_TEXT)
+  .min(3, '3 characters min')
+  .max(30, '30 characters max')
   .regex(/^[a-zA-Z0-9]/, 'Cannot start with underscore or dot')
   .regex(/^[a-zA-Z0-9._]+$/, HELPER_TEXT);
 
@@ -70,7 +70,7 @@ export const usePersonalData = () => {
 
     try {
       await api.user.onBoard(nickname, firstName, lastName);
-      move.goForward(SCREEN_INDEX.PERSONAL_DATA + 1);
+      move.goForward(SCREEN_INDEX.DONE_SCREEN);
     } finally {
       setLoading(false);
     }

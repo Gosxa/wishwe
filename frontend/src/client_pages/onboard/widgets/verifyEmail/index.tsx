@@ -10,7 +10,7 @@ const SCREEN_CONFIG = {
 } as const;
 
 export const VerifyEmail = () => {
-  const { cells, submit, back, email } = useVerifyEmail();
+  const { cells, submit, back, resend, email } = useVerifyEmail();
 
   return (
     <Screen
@@ -18,7 +18,12 @@ export const VerifyEmail = () => {
       {...SCREEN_CONFIG}
       headline={`Enter the 6-digit code we sent to ${email}`}
     >
-      <VerifyEmailContent cells={cells} submit={submit} back={back} />
+      <VerifyEmailContent
+        cells={cells}
+        submit={submit}
+        back={back}
+        resend={resend}
+      />
     </Screen>
   );
 };

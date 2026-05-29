@@ -4,4 +4,5 @@ export const SCREEN_INDEX = {
   VERIFY_EMAIL: 2,
   PASSWORD_FORM: 3,
   PERSONAL_DATA: 4,
+  DONE_SCREEN: 5,
 } as const;

@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { ChevronLeft } from '@shared/ui/icons';
+import { ResendButton } from './ResendButton';
 import s from './verifyEmail.module.scss';
 
 type CellsConfig = {
@@ -26,10 +27,17 @@ type BackConfig = {
   onBack: () => void;
 };
 
+type ResendConfig = {
+  seconds: number;
+  onResend: () => void;
+  error?: string;
+};
+
 type Props = {
   cells: CellsConfig;
   submit: SubmitConfig;
   back: BackConfig;
+  resend: ResendConfig;
 };
 
 const inputParams = {
@@ -38,7 +46,7 @@ const inputParams = {
   maxLength: 1,
 } as const;
 
-export const VerifyEmailContent = ({ cells, submit, back }: Props) => (
+export const VerifyEmailContent = ({ cells, submit, back, resend }: Props) => (
   <div className={s.wrapper}>
     <div className={s.cells}>
       {cells.values.map((val, i) => (
@@ -69,5 +77,10 @@ export const VerifyEmailContent = ({ cells, submit, back }: Props) => (
       <ChevronLeft />
       <span>Change email</span>
     </button>
+    <ResendButton
+      seconds={resend.seconds}
+      onResend={resend.onResend}
+      error={resend.error}
+    />
   </div>
 );

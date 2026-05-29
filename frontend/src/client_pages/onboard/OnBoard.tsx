@@ -4,6 +4,7 @@ import { TrackProvider } from './model';
 import s from './onBoard.module.scss';
 import { Track } from './ui';
 import {
+  DoneScreen,
   EnterEmail,
   LoginScreen,
   PasswordForm,
@@ -25,6 +26,7 @@ export const OnBoard = () => {
           <VerifyEmail />
           <PasswordForm />
           <PersonalDataForm />
+          <DoneScreen />
         </Track>
       </main>
     </TrackProvider>
