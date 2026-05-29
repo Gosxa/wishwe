@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "debug_toolbar",
     "drf_spectacular",
+    "corsheaders",
     "django_celery_beat",
     "user.apps.UserConfig",
     "event.apps.EventConfig",
@@ -54,6 +55,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -198,3 +200,11 @@ AWS_S3_OBJECT_PARAMETERS = {
         "CacheControl": "max-age=2592000, immutable",
     },
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "https://wishwe.online",
+    "http://localhost:8080",
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:5173",
+]
