@@ -1,6 +1,8 @@
 export { Asterisk } from './asterisk/Asterisk';
 export * from './badge';
 export { Avatar } from './avatar/Avatar';
+export * from './eye';
+export { ChevronLeft } from './chevron/ChevronLeft';
 export { Logo } from './logo/Logo';
 export { SearchIcon } from './search/SearchIcon';
 export { Plus } from './plus/Plus';

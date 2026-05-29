@@ -1,0 +1,17 @@
+@use '@shared/styles/buttons' as btn;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 24px;
+}
+
+.continue {
+  @include btn.primary(0, 100%, 40px);
+  margin-top: 8px;
+}
+
+.back {
+  @include btn.tertiary(8px, 100%, 40px);
+}

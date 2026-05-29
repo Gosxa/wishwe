@@ -1,0 +1,41 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/colors' as clr;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 24px;
+}
+
+.googleWrapper {
+  position: relative;
+}
+
+.google {
+  @include btn.primary(0, 100%, 40px);
+}
+
+.spacer {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: clr.$ns-300;
+  }
+
+  > span {
+    @include tp.text-body;
+    color: clr.$ns-700;
+  }
+}
+
+.email {
+  @include btn.secondary(0, 100%, 40px);
+}

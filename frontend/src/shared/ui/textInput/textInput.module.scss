@@ -28,9 +28,13 @@ $SUCESS_SHADOW:
     }
   }
 }
+.inputWrapper {
+  position: relative;
+}
 
 .input {
   display: flex;
+  width: 100%;
   outline: none;
   border-radius: 8px;
   border: none;
@@ -67,45 +71,24 @@ $SUCESS_SHADOW:
   &:not(:placeholder-shown) {
     box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
-}
 
-.inputError {
-  box-shadow: $ERR_SHADOW;
-
-  &:not(:placeholder-shown),
-  &:hover,
-  &:focus-visible {
+  &.inputError {
     box-shadow: $ERR_SHADOW;
+
+    &:not(:placeholder-shown),
+    &:hover,
+    &:focus-visible {
+      box-shadow: $ERR_SHADOW;
+    }
   }
-}
 
-.inputSuccess {
-  box-shadow: $SUCESS_SHADOW;
-
-  &:not(:placeholder-shown),
-  &:hover,
-  &:focus-visible {
+  &.inputSuccess {
     box-shadow: $SUCESS_SHADOW;
+
+    &:not(:placeholder-shown),
+    &:hover,
+    &:focus-visible {
+      box-shadow: $SUCESS_SHADOW;
+    }
   }
-}
-
-.message {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-
-  @include typo.text-caption;
-}
-
-.messageHelper {
-  color: clr.$ns-500;
-}
-
-.messageError {
-  color: clr.$err;
-}
-
-.messageSuccess {
-  color: clr.$success;
 }
