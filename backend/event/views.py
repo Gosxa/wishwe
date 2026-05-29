@@ -1,3 +1,4 @@
+from django.db.models import Q
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
@@ -9,7 +10,8 @@ from event.models import (
     Category,
     Event,
     EventStatus,
-    EventType
+    EventType,
+    EventVisibility
 )
 from event.permissions import IsOwnerOrReadOnly
 from event.serializers import (
@@ -42,28 +44,43 @@ class EventViewSet(
     serializer_class = EventSerializer
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     pagination_class = DefaultPagination
-    _visible_users_ids = None
-
-    def get_visible_users_ids(self):
-        if self._visible_users_ids is None:
-            self._visible_users_ids = (
-                EventService.get_visible_users_ids(
-                    self.request.user
-                )
-            )
-
-        return self._visible_users_ids
 
     def get_queryset(self):
-        visible_users_ids = self.get_visible_users_ids()
+        visibility = self.request.query_params.get(
+            "visible"
+        )
+
+        friend_ids = EventService.get_user_friend_ids(
+            self.request.user
+        )
+
+        query_filter = Q(
+            creator_id__in=friend_ids
+        )
+
+        if visibility in (None, "all"):
+            fof_ids = EventService.get_friends_of_friends_ids(
+                self.request.user,
+                friend_ids
+            )
+
+            query_filter |= Q(
+                creator_id__in=fof_ids,
+                event_visibility=(
+                    EventVisibility.FRIENDS_OF_FRIENDS
+                ),
+            )
 
         queryset = Event.objects.filter(
-            creator_id__in=visible_users_ids,
-            status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+            query_filter,
+            status__in=(
+                EventStatus.ACTIVE,
+                EventStatus.CLOSED,
+            ),
         ).select_related(
             "creator__profile",
             "category",
-        ).order_by("-created_at")
+        )
 
         event_type = self.request.query_params.get("type")
         title = self.request.query_params.get("title")
@@ -109,6 +126,13 @@ class EventViewSet(
                 name="type",
                 type=OpenApiTypes.STR,
                 description="Type of the event to filter in the feed(plan/wish)",
+            ),
+            OpenApiParameter(
+                name="visible",
+                type=OpenApiTypes.STR,
+                description="Type of event visibility to filter in the feed(f-o-f/friends_only). "
+                            "All updates -> by default | ?visible=all /"
+                            "Friends only -> ?visible=friends",
             ),
             OpenApiParameter(
                 name="title",
