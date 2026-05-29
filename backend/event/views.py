@@ -120,6 +120,17 @@ class EventViewSet(
     def perform_destroy(self, instance):
         EventService.delete_event(event=instance)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+
+        context["friend_ids"] = (
+            EventService.get_user_friend_ids(
+                self.request.user
+            )
+        )
+
+        return context
+
     @extend_schema(
         parameters=[
             OpenApiParameter(

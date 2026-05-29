@@ -6,8 +6,10 @@ from event.models import (
     EventParticipant,
     Event,
     EventType,
-    EventStatus
+    EventStatus,
+    EventVisibility
 )
+from event.services.event_service import EventService
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -48,12 +50,14 @@ class EventSerializer(serializers.ModelSerializer):
         source="category.name",
         read_only=True,
     )
+    mutual_friend = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = (
             "id",
             "creator",
+            "mutual_friend",
             "category",
             "event_type",
             "event_visibility",
@@ -80,6 +84,34 @@ class EventSerializer(serializers.ModelSerializer):
             "event_type",
             "status",
         )
+
+    def get_mutual_friend(self, obj):
+        friend_ids = self.context["friend_ids"]
+
+        if obj.creator_id in friend_ids:
+            return None
+
+        if (
+                obj.event_visibility
+                != EventVisibility.FRIENDS_OF_FRIENDS
+        ):
+            return None
+
+        mutual_friend = (
+            EventService.get_mutual_friend(
+                friend_ids,
+                obj.creator,
+            )
+        )
+
+        if not mutual_friend:
+            return None
+
+        return {
+            "id": mutual_friend.id,
+            "username":
+                mutual_friend.profile.username,
+        }
 
 
 class WishWriteSerializer(serializers.ModelSerializer):

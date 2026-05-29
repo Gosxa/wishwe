@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django.db import transaction
@@ -139,6 +141,36 @@ class EventService:
         friends_of_friends -= friend_ids
 
         return friends_of_friends
+
+    @staticmethod
+    def get_mutual_friend(
+            user_friend_ids,
+            creator,
+    ):
+        creator_friend_ids = (
+            EventService.get_user_friend_ids(
+                creator
+            )
+        )
+
+        mutual_friend_ids = (
+                user_friend_ids
+                & creator_friend_ids
+        )
+
+        if not mutual_friend_ids:
+            return None
+
+        mutual_friend_id = min(
+            mutual_friend_ids
+        )
+
+        return (
+            get_user_model()
+            .objects
+            .select_related("profile")
+            .get(id=mutual_friend_id)
+        )
 
     @staticmethod
     def _validate_wish_event(event):
