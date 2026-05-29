@@ -29,10 +29,6 @@ $SUCESS_SHADOW:
   }
 }
 
-<<<<<<< HEAD
-.input {
-  display: flex;
-=======
 .inputWrapper {
   position: relative;
 }
@@ -40,7 +36,6 @@ $SUCESS_SHADOW:
 .input {
   display: flex;
   width: 100%;
->>>>>>> recovered-rebase
   outline: none;
   border-radius: 8px;
   border: none;
@@ -77,50 +72,6 @@ $SUCESS_SHADOW:
   &:not(:placeholder-shown) {
     box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
-<<<<<<< HEAD
-}
-
-.inputError {
-  box-shadow: $ERR_SHADOW;
-
-  &:not(:placeholder-shown),
-  &:hover,
-  &:focus-visible {
-    box-shadow: $ERR_SHADOW;
-  }
-}
-
-.inputSuccess {
-  box-shadow: $SUCESS_SHADOW;
-
-  &:not(:placeholder-shown),
-  &:hover,
-  &:focus-visible {
-    box-shadow: $SUCESS_SHADOW;
-  }
-}
-
-.message {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-
-  @include typo.text-caption;
-}
-
-.messageHelper {
-  color: clr.$ns-500;
-}
-
-.messageError {
-  color: clr.$err;
-}
-
-.messageSuccess {
-  color: clr.$success;
-}
-=======
 
   &.inputError {
     box-shadow: $ERR_SHADOW;
@@ -143,4 +94,3 @@ $SUCESS_SHADOW:
   }
 }
 
->>>>>>> recovered-rebase
