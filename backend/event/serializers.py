@@ -233,6 +233,7 @@ class ConvertWishToPlanSerializer(serializers.ModelSerializer):
         fields = (
             "event_date",
             "event_time",
+            "external_link",
             "min_participants",
             "max_participants",
         )
