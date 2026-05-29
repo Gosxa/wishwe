@@ -391,7 +391,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.filter(is_private=False)
         username = self.request.query_params.get("username")
 
         if username:
