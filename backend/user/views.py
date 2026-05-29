@@ -1,7 +1,6 @@
 import logging
 import uuid
 
-
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
@@ -55,7 +54,6 @@ from .serializers import (
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
 from .services.invite_service import InviteService
-
 
 logger = logging.getLogger(__name__)
 

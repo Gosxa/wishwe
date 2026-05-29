@@ -1,0 +1,7 @@
+export const SCREEN_INDEX = {
+  LOGIN_SCREEN: 0,
+  ENTER_EMAIL: 1,
+  VERIFY_EMAIL: 2,
+  PASSWORD_FORM: 3,
+  PERSONAL_DATA: 4,
+} as const;
