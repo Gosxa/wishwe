@@ -1,11 +1,7 @@
 import clsx from 'clsx';
 import { type ChangeEvent } from 'react';
 import { Asterisk } from '../icons';
-<<<<<<< HEAD
-import { InputMessage } from './InputMessage';
-=======
 import { HelperText } from '../helperText/HelperText';
->>>>>>> recovered-rebase
 import s from './textInput.module.scss';
 
 type Props = {
@@ -33,16 +29,8 @@ export const TextInput = ({
   error,
   isSuccess = false,
 }: Props) => {
-<<<<<<< HEAD
-  const message = error
-    ? { type: 'error' as const, text: error }
-    : helperText
-      ? { type: 'helper' as const, text: helperText }
-      : null;
-=======
   const helperContent = error ?? helperText;
   const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
->>>>>>> recovered-rebase
 
   return (
     <div className={s.wrapper}>
@@ -50,23 +38,6 @@ export const TextInput = ({
         {label}
         {required && <Asterisk />}
       </label>
-<<<<<<< HEAD
-      <input
-        id={id}
-        type="text"
-        placeholder={placeholder}
-        required={required}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        className={clsx(
-          s.input,
-          error && s.inputError,
-          isSuccess && s.inputSuccess,
-        )}
-      />
-      {message && <InputMessage type={message.type} text={message.text} />}
-=======
       <div className={s.inputWrapper}>
         <input
           id={id}
@@ -84,7 +55,6 @@ export const TextInput = ({
         />
         {helperContent && <HelperText text={helperContent} type={helperType} />}
       </div>
->>>>>>> recovered-rebase
     </div>
   );
 };
