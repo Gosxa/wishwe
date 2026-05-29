@@ -1,7 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { useOnboardDataStore, useTrackContext } from '@/client_pages/onboard/model';
+import {
+  SCREEN_INDEX,
+  useOnboardDataStore,
+  useTrackContext,
+} from '@/client_pages/onboard/model';
 
 export const useLoginScreen = () => {
   const setLoading = useOnboardDataStore(s => s.setLoading);
@@ -16,6 +20,8 @@ export const useLoginScreen = () => {
 
     try {
       await new Promise(resolve => setTimeout(resolve, 2000));
+
+      move.goForward(SCREEN_INDEX.PERSONAL_DATA);
     } catch {
       setGoogleError('Unable to connect with google servers');
     } finally {
@@ -25,7 +31,7 @@ export const useLoginScreen = () => {
 
   const onEmail = () => {
     setAuthMethod('email');
-    move.goForward(1);
+    move.goForward(SCREEN_INDEX.ENTER_EMAIL);
   };
 
   return { onGoogle, onEmail, googleError };

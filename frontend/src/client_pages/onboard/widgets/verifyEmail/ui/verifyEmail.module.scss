@@ -1,0 +1,72 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 24px;
+}
+
+.cells {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.cell {
+  width: 56px;
+  height: 40px;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 8px;
+  border: 1px solid clr.$ns-300;
+  background: clr.$ns-50;
+  text-align: center;
+  @include typo.text-body;
+  color: clr.$ns-900;
+  outline: none;
+  transition: border-color 0.3s ease;
+  caret-color: transparent;
+
+  &:hover {
+    border-color: clr.$ns-700;
+  }
+
+  &[data-filled='true'] {
+    border-color: clr.$ns-900;
+  }
+
+  &[data-error='true'] {
+    border-color: clr.$err;
+  }
+
+  &:focus {
+    border-color: clr.$prm;
+  }
+
+  &[data-error='true']:focus {
+    border-color: clr.$err;
+  }
+
+  &[data-filled='false']:focus {
+    caret-color: clr.$prm;
+  }
+}
+
+.verifyWrapper {
+  position: relative;
+  margin-top: 8px;
+}
+
+.verify {
+  @include btn.primary(0, 100%, 40px);
+}
+
+.back {
+  @include btn.tertiary(8px, 100%, 40px);
+}

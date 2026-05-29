@@ -1,0 +1,51 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 24px;
+}
+
+.avatarWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.avatarBtn {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  background: clr.$ns-100;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: clr.$ns-200;
+  }
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  > input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.submit {
+  @include btn.primary(0, 100%, 40px);
+  margin-top: 8px;
+}

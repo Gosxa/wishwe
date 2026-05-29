@@ -1,7 +1,7 @@
 import { type ChangeEvent } from 'react';
-import { TextInput } from '@shared/ui/textInput/TextInput';
+import { PasswordInput } from '@shared/ui/passwordInput/PasswordInput';
 import { ChevronLeft } from '@shared/ui/icons';
-import s from './enterEmail.module.scss';
+import s from './passwordForm.module.scss';
 
 type InputConfig = {
   value: string;
@@ -26,21 +26,15 @@ type Props = {
   back: BackConfig;
 };
 
-const INPUT_CONFIG = {
-  id: 'email',
-  label: '',
-  placeholder: 'mail@example.com',
-} as const;
-
-export const EnterEmailContent = ({ input, submit, back }: Props) => (
+export const PasswordFormContent = ({ input, submit, back }: Props) => (
   <div className={s.wrapper}>
-    <TextInput {...INPUT_CONFIG} {...input} />
-    <button className={s.continue} onClick={submit.onSubmit}>
+    <PasswordInput id="password" {...input} />
+    <button className={s.submit} onClick={submit.onSubmit}>
       <span>Continue</span>
     </button>
     <button className={s.back} onClick={back.onBack}>
       <ChevronLeft />
-      <span>Back to login</span>
+      <span>Back</span>
     </button>
   </div>
 );

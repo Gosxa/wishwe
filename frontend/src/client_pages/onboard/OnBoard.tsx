@@ -3,7 +3,13 @@
 import { TrackProvider } from './model';
 import s from './onBoard.module.scss';
 import { Track } from './ui';
-import { EnterEmail, LoginScreen } from './widgets';
+import {
+  EnterEmail,
+  LoginScreen,
+  PasswordForm,
+  PersonalDataForm,
+  VerifyEmail,
+} from './widgets';
 
 export const OnBoard = () => {
   return (
@@ -16,6 +22,9 @@ export const OnBoard = () => {
         <Track>
           <LoginScreen />
           <EnterEmail />
+          <VerifyEmail />
+          <PasswordForm />
+          <PersonalDataForm />
         </Track>
       </main>
     </TrackProvider>

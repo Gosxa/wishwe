@@ -9,7 +9,7 @@ import s from './passwordInput.module.scss';
 
 type Props = {
   id: string;
-  label: string;
+  label?: string;
   placeholder?: string;
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -37,7 +37,7 @@ export const PasswordInput = ({
 
   return (
     <div className={ts.wrapper}>
-      <label htmlFor={id}>{label}</label>
+      {label && <label htmlFor={id}>{label}</label>}
       <div className={ts.inputWrapper}>
         <div className={s.wrap}>
           <input
@@ -59,7 +59,7 @@ export const PasswordInput = ({
             onClick={() => setShow(v => !v)}
             tabIndex={-1}
           >
-            {show ? <EyeClosed /> : <EyeOpen />}
+            {show ? <EyeOpen /> : <EyeClosed />}
           </button>
         </div>
         {helperContent && <HelperText text={helperContent} type={helperType} />}

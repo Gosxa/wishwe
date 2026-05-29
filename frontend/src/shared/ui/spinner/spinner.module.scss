@@ -1,5 +1,14 @@
 @use '@shared/styles/colors' as clr;
 
+@keyframes shimmer {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg);
@@ -58,5 +67,15 @@
   font-weight: 400;
   font-size: 24px;
   line-height: 160%;
-  color: clr.$ns-700;
+  background: linear-gradient(
+    90deg,
+    clr.$ns-700 25%,
+    clr.$ns-100 50%,
+    clr.$ns-700 75%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 2s linear infinite;
 }

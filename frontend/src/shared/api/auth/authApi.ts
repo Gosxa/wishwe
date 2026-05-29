@@ -1,9 +1,9 @@
-import { CheckMailRes, VerifyMailRes } from './types';
+import { ApiError, CheckMailRes, VerifyMailRes } from './types';
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 const authGoogle = async (idToken: string) => {
-  const res = await fetch(`${baseURL}/user/auth/google`, {
+  const res = await fetch(`${baseURL}/user/auth/google/`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token: idToken }),
@@ -39,7 +39,12 @@ const verifyCode = async (
   });
 
   if (!res.ok) {
-    throw new Error('Verification failed');
+    throw new ApiError(
+      res.status,
+      res.status === 400
+        ? 'Check your code again, please'
+        : 'Service temporarily unavailable',
+    );
   }
 
   return res.json();

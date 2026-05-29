@@ -82,15 +82,63 @@ export const useTrack = () => {
     erase(screenRefs.current, index);
   }, []);
 
+  const summonScreen = useCallback((index: number) => {
+    summon(screenRefs.current, index);
+  }, []);
+
   const jumpBack = useCallback((step: number, eraseIndex: number) => {
     stepRef.current = step;
     moveTrack(VPRef.current, step);
     setTimeout(() => erase(screenRefs.current, eraseIndex), ANIMATION_SPEED);
   }, []);
 
-  const move = useMemo(
-    () => ({ goForward, goBack, start, eraseScreen, jumpBack }),
+  const revealScreen = useCallback(
+    (summonIndex: number, eraseIndex: number) => {
+      const trackEl = VPRef.current;
+
+      if (!trackEl) return;
+
+      summon(screenRefs.current, summonIndex);
+
+      const nextStep = stepRef.current + 1;
+
+      trackEl.style.transition = 'none';
+      trackEl.style.transform = `translateX(-${nextStep * SCREEN_PLUS_GAP}px)`;
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          trackEl.style.transition = `transform ${ANIMATION_SPEED}ms ease`;
+          moveTrack(trackEl, stepRef.current);
+
+          setTimeout(() => {
+            erase(screenRefs.current, eraseIndex);
+            trackEl.style.transition = '';
+          }, ANIMATION_SPEED);
+        });
+      });
+    },
     [],
+  );
+
+  const move = useMemo(
+    () => ({
+      goForward,
+      goBack,
+      start,
+      eraseScreen,
+      summonScreen,
+      jumpBack,
+      revealScreen,
+    }),
+    [
+      goForward,
+      goBack,
+      start,
+      eraseScreen,
+      summonScreen,
+      jumpBack,
+      revealScreen,
+    ],
   );
 
   return { VPRef, screenRefs, registerScreen, move };

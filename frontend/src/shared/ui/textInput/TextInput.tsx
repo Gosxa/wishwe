@@ -6,7 +6,7 @@ import s from './textInput.module.scss';
 
 type Props = {
   id: string;
-  label: string;
+  label?: string;
   placeholder: string;
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -34,10 +34,12 @@ export const TextInput = ({
 
   return (
     <div className={s.wrapper}>
-      <label htmlFor={id}>
-        {label}
-        {required && <Asterisk />}
-      </label>
+      {(label || required) && (
+        <label htmlFor={id}>
+          {label}
+          {required && <Asterisk />}
+        </label>
+      )}
       <div className={s.inputWrapper}>
         <input
           id={id}
