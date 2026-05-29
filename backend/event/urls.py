@@ -3,6 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from event.views import CategoryViewSet, EventViewSet
 
+
 router = DefaultRouter()
 router.register("category", CategoryViewSet)
 router.register("events", EventViewSet, basename="event")

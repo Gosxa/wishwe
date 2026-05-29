@@ -22,6 +22,10 @@ class EventType(models.TextChoices):
     PLAN = "plan", "Plan"
 
 
+class EventVisibility(models.TextChoices):
+    FRIENDS = "friends-only", "FRIENDS-ONLY"
+    FRIENDS_OF_FRIENDS = "f-o-f", "F-O-F"
+
 class EventStatus(models.TextChoices):
     ACTIVE = "active", "Active"
     CLOSED = "closed", "Closed"
@@ -52,6 +56,11 @@ class Event(models.Model):
     event_type = models.CharField(
         max_length=10,
         choices=EventType.choices,
+    )
+    event_visibility = models.CharField(
+        max_length=15,
+        choices=EventVisibility.choices,
+        default=EventVisibility.FRIENDS,
     )
     title = models.CharField(
         max_length=50,
