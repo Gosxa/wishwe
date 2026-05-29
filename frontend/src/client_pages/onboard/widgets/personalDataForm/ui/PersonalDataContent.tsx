@@ -50,7 +50,11 @@ export const PersonalDataContent = ({
         {avatar.url ? <img src={avatar.url} alt="avatar" /> : <Avatar />}
         <input type="file" accept="image/*" onChange={avatar.onChange} hidden />
       </label>
+      <button className={s.btnCh} onClick={() => avatar.onChange}>
+        <span>Change photo</span>
+      </button>
     </div>
+
     <TextInput
       id="nickname"
       label="Your nickname"

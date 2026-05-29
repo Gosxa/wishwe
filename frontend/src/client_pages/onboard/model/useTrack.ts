@@ -130,15 +130,7 @@ export const useTrack = () => {
       jumpBack,
       revealScreen,
     }),
-    [
-      goForward,
-      goBack,
-      start,
-      eraseScreen,
-      summonScreen,
-      jumpBack,
-      revealScreen,
-    ],
+    [],
   );
 
   return { VPRef, screenRefs, registerScreen, move };

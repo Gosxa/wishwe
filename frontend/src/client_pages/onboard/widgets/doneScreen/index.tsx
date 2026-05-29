@@ -1,4 +1,4 @@
-const conf = {
+/*const conf = {
   register: {
     h2: 'Welcome aboard, \n',
     headline:
@@ -9,6 +9,7 @@ const conf = {
     headline: 'Password updated succesfully',
   },
 };
+*/
 
 export const DoneScreen = () => {
   return <div />;
