@@ -26,6 +26,7 @@ class EventVisibility(models.TextChoices):
     FRIENDS = "friends-only", "FRIENDS-ONLY"
     FRIENDS_OF_FRIENDS = "f-o-f", "F-O-F"
 
+
 class EventStatus(models.TextChoices):
     ACTIVE = "active", "Active"
     CLOSED = "closed", "Closed"

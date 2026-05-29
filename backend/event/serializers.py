@@ -56,6 +56,7 @@ class EventSerializer(serializers.ModelSerializer):
             "creator",
             "category",
             "event_type",
+            "event_visibility",
             "status",
             "title",
             "description",
@@ -98,9 +99,9 @@ class WishWriteSerializer(serializers.ModelSerializer):
             "description",
             "cover_image",
             "location",
-            "external_link",
             "timeframe_text",
             "min_participants",
+            "event_visibility",
         )
 
     def validate(self, attrs):
@@ -158,6 +159,7 @@ class PlanWriteSerializer(serializers.ModelSerializer):
             "event_time",
             "min_participants",
             "max_participants",
+            "event_visibility",
         )
 
     def validate(self, attrs):
