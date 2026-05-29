@@ -1,19 +1,11 @@
 import logging
 import uuid
-<<<<<<< HEAD
-=======
-
->>>>>>> recovered-rebase
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q
 from drf_spectacular.types import OpenApiTypes
-<<<<<<< HEAD
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter
-=======
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiExample
->>>>>>> recovered-rebase
 from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
