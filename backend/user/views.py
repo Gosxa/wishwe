@@ -55,7 +55,6 @@ from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
 from .services.invite_service import InviteService
 
-
 logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)

@@ -1,0 +1,21 @@
+@use '@shared/styles/colors' as clr;
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: clr.$ns-50;
+}
+
+.body {
+  display: grid;
+  flex: 1;
+  grid-template-columns: var(--sidebar-width) repeat(12, minmax(0, 1fr));
+  column-gap: 16px;
+  padding-right: var(--page-margin);
+  min-width: 0;
+}
+
+.content {
+  grid-column: 2 / -1;
+}

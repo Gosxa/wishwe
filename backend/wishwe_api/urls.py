@@ -10,6 +10,7 @@ from user.views import health_check
 from user.views import health_check, UsernameAvailabilityAPIView
 >>>>>>> recovered-rebase
 
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/user/", include("user.urls", namespace="user")),

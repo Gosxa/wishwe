@@ -1,0 +1,145 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+
+.header {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) repeat(12, minmax(0, 1fr));
+  column-gap: 16px;
+  padding-right: var(--page-margin);
+  align-items: center;
+  height: 72px;
+  border-bottom: 1px solid clr.$ns-300;
+}
+
+.logoSlot {
+  display: flex;
+  justify-content: center;
+  grid-column: 1;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  grid-column: 13 / -1;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  grid-column: 3 / 7;
+  width: 100%;
+  min-width: 0;
+  padding: 9px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+  color: clr.$ns-300;
+  background: clr.$ns-50;
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+
+  &:focus-within {
+    box-shadow: inset 0 0 0 1px clr.$prm;
+    color: clr.$ns-900;
+  }
+
+  &:has(.searchInput:not(:placeholder-shown)) {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: clr.$ns-900;
+
+  @include tp.text-body;
+
+  &::placeholder {
+    color: clr.$ns-300;
+  }
+
+  &:focus-visible::placeholder {
+    color: clr.$ns-900;
+  }
+}
+
+.createBtn {
+  @include btn.primary(8px, auto, 40px);
+  grid-column: 11 / 13;
+  width: 100%;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+.iconBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  color: clr.$ns-700;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+}
+
+.settings {
+  position: relative;
+}
+
+.settingsMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  width: 160px;
+  padding: 12px 15px 13px;
+  border: 1px solid #858769;
+  border-radius: 10px;
+  background: clr.$ns-50;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.settingsTitle {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e6da;
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.settingsItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e6da;
+  color: clr.$ns-700;
+  font-family: var(--font-sk-modernist);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.danger {
+  color: clr.$err;
+}
