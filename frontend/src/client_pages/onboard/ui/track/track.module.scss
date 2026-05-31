@@ -10,7 +10,7 @@
 }
 
 .viewport {
-  width: 408px;
+  width: calc(var(--flex) + 8px);
   height: 100%;
   box-sizing: border-box;
   padding: 4px;
@@ -22,8 +22,8 @@
   height: 100%;
   flex-direction: row;
   align-items: center;
-  gap: 40px;
-  transition: transform 0.3s ease;
+  gap: var(--gap);
+  transition: transform var(--animation-speed) ease;
 
   > :first-child {
     display: flex;

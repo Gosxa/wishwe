@@ -1,6 +1,5 @@
 'use client';
 
-import { SCREEN_INDEX } from '../../model';
 import { Screen } from '../../ui';
 import { useEnterEmail } from './model/useEnterEmail';
 import { EnterEmailContent } from './ui/EnterEmailContent';
@@ -14,7 +13,7 @@ export const EnterEmail = () => {
   const { input, submit, back } = useEnterEmail();
 
   return (
-    <Screen index={SCREEN_INDEX.ENTER_EMAIL} {...SCREEN_CONFIG}>
+    <Screen {...SCREEN_CONFIG}>
       <EnterEmailContent input={input} submit={submit} back={back} />
     </Screen>
   );

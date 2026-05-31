@@ -2,20 +2,21 @@
 
 import { useState } from 'react';
 import {
-  SCREEN_INDEX,
+  SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
+  type VerifyEmailVariant,
 } from '@/client_pages/onboard/model';
 import { api } from '@/shared';
 import { useCodeInput } from './useCodeInput';
 import { useResendTimer } from './useResendTimer';
 
-export const useVerifyEmail = () => {
+export const useVerifyEmail = (variant: VerifyEmailVariant) => {
   const email = useOnboardDataStore(s => s.email);
-  const authFlow = useOnboardDataStore(s => s.authFlow);
   const setLoading = useOnboardDataStore(s => s.setLoading);
   const setVerificationToken = useOnboardDataStore(s => s.setVerificationToken);
-  const { move } = useTrackContext();
+  const setField = useOnboardDataStore(s => s.setField);
+  const { next, back } = useTrackContext();
 
   const {
     values,
@@ -47,7 +48,7 @@ export const useVerifyEmail = () => {
 
       setVerificationToken(verification_token);
       resetTimer();
-      move.goForward(SCREEN_INDEX.PASSWORD_FORM);
+      next(variant === 'reset' ? SCREEN_ID.RESET_PWD : SCREEN_ID.CREATE_PWD);
     } catch (e) {
       setSubmitError((e as Error).message);
     } finally {
@@ -60,7 +61,7 @@ export const useVerifyEmail = () => {
     setLoading(true);
 
     try {
-      if (authFlow === 'reset') {
+      if (variant === 'reset') {
         await api.auth.resetPwd(email);
       } else {
         await api.auth.sendCode(email);
@@ -76,7 +77,13 @@ export const useVerifyEmail = () => {
 
   const onBack = () => {
     resetTimer();
-    move.goBack(SCREEN_INDEX.VERIFY_EMAIL);
+
+    if (variant === 'reset') {
+      back(SCREEN_ID.LOGIN_SCREEN);
+    } else {
+      setField('email', '');
+      back(SCREEN_ID.ENTER_EMAIL);
+    }
   };
 
   return {
@@ -99,6 +106,7 @@ export const useVerifyEmail = () => {
     },
     back: {
       onBack,
+      label: variant === 'reset' ? 'Go back' : 'Change email',
     },
     email,
   };

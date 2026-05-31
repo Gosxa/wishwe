@@ -2,7 +2,7 @@
 
 import { type ChangeEvent, useState } from 'react';
 import {
-  SCREEN_INDEX,
+  SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
@@ -13,8 +13,7 @@ export const useLoginPassword = () => {
   const password = useOnboardDataStore(s => s.password);
   const setField = useOnboardDataStore(s => s.setField);
   const setLoading = useOnboardDataStore(s => s.setLoading);
-  const setAuthFlow = useOnboardDataStore(s => s.setAuthFlow);
-  const { move } = useTrackContext();
+  const { next } = useTrackContext();
 
   const [error, setError] = useState<string | undefined>();
   const [forgotError, setForgotError] = useState<string | undefined>();
@@ -57,8 +56,8 @@ export const useLoginPassword = () => {
       await api.auth.resetPwd(email);
 
       setField('password', '');
-      setAuthFlow('reset');
-      move.revealScreen(SCREEN_INDEX.VERIFY_EMAIL, SCREEN_INDEX.PASSWORD_FORM);
+
+      next(SCREEN_ID.VERIFY_RESET);
     } catch {
       setForgotError('Service temporarily unavailable');
     } finally {

@@ -25,6 +25,7 @@ type SubmitConfig = {
 
 type BackConfig = {
   onBack: () => void;
+  label: string;
 };
 
 type ResendConfig = {
@@ -75,7 +76,7 @@ export const VerifyEmailContent = ({ cells, submit, back, resend }: Props) => (
     </div>
     <button className={s.back} onClick={back.onBack}>
       <ChevronLeft />
-      <span>Change email</span>
+      <span>{back.label}</span>
     </button>
     <ResendButton
       seconds={resend.seconds}

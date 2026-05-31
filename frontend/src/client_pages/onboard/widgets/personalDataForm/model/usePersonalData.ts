@@ -4,7 +4,7 @@ import { type ChangeEvent, useState } from 'react';
 import { z } from 'zod';
 import { useValidation } from '@/features/useValidation/useValidation';
 import {
-  SCREEN_INDEX,
+  SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
@@ -27,7 +27,7 @@ export const usePersonalData = () => {
   const setField = useOnboardDataStore(s => s.setField);
   const setAvatarUrl = useOnboardDataStore(s => s.setAvatarUrl);
   const setLoading = useOnboardDataStore(s => s.setLoading);
-  const { move } = useTrackContext();
+  const { next } = useTrackContext();
 
   const [rawImageUrl, setRawImageUrl] = useState<string | null>(null);
 
@@ -70,7 +70,7 @@ export const usePersonalData = () => {
 
     try {
       await api.user.onBoard(nickname, firstName, lastName);
-      move.goForward(SCREEN_INDEX.DONE_SCREEN);
+      next(SCREEN_ID.DONE_ONBOARD);
     } finally {
       setLoading(false);
     }

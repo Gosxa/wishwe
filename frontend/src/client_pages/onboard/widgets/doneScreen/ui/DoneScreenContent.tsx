@@ -1,11 +1,12 @@
+import { type DoneScreenVariant } from '@/client_pages/onboard/model';
 import s from './doneScreen.module.scss';
 
 type Props = {
-  isReset: boolean;
+  variant: DoneScreenVariant;
 };
 
-export const DoneScreenContent = ({ isReset }: Props) => {
-  if (isReset) {
+export const DoneScreenContent = ({ variant }: Props) => {
+  if (variant === 'reset') {
     return (
       <div className={s.wrapper}>
         <a href="/feed" className={s.primary}>

@@ -2,7 +2,7 @@
 @use '@shared/styles/colors' as clr;
 
 .screen {
-  display: none;
+  display: flex;
   flex-direction: column;
   flex-shrink: 0;
   width: 400px;
