@@ -5,7 +5,7 @@ const baseURL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 const checkNickname = async (
   username: string,
 ): Promise<{ available: boolean }> => {
-  const res = await fetch(`${baseURL}/username-check/?username=${username}`, {
+  const res = await fetch(`${baseURL}/username-check/?username=${username}/`, {
     method: 'GET',
   });
 
@@ -21,7 +21,7 @@ const onBoard = async (
   firstName: string = '',
   lastName: string = '',
 ): Promise<void> => {
-  const res = await fetch(`${baseURL}/user/profile/onboarding`, {
+  const res = await fetch(`${baseURL}/user/profile/onboarding/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -37,7 +37,7 @@ const onBoard = async (
 };
 
 const changeAvatar = async (avatar: string): Promise<void> => {
-  const res = await fetch(`${baseURL}/user/profile/avatar`, {
+  const res = await fetch(`${baseURL}/user/profile/avatar/`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ avatar: avatar }),
@@ -49,7 +49,7 @@ const changeAvatar = async (avatar: string): Promise<void> => {
 };
 
 const me = async (): Promise<Profile> => {
-  const res = await fetch(`${baseURL}/user/profile/me`, {
+  const res = await fetch(`${baseURL}/user/profile/me/`, {
     method: 'GET',
   });
 
