@@ -4,6 +4,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -38,11 +39,17 @@ class AuthService:
             }
         )
 
+        html_content = render_to_string(
+            "emails/verification_email.html",
+            {"verification_code": code},
+        )
+
         send_mail(
             subject="Your verification code",
-            message=f"Your code is {code}",
+            message=f"",
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
+            html_message=html_content,
         )
 
         return code
