@@ -1,6 +1,6 @@
 import { Profile } from './types';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const baseURL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 const checkNickname = async (
   username: string,
