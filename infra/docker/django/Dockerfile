@@ -16,9 +16,11 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-RUN addgroup --system django && adduser --system --ingroup django django \
-    && mkdir -p /app/staticfiles \
-    && chown -R django:django /app
+ENV HOME=/home/django
+
+RUN addgroup --system django && adduser --system --ingroup django --home /home/django django \
+    && mkdir -p /home/django/.gunicorn \
+    && chown -R django:django /home/django /app
 
 USER django
 
