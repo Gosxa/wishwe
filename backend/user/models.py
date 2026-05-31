@@ -129,6 +129,7 @@ class Profile(models.Model):
         max_length=20, null=True, blank=True, choices=GenderChoices.choices
     )
     is_onboarded = models.BooleanField(default=False)
+    is_private = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
