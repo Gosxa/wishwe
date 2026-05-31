@@ -57,8 +57,6 @@ from .services.invite_service import InviteService
 
 logger = logging.getLogger(__name__)
 
-logger = logging.getLogger(__name__)
-
 User = get_user_model()
 
 
@@ -626,10 +624,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = MutualFriendsSerializer(users, many=True)
         return Response(serializer.data)
 
-<<<<<<< HEAD
-=======
 
->>>>>>> recovered-rebase
     @extend_schema(
         parameters=[
             OpenApiParameter(
