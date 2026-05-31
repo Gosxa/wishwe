@@ -1,6 +1,6 @@
 import { ApiError, CheckMailRes, VerifyMailRes } from './types';
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL;
+const baseURL = process.env.NEXT_PUBLIC_API_URL ?? '/api';
 
 const authGoogle = async (idToken: string) => {
   const res = await fetch(`${baseURL}/user/auth/google/`, {
