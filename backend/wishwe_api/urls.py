@@ -2,13 +2,7 @@ from debug_toolbar.toolbar import debug_toolbar_urls
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-<<<<<<< HEAD
-
-from user.views import health_check
-
-=======
 from user.views import health_check, UsernameAvailabilityAPIView
->>>>>>> recovered-rebase
 
 
 urlpatterns = [

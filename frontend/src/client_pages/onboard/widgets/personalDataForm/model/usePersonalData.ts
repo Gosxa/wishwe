@@ -4,6 +4,7 @@ import { type ChangeEvent, useState } from 'react';
 import { z } from 'zod';
 import { useValidation } from '@/features/useValidation/useValidation';
 import {
+  PersonalDataVariant,
   SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
@@ -17,9 +18,13 @@ const nicknameSchema = z
   .min(3, '3 characters min')
   .max(30, '30 characters max')
   .regex(/^[a-zA-Z0-9]/, 'Cannot start with underscore or dot')
-  .regex(/^[a-zA-Z0-9._]+$/, HELPER_TEXT);
+  .regex(/^[a-zA-Z0-9._]+$/, HELPER_TEXT)
+  .regex(/^[^A-Z]*$/, 'Nickname must be lowercase');
 
-export const usePersonalData = () => {
+export const usePersonalData = (variant: PersonalDataVariant) => {
+  const email = useOnboardDataStore(s => s.email);
+  const password = useOnboardDataStore(s => s.password);
+  const verificationToken = useOnboardDataStore(s => s.verificationToken);
   const nickname = useOnboardDataStore(s => s.nickname);
   const firstName = useOnboardDataStore(s => s.firstName);
   const lastName = useOnboardDataStore(s => s.lastName);
@@ -34,12 +39,24 @@ export const usePersonalData = () => {
   const { error, isSuccess, check, set } = useValidation(nicknameSchema);
 
   const onNicknameChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setField('nickname', e.target.value);
+    setField('nickname', e.target.value.toLowerCase());
     set.error(undefined);
   };
 
-  const onNicknameBlur = () => {
-    if (nickname) check(nickname);
+  const onNicknameBlur = async () => {
+    if (!check(nickname)) {
+      return;
+    }
+
+    try {
+      const { available } = await api.user.checkNickname(nickname);
+
+      if (!available) {
+        set.error('Nickname is already taken. Please, choose another one');
+      }
+    } catch {
+      set.error('Service temporarily unavailable');
+    }
   };
 
   const onFirstNameChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -58,18 +75,45 @@ export const usePersonalData = () => {
   };
 
   const onCropConfirm = (croppedUrl: string) => {
+    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
     setAvatarUrl(croppedUrl);
     setRawImageUrl(null);
   };
 
-  const onCropCancel = () => setRawImageUrl(null);
+  const onCropCancel = () => {
+    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
+    setRawImageUrl(null);
+  };
+
+  const onRemoveAvatar = () => {
+    setAvatarUrl(null);
+  };
 
   const onSubmit = async () => {
-    if (!check(nickname)) return;
+    const { available } = await api.user.checkNickname(nickname);
+
+    if (!check(nickname) || !available) return;
     setLoading(true);
 
     try {
+      if (variant === 'email') {
+        if (!verificationToken) {
+          return;
+        }
+
+        await api.auth.createPassword(verificationToken, password);
+      }
+
       await api.user.onBoard(nickname, firstName, lastName);
+
+      if (avatarUrl) {
+        await api.user.changeAvatar(avatarUrl);
+      }
+
+      if (variant === 'email') {
+        await api.auth.getTokens(email, password);
+      }
+
       next(SCREEN_ID.DONE_ONBOARD);
     } finally {
       setLoading(false);
@@ -83,6 +127,7 @@ export const usePersonalData = () => {
       onChange: onAvatarChange,
       onCropConfirm,
       onCropCancel,
+      onRemove: onRemoveAvatar,
     },
     nickname: {
       value: nickname,

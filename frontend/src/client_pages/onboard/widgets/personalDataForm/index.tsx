@@ -14,8 +14,8 @@ const SCREEN_CONFIG: Record<
   { h2: string; headline: string }
 > = {
   email: {
-    h2: 'Your profile',
-    headline: 'Tell us a bit about yourself.',
+    h2: 'Complete your profile',
+    headline: `Choose how you'll appear to your friends before joining the circle.`,
   },
   google: {
     h2: 'Is this you?',
@@ -24,7 +24,8 @@ const SCREEN_CONFIG: Record<
 };
 
 export const PersonalDataForm = ({ variant }: Props) => {
-  const { avatar, nickname, firstName, lastName, submit } = usePersonalData();
+  const { avatar, nickname, firstName, lastName, submit } =
+    usePersonalData(variant);
 
   return (
     <Screen {...SCREEN_CONFIG[variant]}>
