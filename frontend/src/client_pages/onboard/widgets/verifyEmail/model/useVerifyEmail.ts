@@ -2,18 +2,21 @@
 
 import { useState } from 'react';
 import {
-  SCREEN_INDEX,
+  SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
+  type VerifyEmailVariant,
 } from '@/client_pages/onboard/model';
 import { api } from '@/shared';
 import { useCodeInput } from './useCodeInput';
+import { useResendTimer } from './useResendTimer';
 
-export const useVerifyEmail = () => {
+export const useVerifyEmail = (variant: VerifyEmailVariant) => {
   const email = useOnboardDataStore(s => s.email);
   const setLoading = useOnboardDataStore(s => s.setLoading);
   const setVerificationToken = useOnboardDataStore(s => s.setVerificationToken);
-  const { move } = useTrackContext();
+  const setField = useOnboardDataStore(s => s.setField);
+  const { next, back } = useTrackContext();
 
   const {
     values,
@@ -25,6 +28,9 @@ export const useVerifyEmail = () => {
     code,
   } = useCodeInput();
   const [submitError, setSubmitError] = useState<string | undefined>();
+  const [resendError, setResendError] = useState<string | undefined>();
+
+  const { seconds, start: startTimer, reset: resetTimer } = useResendTimer();
 
   const onChange = (i: number, e: React.ChangeEvent<HTMLInputElement>) => {
     onCellChange(i, e);
@@ -41,11 +47,42 @@ export const useVerifyEmail = () => {
       const { verification_token } = await api.auth.verifyCode(email, code);
 
       setVerificationToken(verification_token);
-      move.goForward(SCREEN_INDEX.PASSWORD_FORM);
+      resetTimer();
+      next(variant === 'reset' ? SCREEN_ID.RESET_PWD : SCREEN_ID.CREATE_PWD);
     } catch (e) {
       setSubmitError((e as Error).message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const onResend = async () => {
+    setResendError(undefined);
+    setLoading(true);
+
+    try {
+      if (variant === 'reset') {
+        await api.auth.resetPwd(email);
+      } else {
+        await api.auth.sendCode(email);
+      }
+
+      startTimer();
+    } catch {
+      setResendError('Service temporarily unavailable');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onBack = () => {
+    resetTimer();
+
+    if (variant === 'reset') {
+      back(SCREEN_ID.LOGIN_SCREEN);
+    } else {
+      setField('email', '');
+      back(SCREEN_ID.ENTER_EMAIL);
     }
   };
 
@@ -62,8 +99,14 @@ export const useVerifyEmail = () => {
       onSubmit,
       error: submitError,
     },
+    resend: {
+      seconds,
+      onResend,
+      error: resendError,
+    },
     back: {
-      onBack: () => move.goBack(SCREEN_INDEX.VERIFY_EMAIL),
+      onBack,
+      label: variant === 'reset' ? 'Go back' : 'Change email',
     },
     email,
   };

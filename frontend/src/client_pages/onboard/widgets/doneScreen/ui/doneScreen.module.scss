@@ -7,11 +7,12 @@
   gap: 24px;
 }
 
-.submit {
+.primary {
   @include btn.primary(0, 100%, 40px);
-  margin-top: 8px;
+  text-decoration: none;
 }
 
-.back {
-  @include btn.tertiary(8px, 100%, 40px);
+.secondary {
+  @include btn.secondary(0, 100%, 40px);
+  text-decoration: none;
 }
