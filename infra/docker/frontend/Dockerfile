@@ -5,6 +5,9 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
+ARG GOOGLE_OAUTH_CLIENT_ID
+ENV GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID
+
 RUN npm run build
 
 FROM node:20-alpine AS runner
