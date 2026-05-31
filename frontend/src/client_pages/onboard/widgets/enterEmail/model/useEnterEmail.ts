@@ -4,7 +4,7 @@ import { type ChangeEvent } from 'react';
 import { z } from 'zod';
 import { useValidation } from '@/features/useValidation/useValidation';
 import {
-  SCREEN_INDEX,
+  SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
@@ -16,8 +16,8 @@ export const useEnterEmail = () => {
   const email = useOnboardDataStore(s => s.email);
   const setLoading = useOnboardDataStore(s => s.setLoading);
   const setField = useOnboardDataStore(s => s.setField);
-  const setAuthFlow = useOnboardDataStore(s => s.setAuthFlow);
-  const { move } = useTrackContext();
+
+  const { next, back } = useTrackContext();
   const { error, isSuccess, check, set } = useValidation(emailSchema);
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -37,12 +37,7 @@ export const useEnterEmail = () => {
     try {
       const { flow } = await api.auth.sendCode(email);
 
-      setAuthFlow(flow);
-      move.goForward(
-        flow === 'login'
-          ? SCREEN_INDEX.PASSWORD_FORM
-          : SCREEN_INDEX.VERIFY_EMAIL,
-      );
+      next(flow === 'login' ? SCREEN_ID.ENTER_PWD : SCREEN_ID.VERIFY_REGISTER);
     } catch {
       set.error('Service temporarily unavailable');
     } finally {
@@ -63,7 +58,7 @@ export const useEnterEmail = () => {
       onSubmit,
     },
     back: {
-      onBack: () => move.goBack(SCREEN_INDEX.ENTER_EMAIL),
+      onBack: () => back(SCREEN_ID.LOGIN_SCREEN),
     },
   };
 };

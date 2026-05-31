@@ -3,7 +3,6 @@
 import { Screen } from '../../ui/screen/Screen';
 import { useLoginScreen } from './model/useLoginScreen';
 import { LoginScreenContent } from './ui';
-import { SCREEN_INDEX } from '../../model';
 
 const SCREEN_CONFIG = {
   h2: 'Get together, finally',
@@ -14,7 +13,7 @@ export const LoginScreen = () => {
   const { onGoogle, onEmail, googleError } = useLoginScreen();
 
   return (
-    <Screen index={SCREEN_INDEX.LOGIN_SCREEN} {...SCREEN_CONFIG}>
+    <Screen {...SCREEN_CONFIG}>
       <LoginScreenContent
         onGoogle={onGoogle}
         onEmail={onEmail}

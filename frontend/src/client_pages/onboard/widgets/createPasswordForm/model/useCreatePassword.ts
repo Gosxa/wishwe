@@ -4,9 +4,10 @@ import { type ChangeEvent, useState } from 'react';
 import { z } from 'zod';
 import { useValidation } from '@/features/useValidation/useValidation';
 import {
-  SCREEN_INDEX,
+  SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
+  type CreatePasswordVariant,
 } from '@/client_pages/onboard/model';
 import { api } from '@/shared';
 
@@ -17,13 +18,13 @@ const passwordSchema = z
   .min(8, HELPER_TEXT)
   .regex(/(?=.*[a-zA-Z])(?=.*[0-9])/, HELPER_TEXT);
 
-export const useCreatePassword = () => {
+export const useCreatePassword = (variant: CreatePasswordVariant) => {
   const password = useOnboardDataStore(s => s.password);
-  const authFlow = useOnboardDataStore(s => s.authFlow);
+
   const verificationToken = useOnboardDataStore(s => s.verificationToken);
   const setField = useOnboardDataStore(s => s.setField);
   const setLoading = useOnboardDataStore(s => s.setLoading);
-  const { move } = useTrackContext();
+  const { next } = useTrackContext();
 
   const [confirm, setConfirm] = useState('');
   const [confirmError, setConfirmError] = useState<string | undefined>();
@@ -56,13 +57,13 @@ export const useCreatePassword = () => {
   const onSubmit = async () => {
     if (!isValid) return;
 
-    if (authFlow === 'reset') {
+    if (variant === 'reset') {
       setSubmitError(undefined);
       setLoading(true);
 
       try {
         await api.auth.setNewPassword(verificationToken ?? '', password);
-        move.goForward(SCREEN_INDEX.PERSONAL_DATA);
+        next(SCREEN_ID.DONE_RESET);
       } catch {
         setSubmitError('Service temporarily unavailable');
       } finally {
@@ -72,7 +73,7 @@ export const useCreatePassword = () => {
       return;
     }
 
-    move.goForward(SCREEN_INDEX.PERSONAL_DATA);
+    next(SCREEN_ID.PERSONAL_MAIL);
   };
 
   return {

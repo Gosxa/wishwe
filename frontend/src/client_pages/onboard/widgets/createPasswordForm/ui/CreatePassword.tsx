@@ -3,14 +3,20 @@
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { PasswordInput } from '@shared/ui/passwordInput/PasswordInput';
 import s from './createPassword.module.scss';
-import { useCreatePassword } from './useCreatePassword';
+import { useCreatePassword } from '../model';
+import { CreatePasswordVariant } from '@/client_pages/onboard/model';
 
-type Props = {
-  button: string;
+const BUTTON_CONFIG: Record<'register' | 'reset', string> = {
+  register: 'Set password',
+  reset: 'Update password',
 };
 
-export const CreatePassword = ({ button }: Props) => {
-  const { passwordInput, confirmInput, submit } = useCreatePassword();
+type Props = {
+  variant: CreatePasswordVariant;
+};
+
+export const CreatePassword = ({ variant }: Props) => {
+  const { passwordInput, confirmInput, submit } = useCreatePassword(variant);
 
   return (
     <div className={s.wrapper}>
@@ -18,7 +24,7 @@ export const CreatePassword = ({ button }: Props) => {
       <PasswordInput id="confirm-password" {...confirmInput} />
       <div className={s.submitWrapper}>
         <button className={s.submit} onClick={submit.onSubmit}>
-          <span>{button}</span>
+          <span>{BUTTON_CONFIG[variant]}</span>
         </button>
         {submit.error && <HelperText type="error" text={submit.error} />}
       </div>
