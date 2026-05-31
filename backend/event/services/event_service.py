@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from django.db import transaction
@@ -16,6 +18,7 @@ from event.models import (
 from notifications.services.notification_service import NotificationService
 from notifications.tasks import send_event_start_reminder_notifications
 from user.models import FriendshipStatus, Friendship
+
 
 IMPORTANT_PLAN_FIELDS = {
     "event_date",
@@ -106,10 +109,9 @@ class EventService:
             "receiver_id",
         )
 
-        friend_ids = set()
+        friend_ids = {user.id}
 
         for sender_id, receiver_id in friendships:
-
             if sender_id == user.id:
                 friend_ids.add(receiver_id)
             else:
@@ -118,12 +120,7 @@ class EventService:
         return friend_ids
 
     @staticmethod
-    def get_visible_users_ids(user):
-        visible_users_ids = {user.id}
-
-        friend_ids = EventService.get_user_friend_ids(user)
-        visible_users_ids.update(friend_ids)
-
+    def get_friends_of_friends_ids(user, friend_ids):
         friendships = Friendship.objects.filter(
             Q(sender_id__in=friend_ids)
             | Q(receiver_id__in=friend_ids),
@@ -133,11 +130,47 @@ class EventService:
             "receiver_id",
         )
 
-        for sender_id, receiver_id in friendships:
-            visible_users_ids.add(sender_id)
-            visible_users_ids.add(receiver_id)
+        friends_of_friends = set()
 
-        return visible_users_ids
+        for sender_id, receiver_id in friendships:
+            friends_of_friends.add(sender_id)
+            friends_of_friends.add(receiver_id)
+
+        friends_of_friends.discard(user.id)
+
+        friends_of_friends -= friend_ids
+
+        return friends_of_friends
+
+    @staticmethod
+    def get_mutual_friend(
+            user_friend_ids,
+            creator,
+    ):
+        creator_friend_ids = (
+            EventService.get_user_friend_ids(
+                creator
+            )
+        )
+
+        mutual_friend_ids = (
+                user_friend_ids
+                & creator_friend_ids
+        )
+
+        if not mutual_friend_ids:
+            return None
+
+        mutual_friend_id = min(
+            mutual_friend_ids
+        )
+
+        return (
+            get_user_model()
+            .objects
+            .select_related("profile")
+            .get(id=mutual_friend_id)
+        )
 
     @staticmethod
     def _validate_wish_event(event):

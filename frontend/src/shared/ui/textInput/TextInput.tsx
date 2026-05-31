@@ -1,12 +1,12 @@
 import clsx from 'clsx';
 import { type ChangeEvent } from 'react';
 import { Asterisk } from '../icons';
-import { InputMessage } from './InputMessage';
+import { HelperText } from '../helperText/HelperText';
 import s from './textInput.module.scss';
 
 type Props = {
   id: string;
-  label: string;
+  label?: string;
   placeholder: string;
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -29,33 +29,34 @@ export const TextInput = ({
   error,
   isSuccess = false,
 }: Props) => {
-  const message = error
-    ? { type: 'error' as const, text: error }
-    : helperText
-      ? { type: 'helper' as const, text: helperText }
-      : null;
+  const helperContent = error ?? helperText;
+  const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
 
   return (
     <div className={s.wrapper}>
-      <label htmlFor={id}>
-        {label}
-        {required && <Asterisk />}
-      </label>
-      <input
-        id={id}
-        type="text"
-        placeholder={placeholder}
-        required={required}
-        value={value}
-        onChange={onChange}
-        onBlur={onBlur}
-        className={clsx(
-          s.input,
-          error && s.inputError,
-          isSuccess && s.inputSuccess,
-        )}
-      />
-      {message && <InputMessage type={message.type} text={message.text} />}
+      {(label || required) && (
+        <label htmlFor={id}>
+          {label}
+          {required && <Asterisk />}
+        </label>
+      )}
+      <div className={s.inputWrapper}>
+        <input
+          id={id}
+          type="text"
+          placeholder={placeholder}
+          required={required}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          className={clsx(
+            s.input,
+            error && s.inputError,
+            isSuccess && s.inputSuccess,
+          )}
+        />
+        {helperContent && <HelperText text={helperContent} type={helperType} />}
+      </div>
     </div>
   );
 };
