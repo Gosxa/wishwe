@@ -5,7 +5,7 @@ import { Profile } from '@/shared/client_api/auth/types';
 const STUB_USER: Profile = {
   id: 1,
   user: 'test@example.com',
-  userName: 'testuser',
+  username: 'testuser',
   first_name: 'Test',
   last_name: 'User',
   bio: null,
@@ -14,6 +14,7 @@ const STUB_USER: Profile = {
   gender: null,
   avatar: null,
   social_media_url: null,
+  is_private: false,
 };
 
 export default function TestPage() {
