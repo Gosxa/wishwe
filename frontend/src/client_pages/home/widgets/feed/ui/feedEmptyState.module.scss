@@ -1,0 +1,44 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-top: 80px;
+}
+
+.title {
+  margin: 0;
+  color: clr.$ns-900;
+
+  @include tp.h1;
+}
+
+.subtitle {
+  max-width: 340px;
+  margin: 8px 0 0;
+  color: clr.$ns-700;
+  font-family: var(--font-sk-modernist);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.create {
+  @include btn.primary(8px, 240px, 40px);
+}
+
+.invite {
+  @include btn.secondary(0, 240px, 40px);
+}

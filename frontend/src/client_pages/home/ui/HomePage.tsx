@@ -1,12 +1,14 @@
 'use client';
 
+import { Spinner } from '@/shared';
 import { Header } from '@widgets/header';
 import { Sidebar } from '@widgets/sidebar';
-import { useUserStore } from '@/shared/store/useUserStore';
+import { useFeedEvents } from '../model/useFeedEvents';
+import { Feed } from '../widgets/feed';
 import s from './homePage.module.scss';
 
 export default function HomePage() {
-  const user = useUserStore(store => store.user);
+  const { events, isLoading } = useFeedEvents();
 
   return (
     <div className={s.shell}>
@@ -14,11 +16,7 @@ export default function HomePage() {
       <div className={s.body}>
         <Sidebar activeKey="home" />
         <main className={s.content}>
-          <pre>{JSON.stringify(user, null, 2)}</pre>
-          {user?.avatar && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.avatar} alt="avatar" width={80} height={80} />
-          )}
+          {isLoading ? <Spinner /> : <Feed events={events} />}
         </main>
       </div>
     </div>

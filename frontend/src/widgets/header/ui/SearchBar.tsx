@@ -33,7 +33,7 @@ export const SearchBar = ({ value, onChange, onSearch }: Props) => {
       <input
         className={s.searchInput}
         type="text"
-        placeholder="Search"
+        placeholder="Search events"
         value={current}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

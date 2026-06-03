@@ -72,4 +72,12 @@ export const beApi = {
         { cache: 'no-store' },
       ),
   },
+
+  event: {
+    list: (query: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${query ? `?${query}` : ''}`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+  },
 };

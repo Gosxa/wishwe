@@ -2,10 +2,14 @@
 @use '@shared/styles/typography' as tp;
 
 .sidebar {
+  position: sticky;
+  top: 72px;
+  align-self: start;
   display: flex;
   flex-direction: column;
   gap: 24px;
   grid-column: 1;
+  height: calc(100vh - 72px);
   padding: 12px 0;
   border-right: 1px solid clr.$ns-300;
 }
