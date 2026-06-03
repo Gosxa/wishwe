@@ -85,16 +85,12 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   };
 
   const onCropConfirm = (croppedUrl: string) => {
-    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
     setAvatarUrl(croppedUrl);
     setAvatarChanged(true);
     setRawImageUrl(null);
   };
 
-  const onCropCancel = () => {
-    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
-    setRawImageUrl(null);
-  };
+  const onCropCancel = () => setRawImageUrl(null);
 
   const onRemoveAvatar = () => setAvatarUrl(null);
 
