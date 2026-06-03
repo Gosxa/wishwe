@@ -27,13 +27,15 @@ services:
       dockerfile: ../infra/docker/frontend/Dockerfile
       args:
        - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
+       - NEXT_PUBLIC_BACKEND_URL=http://django:8000
+       - NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID}
     restart: unless-stopped
     expose:
       - "3000"
     networks:
       - backend
     env_file:
-      - /var/www/app/backend/.env
+      - /var/www/app/frontend/.env
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health 2>/dev/null || wget -qO- http://localhost:3000 2>/dev/null || exit 1"]
       interval: 30s
