@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { BellDot, Gear, Logo } from '@shared/ui/icons';
+import { logout } from '@/shared/client_api/auth';
 import { SearchBar } from './SearchBar';
 import { CreateButton } from './CreateButton';
 import s from '../header.module.scss';
@@ -72,6 +73,7 @@ export const Header = () => {
                         ? `${s.settingsItem} ${s.danger}`
                         : s.settingsItem
                     }
+                    onClick={item.label === 'Log out' ? logout : undefined}
                   >
                     {item.label}
                   </button>

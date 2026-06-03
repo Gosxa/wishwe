@@ -1,5 +1,4 @@
 import { type ChangeEvent, useRef } from 'react';
-import Image from 'next/image';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { Avatar } from '@shared/ui/icons';
 import { AvatarCrop } from './avatarCrop/AvatarCrop';
@@ -54,12 +53,11 @@ export const PersonalDataContent = ({
         <div className={s.avatarBtnWrap}>
           <label className={s.avatarBtn}>
             {avatar.url ? (
-              <Image
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={avatar.url}
                 alt="avatar"
-                fill
-                unoptimized
-                style={{ objectFit: 'cover' }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             ) : (
               <Avatar />

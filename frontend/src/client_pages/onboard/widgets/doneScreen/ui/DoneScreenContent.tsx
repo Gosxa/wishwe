@@ -10,7 +10,7 @@ export const DoneScreenContent = ({ variant }: Props) => {
     return (
       <div className={s.wrapper}>
         <a href="/feed" className={s.primary}>
-          To feed
+          <span>To feed</span>
         </a>
       </div>
     );
@@ -19,10 +19,10 @@ export const DoneScreenContent = ({ variant }: Props) => {
   return (
     <div className={s.wrapper}>
       <a href="/feed" className={s.primary}>
-        To feed
+        <span>To feed</span>
       </a>
       <a href="/find-friends" className={s.secondary}>
-        Find friends
+        <span>Find friends</span>
       </a>
     </div>
   );

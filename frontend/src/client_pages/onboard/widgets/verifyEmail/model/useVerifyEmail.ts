@@ -7,13 +7,18 @@ import {
   useTrackContext,
   type VerifyEmailVariant,
 } from '@/client_pages/onboard/model';
-import { api } from '@/shared';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import {
+  checkEmail,
+  verifyCode,
+  resetPassword,
+} from '@/shared/client_api/auth';
 import { useCodeInput } from './useCodeInput';
 import { useResendTimer } from './useResendTimer';
 
 export const useVerifyEmail = (variant: VerifyEmailVariant) => {
   const email = useOnboardDataStore(s => s.email);
-  const setLoading = useOnboardDataStore(s => s.setLoading);
+  const setLoading = useLoadingStore(s => s.setLoading);
   const setVerificationToken = useOnboardDataStore(s => s.setVerificationToken);
   const setField = useOnboardDataStore(s => s.setField);
   const { next, back } = useTrackContext();
@@ -44,7 +49,7 @@ export const useVerifyEmail = (variant: VerifyEmailVariant) => {
     setLoading(true);
 
     try {
-      const { verification_token } = await api.auth.verifyCode(email, code);
+      const { verification_token } = await verifyCode(email, code);
 
       setVerificationToken(verification_token);
       resetTimer();
@@ -62,9 +67,9 @@ export const useVerifyEmail = (variant: VerifyEmailVariant) => {
 
     try {
       if (variant === 'reset') {
-        await api.auth.resetPwd(email);
+        await resetPassword(email);
       } else {
-        await api.auth.sendCode(email);
+        await checkEmail(email);
       }
 
       startTimer();
