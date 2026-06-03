@@ -11,7 +11,7 @@ const schema = z.object({
   username: z.string().min(3).max(30),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: z.string().min(1).optional(),
 });
 
 export async function POST(request: NextRequest) {
