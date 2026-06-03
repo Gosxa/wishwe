@@ -92,7 +92,7 @@ export const useLoginScreen = () => {
 
       setUser(user);
 
-      if (user.userName) {
+      if (user.username) {
         router.push('/');
       } else {
         setField('firstName', user.first_name ?? '');

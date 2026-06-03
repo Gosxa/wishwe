@@ -1,7 +1,7 @@
 export type Profile = {
   id: number;
   user: string;
-  userName: string;
+  username: string | null;
   first_name: string | null;
   last_name: string | null;
   bio: string | null;
@@ -10,6 +10,7 @@ export type Profile = {
   gender: 'Male' | 'Female' | null;
   avatar: string | null;
   social_media_url: string | null;
+  is_private: boolean;
 };
 
 export type CheckEmailRes = { flow: 'login' | 'register' };
