@@ -10,7 +10,7 @@ const post = (url: string, body: unknown) =>
   });
 
 export const checkEmail = async (email: string): Promise<CheckEmailRes> => {
-  const res = await post('/api/auth/check-email', { email });
+  const res = await post('/next_api/auth/check-email', { email });
 
   if (!res.ok) throw new Error('Failed');
 
@@ -21,7 +21,7 @@ export const verifyCode = async (
   email: string,
   code: string,
 ): Promise<VerifyCodeRes> => {
-  const res = await post('/api/auth/verify-code', { email, code });
+  const res = await post('/next_api/auth/verify-code', { email, code });
 
   if (!res.ok) {
     const { error } = await res.json();
@@ -33,7 +33,7 @@ export const verifyCode = async (
 };
 
 export const loginWithGoogle = async (idToken: string): Promise<Profile> => {
-  const res = await post('/api/auth/google', { token: idToken });
+  const res = await post('/next_api/auth/google', { token: idToken });
 
   if (!res.ok) throw new Error('Google auth failed');
 
@@ -44,7 +44,7 @@ export const login = async (
   email: string,
   password: string,
 ): Promise<Profile> => {
-  const res = await post('/api/auth/login', { email, password });
+  const res = await post('/next_api/auth/login', { email, password });
 
   if (!res.ok) throw new Error('Auth failed');
 
@@ -52,7 +52,7 @@ export const login = async (
 };
 
 export const register = async (params: RegisterParams): Promise<Profile> => {
-  const res = await post('/api/auth/register', params);
+  const res = await post('/next_api/auth/register', params);
 
   if (!res.ok) throw new Error('Registration failed');
 
@@ -60,7 +60,7 @@ export const register = async (params: RegisterParams): Promise<Profile> => {
 };
 
 export const resetPassword = async (email: string): Promise<void> => {
-  const res = await post('/api/auth/reset-password', { email });
+  const res = await post('/next_api/auth/reset-password', { email });
 
   if (!res.ok) throw new Error('Reset failed');
 };
@@ -69,7 +69,7 @@ export const setNewPassword = async (
   token: string,
   newPassword: string,
 ): Promise<void> => {
-  const res = await post('/api/auth/set-new-password', {
+  const res = await post('/next_api/auth/set-new-password', {
     token,
     new_password: newPassword,
     re_new_password: newPassword,
@@ -82,7 +82,7 @@ export const logout = async (): Promise<void> => {
   const { user, clearUser } = useUserStore.getState();
 
   useLoadingStore.getState().setLoading(true);
-  await post('/api/auth/logout', { email: user?.user ?? '' });
+  await post('/next_api/auth/logout', { email: user?.user ?? '' });
   clearUser();
   window.location.href = '/onboard';
 };
