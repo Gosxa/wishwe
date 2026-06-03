@@ -2,7 +2,7 @@ export const checkUsername = async (
   username: string,
 ): Promise<{ available: boolean }> => {
   const res = await fetch(
-    `/api/user/check-username?username=${encodeURIComponent(username)}`,
+    `/next_api/user/check-username?username=${encodeURIComponent(username)}`,
   );
 
   if (!res.ok) throw new Error('Failed');
@@ -15,7 +15,7 @@ export const onBoard = async (
   firstName: string = '',
   lastName: string = '',
 ): Promise<void> => {
-  const res = await fetch('/api/user/onboard', {
+  const res = await fetch('/next_api/user/onboard', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -29,7 +29,7 @@ export const onBoard = async (
 };
 
 export const changeAvatar = async (avatar: string): Promise<void> => {
-  const res = await fetch('/api/user/avatar', {
+  const res = await fetch('/next_api/user/avatar', {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ avatar }),
