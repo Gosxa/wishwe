@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { Profile } from '@/shared/api/user/types';
+import { Profile } from '@/shared/client_api/auth/types';
 
 type UserStore = {
   user: Profile | null;

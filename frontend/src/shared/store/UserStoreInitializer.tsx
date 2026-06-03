@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 
-import { Profile } from '@/shared/api/user/types';
+import { Profile } from '@/shared/client_api/auth/types';
 import { useUserStore } from './useUserStore';
 
 type Props = {

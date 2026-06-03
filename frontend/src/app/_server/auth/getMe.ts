@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-import { Profile } from '@/shared/api/user';
+import { Profile } from '@/shared/client_api/auth/types';
 
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 

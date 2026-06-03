@@ -25,6 +25,8 @@ services:
     build:
       context: ../../frontend
       dockerfile: ../infra/docker/frontend/Dockerfile
+      args:
+       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
     restart: unless-stopped
     expose:
       - "3000"

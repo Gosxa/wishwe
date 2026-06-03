@@ -1,6 +1,6 @@
 import { HomePage } from '@/client_pages';
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
-import { Profile } from '@/shared/api/user/types';
+import { Profile } from '@/shared/client_api/auth/types';
 
 const STUB_USER: Profile = {
   id: 1,
