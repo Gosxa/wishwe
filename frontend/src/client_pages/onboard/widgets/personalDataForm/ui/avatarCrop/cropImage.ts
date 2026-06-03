@@ -6,11 +6,10 @@ export const cropImage = async (
 ): Promise<string> => {
   const image = new Image();
 
-  image.src = imageSrc;
-
   await new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
     image.onerror = () => reject(new Error('Failed to load image'));
+    image.src = imageSrc;
   });
 
   const canvas = document.createElement('canvas');

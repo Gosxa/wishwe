@@ -1,7 +1,8 @@
 'use client';
 
 import { Spinner } from '@/shared';
-import { useTrackContext, useOnboardDataStore, SCREEN_ID } from '../../model';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import { useTrackContext, SCREEN_ID } from '../../model';
 import s from './track.module.scss';
 import {
   CreatePasswordForm,
@@ -34,7 +35,7 @@ const SCREENS = {
 
 export const Track = () => {
   const { screenStack, pointer, setScreenStack } = useTrackContext();
-  const isLoading = useOnboardDataStore(s => s.isLoading);
+  const isLoading = useLoadingStore(s => s.isLoading);
 
   const onTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
     if (e.propertyName !== 'transform' || e.target !== e.currentTarget) return;

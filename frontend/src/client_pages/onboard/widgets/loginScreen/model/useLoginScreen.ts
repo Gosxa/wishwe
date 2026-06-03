@@ -7,7 +7,9 @@ import {
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
-import { api } from '@/shared';
+import { loginWithGoogle } from '@/shared/client_api/auth';
+import { useUserStore } from '@/shared/store/useUserStore';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
 const requestGoogleToken = (clientId: string): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -71,11 +73,12 @@ const requestGoogleToken = (clientId: string): Promise<string> =>
   });
 
 export const useLoginScreen = () => {
-  const setLoading = useOnboardDataStore(s => s.setLoading);
+  const setLoading = useLoadingStore(s => s.setLoading);
   const setField = useOnboardDataStore(s => s.setField);
   const setAvatarUrl = useOnboardDataStore(s => s.setAvatarUrl);
   const { next } = useTrackContext();
   const router = useRouter();
+  const setUser = useUserStore(s => s.setUser);
   const [googleError, setGoogleError] = useState('');
 
   const onGoogle = async () => {
@@ -85,15 +88,11 @@ export const useLoginScreen = () => {
     try {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID ?? '';
       const idToken = await requestGoogleToken(clientId);
+      const user = await loginWithGoogle(idToken);
 
-      await api.auth.google(idToken);
+      setUser(user);
 
-      const user = await api.user.me();
-      const username = user.userName as string | null;
-
-      if (username !== null && username !== '') {
-        // eslint-disable-next-line no-console
-        console.log(user);
+      if (user.userName) {
         router.push('/');
       } else {
         setField('firstName', user.first_name ?? '');

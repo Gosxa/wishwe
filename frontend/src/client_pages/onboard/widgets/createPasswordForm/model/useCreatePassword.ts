@@ -9,7 +9,8 @@ import {
   useTrackContext,
   type CreatePasswordVariant,
 } from '@/client_pages/onboard/model';
-import { api } from '@/shared';
+import { setNewPassword, login } from '@/shared/client_api/auth';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
 const HELPER_TEXT = 'Minimum 8 characters with letters and numbers';
 
@@ -19,11 +20,11 @@ const passwordSchema = z
   .regex(/(?=.*[a-zA-Z])(?=.*[0-9])/, HELPER_TEXT);
 
 export const useCreatePassword = (variant: CreatePasswordVariant) => {
+  const email = useOnboardDataStore(s => s.email);
   const password = useOnboardDataStore(s => s.password);
-
   const verificationToken = useOnboardDataStore(s => s.verificationToken);
   const setField = useOnboardDataStore(s => s.setField);
-  const setLoading = useOnboardDataStore(s => s.setLoading);
+  const setLoading = useLoadingStore(s => s.setLoading);
   const { next } = useTrackContext();
 
   const [confirm, setConfirm] = useState('');
@@ -62,7 +63,8 @@ export const useCreatePassword = (variant: CreatePasswordVariant) => {
       setLoading(true);
 
       try {
-        await api.auth.setNewPassword(verificationToken ?? '', password);
+        await setNewPassword(verificationToken ?? '', password);
+        await login(email, password);
         next(SCREEN_ID.DONE_RESET);
       } catch {
         setSubmitError('Service temporarily unavailable');
