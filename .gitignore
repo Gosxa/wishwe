@@ -197,3 +197,4 @@ override.tf.json
 # SSH keys
 *.pem
 *.key
+package-lock.json
