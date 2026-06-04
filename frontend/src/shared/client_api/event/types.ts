@@ -41,6 +41,7 @@ type EventListParams = {
   type?: BackendEventType;
   visible?: string;
   sort?: string;
+  title?: string;
   page?: number;
   pageSize?: number;
 };

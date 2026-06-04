@@ -1,9 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { listEvents } from '@/shared/client_api/event';
 import { toEventListParams } from './feedQuery';
 import { toFeedEvents } from './feedMapper';
+import { SEARCH_PARAM } from './useFeedSearch';
 import { useFeedToolbarStore } from './useFeedToolbarStore';
 import type { FeedEvent } from './types';
 
@@ -11,6 +13,9 @@ export const useFeedEvents = () => {
   const filter = useFeedToolbarStore(state => state.filter);
   const reach = useFeedToolbarStore(state => state.reach);
   const sort = useFeedToolbarStore(state => state.sort);
+  const hasHydrated = useFeedToolbarStore(state => state._hasHydrated);
+
+  const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
   const [events, setEvents] = useState<FeedEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +27,7 @@ export const useFeedEvents = () => {
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
 
-  const selection = `${filter}|${reach}|${sort}`;
+  const selection = `${filter}|${reach}|${sort}|${search}`;
   const [loadingSelection, setLoadingSelection] = useState(selection);
 
   if (selection !== loadingSelection) {
@@ -31,12 +36,14 @@ export const useFeedEvents = () => {
   }
 
   useEffect(() => {
+    if (!hasHydrated) return;
+
     const requestId = ++requestIdRef.current;
 
     pageRef.current = 1;
     loadingRef.current = false;
 
-    listEvents({ ...toEventListParams(filter, reach, sort), page: 1 })
+    listEvents({ ...toEventListParams(filter, reach, sort, search), page: 1 })
       .then(data => {
         if (requestId !== requestIdRef.current) return;
 
@@ -56,7 +63,7 @@ export const useFeedEvents = () => {
 
         setIsLoading(false);
       });
-  }, [filter, reach, sort]);
+  }, [filter, reach, sort, search, hasHydrated]);
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore) return;
@@ -67,7 +74,10 @@ export const useFeedEvents = () => {
 
     setIsLoadingMore(true);
 
-    listEvents({ ...toEventListParams(filter, reach, sort), page: nextPage })
+    listEvents({
+      ...toEventListParams(filter, reach, sort, search),
+      page: nextPage,
+    })
       .then(data => {
         if (requestId !== requestIdRef.current) return;
 
@@ -80,7 +90,7 @@ export const useFeedEvents = () => {
         loadingRef.current = false;
         setIsLoadingMore(false);
       });
-  }, [filter, reach, sort, hasMore]);
+  }, [filter, reach, sort, search, hasMore]);
 
   return { events, isLoading, isLoadingMore, hasMore, loadMore, error };
 };
