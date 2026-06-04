@@ -135,18 +135,29 @@ INTERNAL_IPS = ["127.0.0.1",]
 
 AWS_STORAGE_BUCKET_NAME = os.getenv("AWS_STORAGE_BUCKET_NAME")
 AWS_S3_REGION_NAME = os.getenv("AWS_S3_REGION_NAME", "eu-central-1")
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+ 
+AWS_DEFAULT_ACL = None          
+AWS_S3_FILE_OVERWRITE = False   
+AWS_QUERYSTRING_AUTH = False    
+AWS_S3_SIGNATURE_VERSION = "s3v4"
+ 
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": "max-age=604800",
+}
+ 
 AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_CLOUDFRONT_DOMAIN")
-
+ 
 STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
 STATICFILES_STORAGE = "wishwe.storage_backends.StaticStorage"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-MEDIA_URL    = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
+ 
+MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
 DEFAULT_FILE_STORAGE = "wishwe.storage_backends.MediaStorage"
 MEDIA_ROOT = BASE_DIR / "media"
 
 GOOGLE_OAUTH_CLIENT_ID = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
-
 GOOGLE_OAUTH_CLIENT_SECRET = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
 
 REST_FRAMEWORK = {
@@ -190,17 +201,6 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Europe/Kyiv"
 
-AWS_S3_SIGNATURE_VERSION = "s3v4"
-AWS_QUERYSTRING_AUTH = False
-
-AWS_S3_OBJECT_PARAMETERS = {
-    "media": {
-        "CacheControl": "max-age=604800",
-    },
-    "static": {
-        "CacheControl": "max-age=2592000, immutable",
-    },
-}
 
 CORS_ALLOWED_ORIGINS = [
     "https://wishwe.online",
