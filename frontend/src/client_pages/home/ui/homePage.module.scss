@@ -17,5 +17,7 @@
 }
 
 .content {
+  position: relative;
   grid-column: 2 / -1;
+  min-height: calc(100vh - 72px);
 }

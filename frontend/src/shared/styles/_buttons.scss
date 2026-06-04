@@ -64,10 +64,10 @@
   @include button-base($gap, $width, $height);
   @include button-content(clr.$prm, clr.$prm);
 
-  @include button-visual(clr.$ns-50, 0 0 0 1px clr.$prm);
+  @include button-visual(clr.$ns-50, inset 0 0 0 1px clr.$prm);
 
   &:hover {
-    @include button-visual(clr.$ns-100, 0 0 0 1px clr.$prm);
+    @include button-visual(clr.$ns-100, inset 0 0 0 1px clr.$prm);
   }
 
   &:focus-visible {
@@ -80,34 +80,40 @@
   }
 
   &:active {
-    @include button-visual(#d2cfc5, 0 0 0 1px clr.$prm-dark);
+    @include button-visual(#d2cfc5, inset 0 0 0 1px clr.$prm-dark);
   }
 
   &:disabled {
     @include button-content(clr.$ns-500, clr.$ns-500);
-    @include button-visual(clr.$ns-50, 0 0 0 1px clr.$ns-300);
+    @include button-visual(clr.$ns-50, inset 0 0 0 1px clr.$ns-300);
   }
+}
+
+
+@mixin sec-leave($fill) {
+  @include button-content(clr.$err, clr.$err);
+  @include button-visual(rgba(clr.$err, $fill), inset 0 0 0 1px clr.$err);
 }
 
 @mixin sec-selected {
-  @include button-visual(rgba(clr.$prm-light, 0.1), 0 0 0 1px clr.$prm);
+  @include button-content(clr.$prm, clr.$prm);
+  @include button-visual(rgba(clr.$prm-light, 0.1), inset 0 0 0 1px clr.$prm);
 
-  &:hover,
-  &:focus-visible,
-  &:active {
-    @include button-visual(rgba(clr.$prm-light, 0.1), 0 0 0 1px clr.$prm);
+  &:focus-visible {
+    @include button-visual(
+      rgba(clr.$prm-light, 0.1),
+      0 0 0 2px clr.$prm,
+      0 0 0 4px clr.$ns-50,
+      0 0 0 6px clr.$prm
+    );
   }
-}
 
-@mixin sec-leave {
-  @include button-content(clr.$err, clr.$err);
-  @include button-visual(rgba(clr.$err, 0.1), 0 0 0 1px clr.$err);
+  &:hover {
+    @include sec-leave(0.1);
+  }
 
-  &:hover,
-  &:focus-visible,
   &:active {
-    @include button-content(clr.$err, clr.$err);
-    @include button-visual(rgba(clr.$err, 0.1), 0 0 0 1px clr.$err);
+    @include sec-leave(0.25);
   }
 }
 

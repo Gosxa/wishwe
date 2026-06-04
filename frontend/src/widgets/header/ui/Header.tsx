@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BellDot, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
-import { SearchBar } from './SearchBar';
+import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
 import s from '../header.module.scss';
 
@@ -13,7 +13,11 @@ const settingsItems = [
   { label: 'Log out', variant: 'danger' },
 ] as const;
 
-export const Header = () => {
+type Props = {
+  search?: SearchBarProps;
+};
+
+export const Header = ({ search }: Props) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
@@ -46,7 +50,7 @@ export const Header = () => {
       <div className={s.logoSlot}>
         <Logo height={36} />
       </div>
-      <SearchBar />
+      <SearchBar {...search} />
       <CreateButton />
       <div className={s.actions}>
         <button className={s.iconBtn}>

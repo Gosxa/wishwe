@@ -1,24 +1,32 @@
 'use client';
 
+import { Suspense } from 'react';
 import { Header } from '@widgets/header';
 import { Sidebar } from '@widgets/sidebar';
-import { useUserStore } from '@/shared/store/useUserStore';
+import { useFeedSearch } from '@client_pages/home/model/useFeedSearch';
+import { Feed } from '../widgets/feed';
 import s from './homePage.module.scss';
 
 export default function HomePage() {
-  const user = useUserStore(store => store.user);
+  // useFeedSearch and the feed read the URL via useSearchParams, which must sit
+  // under a Suspense boundary so any page rendering HomePage can prerender.
+  return (
+    <Suspense fallback={null}>
+      <HomePageContent />
+    </Suspense>
+  );
+}
+
+function HomePageContent() {
+  const search = useFeedSearch();
 
   return (
     <div className={s.shell}>
-      <Header />
+      <Header search={search} />
       <div className={s.body}>
         <Sidebar activeKey="home" />
         <main className={s.content}>
-          <pre>{JSON.stringify(user, null, 2)}</pre>
-          {user?.avatar && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.avatar} alt="avatar" width={80} height={80} />
-          )}
+          <Feed />
         </main>
       </div>
     </div>
