@@ -1,33 +1,86 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { listEvents } from '@/shared/client_api/event';
+import { toEventListParams } from './feedQuery';
 import { toFeedEvents } from './feedMapper';
+import { useFeedToolbarStore } from './useFeedToolbarStore';
 import type { FeedEvent } from './types';
 
 export const useFeedEvents = () => {
+  const filter = useFeedToolbarStore(state => state.filter);
+  const reach = useFeedToolbarStore(state => state.reach);
+  const sort = useFeedToolbarStore(state => state.sort);
+
   const [events, setEvents] = useState<FeedEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
+  const requestIdRef = useRef(0);
+  const pageRef = useRef(1);
+  const loadingRef = useRef(false);
 
-    listEvents()
-      .then(backendEvents => {
-        if (active) setEvents(toFeedEvents(backendEvents));
+  const selection = `${filter}|${reach}|${sort}`;
+  const [loadingSelection, setLoadingSelection] = useState(selection);
+
+  if (selection !== loadingSelection) {
+    setLoadingSelection(selection);
+    setIsLoading(true);
+  }
+
+  useEffect(() => {
+    const requestId = ++requestIdRef.current;
+
+    pageRef.current = 1;
+    loadingRef.current = false;
+
+    listEvents({ ...toEventListParams(filter, reach, sort), page: 1 })
+      .then(data => {
+        if (requestId !== requestIdRef.current) return;
+
+        setEvents(toFeedEvents(data.results));
+        setHasMore(Boolean(data.next));
+        setError(null);
       })
       .catch(() => {
-        if (active) setError('Failed to load events');
+        if (requestId !== requestIdRef.current) return;
+
+        setEvents([]);
+        setHasMore(false);
+        setError('Failed to load events');
       })
       .finally(() => {
-        if (active) setIsLoading(false);
+        if (requestId !== requestIdRef.current) return;
+
+        setIsLoading(false);
       });
+  }, [filter, reach, sort]);
 
-    return () => {
-      active = false;
-    };
-  }, []);
+  const loadMore = useCallback(() => {
+    if (loadingRef.current || !hasMore) return;
 
-  return { events, isLoading, error };
+    loadingRef.current = true;
+    const requestId = requestIdRef.current;
+    const nextPage = pageRef.current + 1;
+
+    setIsLoadingMore(true);
+
+    listEvents({ ...toEventListParams(filter, reach, sort), page: nextPage })
+      .then(data => {
+        if (requestId !== requestIdRef.current) return;
+
+        pageRef.current = nextPage;
+        setEvents(prev => [...prev, ...toFeedEvents(data.results)]);
+        setHasMore(Boolean(data.next));
+      })
+      .catch(() => {})
+      .finally(() => {
+        loadingRef.current = false;
+        setIsLoadingMore(false);
+      });
+  }, [filter, reach, sort, hasMore]);
+
+  return { events, isLoading, isLoadingMore, hasMore, loadMore, error };
 };

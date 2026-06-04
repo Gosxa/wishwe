@@ -37,4 +37,18 @@ type Paginated<T> = {
   results: T[];
 };
 
-export type { BackendEvent, BackendEventType, MutualFriend, Paginated };
+type EventListParams = {
+  type?: BackendEventType;
+  visible?: string;
+  sort?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export type {
+  BackendEvent,
+  BackendEventType,
+  EventListParams,
+  MutualFriend,
+  Paginated,
+};

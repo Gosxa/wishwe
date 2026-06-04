@@ -1,34 +1,36 @@
-import { BackendEvent, Paginated } from './types';
+import { BackendEvent, EventListParams, Paginated } from './types';
 
 const PAGE_SIZE = 20;
 
-export const listEvents = async (): Promise<BackendEvent[]> => {
-  const events: BackendEvent[] = [];
-  let page: number | null = 1;
+export const listEvents = async (
+  params: EventListParams = {},
+): Promise<Paginated<BackendEvent>> => {
+  const { type, visible, sort, page = 1, pageSize = PAGE_SIZE } = params;
 
-  while (page !== null) {
-    const res = await fetch(
-      `/api/event/events?page=${page}&page_size=${PAGE_SIZE}`,
-      { method: 'GET' },
-    );
+  const query = new URLSearchParams();
 
-    if (!res.ok) {
-      throw new Error('Failed to load events');
-    }
+  query.set('page', String(page));
+  query.set('page_size', String(pageSize));
 
-    const data: Paginated<BackendEvent> = await res.json();
+  if (type) query.set('type', type);
+  if (visible) query.set('visible', visible);
+  if (sort) query.set('sort', sort);
 
-    events.push(...data.results);
+  const res = await fetch(`/api/event/events?${query.toString()}`, {
+    method: 'GET',
+  });
 
-    page = data.next ? page + 1 : null;
+  if (!res.ok) {
+    throw new Error('Failed to load events');
   }
 
-  return events;
+  return (await res.json()) as Paginated<BackendEvent>;
 };
 
 export type {
   BackendEvent,
   BackendEventType,
+  EventListParams,
   MutualFriend,
   Paginated,
 } from './types';

@@ -21,6 +21,17 @@
   grid-column: 1 / -1;
 }
 
+.statusSlot {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.sentinel {
+  height: 1px;
+}
+
 @media (max-width: 900px) {
   .feed {
     grid-template-columns: 1fr;
@@ -29,7 +40,8 @@
 
   .toolbarSlot,
   .list,
-  .emptySlot {
+  .emptySlot,
+  .statusSlot {
     grid-column: 1;
   }
 }
