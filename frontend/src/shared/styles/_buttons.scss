@@ -1,5 +1,5 @@
-@use './colors' as clr;
-@use './typography' as tp;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
 
 // TODO: clear selected + leave logic
 @mixin button-base($gap, $width, $height) {

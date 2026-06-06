@@ -95,5 +95,6 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
         event.event_type === 'wish'
           ? event.interested_count
           : event.participants_count,
+      userParticipationStatus: event.user_participation_status,
     };
   });

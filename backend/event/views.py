@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
@@ -9,6 +9,7 @@ from common.pagination import DefaultPagination
 from event.models import (
     Category,
     Event,
+    EventParticipant,
     EventStatus,
     EventType,
     EventVisibility
@@ -103,6 +104,17 @@ class EventViewSet(
         if title:
             queryset = queryset.filter(title__icontains=title)
 
+        if self.action == "list":
+            queryset = queryset.prefetch_related(
+                Prefetch(
+                    "participants",
+                    queryset=EventParticipant.objects.filter(
+                        user=self.request.user
+                    ),
+                    to_attr="current_user_participation",
+                )
+            )
+
         return queryset
 
     def get_serializer_class(self):
@@ -175,7 +187,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data,
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -192,7 +207,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data,
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_201_CREATED,
         )
 
@@ -212,7 +230,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data,
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_200_OK,
         )
 
@@ -232,7 +253,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data,
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_200_OK,
         )
 
@@ -250,7 +274,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data,
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data,
         )
 
     @action(
@@ -267,7 +294,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data
         )
 
     @action(
@@ -284,7 +314,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data
         )
 
     @action(detail=True, methods=["post"], )
@@ -302,7 +335,10 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(event).data
+            EventSerializer(
+                event,
+                context=self.get_serializer_context(),
+            ).data
         )
 
     @action(
@@ -319,6 +355,9 @@ class EventViewSet(
         )
 
         return Response(
-            EventSerializer(copied_event).data,
+            EventSerializer(
+                copied_event,
+                context=self.get_serializer_context(),
+            ).data,
             status=status.HTTP_201_CREATED,
         )
