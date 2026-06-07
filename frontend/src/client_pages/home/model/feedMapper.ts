@@ -15,23 +15,26 @@ const apiOrigin = (() => {
   }
 })();
 
-const eventImage = (coverImage: string | null) => {
-  const image = coverImage?.trim();
+const toAbsoluteMediaUrl = (path: string | null | undefined): string | null => {
+  const value = path?.trim();
 
-  if (!image) {
-    return fallbackCover;
+  if (!value) {
+    return null;
   }
 
-  if (/^(https?:)?\/\//.test(image)) {
-    return image;
+  if (/^(https?:)?\/\//.test(value)) {
+    return value;
   }
 
   if (apiOrigin) {
-    return `${apiOrigin}/${image.replace(/^\/+/, '')}`;
+    return `${apiOrigin}/${value.replace(/^\/+/, '')}`;
   }
 
-  return image;
+  return value;
 };
+
+const eventImage = (coverImage: string | null) =>
+  toAbsoluteMediaUrl(coverImage) ?? fallbackCover;
 
 const handle = (username: string | null | undefined) =>
   username ? `@${username}` : '@someone';
@@ -82,6 +85,7 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
       title: event.title,
       host: {
         username: handle(event.creator),
+        avatar: toAbsoluteMediaUrl(event.creator_avatar),
         mutualFriend: event.mutual_friend
           ? handle(event.mutual_friend.username)
           : undefined,
@@ -95,5 +99,9 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
         event.event_type === 'wish'
           ? event.interested_count
           : event.participants_count,
+      participants: (event.participants_preview ?? []).map(participant => ({
+        username: handle(participant.username),
+        avatar: toAbsoluteMediaUrl(participant.avatar),
+      })),
     };
   });

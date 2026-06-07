@@ -7,7 +7,8 @@ from event.models import (
     Event,
     EventType,
     EventStatus,
-    EventVisibility
+    EventVisibility,
+    ParticipationStatus,
 )
 from event.services.event_service import EventService
 
@@ -24,7 +25,7 @@ class EventParticipantSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     avatar = serializers.ImageField(
-        source="user.avatar",
+        source="user.profile.avatar",
         read_only=True,
     )
 
@@ -41,9 +42,29 @@ class EventParticipantSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class ParticipantPreviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source="user.profile.username",
+        read_only=True,
+    )
+    avatar = serializers.ImageField(
+        source="user.profile.avatar",
+        read_only=True,
+    )
+
+    class Meta:
+        model = EventParticipant
+        fields = ("username", "avatar")
+        read_only_fields = fields
+
+
 class EventSerializer(serializers.ModelSerializer):
     creator = serializers.CharField(
         source="creator.profile.username",
+        read_only=True,
+    )
+    creator_avatar = serializers.ImageField(
+        source="creator.profile.avatar",
         read_only=True,
     )
     category = serializers.CharField(
@@ -51,12 +72,14 @@ class EventSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     mutual_friend = serializers.SerializerMethodField()
+    participants_preview = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
         fields = (
             "id",
             "creator",
+            "creator_avatar",
             "mutual_friend",
             "category",
             "event_type",
@@ -74,6 +97,7 @@ class EventSerializer(serializers.ModelSerializer):
             "max_participants",
             "participants_count",
             "interested_count",
+            "participants_preview",
             "created_at",
             "is_full",
             "available_spots",
@@ -112,6 +136,24 @@ class EventSerializer(serializers.ModelSerializer):
             "username":
                 mutual_friend.profile.username,
         }
+
+    def get_participants_preview(self, obj):
+        relevant_status = (
+            ParticipationStatus.INTERESTED
+            if obj.is_wish
+            else ParticipationStatus.JOINED
+        )
+        preview = [
+            participant
+            for participant in getattr(obj, "preview_participants", [])
+            if participant.status == relevant_status
+        ][:3]
+
+        return ParticipantPreviewSerializer(
+            preview,
+            many=True,
+            context=self.context,
+        ).data
 
 
 class WishWriteSerializer(serializers.ModelSerializer):
