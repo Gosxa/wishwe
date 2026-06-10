@@ -31,5 +31,5 @@ export type FeedEvent = {
   location: string;
   description?: string;
   participantCount: number;
-  participants: ParticipantAvatar[];
+  userParticipationStatus: 'joined' | 'interested' | null;
 };

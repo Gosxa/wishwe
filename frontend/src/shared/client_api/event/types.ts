@@ -1,5 +1,7 @@
 type BackendEventType = 'wish' | 'plan';
 
+type UserParticipationStatus = 'joined' | 'interested';
+
 type MutualFriend = {
   id: number;
   username: string;
@@ -35,6 +37,7 @@ type BackendEvent = {
   created_at: string;
   is_full: boolean;
   available_spots: number | null;
+  user_participation_status: UserParticipationStatus | null;
 };
 
 type Paginated<T> = {
@@ -60,4 +63,5 @@ export type {
   MutualFriend,
   ParticipantPreview,
   Paginated,
+  UserParticipationStatus,
 };

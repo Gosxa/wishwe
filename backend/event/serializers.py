@@ -72,7 +72,7 @@ class EventSerializer(serializers.ModelSerializer):
         read_only=True,
     )
     mutual_friend = serializers.SerializerMethodField()
-    participants_preview = serializers.SerializerMethodField()
+    user_participation_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Event
@@ -81,6 +81,7 @@ class EventSerializer(serializers.ModelSerializer):
             "creator",
             "creator_avatar",
             "mutual_friend",
+            "user_participation_status",
             "category",
             "event_type",
             "event_visibility",
@@ -109,8 +110,25 @@ class EventSerializer(serializers.ModelSerializer):
             "status",
         )
 
+    def get_user_participation_status(self, obj):
+        records = getattr(obj, "current_user_participation", None)
+
+        if records is not None:
+            record = records[0] if records else None
+        else:
+            request = self.context.get("request")
+            if request is None or not request.user.is_authenticated:
+                return None
+            record = obj.participants.filter(user=request.user).first()
+
+        if record is None or record.status == ParticipationStatus.LEFT:
+            return None
+        return record.status
+
     def get_mutual_friend(self, obj):
-        friend_ids = self.context["friend_ids"]
+        friend_ids = self.context.get("friend_ids")
+        if friend_ids is None:
+            return None
 
         if obj.creator_id in friend_ids:
             return None

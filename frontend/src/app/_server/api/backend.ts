@@ -79,5 +79,12 @@ export const beApi = {
         headers: { cookie: cookieHeader },
         cache: 'no-store',
       }),
+
+    action: (id: string, action: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/${action}/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
   },
 };
