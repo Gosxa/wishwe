@@ -5,9 +5,15 @@ type MutualFriend = {
   username: string;
 };
 
+type ParticipantPreview = {
+  username: string | null;
+  avatar: string | null;
+};
+
 type BackendEvent = {
   id: number;
   creator: string | null;
+  creator_avatar: string | null;
   mutual_friend: MutualFriend | null;
   category: string | null;
   event_type: BackendEventType;
@@ -25,6 +31,7 @@ type BackendEvent = {
   max_participants: number | null;
   participants_count: number;
   interested_count: number;
+  participants_preview: ParticipantPreview[];
   created_at: string;
   is_full: boolean;
   available_spots: number | null;
@@ -51,5 +58,6 @@ export type {
   BackendEventType,
   EventListParams,
   MutualFriend,
+  ParticipantPreview,
   Paginated,
 };

@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
@@ -9,9 +9,11 @@ from common.pagination import DefaultPagination
 from event.models import (
     Category,
     Event,
+    EventParticipant,
     EventStatus,
     EventType,
-    EventVisibility
+    EventVisibility,
+    ParticipationStatus,
 )
 from event.permissions import IsOwnerOrReadOnly
 from event.serializers import (
@@ -80,6 +82,17 @@ class EventViewSet(
         ).select_related(
             "creator__profile",
             "category",
+        ).prefetch_related(
+            Prefetch(
+                "participants",
+                queryset=EventParticipant.objects.filter(
+                    status__in=(
+                        ParticipationStatus.JOINED,
+                        ParticipationStatus.INTERESTED,
+                    ),
+                ).select_related("user__profile").order_by("joined_at")[:3],
+                to_attr="preview_participants",
+            )
         )
 
         event_type = self.request.query_params.get("type")

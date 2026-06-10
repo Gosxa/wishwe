@@ -8,8 +8,14 @@ export type SortOption = 'soonest' | 'recent' | 'heat';
 
 export type EventHost = {
   username: string;
+  avatar?: string | null;
   /** Set when the host is reachable through a mutual friend. */
   mutualFriend?: string;
+};
+
+export type ParticipantAvatar = {
+  username: string;
+  avatar: string | null;
 };
 
 export type FeedEvent = {
@@ -25,4 +31,5 @@ export type FeedEvent = {
   location: string;
   description?: string;
   participantCount: number;
+  participants: ParticipantAvatar[];
 };
