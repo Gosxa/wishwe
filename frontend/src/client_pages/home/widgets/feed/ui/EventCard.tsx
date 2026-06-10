@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import {
+  Avatar,
   CalendarClock,
   Location,
   Plus,
@@ -119,7 +120,14 @@ export const EventCard = ({ event }: Props) => {
           <ul className={s.meta}>
             <li className={s.metaRow}>
               <UserRound />
-              <span className={s.avatar} />
+              <span className={s.avatar}>
+                {host.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={host.avatar} alt={host.username} loading="lazy" />
+                ) : (
+                  <Avatar width={14} height={14} />
+                )}
+              </span>
               <span className={s.username}>{host.username}</span>
               {host.mutualFriend && (
                 <span className={s.muted}>· friend of {host.mutualFriend}</span>
@@ -148,8 +156,19 @@ export const EventCard = ({ event }: Props) => {
           <div className={s.participants}>
             <UsersRound />
             <div className={s.avatars}>
-              {Array.from({ length: visibleAvatars }).map((_, index) => (
-                <span key={index} className={s.stackAvatar} />
+              {shownParticipants.map((participant, index) => (
+                <span key={index} className={s.stackAvatar}>
+                  {participant.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={participant.avatar}
+                      alt={participant.username}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <Avatar width={28} height={28} />
+                  )}
+                </span>
               ))}
             </div>
             {extraCount > 0 && <span className={s.extra}>+{extraCount}</span>}

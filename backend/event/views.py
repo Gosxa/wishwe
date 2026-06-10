@@ -12,7 +12,8 @@ from event.models import (
     EventParticipant,
     EventStatus,
     EventType,
-    EventVisibility
+    EventVisibility,
+    ParticipationStatus,
 )
 from event.permissions import IsOwnerOrReadOnly
 from event.serializers import (
@@ -81,6 +82,17 @@ class EventViewSet(
         ).select_related(
             "creator__profile",
             "category",
+        ).prefetch_related(
+            Prefetch(
+                "participants",
+                queryset=EventParticipant.objects.filter(
+                    status__in=(
+                        ParticipationStatus.JOINED,
+                        ParticipationStatus.INTERESTED,
+                    ),
+                ).select_related("user__profile").order_by("joined_at")[:3],
+                to_attr="preview_participants",
+            )
         )
 
         event_type = self.request.query_params.get("type")
