@@ -38,7 +38,7 @@ from .models import (
     FriendInvite
 )
 
-from .permissions import IsOwnerOrReadOnly
+from .permissions import IsOwnerOrReadOnly, IsSelf
 from .serializers import (
     EmailSerializer,
     VerifyCodeSerializer,
@@ -598,11 +598,24 @@ class FriendshipViewSet(
         return Response(serializer.data)
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
+class UserViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    GenericViewSet
+):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
     pagination_class = DefaultPagination
+
+    def get_permissions(self):
+        if self.action == "destroy":
+            permission_classes = [IsAuthenticated, IsSelf]
+        else:
+            permission_classes = [IsAuthenticated]
+
+        return [permission() for permission in permission_classes]
 
     @action(detail=True, methods=["get"])
     def friends(self, request, pk=None):
