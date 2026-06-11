@@ -1,4 +1,4 @@
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
@@ -112,6 +112,28 @@ class EventViewSet(
             queryset = queryset.filter(
                 event_type=event_type
             )
+
+        if sort == "heat" and event_type == EventType.PLAN:
+            queryset = queryset.annotate(
+                social_heat=Count(
+                    "participants",
+                    filter=Q(
+                        participants__user_id__in=friend_ids,
+                        participants__status=ParticipationStatus.JOINED,
+                    )
+                )
+            ).order_by("-social_heat", "-created_at")
+
+        if sort == "heat" and event_type == EventType.WISH:
+            queryset = queryset.annotate(
+                social_heat=Count(
+                    "participants",
+                    filter=Q(
+                        participants__user_id__in=friend_ids,
+                        participants__status=ParticipationStatus.INTERESTED,
+                    )
+                )
+            ).order_by("-social_heat", "-created_at")
 
         if title:
             queryset = queryset.filter(title__icontains=title)
