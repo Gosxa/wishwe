@@ -5,6 +5,7 @@ import { Profile } from '@/shared/client_api/auth/types';
 const STUB_USER: Profile = {
   id: 1,
   user: 'test@example.com',
+  user_id: 1,
   username: 'testuser',
   first_name: 'Test',
   last_name: 'User',

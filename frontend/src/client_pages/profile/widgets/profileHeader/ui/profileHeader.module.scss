@@ -1,0 +1,121 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+
+.header {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 16px;
+  align-items: start;
+  padding: 40px 0 32px;
+}
+
+/* ---- Identity (left) ---- */
+
+.identity {
+  display: flex;
+  grid-column: 2 / 8;
+  gap: 24px;
+  min-width: 0;
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: clr.$ns-100;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.identityBody {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.username {
+  color: clr.$ns-900;
+
+  @include tp.h1;
+}
+
+.bio {
+  margin-top: 8px;
+  color: clr.$ns-700;
+
+  @include tp.text-body;
+}
+
+.editButton {
+  @include btn.secondary(8px, 100%, 52px);
+  margin-top: 24px;
+  padding: 0 24px;
+}
+
+/* ---- Invite (right) ---- */
+
+.invite {
+  display: flex;
+  flex-direction: column;
+  grid-column: 9 / 12;
+  min-width: 0;
+}
+
+.inviteTitle {
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.inviteText {
+  margin-top: 8px;
+  color: clr.$ns-700;
+
+  @include tp.text-body;
+}
+
+.copyButton {
+  @include btn.secondary(8px, 100%, 52px);
+  margin-top: 24px;
+  padding: 0 24px;
+}
+
+@media (max-width: 900px) {
+  .header {
+    grid-template-columns: 1fr;
+    padding-inline: 16px;
+  }
+
+  .identity,
+  .invite {
+    grid-column: 1;
+  }
+
+  .invite {
+    margin-top: 32px;
+  }
+}
+
+@media (max-width: 520px) {
+  .identity {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .avatar {
+    width: 128px;
+    height: 128px;
+  }
+}

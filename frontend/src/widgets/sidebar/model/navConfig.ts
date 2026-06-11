@@ -9,7 +9,7 @@ export type NavConfigItem = {
 };
 
 export const navConfig: NavConfigItem[] = [
-  { key: 'home', label: 'Home', href: '/home', Icon: HomeIcon },
+  { key: 'home', label: 'Home', href: '/feed', Icon: HomeIcon },
   { key: 'friends', label: 'Friends', href: '/friends', Icon: FriendsIcon },
   { key: 'profile', label: 'Profile', href: '/profile', Icon: ProfileIcon },
 ];

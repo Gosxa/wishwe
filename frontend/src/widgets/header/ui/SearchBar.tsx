@@ -8,9 +8,15 @@ export type SearchBarProps = {
   value?: string;
   onChange?: (value: string) => void;
   onSearch?: (q: string) => void;
+  placeholder?: string;
 };
 
-export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
+export const SearchBar = ({
+  value,
+  onChange,
+  onSearch,
+  placeholder = 'Search events',
+}: SearchBarProps) => {
   const [localValue, setLocalValue] = useState('');
 
   const controlled = value !== undefined;
@@ -33,7 +39,7 @@ export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
       <input
         className={s.searchInput}
         type="text"
-        placeholder="Search events"
+        placeholder={placeholder}
         value={current}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

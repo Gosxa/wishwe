@@ -73,6 +73,7 @@ class EventSerializer(serializers.ModelSerializer):
     )
     mutual_friend = serializers.SerializerMethodField()
     user_participation_status = serializers.SerializerMethodField()
+    participants_preview = serializers.SerializerMethodField()
 
     class Meta:
         model = Event

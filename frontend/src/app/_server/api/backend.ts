@@ -71,6 +71,22 @@ export const beApi = {
         `${BACKEND}/api/username-check/?username=${encodeURIComponent(username)}`,
         { cache: 'no-store' },
       ),
+
+    invite: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/invite/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    events: (id: string, query: string, cookieHeader: string) =>
+      fetch(
+        `${BACKEND}/api/user/users/${id}/events/${query ? `?${query}` : ''}`,
+        {
+          headers: { cookie: cookieHeader },
+          cache: 'no-store',
+        },
+      ),
   },
 
   event: {

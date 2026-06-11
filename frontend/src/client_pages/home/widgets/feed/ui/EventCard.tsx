@@ -6,7 +6,9 @@ import {
   Avatar,
   CalendarClock,
   Location,
+  Pencil,
   Plus,
+  Sparkles,
   StickyNote,
   UserRound,
   UsersRound,
@@ -23,11 +25,12 @@ import s from './eventCard.module.scss';
 
 type Props = {
   event: FeedEvent;
+  isOwn?: boolean;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
 
-export const EventCard = ({ event }: Props) => {
+export const EventCard = ({ event, isOwn = false }: Props) => {
   const {
     id,
     type,
@@ -38,6 +41,7 @@ export const EventCard = ({ event }: Props) => {
     date,
     location,
     description,
+    participants,
     participantCount: initialCount,
     userParticipationStatus: initialStatus,
   } = event;
@@ -48,8 +52,8 @@ export const EventCard = ({ event }: Props) => {
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
 
   const isParticipating = status !== null;
-  const visibleAvatars = Math.min(count, MAX_VISIBLE_AVATARS);
-  const extraCount = count - visibleAvatars;
+  const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
+  const extraCount = Math.max(0, count - shownParticipants.length);
   const actionLabel = type === 'plan' ? 'Join' : 'Interested';
   const selectedLabel = type === 'plan' ? 'Joined' : 'Interested';
 
@@ -180,27 +184,43 @@ export const EventCard = ({ event }: Props) => {
           </div>
         )}
 
-        <button
-          type="button"
-          className={clsx(s.action, isParticipating && s.joined)}
-          onClick={handleActionClick}
-          disabled={isPending}
-        >
-          {isParticipating ? (
-            <>
-              <span className={s.selectedFace}>{selectedLabel}</span>
-              <span className={s.leaveFace}>
-                <X />
-                Leave
-              </span>
-            </>
-          ) : (
-            <>
-              <Plus />
-              <span>{actionLabel}</span>
-            </>
-          )}
-        </button>
+        {isOwn ? (
+          // Static for now — edit / plan-it flows are not wired up yet.
+          <div className={s.ownerActions}>
+            <button type="button" className={s.edit}>
+              <Pencil />
+              <span>Edit</span>
+            </button>
+            {type === 'wish' && (
+              <button type="button" className={s.planIt}>
+                <Sparkles />
+                <span>Plan it</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={clsx(s.action, isParticipating && s.joined)}
+            onClick={handleActionClick}
+            disabled={isPending}
+          >
+            {isParticipating ? (
+              <>
+                <span className={s.selectedFace}>{selectedLabel}</span>
+                <span className={s.leaveFace}>
+                  <X />
+                  Leave
+                </span>
+              </>
+            ) : (
+              <>
+                <Plus />
+                <span>{actionLabel}</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {isLeaveDialogOpen && (

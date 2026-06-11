@@ -1,4 +1,6 @@
 from debug_toolbar.toolbar import debug_toolbar_urls
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -19,3 +21,9 @@ urlpatterns = [
     path("api/doc/", SpectacularAPIView.as_view(), name="schema"),
     path("api/doc/swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ] + debug_toolbar_urls()
+
+# Serve user-uploaded media from the local filesystem during development.
+# In production media is served from S3/CloudFront (AWS_S3_CUSTOM_DOMAIN),
+# so this is only needed for the local DEBUG setup.
+if settings.DEBUG and not settings.AWS_S3_CUSTOM_DOMAIN:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

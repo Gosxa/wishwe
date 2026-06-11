@@ -7,6 +7,8 @@ export { ChevronDown } from './chevron/ChevronDown';
 export { Logo } from './logo/Logo';
 export { SearchIcon } from './search/SearchIcon';
 export { Plus } from './plus/Plus';
+export { Pencil } from './pencil/Pencil';
+export { Sparkles } from './sparkles/Sparkles';
 export { X } from './x/X';
 export { BellDot } from './bell/BellDot';
 export { Gear } from './gear/Gear';

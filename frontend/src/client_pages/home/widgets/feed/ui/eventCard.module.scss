@@ -204,6 +204,30 @@
   @include btn.sec-selected;
 }
 
+
+.ownerActions {
+  display: flex;
+  grid-column: 4 / 6;
+  grid-row: 3;
+  align-self: end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edit {
+  @include btn.secondary(8px, 100%, 40px);
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.planIt {
+  @include btn.primary(8px, 100%, 40px);
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+}
+
 .selectedFace,
 .leaveFace {
   display: inline-flex;
@@ -293,7 +317,8 @@
 
   .details,
   .participants,
-  .action {
+  .action,
+  .ownerActions {
     grid-column: 1;
   }
 
@@ -302,7 +327,8 @@
   }
 
   .participants,
-  .action {
+  .action,
+  .ownerActions {
     grid-row: auto;
   }
 

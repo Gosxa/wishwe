@@ -32,10 +32,11 @@ class SetPasswordSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.CharField(source="user.email", read_only=True)
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
     class Meta:
         model = Profile
         fields = (
-            "id", "user", "username", "first_name", "last_name",
+            "id", "user", "user_id", "username", "first_name", "last_name",
             "bio", "date_of_birth", "city", "gender", "avatar",
             "social_media_url", "is_private"
         )
