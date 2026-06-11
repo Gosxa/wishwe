@@ -48,30 +48,49 @@ class EventViewSet(
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        visibility = self.request.query_params.get(
-            "visible"
-        )
+        mine = self.request.query_params.get("mine")
 
-        friend_ids = EventService.get_user_friend_ids(
-            self.request.user
-        )
-
-        query_filter = Q(
-            creator_id__in=friend_ids
-        )
-
-        if visibility in (None, "all"):
-            fof_ids = EventService.get_friends_of_friends_ids(
-                self.request.user,
-                friend_ids
-            )
-
-            query_filter |= Q(
-                creator_id__in=fof_ids,
-                event_visibility=(
-                    EventVisibility.FRIENDS_OF_FRIENDS
+        if mine in ("true", "1"):
+            # Profile feed: the user's own events — ones they created plus ones
+            # they joined / are interested in.
+            participated_ids = EventParticipant.objects.filter(
+                user=self.request.user,
+                status__in=(
+                    ParticipationStatus.JOINED,
+                    ParticipationStatus.INTERESTED,
                 ),
+            ).values_list("event_id", flat=True)
+
+            query_filter = Q(
+                creator=self.request.user
+            ) | Q(
+                id__in=participated_ids
             )
+        else:
+            visibility = self.request.query_params.get(
+                "visible"
+            )
+
+            friend_ids = EventService.get_user_friend_ids(
+                self.request.user
+            )
+
+            query_filter = Q(
+                creator_id__in=friend_ids
+            )
+
+            if visibility in (None, "all"):
+                fof_ids = EventService.get_friends_of_friends_ids(
+                    self.request.user,
+                    friend_ids
+                )
+
+                query_filter |= Q(
+                    creator_id__in=fof_ids,
+                    event_visibility=(
+                        EventVisibility.FRIENDS_OF_FRIENDS
+                    ),
+                )
 
         queryset = Event.objects.filter(
             query_filter,
@@ -157,6 +176,13 @@ class EventViewSet(
 
     @extend_schema(
         parameters=[
+            OpenApiParameter(
+                name="mine",
+                type=OpenApiTypes.STR,
+                description="Profile feed: ?mine=true returns the current user's own "
+                            "events (created + joined/interested) instead of the "
+                            "friends/friends-of-friends feed",
+            ),
             OpenApiParameter(
                 name="type",
                 type=OpenApiTypes.STR,
