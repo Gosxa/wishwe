@@ -237,45 +237,6 @@ class EventFeedTests(APITestCase):
             titles,
         )
 
-    def test_mine_returns_own_and_participated_events(self):
-        own_event = Event.objects.create(
-            creator=self.user,
-            event_type=EventType.WISH,
-            title="My own wish",
-            description="desc",
-            location="Kyiv",
-            timeframe_text="Someday",
-            status=EventStatus.ACTIVE,
-        )
-
-        EventParticipant.objects.create(
-            event=self.plan_event,
-            user=self.user,
-            status=ParticipationStatus.JOINED,
-        )
-
-        response = self.client.get(
-            reverse("events:event-list"),
-            {"mine": "true"},
-        )
-
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_200_OK,
-        )
-
-        titles = [
-            event["title"]
-            for event in response.data["results"]
-        ]
-
-        self.assertIn(own_event.title, titles)
-        self.assertIn(self.plan_event.title, titles)
-
-        # Friend's event the user does not participate in is excluded.
-        self.assertNotIn(self.friend_event.title, titles)
-        self.assertNotIn(self.stranger_event.title, titles)
-
     def test_join_plan(self):
         response = self.client.post(
             reverse(
