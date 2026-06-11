@@ -267,6 +267,11 @@ class EventFeedTests(APITestCase):
             ParticipationStatus.JOINED,
         )
 
+        self.assertEqual(
+            response.data["user_participation_status"],
+            ParticipationStatus.JOINED,
+        )
+
     def test_interested_in_wish(self):
         response = self.client.post(
             reverse(
@@ -294,6 +299,11 @@ class EventFeedTests(APITestCase):
 
         self.assertEqual(
             participant.status,
+            ParticipationStatus.INTERESTED,
+        )
+
+        self.assertEqual(
+            response.data["user_participation_status"],
             ParticipationStatus.INTERESTED,
         )
 
@@ -334,6 +344,10 @@ class EventFeedTests(APITestCase):
         self.assertEqual(
             participant.status,
             ParticipationStatus.LEFT,
+        )
+
+        self.assertIsNone(
+            response.data["user_participation_status"],
         )
 
     def test_copy_wish(self):
@@ -416,3 +430,81 @@ class EventFeedTests(APITestCase):
         self.assertIn("count", response.data)
         self.assertIn("next", response.data)
         self.assertIn("previous", response.data)
+
+    def test_list_user_participation_status(self):
+        EventParticipant.objects.create(
+            event=self.plan_event,
+            user=self.user,
+            status=ParticipationStatus.JOINED,
+        )
+
+        response = self.client.get(
+            reverse("events:event-list")
+        )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        by_title = {
+            event["title"]: event["user_participation_status"]
+            for event in response.data["results"]
+        }
+
+        self.assertEqual(
+            by_title[self.plan_event.title],
+            ParticipationStatus.JOINED,
+        )
+
+        self.assertIsNone(
+            by_title[self.friend_event.title],
+        )
+
+    def test_list_no_n_plus_one_for_participation_status(self):
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        EventParticipant.objects.create(
+            event=self.plan_event,
+            user=self.user,
+            status=ParticipationStatus.JOINED,
+        )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(
+                reverse("events:event-list")
+            )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        baseline = len(ctx.captured_queries)
+
+        for i in range(5):
+            Event.objects.create(
+                creator=self.friend,
+                event_type=EventType.WISH,
+                title=f"Extra event {i}",
+                description="desc",
+                location="Kyiv",
+                timeframe_text="Soon",
+                status=EventStatus.ACTIVE,
+            )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get(
+                reverse("events:event-list")
+            )
+
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK,
+        )
+
+        self.assertEqual(
+            len(ctx.captured_queries),
+            baseline,
+        )

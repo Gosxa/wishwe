@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import clsx from 'clsx';
 import {
+  Avatar,
   CalendarClock,
   Location,
   Plus,
@@ -11,7 +12,13 @@ import {
   UsersRound,
   X,
 } from '@shared/ui/icons';
+import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
+import {
+  expressInterest,
+  joinPlan,
+  leaveEvent,
+} from '@/shared/client_api/event';
 import s from './eventCard.module.scss';
 
 type Props = {
@@ -22,6 +29,7 @@ const MAX_VISIBLE_AVATARS = 3;
 
 export const EventCard = ({ event }: Props) => {
   const {
+    id,
     type,
     hashtag,
     image,
@@ -30,28 +38,66 @@ export const EventCard = ({ event }: Props) => {
     date,
     location,
     description,
-    participantCount,
+    participantCount: initialCount,
+    userParticipationStatus: initialStatus,
   } = event;
 
-  const [joined, setJoined] = useState(false);
+  const [status, setStatus] = useState(initialStatus);
+  const [count, setCount] = useState(initialCount);
+  const [isPending, setIsPending] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
 
-  const visibleAvatars = Math.min(participantCount, MAX_VISIBLE_AVATARS);
-  const extraCount = participantCount - visibleAvatars;
+  const isParticipating = status !== null;
+  const visibleAvatars = Math.min(count, MAX_VISIBLE_AVATARS);
+  const extraCount = count - visibleAvatars;
   const actionLabel = type === 'plan' ? 'Join' : 'Interested';
+  const selectedLabel = type === 'plan' ? 'Joined' : 'Interested';
 
-  const handleActionClick = () => {
-    if (joined) {
+  const applyResponse = (resp: ReturnType<typeof toFeedEvents>[number]) => {
+    setStatus(resp.userParticipationStatus);
+    setCount(resp.participantCount);
+  };
+
+  const handleActionClick = async () => {
+    if (isParticipating) {
       setIsLeaveDialogOpen(true);
 
       return;
     }
 
-    setJoined(true);
+    setIsPending(true);
+
+    try {
+      const resp =
+        type === 'plan' ? await joinPlan(id) : await expressInterest(id);
+
+      applyResponse(toFeedEvents([resp])[0]);
+    } catch {
+      // silent revert — button stays in previous state
+    } finally {
+      setIsPending(false);
+    }
+  };
+
+  const handleLeaveConfirm = async () => {
+    setIsPending(true);
+
+    try {
+      const resp = await leaveEvent(id);
+
+      applyResponse(toFeedEvents([resp])[0]);
+      setIsLeaveDialogOpen(false);
+    } catch {
+      // silent revert — button stays in previous state
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const handleLeaveDialogClose = () => {
-    setIsLeaveDialogOpen(false);
+    if (!isPending) {
+      setIsLeaveDialogOpen(false);
+    }
   };
 
   return (
@@ -74,7 +120,14 @@ export const EventCard = ({ event }: Props) => {
           <ul className={s.meta}>
             <li className={s.metaRow}>
               <UserRound />
-              <span className={s.avatar} />
+              <span className={s.avatar}>
+                {host.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={host.avatar} alt={host.username} loading="lazy" />
+                ) : (
+                  <Avatar width={14} height={14} />
+                )}
+              </span>
               <span className={s.username}>{host.username}</span>
               {host.mutualFriend && (
                 <span className={s.muted}>· friend of {host.mutualFriend}</span>
@@ -99,12 +152,23 @@ export const EventCard = ({ event }: Props) => {
           </ul>
         </div>
 
-        {participantCount > 0 ? (
+        {count > 0 ? (
           <div className={s.participants}>
             <UsersRound />
             <div className={s.avatars}>
-              {Array.from({ length: visibleAvatars }).map((_, index) => (
-                <span key={index} className={s.stackAvatar} />
+              {shownParticipants.map((participant, index) => (
+                <span key={index} className={s.stackAvatar}>
+                  {participant.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={participant.avatar}
+                      alt={participant.username}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <Avatar width={28} height={28} />
+                  )}
+                </span>
               ))}
             </div>
             {extraCount > 0 && <span className={s.extra}>+{extraCount}</span>}
@@ -118,12 +182,13 @@ export const EventCard = ({ event }: Props) => {
 
         <button
           type="button"
-          className={clsx(s.action, joined && s.joined)}
+          className={clsx(s.action, isParticipating && s.joined)}
           onClick={handleActionClick}
+          disabled={isPending}
         >
-          {joined ? (
+          {isParticipating ? (
             <>
-              <span className={s.selectedFace}>Interested</span>
+              <span className={s.selectedFace}>{selectedLabel}</span>
               <span className={s.leaveFace}>
                 <X />
                 Leave
@@ -147,13 +212,15 @@ export const EventCard = ({ event }: Props) => {
                 type="button"
                 className={s.noThanksButton}
                 onClick={handleLeaveDialogClose}
+                disabled={isPending}
               >
                 <span>No, thanks</span>
               </button>
               <button
                 type="button"
                 className={s.leaveButton}
-                onClick={handleLeaveDialogClose}
+                onClick={handleLeaveConfirm}
+                disabled={isPending}
               >
                 <span>Leave</span>
               </button>

@@ -2,6 +2,28 @@ import { BackendEvent, EventListParams, Paginated } from './types';
 
 const PAGE_SIZE = 20;
 
+const postAction = async (
+  id: string,
+  action: string,
+): Promise<BackendEvent> => {
+  const res = await fetch(`/api/event/events/${id}/${action}`, {
+    method: 'POST',
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to ${action}`);
+  }
+
+  return (await res.json()) as BackendEvent;
+};
+
+export const joinPlan = (id: string) => postAction(id, 'join_plan');
+
+export const expressInterest = (id: string) =>
+  postAction(id, 'interested_in_wish');
+
+export const leaveEvent = (id: string) => postAction(id, 'leave_event');
+
 export const listEvents = async (
   params: EventListParams = {},
 ): Promise<Paginated<BackendEvent>> => {
@@ -34,4 +56,5 @@ export type {
   EventListParams,
   MutualFriend,
   Paginated,
+  UserParticipationStatus,
 } from './types';

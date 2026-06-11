@@ -3,7 +3,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Prefetch, Q
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiExample
 from requests import RequestException
@@ -23,7 +23,13 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from common.pagination import DefaultPagination
-from event.models import Event, EventStatus, EventType
+from event.models import (
+    Event,
+    EventParticipant,
+    EventStatus,
+    EventType,
+    ParticipationStatus,
+)
 from event.serializers import EventSerializer
 from .models import (
     SocialAccount,
@@ -639,6 +645,11 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 description="Sort parameter in profile events"
                             "(recently added -> by default "
                             "/ ?sort=soonest -> soonest first)",
+            ),
+            OpenApiParameter(
+                name="title",
+                type=OpenApiTypes.STR,
+                description="Filtering by title",
             )
         ]
     )
@@ -646,13 +657,38 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def events(self, request, pk=None):
         user = self.get_object()
         events = Event.objects.filter(
-            Q(creator=user) | Q(participants__user=user)
+            Q(creator=user) | Q(
+                participants__user=user,
+                participants__status__in=(
+                    ParticipationStatus.JOINED,
+                    ParticipationStatus.INTERESTED,
+                ),
+            )
         ).select_related(
             "category",
             "creator__profile",
+        ).prefetch_related(
+            Prefetch(
+                "participants",
+                queryset=EventParticipant.objects.filter(
+                    status__in=(
+                        ParticipationStatus.JOINED,
+                        ParticipationStatus.INTERESTED,
+                    ),
+                ).select_related("user__profile").order_by("joined_at")[:3],
+                to_attr="preview_participants",
+            ),
+            Prefetch(
+                "participants",
+                queryset=EventParticipant.objects.filter(
+                    user=request.user
+                ),
+                to_attr="current_user_participation",
+            ),
         ).distinct()
         tab = self.request.query_params.get("tab")
         sort = self.request.query_params.get("sort")
+        title = self.request.query_params.get("title")
 
         if sort == "soonest":
             events = events.order_by(
@@ -677,15 +713,26 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
                 status=EventStatus.COMPLETED,
             )
 
+        if title:
+            events = events.filter(title__icontains=title)
+
         page = self.paginate_queryset(events)
 
         if page is not None:
-            serializer = EventSerializer(page, many=True,)
+            serializer = EventSerializer(
+                page,
+                many=True,
+                context={"request": request},
+            )
             return self.get_paginated_response(
                 serializer.data
             )
 
-        serializer = EventSerializer(events, many=True,)
+        serializer = EventSerializer(
+            events,
+            many=True,
+            context={"request": request},
+        )
 
         return Response(serializer.data)
 
