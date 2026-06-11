@@ -1,4 +1,7 @@
+export { AvatarCrop } from './avatarCrop/AvatarCrop';
 export { TextInput } from './textInput/TextInput';
+export { TextArea } from './textArea/TextArea';
+export { Toggle } from './toggle/Toggle';
 export { PasswordInput } from './passwordInput/PasswordInput';
 export { Spinner } from './spinner/Spinner';
 export { HelperText } from './helperText/HelperText';

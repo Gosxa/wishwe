@@ -5,6 +5,8 @@ import s from './helperText.module.scss';
 type Props = {
   text: string;
   type?: 'info' | 'success' | 'error';
+  // variant for helpers outside a positioned input wrapper
+  inline?: boolean;
 };
 
 const badge = {
@@ -13,8 +15,8 @@ const badge = {
   error: <BadgeError />,
 };
 
-export const HelperText = ({ text, type = 'info' }: Props) => (
-  <div className={s.container}>
+export const HelperText = ({ text, type = 'info', inline = false }: Props) => (
+  <div className={clsx(s.container, inline && s.inline)}>
     {badge[type]}
     <span className={clsx(s.text, s[type])}>{text}</span>
   </div>

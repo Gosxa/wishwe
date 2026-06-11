@@ -1,3 +1,5 @@
+import type { Profile } from '../auth/types';
+import { avatarFormData } from '@/shared/lib/avatarFormData';
 import type { BackendEvent, Paginated } from '../event';
 
 const EVENTS_PAGE_SIZE = 20;
@@ -71,14 +73,45 @@ export const onBoard = async (
   if (!res.ok) throw new Error('Failed to onboard');
 };
 
-export const changeAvatar = async (avatar: string): Promise<void> => {
+export const changeAvatar = async (
+  avatar: string,
+): Promise<{ avatar: string }> => {
   const res = await fetch('/next_api/user/avatar', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ avatar }),
+    body: await avatarFormData(avatar),
   });
 
   if (!res.ok) throw new Error('Failed to upload avatar');
+
+  return res.json();
+};
+
+export type UpdateProfilePayload = Partial<
+  Pick<Profile, 'username' | 'first_name' | 'last_name' | 'bio' | 'is_private'>
+>;
+
+export class UpdateProfileError extends Error {
+  constructor(public body: Record<string, unknown>) {
+    super('Failed to update profile');
+  }
+}
+
+export const updateProfile = async (
+  payload: UpdateProfilePayload,
+): Promise<Profile> => {
+  const res = await fetch('/next_api/user/profile', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+
+    throw new UpdateProfileError(body);
+  }
+
+  return res.json();
 };
 
 export const createInvite = async (): Promise<{ token: string }> => {

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { beApi } from '@/app/_server/api/backend';
 import { extractCookieHeader, forwardCookies } from '@/app/_server/api/cookies';
 import { validate } from '@/app/_server/api/validate';
+import { avatarFormData } from '@/shared/lib/avatarFormData';
 
 const schema = z.object({
   token: z.string().min(1),
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (avatarUrl) {
-    await beApi.user.avatar({ avatar: avatarUrl }, cookieHeader);
+    await beApi.user.avatar(await avatarFormData(avatarUrl), cookieHeader);
   }
 
   const meRes = await beApi.user.me(cookieHeader);

@@ -1,7 +1,7 @@
 'use client';
 
 import { type ChangeEvent, useRef, useState } from 'react';
-import { AvatarCrop } from '@/client_pages/onboard/widgets/personalDataForm/ui/avatarCrop/AvatarCrop';
+import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
 
 export default function TestCropperPage() {
   const [rawImageUrl, setRawImageUrl] = useState<string | null>(null);

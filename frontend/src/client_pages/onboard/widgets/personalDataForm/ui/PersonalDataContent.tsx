@@ -1,7 +1,7 @@
 import { type ChangeEvent, useRef } from 'react';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { Avatar } from '@shared/ui/icons';
-import { AvatarCrop } from './avatarCrop/AvatarCrop';
+import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
 import s from './personalData.module.scss';
 
 type AvatarConfig = {

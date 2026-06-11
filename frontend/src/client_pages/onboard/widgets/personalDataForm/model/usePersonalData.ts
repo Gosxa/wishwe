@@ -1,7 +1,6 @@
 'use client';
 
 import { type ChangeEvent, useState } from 'react';
-import { z } from 'zod';
 import { useValidation } from '@/features/useValidation/useValidation';
 import {
   PersonalDataVariant,
@@ -13,16 +12,10 @@ import { register } from '@/shared/client_api/auth';
 import { checkUsername, onBoard, changeAvatar } from '@/shared/client_api/user';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
-
-const HELPER_TEXT = '3-30 characters. Letters, numbers, "." and "_" only.';
-
-const nicknameSchema = z
-  .string()
-  .min(3, '3 characters min')
-  .max(30, '30 characters max')
-  .regex(/^[a-zA-Z0-9]/, 'Cannot start with underscore or dot')
-  .regex(/^[a-zA-Z0-9._]+$/, HELPER_TEXT)
-  .regex(/^[^A-Z]*$/, 'Nickname must be lowercase');
+import {
+  NICKNAME_HELPER_TEXT as HELPER_TEXT,
+  nicknameSchema,
+} from '@/shared/lib/validation/nickname';
 
 export const usePersonalData = (variant: PersonalDataVariant) => {
   const password = useOnboardDataStore(s => s.password);

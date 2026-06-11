@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { Avatar, Pencil } from '@shared/ui/icons';
 import { useUserStore } from '@/shared/store/useUserStore';
@@ -36,11 +37,10 @@ export const ProfileHeader = ({ initialUser }: Props) => {
           {username && <h1 className={s.username}>@{username}</h1>}
           {bio && <p className={s.bio}>{bio}</p>}
 
-          {/* Static for now — edit-profile flow is not wired up yet. */}
-          <button type="button" className={s.editButton}>
+          <Link href="/edit-profile" className={s.editButton}>
             <Pencil />
             <span>Edit profile</span>
-          </button>
+          </Link>
         </div>
       </div>
 

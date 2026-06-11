@@ -63,8 +63,16 @@ export const beApi = {
     onboarding: (body: unknown, cookieHeader: string) =>
       patch(`${BACKEND}/api/user/profile/onboarding/`, body, cookieHeader),
 
-    avatar: (body: unknown, cookieHeader: string) =>
-      patch(`${BACKEND}/api/user/profile/avatar/`, body, cookieHeader),
+    updateProfile: (body: unknown, cookieHeader: string) =>
+      patch(`${BACKEND}/api/user/profile/update_profile/`, body, cookieHeader),
+
+    avatar: (body: FormData, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/avatar/`, {
+        method: 'PATCH',
+        headers: { cookie: cookieHeader },
+        body,
+        cache: 'no-store',
+      }),
 
     checkUsername: (username: string) =>
       fetch(

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { BellDot, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
 import { SearchBar, type SearchBarProps } from './SearchBar';
@@ -18,8 +19,17 @@ type Props = {
 };
 
 export const Header = ({ search }: Props) => {
+  const router = useRouter();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+
+  const settingsActions: Partial<Record<string, () => void>> = {
+    'Log out': logout,
+    'Edit profile': () => {
+      setIsSettingsOpen(false);
+      router.push('/edit-profile');
+    },
+  };
 
   useEffect(() => {
     if (!isSettingsOpen) return;
@@ -77,7 +87,7 @@ export const Header = ({ search }: Props) => {
                         ? `${s.settingsItem} ${s.danger}`
                         : s.settingsItem
                     }
-                    onClick={item.label === 'Log out' ? logout : undefined}
+                    onClick={settingsActions[item.label]}
                   >
                     {item.label}
                   </button>

@@ -10,8 +10,6 @@
   padding: 40px 0 32px;
 }
 
-/* ---- Identity (left) ---- */
-
 .identity {
   display: flex;
   grid-column: 2 / 8;
@@ -26,6 +24,7 @@
   justify-content: center;
   width: 160px;
   height: 160px;
+  border: 1px solid clr.$prm;
   border-radius: 50%;
   overflow: hidden;
   background: clr.$ns-100;
@@ -58,12 +57,11 @@
 }
 
 .editButton {
-  @include btn.secondary(8px, 100%, 52px);
+  @include btn.secondary(8px, 100%, 40px);
   margin-top: 24px;
   padding: 0 24px;
+  text-decoration: none;
 }
-
-/* ---- Invite (right) ---- */
 
 .invite {
   display: flex;
@@ -86,7 +84,7 @@
 }
 
 .copyButton {
-  @include btn.secondary(8px, 100%, 52px);
+  @include btn.secondary(8px, 100%, 40px);
   margin-top: 24px;
   padding: 0 24px;
 }
