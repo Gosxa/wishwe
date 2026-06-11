@@ -151,8 +151,8 @@ def google_auth(request):
 
         if avatar_url and not profile.avatar:
             try:
-                response = pyrequests.get(avatar_url)
-
+                response = pyrequests.get(avatar_url, timeout=10)
+                print(f"DEBUG avatar_url={avatar_url} status={response.status_code} len={len(response.content)}")
                 if response.status_code == 200:
                     profile.avatar.save(
                         f"{user.pk}_google_avatar.jpg",
@@ -160,10 +160,10 @@ def google_auth(request):
                         save=False
                     )
                     updated = True
-
-
-            except RequestException as e:
-                logger.warning(f"Failed to download google avatar: {e}")
+                else:
+                    print(f"DEBUG avatar download failed: {response.status_code}")
+            except Exception as e:
+                print(f"DEBUG avatar exception: {e}")
 
         if updated:
             profile.save()
