@@ -8,13 +8,14 @@ import {
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
-import { api } from '@/shared';
+import { checkEmail } from '@/shared/client_api/auth';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
 const emailSchema = z.email('please, enter valid email');
 
 export const useEnterEmail = () => {
   const email = useOnboardDataStore(s => s.email);
-  const setLoading = useOnboardDataStore(s => s.setLoading);
+  const setLoading = useLoadingStore(s => s.setLoading);
   const setField = useOnboardDataStore(s => s.setField);
 
   const { next, back } = useTrackContext();
@@ -35,7 +36,7 @@ export const useEnterEmail = () => {
     setLoading(true);
 
     try {
-      const { flow } = await api.auth.sendCode(email);
+      const { flow } = await checkEmail(email);
 
       next(flow === 'login' ? SCREEN_ID.ENTER_PWD : SCREEN_ID.VERIFY_REGISTER);
     } catch {

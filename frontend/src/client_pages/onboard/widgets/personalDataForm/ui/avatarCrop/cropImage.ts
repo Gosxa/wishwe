@@ -6,11 +6,10 @@ export const cropImage = async (
 ): Promise<string> => {
   const image = new Image();
 
-  image.src = imageSrc;
-
   await new Promise<void>((resolve, reject) => {
     image.onload = () => resolve();
     image.onerror = () => reject(new Error('Failed to load image'));
+    image.src = imageSrc;
   });
 
   const canvas = document.createElement('canvas');
@@ -33,10 +32,5 @@ export const cropImage = async (
     pixelCrop.height,
   );
 
-  return new Promise((resolve, reject) => {
-    canvas.toBlob(blob => {
-      if (blob) resolve(URL.createObjectURL(blob));
-      else reject(new Error('Canvas is empty'));
-    }, 'image/jpeg');
-  });
+  return canvas.toDataURL('image/jpeg', 0.9);
 };

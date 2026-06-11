@@ -1,0 +1,317 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+
+.card {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 16px;
+  align-items: stretch;
+}
+
+/* ---- Media (left) ---- */
+
+.media {
+  position: relative;
+  grid-column: 2 / 7;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tags {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.tag {
+  padding: 2px 12px;
+  border-radius: 999px;
+  color: clr.$ns-900;
+
+  @include tp.text-accent;
+}
+
+.plan {
+  background: clr.$acc-purple;
+}
+
+.wish {
+  background: clr.$acc-yellow;
+}
+
+.hashtag {
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-200;
+}
+
+/* ---- Body (right) ---- */
+
+.body {
+  display: grid;
+  grid-column: 7 / 12;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: auto 1fr auto;
+  column-gap: 16px;
+  min-width: 0;
+}
+
+.details {
+  grid-column: 1 / 6;
+  grid-row: 1 / 3;
+  min-width: 0;
+}
+
+.title {
+  margin-bottom: 16px;
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: clr.$ns-900;
+
+  @include tp.text-body;
+
+  > svg {
+    flex-shrink: 0;
+    color: clr.$ns-500;
+  }
+}
+
+.metaRowTop {
+  align-items: flex-start;
+
+  > svg {
+    margin-top: 4px;
+  }
+}
+
+.username {
+  color: clr.$ns-900;
+}
+
+.muted {
+  color: clr.$ns-500;
+}
+
+.description {
+  white-space: pre-line;
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: clr.$ns-100;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.participants {
+  display: flex;
+  grid-column: 1 / 4;
+  grid-row: 3;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: clr.$ns-500;
+
+  @include tp.text-body;
+}
+
+.avatars {
+  display: flex;
+
+  .stackAvatar:not(:first-child) {
+    margin-left: -8px;
+  }
+}
+
+.stackAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: clr.$ns-100;
+  border: 2px solid clr.$ns-50;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.extra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 6px;
+  margin-left: -12px;
+  border-radius: 48px;
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-200;
+  color: clr.$ns-700;
+
+  @include tp.text-caption;
+}
+
+.action {
+  @include btn.secondary(8px, 100%, 40px);
+  grid-column: 4 / 6;
+  grid-row: 3;
+  align-self: end;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.joined {
+  @include btn.sec-selected;
+}
+
+.selectedFace,
+.leaveFace {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.leaveFace {
+  display: none;
+}
+
+.joined:hover,
+.joined:active {
+  .selectedFace {
+    display: none;
+  }
+
+  .leaveFace {
+    display: inline-flex;
+  }
+}
+
+.leaveOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(clr.$ns-900, 0.42);
+  backdrop-filter: blur(8px);
+}
+
+.leaveDialog {
+  width: min(690px, 100%);
+  padding: 40px 72px 32px;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  box-shadow:
+    inset 0 0 0 2px rgba(clr.$prm, 0.62),
+    0 18px 56px rgba(clr.$ns-900, 0.24);
+}
+
+.leaveDialogTitle {
+  margin-bottom: 28px;
+  text-align: center;
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.leaveDialogActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
+  align-items: center;
+}
+
+.noThanksButton {
+  @include btn.tertiary(0, 100%, 52px);
+
+  color: clr.$prm;
+}
+
+.leaveButton {
+  @include btn.primary(0, 100%, 52px);
+}
+
+@media (max-width: 900px) {
+  .card {
+    grid-template-columns: 1fr;
+    row-gap: 16px;
+  }
+
+  .media,
+  .body {
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .body {
+    grid-template-columns: 1fr;
+    row-gap: 16px;
+  }
+
+  .details,
+  .participants,
+  .action {
+    grid-column: 1;
+  }
+
+  .details {
+    grid-row: auto;
+  }
+
+  .participants,
+  .action {
+    grid-row: auto;
+  }
+
+  .leaveDialog {
+    padding: 32px 24px 24px;
+  }
+
+  .leaveDialogActions {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

@@ -9,7 +9,10 @@ import {
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
-import { api } from '@/shared';
+import { register } from '@/shared/client_api/auth';
+import { checkUsername, onBoard, changeAvatar } from '@/shared/client_api/user';
+import { useUserStore } from '@/shared/store/useUserStore';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
 const HELPER_TEXT = '3-30 characters. Letters, numbers, "." and "_" only.';
 
@@ -22,7 +25,6 @@ const nicknameSchema = z
   .regex(/^[^A-Z]*$/, 'Nickname must be lowercase');
 
 export const usePersonalData = (variant: PersonalDataVariant) => {
-  const email = useOnboardDataStore(s => s.email);
   const password = useOnboardDataStore(s => s.password);
   const verificationToken = useOnboardDataStore(s => s.verificationToken);
   const nickname = useOnboardDataStore(s => s.nickname);
@@ -31,27 +33,33 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   const avatarUrl = useOnboardDataStore(s => s.avatarUrl);
   const setField = useOnboardDataStore(s => s.setField);
   const setAvatarUrl = useOnboardDataStore(s => s.setAvatarUrl);
-  const setLoading = useOnboardDataStore(s => s.setLoading);
+  const setLoading = useLoadingStore(s => s.setLoading);
+  const resetOnboard = useOnboardDataStore(s => s.reset);
+  const setUser = useUserStore(s => s.setUser);
   const { next } = useTrackContext();
 
   const [rawImageUrl, setRawImageUrl] = useState<string | null>(null);
+  const [avatarChanged, setAvatarChanged] = useState(false);
+  const [isUnique, setIsUnique] = useState<boolean | null>(null);
 
   const { error, isSuccess, check, set } = useValidation(nicknameSchema);
 
   const onNicknameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setField('nickname', e.target.value.toLowerCase());
     set.error(undefined);
+    setIsUnique(null);
   };
 
   const onNicknameBlur = async () => {
-    if (!check(nickname)) {
-      return;
-    }
+    if (!check(nickname)) return;
 
     try {
-      const { available } = await api.user.checkNickname(nickname);
+      const { available } = await checkUsername(nickname);
 
-      if (!available) {
+      if (available) {
+        setIsUnique(true);
+      } else {
+        setIsUnique(false);
         set.error('Nickname is already taken. Please, choose another one');
       }
     } catch {
@@ -59,61 +67,60 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
     }
   };
 
-  const onFirstNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onFirstNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setField('firstName', e.target.value);
-  };
 
-  const onLastNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const onLastNameChange = (e: ChangeEvent<HTMLInputElement>) =>
     setField('lastName', e.target.value);
-  };
 
   const onAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
-    setRawImageUrl(URL.createObjectURL(file));
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => setRawImageUrl(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const onCropConfirm = (croppedUrl: string) => {
-    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
     setAvatarUrl(croppedUrl);
+    setAvatarChanged(true);
     setRawImageUrl(null);
   };
 
-  const onCropCancel = () => {
-    if (rawImageUrl) URL.revokeObjectURL(rawImageUrl);
-    setRawImageUrl(null);
-  };
+  const onCropCancel = () => setRawImageUrl(null);
 
-  const onRemoveAvatar = () => {
-    setAvatarUrl(null);
-  };
+  const onRemoveAvatar = () => setAvatarUrl(null);
 
   const onSubmit = async () => {
-    const { available } = await api.user.checkNickname(nickname);
+    const { available } = await checkUsername(nickname);
 
     if (!check(nickname) || !available) return;
     setLoading(true);
 
     try {
       if (variant === 'email') {
-        if (!verificationToken) {
-          return;
-        }
+        if (!verificationToken) return;
 
-        await api.auth.createPassword(verificationToken, password);
+        const user = await register({
+          token: verificationToken,
+          password,
+          username: nickname,
+          firstName,
+          lastName,
+          avatarUrl: avatarUrl ?? undefined,
+        });
+
+        setUser(user);
+      } else {
+        await onBoard(nickname, firstName, lastName);
+
+        if (avatarChanged && avatarUrl) await changeAvatar(avatarUrl);
       }
 
-      await api.user.onBoard(nickname, firstName, lastName);
-
-      if (avatarUrl) {
-        await api.user.changeAvatar(avatarUrl);
-      }
-
-      if (variant === 'email') {
-        await api.auth.getTokens(email, password);
-      }
-
+      resetOnboard();
       next(SCREEN_ID.DONE_ONBOARD);
     } finally {
       setLoading(false);
@@ -134,7 +141,11 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
       onChange: onNicknameChange,
       onBlur: onNicknameBlur,
       error,
-      helperText: error ? undefined : HELPER_TEXT,
+      helperText: error
+        ? undefined
+        : isUnique
+          ? 'The nickname is unique'
+          : HELPER_TEXT,
       isSuccess,
       required: true as const,
     },

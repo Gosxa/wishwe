@@ -3,6 +3,9 @@
 @use '@shared/styles/typography' as tp;
 
 .header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
   display: grid;
   grid-template-columns: var(--sidebar-width) repeat(12, minmax(0, 1fr));
   column-gap: 16px;
@@ -10,6 +13,7 @@
   align-items: center;
   height: 72px;
   border-bottom: 1px solid clr.$ns-300;
+  background: clr.$ns-50;
 }
 
 .logoSlot {

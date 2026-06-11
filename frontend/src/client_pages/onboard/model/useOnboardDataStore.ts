@@ -10,11 +10,9 @@ type OnboardDataStore = {
   lastName: string;
   avatarUrl: string | null;
   verificationToken: string | null;
-  isLoading: boolean;
   setField: (field: FieldKey, value: string) => void;
   setAvatarUrl: (url: string | null) => void;
   setVerificationToken: (token: string) => void;
-  setLoading: (value: boolean) => void;
   reset: () => void;
 };
 
@@ -26,7 +24,6 @@ const initialState = {
   lastName: '',
   avatarUrl: null,
   verificationToken: null,
-  isLoading: false,
 };
 
 export const useOnboardDataStore = create<OnboardDataStore>(set => ({
@@ -34,6 +31,5 @@ export const useOnboardDataStore = create<OnboardDataStore>(set => ({
   setField: (field, value) => set({ [field]: value }),
   setAvatarUrl: url => set({ avatarUrl: url }),
   setVerificationToken: token => set({ verificationToken: token }),
-  setLoading: value => set({ isLoading: value }),
   reset: () => set(initialState),
 }));

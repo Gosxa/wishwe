@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Instrument_Serif } from 'next/font/google';
+import { GlobalLoader } from '@/shared/ui/globalLoader/GlobalLoader';
 import './globals.scss';
 
 const skModernist = localFont({
@@ -41,7 +42,10 @@ export default function RootLayout({
       lang="en"
       className={`${skModernist.variable} ${instrumentSerif.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <GlobalLoader />
+        {children}
+      </body>
     </html>
   );
 }

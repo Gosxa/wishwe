@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { SearchIcon } from '@shared/ui/icons';
 import s from '../header.module.scss';
 
-type Props = {
+export type SearchBarProps = {
   value?: string;
   onChange?: (value: string) => void;
   onSearch?: (q: string) => void;
 };
 
-export const SearchBar = ({ value, onChange, onSearch }: Props) => {
+export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
   const [localValue, setLocalValue] = useState('');
 
   const controlled = value !== undefined;
@@ -33,7 +33,7 @@ export const SearchBar = ({ value, onChange, onSearch }: Props) => {
       <input
         className={s.searchInput}
         type="text"
-        placeholder="Search"
+        placeholder="Search events"
         value={current}
         onChange={handleChange}
         onKeyDown={handleKeyDown}

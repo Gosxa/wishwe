@@ -1,20 +1,25 @@
 'use client';
 
 import { type ChangeEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
 } from '@/client_pages/onboard/model';
-import { api } from '@/shared';
+import { login, resetPassword } from '@/shared/client_api/auth';
+import { useUserStore } from '@/shared/store/useUserStore';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
 export const useLoginPassword = () => {
   const email = useOnboardDataStore(s => s.email);
   const password = useOnboardDataStore(s => s.password);
   const setField = useOnboardDataStore(s => s.setField);
-  const setLoading = useOnboardDataStore(s => s.setLoading);
+  const setLoading = useLoadingStore(s => s.setLoading);
   const { next } = useTrackContext();
+  const router = useRouter();
 
+  const setUser = useUserStore(s => s.setUser);
   const [error, setError] = useState<string | undefined>();
   const [forgotError, setForgotError] = useState<string | undefined>();
 
@@ -28,21 +33,12 @@ export const useLoginPassword = () => {
     setLoading(true);
 
     try {
-      await api.auth.getTokens(email, password);
+      const user = await login(email, password);
+
+      setUser(user);
+      router.push('/');
     } catch {
       setError('Login failed');
-      setLoading(false);
-
-      return;
-    }
-
-    try {
-      const profile = await api.user.me();
-
-      // eslint-disable-next-line no-console
-      console.log(profile);
-    } catch {
-      setError('Service temporarily unavailable');
     } finally {
       setLoading(false);
     }
@@ -53,10 +49,8 @@ export const useLoginPassword = () => {
     setLoading(true);
 
     try {
-      await api.auth.resetPwd(email);
-
+      await resetPassword(email);
       setField('password', '');
-
       next(SCREEN_ID.VERIFY_RESET);
     } catch {
       setForgotError('Service temporarily unavailable');
