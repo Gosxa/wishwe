@@ -38,6 +38,7 @@ export const EventCard = ({ event }: Props) => {
     date,
     location,
     description,
+    participants,
     participantCount: initialCount,
     userParticipationStatus: initialStatus,
   } = event;
@@ -48,8 +49,8 @@ export const EventCard = ({ event }: Props) => {
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
 
   const isParticipating = status !== null;
-  const visibleAvatars = Math.min(count, MAX_VISIBLE_AVATARS);
-  const extraCount = count - visibleAvatars;
+  const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
+  const extraCount = Math.max(0, count - shownParticipants.length);
   const actionLabel = type === 'plan' ? 'Join' : 'Interested';
   const selectedLabel = type === 'plan' ? 'Joined' : 'Interested';
 

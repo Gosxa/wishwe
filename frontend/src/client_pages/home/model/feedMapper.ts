@@ -99,6 +99,10 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
         event.event_type === 'wish'
           ? event.interested_count
           : event.participants_count,
+      participants: (event.participants_preview ?? []).map(participant => ({
+        username: handle(participant.username),
+        avatar: toAbsoluteMediaUrl(participant.avatar),
+      })),
       userParticipationStatus: event.user_participation_status,
     };
   });
