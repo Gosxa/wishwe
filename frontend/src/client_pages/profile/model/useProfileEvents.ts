@@ -13,15 +13,17 @@ type Args = {
   userId: number | null;
   tab: ProfileTab;
   sort: ProfileSort;
+  refreshKey?: number;
 };
 
 const noop = () => {};
 
-// Profile events live on the per-user backend endpoint
-// (`/users/{id}/events/`), separate from the home feed, which only returns
-// friends'/friends-of-friends' events. Ownership of each card is resolved
-// client-side by comparing the host handle to the signed-in user.
-export const useProfileEvents = ({ userId, tab, sort }: Args) => {
+export const useProfileEvents = ({
+  userId,
+  tab,
+  sort,
+  refreshKey = 0,
+}: Args) => {
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
   const [events, setEvents] = useState<FeedEvent[]>([]);
@@ -34,10 +36,10 @@ export const useProfileEvents = ({ userId, tab, sort }: Args) => {
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
 
-  // Archive isn't implemented yet — keep the tab inert without hitting the API.
+  // Archive isn't implemented yet
   const isArchive = tab === 'archive';
 
-  const selection = `${tab}|${sort}|${search}`;
+  const selection = `${tab}|${sort}|${search}|${refreshKey}`;
   const [loadingSelection, setLoadingSelection] = useState(selection);
 
   if (selection !== loadingSelection) {
@@ -76,7 +78,7 @@ export const useProfileEvents = ({ userId, tab, sort }: Args) => {
 
         setIsLoading(false);
       });
-  }, [userId, tab, sort, search, isArchive]);
+  }, [userId, tab, sort, search, isArchive, refreshKey]);
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore || userId == null) return;

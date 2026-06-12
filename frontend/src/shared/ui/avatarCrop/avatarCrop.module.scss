@@ -1,5 +1,6 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/animations' as anim;
 
 .overlay {
   position: fixed;
@@ -9,6 +10,7 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
+  @include anim.modal-overlay-enter;
 }
 
 .modal {
@@ -19,6 +21,7 @@
   flex-direction: column;
   gap: 16px;
   width: 560px;
+  @include anim.modal-enter;
 }
 
 .cropArea {

@@ -1,0 +1,80 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+
+.cover {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  @include tp.h2;
+  color: clr.$ns-900;
+}
+
+.tip {
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.dropArea {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 560px;
+  aspect-ratio: 7 / 4;
+  border-radius: 16px;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background-image: url(
+      'data:image/svg+xml,' +
+      '<svg xmlns="http://www.w3.org/2000/svg">' +
+      '<rect width="100%25" height="100%25" fill="none" rx="16" ry="16" ' +
+      'stroke="%23474B24" stroke-width="5" stroke-dasharray="16 14" stroke-linecap="round"/>' +
+      '</svg>'
+    );
+    pointer-events: none;
+  }
+}
+
+.preview {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.changeButton {
+  @include btn.primary(8px, 192px, 40px);
+  position: relative;
+  cursor: pointer;
+}
+
+.formats {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  @include tp.text-caption;
+  color: clr.$ns-700;
+
+  > svg {
+    width: 16px;
+    height: 16px;
+  }
+}

@@ -112,11 +112,40 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    get: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    categories: () =>
+      fetch(`${BACKEND}/api/event/category/`, { cache: 'no-store' }),
+
     action: (id: string, action: string, cookieHeader: string) =>
       fetch(`${BACKEND}/api/event/events/${id}/${action}/`, {
         method: 'POST',
         headers: { cookie: cookieHeader },
         cache: 'no-store',
       }),
+
+    update: (
+      id: string,
+      type: 'plan' | 'wish',
+      body: FormData | unknown,
+      cookieHeader: string,
+    ) => {
+      const url = `${BACKEND}/api/event/events/${id}/update_${type}/`;
+
+      if (body instanceof FormData) {
+        return fetch(url, {
+          method: 'PATCH',
+          headers: { cookie: cookieHeader },
+          body,
+          cache: 'no-store',
+        });
+      }
+
+      return patch(url, body, cookieHeader);
+    },
   },
 };

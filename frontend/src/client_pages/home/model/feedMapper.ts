@@ -1,10 +1,8 @@
+import { formatCategoryHashtag } from '@/shared/lib/formatCategoryName';
 import type { BackendEvent } from '@/shared/client_api/event';
 import type { FeedEvent } from './types';
 
-const cover = (label: string) =>
-  `https://placehold.co/640x400/e8e4d8/8a9199.png?text=${encodeURIComponent(label)}`;
-
-const fallbackCover = cover('No image provided');
+const fallbackCover = '/bg-gradient-noise.webp';
 const apiBaseURL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 const apiOrigin = (() => {
@@ -15,7 +13,9 @@ const apiOrigin = (() => {
   }
 })();
 
-const toAbsoluteMediaUrl = (path: string | null | undefined): string | null => {
+export const toAbsoluteMediaUrl = (
+  path: string | null | undefined,
+): string | null => {
   const value = path?.trim();
 
   if (!value) {
@@ -80,7 +80,9 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
     return {
       id: String(event.id),
       type: event.event_type,
-      hashtag: event.category ? `#${event.category}` : undefined,
+      hashtag: event.category
+        ? formatCategoryHashtag(event.category)
+        : undefined,
       image: eventImage(event.cover_image),
       title: event.title,
       host: {

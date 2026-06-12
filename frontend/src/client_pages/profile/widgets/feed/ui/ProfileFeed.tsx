@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Spinner } from '@/shared';
 import type { Profile } from '@/shared/client_api/auth/types';
+import { getEvent } from '@/shared/client_api/event';
+import type { BackendEvent } from '@/shared/client_api/event';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
+import { EditEventModal } from '@client_pages/profile/widgets/editEventModal';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
 import type {
   ProfileSort,
@@ -22,18 +25,31 @@ export const ProfileFeed = ({ initialUser }: Props) => {
   const [tab, setTab] = useState<ProfileTab>('plans');
   const [sort, setSort] = useState<ProfileSort>('recent');
 
-  // Prefer the live store (picks up in-session edits) but fall back to the
-  // server-fetched user so the first events request doesn't wait for the
-  // client store to hydrate.
   const user = useUserStore(state => state.user) ?? initialUser;
 
   const username = user?.username;
   const currentHandle = username ? `@${username}` : null;
 
+  const [editingEvent, setEditingEvent] = useState<BackendEvent | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
-    useProfileEvents({ userId: user?.user_id ?? null, tab, sort });
+    useProfileEvents({ userId: user?.user_id ?? null, tab, sort, refreshKey });
 
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const handleEditOpen = useCallback(async (id: string) => {
+    try {
+      setEditingEvent(await getEvent(id));
+    } catch {
+      // network failure — leave the modal closed
+    }
+  }, []);
+
+  const handleEventSaved = useCallback(() => {
+    setEditingEvent(null);
+    setRefreshKey(key => key + 1);
+  }, []);
 
   useEffect(() => {
     const node = sentinelRef.current;
@@ -82,6 +98,7 @@ export const ProfileFeed = ({ initialUser }: Props) => {
               isOwn={
                 currentHandle != null && event.host.username === currentHandle
               }
+              onEdit={handleEditOpen}
             />
           ))}
           {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
@@ -91,6 +108,14 @@ export const ProfileFeed = ({ initialUser }: Props) => {
             </div>
           )}
         </div>
+      )}
+
+      {editingEvent && (
+        <EditEventModal
+          event={editingEvent}
+          onClose={() => setEditingEvent(null)}
+          onSaved={handleEventSaved}
+        />
       )}
     </div>
   );

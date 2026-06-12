@@ -26,11 +26,12 @@ import s from './eventCard.module.scss';
 type Props = {
   event: FeedEvent;
   isOwn?: boolean;
+  onEdit?: (id: string) => void;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
 
-export const EventCard = ({ event, isOwn = false }: Props) => {
+export const EventCard = ({ event, isOwn = false, onEdit }: Props) => {
   const {
     id,
     type,
@@ -185,12 +186,16 @@ export const EventCard = ({ event, isOwn = false }: Props) => {
         )}
 
         {isOwn ? (
-          // Static for now — edit / plan-it flows are not wired up yet.
           <div className={s.ownerActions}>
-            <button type="button" className={s.edit}>
+            <button
+              type="button"
+              className={s.edit}
+              onClick={() => onEdit?.(id)}
+            >
               <Pencil />
               <span>Edit</span>
             </button>
+            {/* Static for now */}
             {type === 'wish' && (
               <button type="button" className={s.planIt}>
                 <Sparkles />

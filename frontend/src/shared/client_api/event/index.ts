@@ -1,4 +1,10 @@
-import { BackendEvent, EventListParams, Paginated } from './types';
+import {
+  BackendEvent,
+  BackendEventType,
+  Category,
+  EventListParams,
+  Paginated,
+} from './types';
 
 const PAGE_SIZE = 20;
 
@@ -50,9 +56,69 @@ export const listEvents = async (
   return (await res.json()) as Paginated<BackendEvent>;
 };
 
+export const getEvent = async (id: string): Promise<BackendEvent> => {
+  const res = await fetch(`/api/event/events/${id}`, { method: 'GET' });
+
+  if (!res.ok) {
+    throw new Error('Failed to load event');
+  }
+
+  return (await res.json()) as BackendEvent;
+};
+
+export const listCategories = async (): Promise<Category[]> => {
+  const res = await fetch('/api/event/category', { method: 'GET' });
+
+  if (!res.ok) {
+    throw new Error('Failed to load categories');
+  }
+
+  return (await res.json()) as Category[];
+};
+
+export class UpdateEventError extends Error {
+  constructor(public body: Record<string, unknown>) {
+    super('Failed to update event');
+  }
+}
+
+export const updateEvent = async (
+  id: string,
+  type: BackendEventType,
+  payload: FormData | Record<string, unknown>,
+): Promise<BackendEvent> => {
+  const isFormData = payload instanceof FormData;
+
+  if (isFormData) {
+    payload.set('type', type);
+  }
+
+  const res = await fetch(`/next_api/event/${id}`, {
+    method: 'PATCH',
+    ...(isFormData
+      ? { body: payload }
+      : {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, type }),
+        }),
+  });
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+
+    throw new UpdateEventError(body);
+  }
+
+  return (await res.json()) as BackendEvent;
+};
+
 export type {
   BackendEvent,
   BackendEventType,
+  Category,
   EventListParams,
   MutualFriend,
   Paginated,
