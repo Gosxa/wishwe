@@ -35,6 +35,10 @@
   object-fit: cover;
 }
 
+.imageArchived {
+  filter: grayscale(100%);
+}
+
 .tags {
   position: absolute;
   top: 12px;
@@ -213,6 +217,15 @@
   @include btn.sec-selected;
 }
 
+.viewRecap {
+  @include btn.secondary(8px, 100%, 40px);
+  grid-column: 4 / 6;
+  grid-row: 3;
+  align-self: end;
+  min-width: 0;
+  padding: 0 12px;
+}
+
 
 .ownerActions {
   display: flex;
@@ -327,6 +340,7 @@
   .details,
   .participants,
   .action,
+  .viewRecap,
   .ownerActions {
     grid-column: 1;
   }
@@ -337,6 +351,7 @@
 
   .participants,
   .action,
+  .viewRecap,
   .ownerActions {
     grid-row: auto;
   }

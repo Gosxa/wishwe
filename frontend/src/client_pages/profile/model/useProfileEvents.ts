@@ -16,8 +16,6 @@ type Args = {
   refreshKey?: number;
 };
 
-const noop = () => {};
-
 export const useProfileEvents = ({
   userId,
   tab,
@@ -36,9 +34,6 @@ export const useProfileEvents = ({
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
 
-  // Archive isn't implemented yet
-  const isArchive = tab === 'archive';
-
   const selection = `${tab}|${sort}|${search}|${refreshKey}`;
   const [loadingSelection, setLoadingSelection] = useState(selection);
 
@@ -48,7 +43,7 @@ export const useProfileEvents = ({
   }
 
   useEffect(() => {
-    if (isArchive || userId == null) return;
+    if (userId == null) return;
 
     const requestId = ++requestIdRef.current;
 
@@ -78,7 +73,7 @@ export const useProfileEvents = ({
 
         setIsLoading(false);
       });
-  }, [userId, tab, sort, search, isArchive, refreshKey]);
+  }, [userId, tab, sort, search, refreshKey]);
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore || userId == null) return;
@@ -106,17 +101,6 @@ export const useProfileEvents = ({
         setIsLoadingMore(false);
       });
   }, [userId, tab, sort, search, hasMore]);
-
-  if (isArchive) {
-    return {
-      events: [] as FeedEvent[],
-      isLoading: false,
-      isLoadingMore: false,
-      hasMore: false,
-      loadMore: noop,
-      error: null,
-    };
-  }
 
   return { events, isLoading, isLoadingMore, hasMore, loadMore, error };
 };

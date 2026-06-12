@@ -1,14 +1,17 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Spinner } from '@/shared';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { getEvent } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
+import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { EditEventModal } from '@client_pages/profile/widgets/editEventModal';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
+import { SEARCH_PARAM } from '@client_pages/profile/model/useProfileSearch';
 import type {
   ProfileSort,
   ProfileTab,
@@ -19,9 +22,10 @@ import s from './profileFeed.module.scss';
 
 type Props = {
   initialUser: Profile | null;
+  onSearchDisabledChange?: (disabled: boolean) => void;
 };
 
-export const ProfileFeed = ({ initialUser }: Props) => {
+export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const [tab, setTab] = useState<ProfileTab>('plans');
   const [sort, setSort] = useState<ProfileSort>('recent');
 
@@ -35,6 +39,10 @@ export const ProfileFeed = ({ initialUser }: Props) => {
 
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
     useProfileEvents({ userId: user?.user_id ?? null, tab, sort, refreshKey });
+
+  const search = useSearchParams().get(SEARCH_PARAM) ?? '';
+
+  useSearchDisabledSync(onSearchDisabledChange, events, search);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -98,6 +106,7 @@ export const ProfileFeed = ({ initialUser }: Props) => {
               isOwn={
                 currentHandle != null && event.host.username === currentHandle
               }
+              isArchived={tab === 'archive'}
               onEdit={handleEditOpen}
             />
           ))}

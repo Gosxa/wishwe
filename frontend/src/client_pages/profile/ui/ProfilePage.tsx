@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { Header } from '@widgets/header';
 import { Sidebar } from '@widgets/sidebar';
@@ -25,15 +25,25 @@ export default function ProfilePage({ initialUser }: Props) {
 
 function ProfilePageContent({ initialUser }: Props) {
   const search = useProfileSearch();
+  const [searchDisabled, setSearchDisabled] = useState(false);
 
   return (
     <div className={s.shell}>
-      <Header search={{ ...search, placeholder: 'Search my events' }} />
+      <Header
+        search={{
+          ...search,
+          placeholder: 'Search my events',
+          disabled: searchDisabled,
+        }}
+      />
       <div className={s.body}>
         <Sidebar activeKey="profile" />
         <main className={s.content}>
           <ProfileHeader initialUser={initialUser} />
-          <ProfileFeed initialUser={initialUser} />
+          <ProfileFeed
+            initialUser={initialUser}
+            onSearchDisabledChange={setSearchDisabled}
+          />
         </main>
       </div>
     </div>

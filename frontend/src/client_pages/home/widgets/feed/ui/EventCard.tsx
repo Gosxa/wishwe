@@ -26,12 +26,18 @@ import s from './eventCard.module.scss';
 type Props = {
   event: FeedEvent;
   isOwn?: boolean;
+  isArchived?: boolean;
   onEdit?: (id: string) => void;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
 
-export const EventCard = ({ event, isOwn = false, onEdit }: Props) => {
+export const EventCard = ({
+  event,
+  isOwn = false,
+  isArchived = false,
+  onEdit,
+}: Props) => {
   const {
     id,
     type,
@@ -109,7 +115,12 @@ export const EventCard = ({ event, isOwn = false, onEdit }: Props) => {
     <article className={s.card}>
       <div className={s.media}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={s.image} src={image} alt={title} loading="lazy" />
+        <img
+          className={clsx(s.image, isArchived && s.imageArchived)}
+          src={image}
+          alt={title}
+          loading="lazy"
+        />
         <div className={s.tags}>
           <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
             {type}
@@ -185,7 +196,12 @@ export const EventCard = ({ event, isOwn = false, onEdit }: Props) => {
           </div>
         )}
 
-        {isOwn ? (
+        {isArchived ? (
+          /* Static for now */
+          <button type="button" className={s.viewRecap}>
+            <span>View recap</span>
+          </button>
+        ) : isOwn ? (
           <div className={s.ownerActions}>
             <button
               type="button"
