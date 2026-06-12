@@ -95,6 +95,10 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   const onRemoveAvatar = () => setAvatarUrl(null);
 
   const onSubmit = async () => {
+    console.log('=== onSubmit ===');
+    console.log('avatarChanged:', avatarChanged);
+    console.log('avatarUrl:', avatarUrl ? avatarUrl.substring(0, 50) : null);
+    console.log('variant:', variant);
     const { available } = await checkUsername(nickname);
 
     if (!check(nickname) || !available) return;
