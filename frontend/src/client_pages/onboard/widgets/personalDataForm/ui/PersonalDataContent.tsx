@@ -1,4 +1,4 @@
-import { type ChangeEvent, useRef } from 'react';
+import { type ChangeEvent } from 'react';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { Avatar } from '@shared/ui/icons';
 import { AvatarCrop } from './avatarCrop/AvatarCrop';
@@ -38,8 +38,6 @@ export const PersonalDataContent = ({
   lastName,
   submit,
 }: Props) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   return (
     <div className={s.wrapper}>
       {avatar.rawImageUrl && (
@@ -51,7 +49,7 @@ export const PersonalDataContent = ({
       )}
       <div className={s.avatarWrapper}>
         <div className={s.avatarBtnWrap}>
-          <label className={s.avatarBtn}>
+          <label className={s.avatarBtn} htmlFor="avatar-input">
             {avatar.url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -62,14 +60,6 @@ export const PersonalDataContent = ({
             ) : (
               <Avatar />
             )}
-            <input
-              ref={fileInputRef}
-              id="avatar-input"
-              type="file"
-              accept="image/*"
-              onChange={avatar.onChange}
-              hidden
-            />
           </label>
           {avatar.url && (
             <button className={s.removeAvatarBtn} onClick={avatar.onRemove}>
@@ -80,6 +70,13 @@ export const PersonalDataContent = ({
         <label className={s.btnCh} htmlFor="avatar-input">
           <span>Change photo</span>
         </label>
+        <input
+          id="avatar-input"
+          type="file"
+          accept="image/*"
+          onChange={avatar.onChange}
+          hidden
+        />
       </div>
 
       <TextInput
