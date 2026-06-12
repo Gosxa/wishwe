@@ -66,6 +66,14 @@ export const beApi = {
     updateProfile: (body: unknown, cookieHeader: string) =>
       patch(`${BACKEND}/api/user/profile/update_profile/`, body, cookieHeader),
 
+    changePassword: (body: unknown, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/change-password/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      }),
+
     avatar: (body: FormData, cookieHeader: string) =>
       fetch(`${BACKEND}/api/user/profile/avatar/`, {
         method: 'PATCH',

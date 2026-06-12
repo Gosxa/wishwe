@@ -114,6 +114,32 @@ export const updateProfile = async (
   return res.json();
 };
 
+export class ChangePasswordError extends Error {
+  constructor(public body: Record<string, unknown>) {
+    super('Failed to change password');
+  }
+}
+
+export const changePassword = async (
+  oldPassword: string,
+  newPassword: string,
+): Promise<void> => {
+  const res = await fetch('/next_api/user/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      old_password: oldPassword,
+      new_password: newPassword,
+    }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+
+    throw new ChangePasswordError(body);
+  }
+};
+
 export const createInvite = async (): Promise<{ token: string }> => {
   const res = await fetch('/next_api/user/invite', { method: 'POST' });
 

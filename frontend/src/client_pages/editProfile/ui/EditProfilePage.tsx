@@ -9,6 +9,8 @@ import { TextArea } from '@shared/ui/textArea/TextArea';
 import { Toggle } from '@shared/ui/toggle/Toggle';
 import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
 import { HelperText } from '@shared/ui/helperText/HelperText';
+import { useState } from 'react';
+import { ChangePasswordModal } from '../widgets/changePasswordModal';
 import { useEditProfile } from '../model/useEditProfile';
 import s from './editProfilePage.module.scss';
 
@@ -29,6 +31,8 @@ export default function EditProfilePage({ initialUser }: Props) {
     onSubmit,
     onCancel,
   } = useEditProfile(initialUser);
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   return (
     <div className={s.shell}>
@@ -98,8 +102,13 @@ export default function EditProfilePage({ initialUser }: Props) {
               </div>
             </div>
 
-            {/* TODO: wire to the change-password flow */}
-            <span className={s.changePassword}>Change password?</span>
+            <button
+              type="button"
+              className={s.changePassword}
+              onClick={() => setIsPasswordModalOpen(true)}
+            >
+              Change password?
+            </button>
 
             {formError && <HelperText text={formError} type="error" inline />}
 
@@ -126,6 +135,10 @@ export default function EditProfilePage({ initialUser }: Props) {
           onConfirm={avatar.onCropConfirm}
           onCancel={avatar.onCropCancel}
         />
+      )}
+
+      {isPasswordModalOpen && (
+        <ChangePasswordModal onClose={() => setIsPasswordModalOpen(false)} />
       )}
     </div>
   );

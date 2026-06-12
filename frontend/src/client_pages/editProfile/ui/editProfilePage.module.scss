@@ -111,8 +111,13 @@
 
 .changePassword {
   @include tp.text-caption;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
   color: clr.$prm-dark;
   margin-top: 24px;
+  cursor: pointer;
 }
 
 .actions {
