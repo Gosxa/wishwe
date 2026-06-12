@@ -1,3 +1,5 @@
+import { avatarFormData } from '@/shared/lib/avatarFormData';
+
 export const checkUsername = async (
   username: string,
 ): Promise<{ available: boolean }> => {
@@ -28,12 +30,15 @@ export const onBoard = async (
   if (!res.ok) throw new Error('Failed to onboard');
 };
 
-export const changeAvatar = async (avatar: string): Promise<void> => {
+export const changeAvatar = async (
+  avatar: string,
+): Promise<{ avatar: string }> => {
   const res = await fetch('/next_api/user/avatar', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ avatar }),
+    body: await avatarFormData(avatar),
   });
 
   if (!res.ok) throw new Error('Failed to upload avatar');
+
+  return res.json();
 };
