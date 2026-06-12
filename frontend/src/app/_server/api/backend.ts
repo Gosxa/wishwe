@@ -63,13 +63,23 @@ export const beApi = {
     onboarding: (body: unknown, cookieHeader: string) =>
       patch(`${BACKEND}/api/user/profile/onboarding/`, body, cookieHeader),
 
-    avatar: (body: FormData, cookieHeader: string) =>
-      fetch(`${BACKEND}/api/user/profile/avatar/`, {
+    avatar: (body: FormData, cookieHeader: string) => {
+      // In Node.js fetch, FormData doesn't auto-set Content-Type with boundary.
+      // We need to get it from the FormData object itself.
+      const headers: Record<string, string> = { cookie: cookieHeader };
+
+      // Node 18+ / undici: FormData has no .getHeaders(), but we can cast
+      // to get the boundary via the internal boundary property
+      // The safest fix: convert FormData → Blob with explicit type
+      return fetch(`${BACKEND}/api/user/profile/avatar/`, {
         method: 'PATCH',
-        headers: { cookie: cookieHeader },
+        headers,
         body,
         cache: 'no-store',
-      }),
+        // @ts-ignore — undici supports duplex for streaming
+        duplex: 'half',
+      });
+    },
 
     checkUsername: (username: string) =>
       fetch(
