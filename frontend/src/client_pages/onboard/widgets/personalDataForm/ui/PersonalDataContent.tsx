@@ -64,6 +64,7 @@ export const PersonalDataContent = ({
             )}
             <input
               ref={fileInputRef}
+              id="avatar-input"
               type="file"
               accept="image/*"
               onChange={avatar.onChange}
@@ -76,12 +77,9 @@ export const PersonalDataContent = ({
             </button>
           )}
         </div>
-        <button
-          className={s.btnCh}
-          onClick={() => fileInputRef.current?.click()}
-        >
+        <label className={s.btnCh} htmlFor="avatar-input">
           <span>Change photo</span>
-        </button>
+        </label>
       </div>
 
       <TextInput
