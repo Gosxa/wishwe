@@ -110,10 +110,15 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
           username: nickname,
           firstName,
           lastName,
-          avatarUrl: avatarUrl ?? undefined,
         });
 
-        setUser(user);
+        if (avatarChanged && avatarUrl) {
+          const { avatar } = await changeAvatar(avatarUrl);
+
+          setUser({ ...user, avatar });
+        } else {
+          setUser(user);
+        }
       } else {
         await onBoard(nickname, firstName, lastName);
 

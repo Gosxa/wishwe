@@ -23,5 +23,4 @@ export type RegisterParams = {
   username: string;
   firstName?: string;
   lastName?: string;
-  avatarUrl?: string;
 };
