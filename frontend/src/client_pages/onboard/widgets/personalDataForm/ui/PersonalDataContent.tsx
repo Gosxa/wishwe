@@ -75,7 +75,7 @@ export const PersonalDataContent = ({
           type="file"
           accept="image/*"
           onChange={avatar.onChange}
-          hidden
+          style={{ display: 'none' }}
         />
       </div>
 
