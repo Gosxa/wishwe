@@ -30,6 +30,7 @@ type Props = {
   isArchived?: boolean;
   showEventType?: boolean;
   onEdit?: (id: string) => void;
+  onPlanIt?: (id: string) => void;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
@@ -40,6 +41,7 @@ export const EventCard = ({
   isArchived = false,
   showEventType = true,
   onEdit,
+  onPlanIt,
 }: Props) => {
   const {
     id,
@@ -220,9 +222,12 @@ export const EventCard = ({
               <Pencil />
               <span>Edit</span>
             </button>
-            {/* Static for now */}
             {type === 'wish' && (
-              <button type="button" className={s.planIt}>
+              <button
+                type="button"
+                className={s.planIt}
+                onClick={() => onPlanIt?.(id)}
+              >
                 <Sparkles />
                 <span>Plan it</span>
               </button>

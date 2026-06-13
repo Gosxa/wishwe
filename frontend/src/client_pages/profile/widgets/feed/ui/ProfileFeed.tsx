@@ -10,6 +10,7 @@ import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { EditEventModal } from '@client_pages/profile/widgets/editEventModal';
+import { PlanItModal } from '@client_pages/profile/widgets/planItModal';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
 import { SEARCH_PARAM } from '@client_pages/profile/model/useProfileSearch';
 import type {
@@ -35,6 +36,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const currentHandle = username ? `@${username}` : null;
 
   const [editingEvent, setEditingEvent] = useState<BackendEvent | null>(null);
+  const [planningEvent, setPlanningEvent] = useState<BackendEvent | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
@@ -56,6 +58,18 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
 
   const handleEventSaved = useCallback(() => {
     setEditingEvent(null);
+    setRefreshKey(key => key + 1);
+  }, []);
+
+  const handlePlanItOpen = useCallback(async (id: string) => {
+    try {
+      setPlanningEvent(await getEvent(id));
+    } catch {}
+  }, []);
+
+  const handlePlanItConverted = useCallback(() => {
+    setPlanningEvent(null);
+    setTab('plans');
     setRefreshKey(key => key + 1);
   }, []);
 
@@ -109,6 +123,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
               isArchived={tab === 'archive'}
               showEventType={false}
               onEdit={handleEditOpen}
+              onPlanIt={handlePlanItOpen}
             />
           ))}
           {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
@@ -125,6 +140,14 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
           event={editingEvent}
           onClose={() => setEditingEvent(null)}
           onSaved={handleEventSaved}
+        />
+      )}
+
+      {planningEvent && (
+        <PlanItModal
+          event={planningEvent}
+          onClose={() => setPlanningEvent(null)}
+          onConverted={handlePlanItConverted}
         />
       )}
     </div>

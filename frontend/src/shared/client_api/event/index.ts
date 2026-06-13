@@ -115,6 +115,41 @@ export const updateEvent = async (
   return (await res.json()) as BackendEvent;
 };
 
+export class ConvertEventError extends Error {
+  constructor(public body: Record<string, unknown>) {
+    super('Failed to convert wish to plan');
+  }
+}
+
+export type ConvertToPlanPayload = {
+  event_date: string;
+  event_time: string;
+  min_participants: number;
+  max_participants: number;
+};
+
+export const convertToPlan = async (
+  id: string,
+  payload: ConvertToPlanPayload,
+): Promise<BackendEvent> => {
+  const res = await fetch(`/next_api/event/${id}/convert`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+
+    throw new ConvertEventError(body);
+  }
+
+  return (await res.json()) as BackendEvent;
+};
+
 export type {
   BackendEvent,
   BackendEventType,

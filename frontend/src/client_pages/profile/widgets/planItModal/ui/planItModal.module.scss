@@ -1,0 +1,264 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/animations' as anim;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  @include anim.modal-overlay-enter;
+}
+
+.modal {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+  gap: 48px;
+  width: min(1200px, 100%);
+  height: min(880px, 100%);
+  padding: 72px 56px 56px;
+  border: 1px solid clr.$prm;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  @include anim.modal-enter;
+}
+
+.close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: clr.$ns-700;
+  cursor: pointer;
+
+  > svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.typeBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.typePills {
+  display: flex;
+  gap: 8px;
+}
+
+.typePill {
+  display: flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 16px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 1px clr.$ns-100;
+  color: clr.$ns-700;
+
+  @include tp.text-body;
+}
+
+.typePillActive {
+  background: clr.$prm;
+  box-shadow: none;
+  color: clr.$ns-50;
+  font-weight: 700;
+}
+
+.typeHint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @include tp.text-caption;
+  color: clr.$ns-700;
+
+  > svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.coverSlot {
+  margin: auto 0;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 0;
+}
+
+.title {
+  @include tp.h2;
+  color: clr.$ns-900;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 24px;
+  min-height: 0;
+  padding-right: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+
+.readonly {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @include tp.text-body;
+  color: clr.$ns-900;
+
+  > svg {
+    width: 16px;
+    height: 16px;
+    color: clr.$err;
+  }
+}
+
+.whenRow {
+  display: flex;
+  gap: 16px;
+}
+
+.dateTimeWrapper {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+
+  > svg {
+    position: absolute;
+    right: 16px;
+    width: 16px;
+    height: 16px;
+    color: clr.$ns-900;
+    pointer-events: none;
+  }
+}
+
+.dateTimeWrapperTime {
+  flex: 0 1 176px;
+}
+
+.dateTimeInput {
+  width: 100%;
+  padding: 9px 16px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background-color: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-700;
+  color: clr.$ns-900;
+  transition: all 0.3s ease;
+
+  @include tp.text-body;
+
+  &::-webkit-calendar-picker-indicator {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  &:focus-visible {
+    box-shadow:
+      inset 0 0 0 1px clr.$prm,
+      0 0 4px 0 rgba(clr.$prm-light, 0.1);
+  }
+}
+
+.inputError {
+  box-shadow:
+    inset 0 0 0 1px clr.$err,
+    0 0 4px 0 rgba(#ffb3b3, 0.7);
+
+  &:focus-visible {
+    box-shadow:
+      inset 0 0 0 1px clr.$err,
+      0 0 4px 0 rgba(#ffb3b3, 0.7);
+  }
+}
+
+.steppers {
+  display: flex;
+  align-items: flex-start;
+  gap: 19px;
+}
+
+.maxField {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.unlimited {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.unlimitedLabel {
+  @include tp.text-caption;
+  color: clr.$ns-500;
+}
+
+.unlimitedControl {
+  display: flex;
+  align-items: center;
+  height: 40px;
+}
+
+.share {
+  @include btn.primary(8px, 100%, 40px);
+  flex-shrink: 0;
+}

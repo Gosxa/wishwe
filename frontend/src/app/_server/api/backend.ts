@@ -147,5 +147,13 @@ export const beApi = {
 
       return patch(url, body, cookieHeader);
     },
+
+    convert: (id: string, body: unknown, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/convert_to_plan/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      }),
   },
 };
