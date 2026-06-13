@@ -107,6 +107,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
                 currentHandle != null && event.host.username === currentHandle
               }
               isArchived={tab === 'archive'}
+              showEventType={false}
               onEdit={handleEditOpen}
             />
           ))}

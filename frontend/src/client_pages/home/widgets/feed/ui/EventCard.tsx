@@ -28,6 +28,7 @@ type Props = {
   event: FeedEvent;
   isOwn?: boolean;
   isArchived?: boolean;
+  showEventType?: boolean;
   onEdit?: (id: string) => void;
 };
 
@@ -37,6 +38,7 @@ export const EventCard = ({
   event,
   isOwn = false,
   isArchived = false,
+  showEventType = true,
   onEdit,
 }: Props) => {
   const {
@@ -124,9 +126,11 @@ export const EventCard = ({
           loading="lazy"
         />
         <div className={s.tags}>
-          <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
-            {type}
-          </span>
+          {showEventType && (
+            <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
+              {type}
+            </span>
+          )}
           {hashtag && <span className={clsx(s.tag, s.hashtag)}>{hashtag}</span>}
         </div>
       </div>

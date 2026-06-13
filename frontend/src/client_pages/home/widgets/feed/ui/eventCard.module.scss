@@ -57,15 +57,18 @@
 
 .plan {
   background: clr.$acc-purple;
+  box-shadow: inset 0 0 0 1px clr.$ns-900;
 }
 
 .wish {
   background: clr.$acc-yellow;
+  outline: 2px dashed clr.$ns-900;
+  outline-offset: -2px;
 }
 
 .hashtag {
   background: clr.$ns-50;
-  box-shadow: inset 0 0 0 1px clr.$ns-200;
+  box-shadow: inset 0 0 0 1px clr.$ns-900;
 }
 
 /* ---- Body (right) ---- */
