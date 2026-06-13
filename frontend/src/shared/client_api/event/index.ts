@@ -76,6 +76,44 @@ export const listCategories = async (): Promise<Category[]> => {
   return (await res.json()) as Category[];
 };
 
+export class CreateEventError extends Error {
+  constructor(public body: Record<string, unknown>) {
+    super('Failed to create event');
+  }
+}
+
+export const createEvent = async (
+  type: BackendEventType,
+  payload: FormData | Record<string, unknown>,
+): Promise<BackendEvent> => {
+  const isFormData = payload instanceof FormData;
+
+  if (isFormData) {
+    payload.set('type', type);
+  }
+
+  const res = await fetch('/next_api/event', {
+    method: 'POST',
+    ...(isFormData
+      ? { body: payload }
+      : {
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...payload, type }),
+        }),
+  });
+
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as Record<
+      string,
+      unknown
+    >;
+
+    throw new CreateEventError(body);
+  }
+
+  return (await res.json()) as BackendEvent;
+};
+
 export class UpdateEventError extends Error {
   constructor(public body: Record<string, unknown>) {
     super('Failed to update event');

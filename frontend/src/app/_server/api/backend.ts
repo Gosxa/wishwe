@@ -128,6 +128,30 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    create: (
+      type: 'plan' | 'wish',
+      body: FormData | unknown,
+      cookieHeader: string,
+    ) => {
+      const url = `${BACKEND}/api/event/events/create_${type}/`;
+
+      if (body instanceof FormData) {
+        return fetch(url, {
+          method: 'POST',
+          headers: { cookie: cookieHeader },
+          body,
+          cache: 'no-store',
+        });
+      }
+
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      });
+    },
+
     update: (
       id: string,
       type: 'plan' | 'wish',

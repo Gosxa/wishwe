@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { listUserEvents } from '@/shared/client_api/user';
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { toProfileEventListParams } from './profileEventsQuery';
@@ -23,6 +24,7 @@ export const useProfileEvents = ({
   refreshKey = 0,
 }: Args) => {
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
+  const refreshToken = useEventsRefreshStore(state => state.refreshToken);
 
   const [events, setEvents] = useState<FeedEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +36,7 @@ export const useProfileEvents = ({
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
 
-  const selection = `${tab}|${sort}|${search}|${refreshKey}`;
+  const selection = `${tab}|${sort}|${search}|${refreshKey}|${refreshToken}`;
   const [loadingSelection, setLoadingSelection] = useState(selection);
 
   if (selection !== loadingSelection) {
@@ -73,7 +75,7 @@ export const useProfileEvents = ({
 
         setIsLoading(false);
       });
-  }, [userId, tab, sort, search, refreshKey]);
+  }, [userId, tab, sort, search, refreshKey, refreshToken]);
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore || userId == null) return;

@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 128px;
+  width: 136px;
 }
 
 .label {
@@ -17,8 +17,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  padding: 10px 16px;
+  gap: 10px;
+  padding: 10px 14px;
   border-radius: 8px;
   background: clr.$ns-50;
   box-shadow: inset 0 0 0 1px clr.$ns-300;

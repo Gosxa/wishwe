@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { listEvents } from '@/shared/client_api/event';
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { toEventListParams } from './feedQuery';
 import { toFeedEvents } from './feedMapper';
 import { SEARCH_PARAM } from './useFeedSearch';
@@ -14,6 +15,7 @@ export const useFeedEvents = () => {
   const reach = useFeedToolbarStore(state => state.reach);
   const sort = useFeedToolbarStore(state => state.sort);
   const hasHydrated = useFeedToolbarStore(state => state._hasHydrated);
+  const refreshToken = useEventsRefreshStore(state => state.refreshToken);
 
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
@@ -63,7 +65,7 @@ export const useFeedEvents = () => {
 
         setIsLoading(false);
       });
-  }, [filter, reach, sort, search, hasHydrated]);
+  }, [filter, reach, sort, search, hasHydrated, refreshToken]);
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore) return;

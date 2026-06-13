@@ -73,9 +73,12 @@
   align-items: center;
   height: 30px;
   padding: 0 16px;
+  border: none;
   border-radius: 8px;
   box-shadow: inset 0 0 0 1px clr.$ns-100;
+  background: transparent;
   color: clr.$ns-700;
+  cursor: pointer;
 
   @include tp.text-body;
 }
@@ -247,7 +250,7 @@
   height: 40px;
 }
 
-.save {
+.share {
   @include btn.primary(8px, 100%, 40px);
   flex-shrink: 0;
 }

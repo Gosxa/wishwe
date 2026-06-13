@@ -7,23 +7,23 @@ import { TextInput } from '@shared/ui/textInput/TextInput';
 import { TextArea } from '@shared/ui/textArea/TextArea';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { Toggle } from '@shared/ui/toggle/Toggle';
-import type { BackendEvent } from '@/shared/client_api/event';
-import { useBodyScrollLock } from '@/features';
 import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
 import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
-import { useEditEvent } from '../model/useEditEvent';
-import s from './editEventModal.module.scss';
+import { useBodyScrollLock } from '@/features';
+import { useCreateEvent } from '../model/useCreateEvent';
+import { PrivacyPicker } from './PrivacyPicker';
+import s from './createEventModal.module.scss';
 
 type Props = {
-  event: BackendEvent;
   onClose: () => void;
-  onSaved: () => void;
+  onCreated: () => void;
 };
 
-export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
+export const CreateEventModal = ({ onClose, onCreated }: Props) => {
   const {
     isPlan,
+    onTypeChange,
     category,
     titleInput,
     locationInput,
@@ -32,9 +32,11 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
     timeInput,
     participants,
     timeframeInput,
+    visibility,
     cover,
+    canShare,
     submit,
-  } = useEditEvent(event, onSaved);
+  } = useCreateEvent(onCreated);
 
   useBodyScrollLock();
 
@@ -58,7 +60,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
         className={s.modal}
         role="dialog"
         aria-modal="true"
-        aria-labelledby="editEventTitle"
+        aria-labelledby="createEventTitle"
       >
         <button
           type="button"
@@ -70,15 +72,24 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
         </button>
 
         <div className={s.left}>
-          {/* Display-only */}
           <div className={s.typeBlock}>
             <div className={s.typePills}>
-              <span className={clsx(s.typePill, isPlan && s.typePillActive)}>
+              <button
+                type="button"
+                className={clsx(s.typePill, isPlan && s.typePillActive)}
+                onClick={() => onTypeChange('plan')}
+                aria-pressed={isPlan}
+              >
                 Plan
-              </span>
-              <span className={clsx(s.typePill, !isPlan && s.typePillActive)}>
+              </button>
+              <button
+                type="button"
+                className={clsx(s.typePill, !isPlan && s.typePillActive)}
+                onClick={() => onTypeChange('wish')}
+                aria-pressed={!isPlan}
+              >
                 Wish
-              </span>
+              </button>
             </div>
             <span className={s.typeHint}>
               <BadgeInfo />
@@ -99,8 +110,8 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
         </div>
 
         <div className={s.right}>
-          <h2 id="editEventTitle" className={s.title}>
-            {isPlan ? 'Edit a plan' : 'Edit a wish'}
+          <h2 id="createEventTitle" className={s.title}>
+            {isPlan ? 'Create a plan' : 'Create a wish'}
           </h2>
 
           <div className={s.fields}>
@@ -115,7 +126,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
               id="eventTitle"
               label={isPlan ? "What's the plan?" : "What's your wish?"}
               placeholder={
-                isPlan ? 'Rooftop sunset cocktails' : 'Board games night'
+                isPlan ? 'e.g., Friday pizza party' : 'e.g., Picnic in the park'
               }
               required
               value={titleInput.value}
@@ -127,7 +138,11 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
             <TextInput
               id="eventLocation"
               label="Where?"
-              placeholder="Add a location"
+              placeholder={
+                isPlan
+                  ? 'Name of the spot or address'
+                  : 'Any specific place or area?'
+              }
               required
               value={locationInput.value}
               onChange={e => locationInput.onChange(e.target.value)}
@@ -137,7 +152,11 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
             <TextArea
               id="eventDescription"
               label="Description"
-              placeholder="Add details"
+              placeholder={
+                isPlan
+                  ? 'Share some details: the vibe, what to bring, etc.'
+                  : 'Share some details about your idea'
+              }
               value={descriptionInput.value}
               onChange={e => descriptionInput.onChange(e.target.value)}
               helperText="Up to 200 characters"
@@ -218,19 +237,16 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
                       <span className={s.unlimitedLabel}>Unlimited</span>
                       <div className={s.unlimitedControl}>
                         <Toggle
-                          id="editPlanUnlimited"
+                          id="planUnlimited"
                           checked={participants.unlimited}
                           onChange={participants.onUnlimitedChange}
                         />
                       </div>
                     </div>
                   </div>
-                  {(participants.minError ?? participants.maxError) && (
+                  {participants.maxError && (
                     <HelperText
-                      text={
-                        (participants.minError ??
-                          participants.maxError) as string
-                      }
+                      text={participants.maxError}
                       type="error"
                       inline
                     />
@@ -257,16 +273,14 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
                     min={1}
                     onChange={participants.onMinChange}
                   />
-                  {participants.minError && (
-                    <HelperText
-                      text={participants.minError}
-                      type="error"
-                      inline
-                    />
-                  )}
                 </div>
               </>
             )}
+
+            <PrivacyPicker
+              value={visibility.value}
+              onChange={visibility.onChange}
+            />
 
             {submit.error && (
               <HelperText text={submit.error} type="error" inline />
@@ -275,11 +289,11 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
 
           <button
             type="button"
-            className={s.save}
+            className={s.share}
             onClick={submit.onSubmit}
-            disabled={submit.isSubmitting}
+            disabled={!canShare || submit.isSubmitting}
           >
-            <span>Save changes</span>
+            <span>Share</span>
           </button>
         </div>
       </div>

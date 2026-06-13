@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BellDot, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
+import { CreateEventModal } from '@widgets/createEventModal';
 import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
 import s from '../header.module.scss';
@@ -20,7 +22,9 @@ type Props = {
 
 export const Header = ({ search }: Props) => {
   const router = useRouter();
+  const requestRefresh = useEventsRefreshStore(state => state.requestRefresh);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   const settingsActions: Partial<Record<string, () => void>> = {
@@ -61,7 +65,16 @@ export const Header = ({ search }: Props) => {
         <Logo height={36} />
       </div>
       <SearchBar {...search} />
-      <CreateButton />
+      <CreateButton onClick={() => setIsCreateOpen(true)} />
+      {isCreateOpen && (
+        <CreateEventModal
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => {
+            setIsCreateOpen(false);
+            requestRefresh();
+          }}
+        />
+      )}
       <div className={s.actions}>
         <button className={s.iconBtn}>
           <BellDot />

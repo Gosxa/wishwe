@@ -2,18 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import {
+  createEvent,
+  CreateEventError,
   listCategories,
-  updateEvent,
-  UpdateEventError,
 } from '@/shared/client_api/event';
-import type { BackendEvent, Category } from '@/shared/client_api/event';
+import type { BackendEventType, Category } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
-import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
-import type { FieldErrors } from './types';
+import type { EventVisibility, FieldErrors } from './types';
 
+const UNLIMITED_MAX = 3000;
 const ALLOWED_COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_COVER_SIZE = 5 * 1024 * 1024;
-const UNLIMITED_MAX = 3000;
 
 const fieldError = (value: unknown): string | undefined =>
   Array.isArray(value) && value.length > 0 ? String(value[0]) : undefined;
@@ -36,60 +35,46 @@ const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   cover_image: 'cover',
 };
 
-export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
+export const useCreateEvent = (onCreated: () => void) => {
   const setLoading = useLoadingStore(s => s.setLoading);
 
-  const isPlan = event.event_type === 'plan';
+  const [type, setType] = useState<BackendEventType>('plan');
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<number | null>(null);
 
-  const [title, setTitle] = useState(event.title);
-  const [location, setLocation] = useState(event.location);
-  const [description, setDescription] = useState(event.description);
-  const [eventDate, setEventDate] = useState(event.event_date ?? '');
-  const [eventTime, setEventTime] = useState(
-    event.event_time?.slice(0, 5) ?? '',
-  );
-  const [minParticipants, setMinParticipants] = useState(
-    event.min_participants,
-  );
-  const initialMax = event.max_participants ?? 2;
-  const initialUnlimited = isPlan && initialMax >= UNLIMITED_MAX;
-  const [maxParticipants, setMaxParticipants] = useState(
-    initialUnlimited ? 2 : initialMax,
-  );
-  const [unlimited, setUnlimited] = useState(initialUnlimited);
-  const [timeframeText, setTimeframeText] = useState(
-    event.timeframe_text ?? '',
-  );
+  const [title, setTitle] = useState('');
+  const [location, setLocation] = useState('');
+  const [description, setDescription] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [minParticipants, setMinParticipants] = useState(1);
+  const [maxParticipants, setMaxParticipants] = useState(2);
+  const [unlimited, setUnlimited] = useState(true);
+  const [timeframeText, setTimeframeText] = useState('');
+  const [visibility, setVisibility] = useState<EventVisibility>('friends-only');
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(
-    toAbsoluteMediaUrl(event.cover_image),
-  );
+  const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isPlan = type === 'plan';
 
   useEffect(() => {
     let isActive = true;
 
     listCategories()
       .then(data => {
-        if (!isActive) return;
-
-        setCategories(data);
-        setCategoryId(
-          data.find(category => category.name === event.category)?.id ?? null,
-        );
+        if (isActive) setCategories(data);
       })
       .catch(() => {});
 
     return () => {
       isActive = false;
     };
-  }, [event.category]);
+  }, []);
 
   useEffect(
     () => () => {
@@ -131,6 +116,8 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
   const validate = (): FieldErrors => {
     const next: FieldErrors = {};
 
+    if (!categoryId) next.category = 'Category is required';
+
     if (!title.trim()) next.title = 'Title is required';
     else if (title.length > 50) next.title = 'Up to 50 characters';
 
@@ -156,15 +143,24 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
     return next;
   };
 
+  const canShare =
+    Boolean(categoryId) &&
+    title.trim().length > 0 &&
+    location.trim().length > 0 &&
+    (isPlan
+      ? Boolean(eventDate) && Boolean(eventTime)
+      : timeframeText.trim().length > 0);
+
   const buildFields = (): Record<string, string | number> => {
     const fields: Record<string, string | number> = {
       title: title.trim(),
-      description,
       location: location.trim(),
       min_participants: minParticipants,
+      event_visibility: visibility,
     };
 
     if (categoryId != null) fields.category = categoryId;
+    if (description.trim()) fields.description = description.trim();
 
     if (isPlan) {
       fields.event_date = eventDate;
@@ -204,10 +200,10 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
         payload = formData;
       }
 
-      await updateEvent(String(event.id), event.event_type, payload);
-      onSaved();
+      await createEvent(type, payload);
+      onCreated();
     } catch (e) {
-      const body = e instanceof UpdateEventError ? errorBody(e.body) : {};
+      const body = e instanceof CreateEventError ? errorBody(e.body) : {};
       const next: FieldErrors = {};
 
       Object.entries(DRF_FIELD_MAP).forEach(([drfKey, formKey]) => {
@@ -231,7 +227,12 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
   };
 
   return {
+    type,
     isPlan,
+    onTypeChange: (next: BackendEventType) => {
+      setType(next);
+      setErrors({});
+    },
     category: {
       options: categories,
       selected: categoryId,
@@ -308,11 +309,16 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
       },
       error: errors.timeframeText,
     },
+    visibility: {
+      value: visibility,
+      onChange: (value: EventVisibility) => setVisibility(value),
+    },
     cover: {
       previewUrl: coverPreviewUrl,
       onSelect: onCoverSelect,
       error: errors.cover,
     },
+    canShare,
     submit: {
       onSubmit,
       isSubmitting,

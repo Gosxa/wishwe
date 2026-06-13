@@ -2,13 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { beApi } from '@/app/_server/api/backend';
 import { validate } from '@/app/_server/api/validate';
-import { planSchema, typeSchema, wishSchema } from '../schemas';
+import { planSchema, typeSchema, wishSchema } from './schemas';
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params;
+export async function POST(request: NextRequest) {
   const cookieHeader = request.headers.get('cookie') ?? '';
   const contentType = request.headers.get('content-type') ?? '';
 
@@ -39,8 +35,7 @@ export async function PATCH(
 
     formData.delete('type');
 
-    const res = await beApi.event.update(
-      id,
+    const res = await beApi.event.create(
       parsedType.data,
       formData,
       cookieHeader,
@@ -63,7 +58,7 @@ export async function PATCH(
 
   if (error) return error;
 
-  const res = await beApi.event.update(id, parsedType.data, data, cookieHeader);
+  const res = await beApi.event.create(parsedType.data, data, cookieHeader);
 
   return NextResponse.json(await res.json(), { status: res.status });
 }

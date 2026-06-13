@@ -5,3 +5,6 @@ export { Toggle } from './toggle/Toggle';
 export { PasswordInput } from './passwordInput/PasswordInput';
 export { Spinner } from './spinner/Spinner';
 export { HelperText } from './helperText/HelperText';
+export { CategoryPicker } from './categoryPicker/CategoryPicker';
+export { Stepper } from './stepper/Stepper';
+export { CoverUpload } from './coverUpload/CoverUpload';

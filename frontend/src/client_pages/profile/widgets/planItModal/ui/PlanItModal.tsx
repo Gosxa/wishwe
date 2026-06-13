@@ -10,10 +10,10 @@ import { Toggle } from '@shared/ui/toggle/Toggle';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
+import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
+import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
+import { Stepper } from '@shared/ui/stepper/Stepper';
 import { usePlanIt } from '../model/usePlanIt';
-import { CategoryPicker } from '../../editEventModal/ui/CategoryPicker';
-import { CoverUpload } from '../../editEventModal/ui/CoverUpload';
-import { Stepper } from '../../editEventModal/ui/Stepper';
 import s from './planItModal.module.scss';
 
 type Props = {
