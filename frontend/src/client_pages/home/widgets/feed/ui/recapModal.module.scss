@@ -1,0 +1,172 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/animations' as anim;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  @include anim.modal-overlay-enter;
+}
+
+.modal {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 560px) minmax(0, 480px);
+  align-items: start;
+  gap: 48px;
+  width: min(1200px, 100%);
+  max-height: calc(100vh - 48px);
+  padding: 72px 56px 56px;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  overflow-y: auto;
+  @include anim.modal-enter;
+}
+
+.close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: clr.$ns-700;
+  cursor: pointer;
+
+  > svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.cover {
+  align-self: start;
+  aspect-ratio: 7 / 4;
+  width: 100%;
+  border: 1px dashed clr.$prm;
+  border-radius: 16px;
+  overflow: hidden;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.title {
+  @include tp.h2;
+  color: clr.$ns-900;
+  word-break: break-word;
+}
+
+.divider {
+  height: 1px;
+  background: clr.$ns-200;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.fieldValue {
+  @include tp.text-body;
+  color: clr.$ns-900;
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+.muted {
+  @include tp.text-body;
+  color: clr.$ns-500;
+}
+
+.attendees {
+  display: flex;
+  align-items: center;
+}
+
+.avatars {
+  display: flex;
+
+  .stackAvatar:not(:first-child) {
+    margin-left: -8px;
+  }
+}
+
+.stackAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: clr.$ns-100;
+  border: 2px solid clr.$ns-50;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.extra {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 6px;
+  margin-left: -12px;
+  border-radius: 48px;
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-200;
+  color: clr.$ns-700;
+
+  @include tp.text-caption;
+}
+
+.backButton {
+  @include btn.primary(8px, 100%, 40px);
+}

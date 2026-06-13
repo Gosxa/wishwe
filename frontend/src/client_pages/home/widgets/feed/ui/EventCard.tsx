@@ -21,6 +21,7 @@ import {
   joinPlan,
   leaveEvent,
 } from '@/shared/client_api/event';
+import { RecapModal } from './RecapModal';
 import s from './eventCard.module.scss';
 
 type Props = {
@@ -57,6 +58,7 @@ export const EventCard = ({
   const [count, setCount] = useState(initialCount);
   const [isPending, setIsPending] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isRecapOpen, setIsRecapOpen] = useState(false);
 
   const isParticipating = status !== null;
   const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
@@ -197,8 +199,11 @@ export const EventCard = ({
         )}
 
         {isArchived ? (
-          /* Static for now */
-          <button type="button" className={s.viewRecap}>
+          <button
+            type="button"
+            className={s.viewRecap}
+            onClick={() => setIsRecapOpen(true)}
+          >
             <span>View recap</span>
           </button>
         ) : isOwn ? (
@@ -243,6 +248,10 @@ export const EventCard = ({
           </button>
         )}
       </div>
+
+      {isRecapOpen && (
+        <RecapModal event={event} onClose={() => setIsRecapOpen(false)} />
+      )}
 
       {isLeaveDialogOpen && (
         <div className={s.leaveOverlay}>
