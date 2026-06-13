@@ -148,7 +148,11 @@ export const FeedToolbar = ({
       <Dropdown
         label="Sort:"
         value={activeSort}
-        options={sortOptions}
+        options={
+          activeFilter === 'all'
+            ? sortOptions.filter(option => option.key !== 'heat')
+            : sortOptions
+        }
         onChange={onSortChange}
       />
     </div>

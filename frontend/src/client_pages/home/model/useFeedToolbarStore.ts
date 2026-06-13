@@ -24,7 +24,12 @@ export const useFeedToolbarStore = create<FeedToolbarStore>()(
   persist(
     set => ({
       ...initialState,
-      setFilter: filter => set({ filter }),
+      setFilter: filter =>
+        set(state => ({
+          filter,
+          sort:
+            filter === 'all' && state.sort === 'heat' ? 'recent' : state.sort,
+        })),
       setReach: reach => set({ reach }),
       setSort: sort => set({ sort }),
       setHasHydrated: value => set({ _hasHydrated: value }),
@@ -32,7 +37,12 @@ export const useFeedToolbarStore = create<FeedToolbarStore>()(
     {
       name: 'feed-toolbar',
       partialize: ({ filter, reach, sort }) => ({ filter, reach, sort }),
-      onRehydrateStorage: () => state => state?.setHasHydrated(true),
+      onRehydrateStorage: () => state => {
+        if (!state) return;
+        if (state.filter === 'all' && state.sort === 'heat')
+          state.setSort('recent');
+        state.setHasHydrated(true);
+      },
     },
   ),
 );
