@@ -167,7 +167,7 @@ class EventSerializer(serializers.ModelSerializer):
             participant
             for participant in getattr(obj, "preview_participants", [])
             if participant.status == relevant_status
-        ][:3]
+        ][:6]
 
         return ParticipantPreviewSerializer(
             preview,

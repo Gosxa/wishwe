@@ -11,7 +11,7 @@ type Props = {
   onClose: () => void;
 };
 
-const MAX_VISIBLE_AVATARS = 3;
+const MAX_VISIBLE_AVATARS = 6;
 
 export const RecapModal = ({ event, onClose }: Props) => {
   const {

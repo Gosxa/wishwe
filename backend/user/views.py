@@ -688,7 +688,7 @@ class UserViewSet(
                         ParticipationStatus.JOINED,
                         ParticipationStatus.INTERESTED,
                     ),
-                ).select_related("user__profile").order_by("joined_at")[:3],
+                ).select_related("user__profile").order_by("joined_at")[:6],
                 to_attr="preview_participants",
             ),
             Prefetch(
