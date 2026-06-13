@@ -4,7 +4,6 @@ import { z } from 'zod';
 import { beApi } from '@/app/_server/api/backend';
 import { extractCookieHeader, forwardCookies } from '@/app/_server/api/cookies';
 import { validate } from '@/app/_server/api/validate';
-import { avatarFormData } from '@/shared/lib/avatarFormData';
 
 const schema = z.object({
   token: z.string().min(1),
@@ -12,7 +11,6 @@ const schema = z.object({
   username: z.string().min(3).max(30),
   firstName: z.string().optional(),
   lastName: z.string().optional(),
-  avatarUrl: z.string().min(1).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -20,7 +18,7 @@ export async function POST(request: NextRequest) {
 
   if (error) return error;
 
-  const { token, password, username, firstName, lastName, avatarUrl } = data;
+  const { token, password, username, firstName, lastName } = data;
 
   const setPasswordRes = await beApi.auth.setPassword({ token, password });
 
@@ -41,10 +39,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(await onboardRes.json(), {
       status: onboardRes.status,
     });
-  }
-
-  if (avatarUrl) {
-    await beApi.user.avatar(await avatarFormData(avatarUrl), cookieHeader);
   }
 
   const meRes = await beApi.user.me(cookieHeader);

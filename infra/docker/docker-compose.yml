@@ -7,8 +7,6 @@ services:
     restart: unless-stopped
     env_file:
       - /var/www/app/backend/.env
-    volumes:
-      - static_files:/app/staticfiles
     expose:
       - "8000"
     networks:
@@ -50,7 +48,6 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - static_files:/app/staticfiles:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
@@ -142,7 +139,6 @@ volumes:
   netdataconfig:
   netdatalib:
   netdatacache:
-  static_files:
 
 networks:
   backend:

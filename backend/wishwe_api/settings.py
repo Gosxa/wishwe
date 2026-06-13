@@ -151,9 +151,15 @@ AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_CLOUDFRONT_DOMAIN")
 
 if AWS_S3_CUSTOM_DOMAIN:
     STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
-    STATICFILES_STORAGE = "wishwe.storage_backends.StaticStorage"
     MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/media/"
-    DEFAULT_FILE_STORAGE = "wishwe.storage_backends.MediaStorage"
+    STORAGES = {
+        "default": {
+            "BACKEND": "wishwe_api.storage_backends.MediaStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "wishwe_api.storage_backends.StaticStorage",
+        },
+    }
 else:
     STATIC_URL = "/static/"
     MEDIA_URL = "/media/"
