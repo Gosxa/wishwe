@@ -82,7 +82,6 @@ export default function EditProfilePage({ initialUser }: Props) {
                 <Toggle
                   id="publicProfile"
                   label="Public profile"
-                  helperText="If disabled, your profile is hidden from search and can only be seen by your direct friends."
                   {...privacy}
                 />
               </div>

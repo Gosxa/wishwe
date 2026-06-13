@@ -16,6 +16,10 @@ import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
 const TAKEN_ERROR = 'Nickname is already taken. Please, choose another one';
+const PUBLIC_PROFILE_HELPER_ON =
+  'Your profile can be found by other users via search.';
+const PUBLIC_PROFILE_HELPER_OFF =
+  'If disabled, your profile is hidden from search and can only be seen by your direct friends.';
 
 export const useEditProfile = (initialUser: Profile | null) => {
   const router = useRouter();
@@ -174,7 +178,13 @@ export const useEditProfile = (initialUser: Profile | null) => {
     bio: { value: bio, onChange: onBioChange },
     firstName: { value: firstName, onChange: onFirstNameChange },
     lastName: { value: lastName, onChange: onLastNameChange },
-    privacy: { checked: isPublic, onChange: setIsPublic },
+    privacy: {
+      checked: isPublic,
+      onChange: setIsPublic,
+      helperText: isPublic
+        ? PUBLIC_PROFILE_HELPER_ON
+        : PUBLIC_PROFILE_HELPER_OFF,
+    },
     formError,
     isDirty,
     onSubmit,
