@@ -2,6 +2,7 @@
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/animations' as anim;
+@use '@shared/styles/scrollbars' as scroll;
 
 .overlay {
   position: fixed;
@@ -127,6 +128,7 @@
   padding-right: 4px;
   overflow-y: auto;
   overflow-x: hidden;
+  @include scroll.thin;
 }
 
 
