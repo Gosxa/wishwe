@@ -108,16 +108,18 @@ class ChangePasswordSerializer(serializers.Serializer):
 
 class FriendshipSerializer(serializers.ModelSerializer):
     sender = serializers.CharField(source="sender.profile.username", read_only=True)
+    sender_avatar = serializers.ImageField(source="sender.profile.avatar", read_only=True)
     receiver = serializers.CharField(source="receiver.profile.username", read_only=True)
 
     class Meta:
         model = Friendship
-        fields = ("id", "sender", "receiver", "status")
+        fields = ("id", "sender", "sender_avatar", "receiver", "status")
 
 
 class FriendSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField()
+    avatar = serializers.ImageField()
     friendship_id = serializers.IntegerField()
 
 

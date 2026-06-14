@@ -78,6 +78,7 @@ class FriendshipService:
             result.append({
                 "id": friend.id,
                 "username": friend.profile.username,
+                "avatar": friend.profile.avatar,
                 "friendship_id": f.id
             })
 
