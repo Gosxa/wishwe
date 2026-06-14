@@ -37,6 +37,18 @@ $FOCUS_SHADOW:
   position: relative;
 }
 
+.counter {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.counterOver {
+  color: clr.$err;
+}
+
 .textarea {
   display: flex;
   width: 100%;

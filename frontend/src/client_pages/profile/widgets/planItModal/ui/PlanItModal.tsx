@@ -109,6 +109,8 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
                 value={event.title}
                 onChange={noop}
                 helperText="Up to 50 characters"
+                maxLength={50}
+                showCounter
               />
 
               <TextInput
@@ -128,6 +130,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
                 onChange={noop}
                 helperText="Up to 200 characters"
                 maxLength={200}
+                showCounter
               />
             </fieldset>
 

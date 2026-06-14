@@ -15,6 +15,8 @@ type Props = {
   helperText?: string;
   error?: string;
   isSuccess?: boolean;
+  maxLength?: number;
+  showCounter?: boolean;
 };
 
 export const TextInput = ({
@@ -28,6 +30,8 @@ export const TextInput = ({
   helperText,
   error,
   isSuccess = false,
+  maxLength,
+  showCounter = false,
 }: Props) => {
   const helperContent = error ?? helperText;
   const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
@@ -49,6 +53,7 @@ export const TextInput = ({
           value={value}
           onChange={onChange}
           onBlur={onBlur}
+          maxLength={maxLength}
           className={clsx(
             s.input,
             error && s.inputError,
@@ -56,6 +61,16 @@ export const TextInput = ({
           )}
         />
         {helperContent && <HelperText text={helperContent} type={helperType} />}
+        {showCounter && maxLength != null && (
+          <span
+            className={clsx(
+              s.counter,
+              value.length > maxLength && s.counterOver,
+            )}
+          >
+            {value.length}/{maxLength}
+          </span>
+        )}
       </div>
     </div>
   );

@@ -122,6 +122,8 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
               onChange={e => titleInput.onChange(e.target.value)}
               helperText="Up to 50 characters"
               error={titleInput.error}
+              maxLength={50}
+              showCounter
             />
 
             <TextInput
@@ -143,6 +145,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
               helperText="Up to 200 characters"
               error={descriptionInput.error}
               maxLength={200}
+              showCounter
             />
 
             {isPlan ? (

@@ -75,6 +75,7 @@ export default function EditProfilePage({ initialUser }: Props) {
                 label="Your bio"
                 maxLength={150}
                 helperText="Up to 150 characters"
+                showCounter
                 {...bio}
               />
               <div className={s.privacy}>

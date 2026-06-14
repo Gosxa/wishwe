@@ -16,6 +16,7 @@ type Props = {
   error?: string;
   isSuccess?: boolean;
   maxLength?: number;
+  showCounter?: boolean;
   rows?: number;
 };
 
@@ -31,6 +32,7 @@ export const TextArea = ({
   error,
   isSuccess = false,
   maxLength,
+  showCounter = false,
   rows = 3,
 }: Props) => {
   const helperContent = error ?? helperText;
@@ -61,6 +63,16 @@ export const TextArea = ({
           )}
         />
         {helperContent && <HelperText text={helperContent} type={helperType} />}
+        {showCounter && maxLength != null && (
+          <span
+            className={clsx(
+              s.counter,
+              value.length > maxLength && s.counterOver,
+            )}
+          >
+            {value.length}/{maxLength}
+          </span>
+        )}
       </div>
     </div>
   );
