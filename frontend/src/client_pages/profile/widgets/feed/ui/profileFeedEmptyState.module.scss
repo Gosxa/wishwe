@@ -1,0 +1,37 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 72px;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.subtitle {
+  max-width: 520px;
+  margin: 8px 0 0;
+  color: clr.$ns-700;
+
+  @include tp.text-body;
+}
+
+.create {
+  @include btn.primary(8px, 184px, 40px);
+  margin-top: 32px;
+}
+
+@media (max-width: 900px) {
+  .empty {
+    padding-top: 56px;
+  }
+}

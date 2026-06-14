@@ -1,5 +1,6 @@
 import type { FeedFilter } from '@client_pages/home/model/types';
 import { Plus } from '@shared/ui/icons';
+import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import s from './feedEmptyState.module.scss';
 
 type Props = {
@@ -31,6 +32,7 @@ const copy: Record<
 
 export const FeedEmptyState = ({ filter }: Props) => {
   const { title, subtitle, create } = copy[filter];
+  const openCreate = useCreateEventStore(state => state.open);
 
   return (
     <div className={s.empty}>
@@ -38,7 +40,11 @@ export const FeedEmptyState = ({ filter }: Props) => {
       <p className={s.subtitle}>{subtitle}</p>
 
       <div className={s.actions}>
-        <button type="button" className={s.create}>
+        <button
+          type="button"
+          className={s.create}
+          onClick={() => openCreate(filter === 'wishes' ? 'wish' : 'plan')}
+        >
           <Plus />
           <span>{create}</span>
         </button>

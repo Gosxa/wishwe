@@ -35,10 +35,13 @@ const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   cover_image: 'cover',
 };
 
-export const useCreateEvent = (onCreated: () => void) => {
+export const useCreateEvent = (
+  onCreated: () => void,
+  defaultType: BackendEventType = 'plan',
+) => {
   const setLoading = useLoadingStore(s => s.setLoading);
 
-  const [type, setType] = useState<BackendEventType>('plan');
+  const [type, setType] = useState<BackendEventType>(defaultType);
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<number | null>(null);
@@ -61,6 +64,14 @@ export const useCreateEvent = (onCreated: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isPlan = type === 'plan';
+
+  const [prevDefaultType, setPrevDefaultType] = useState(defaultType);
+
+  if (defaultType !== prevDefaultType) {
+    setPrevDefaultType(defaultType);
+    setType(defaultType);
+    setErrors({});
+  }
 
   useEffect(() => {
     let isActive = true;

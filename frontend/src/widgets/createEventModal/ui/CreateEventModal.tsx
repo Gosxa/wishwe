@@ -10,6 +10,7 @@ import { Toggle } from '@shared/ui/toggle/Toggle';
 import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
 import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
+import type { BackendEventType } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { useCreateEvent } from '../model/useCreateEvent';
 import { PrivacyPicker } from './PrivacyPicker';
@@ -18,9 +19,14 @@ import s from './createEventModal.module.scss';
 type Props = {
   onClose: () => void;
   onCreated: () => void;
+  defaultType?: BackendEventType;
 };
 
-export const CreateEventModal = ({ onClose, onCreated }: Props) => {
+export const CreateEventModal = ({
+  onClose,
+  onCreated,
+  defaultType,
+}: Props) => {
   const {
     isPlan,
     onTypeChange,
@@ -36,7 +42,7 @@ export const CreateEventModal = ({ onClose, onCreated }: Props) => {
     cover,
     canShare,
     submit,
-  } = useCreateEvent(onCreated);
+  } = useCreateEvent(onCreated, defaultType);
 
   useBodyScrollLock();
 
