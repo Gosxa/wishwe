@@ -8,15 +8,25 @@ export type SearchBarProps = {
   value?: string;
   onChange?: (value: string) => void;
   onSearch?: (q: string) => void;
+  placeholder?: string;
+  disabled?: boolean;
 };
 
-export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
+export const SearchBar = ({
+  value,
+  onChange,
+  onSearch,
+  placeholder = 'Search events',
+  disabled = false,
+}: SearchBarProps) => {
   const [localValue, setLocalValue] = useState('');
 
   const controlled = value !== undefined;
   const current = controlled ? value : localValue;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
+
     const next = e.target.value;
 
     if (!controlled) setLocalValue(next);
@@ -24,17 +34,24 @@ export const SearchBar = ({ value, onChange, onSearch }: SearchBarProps) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') onSearch?.(current);
+    if (disabled || e.key !== 'Enter') return;
+
+    onSearch?.(current);
   };
 
   return (
-    <div className={s.searchBar}>
+    <div
+      className={
+        disabled ? `${s.searchBar} ${s.searchBarDisabled}` : s.searchBar
+      }
+    >
       <SearchIcon />
       <input
         className={s.searchInput}
         type="text"
-        placeholder="Search events"
+        placeholder={placeholder}
         value={current}
+        disabled={disabled}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />

@@ -6,7 +6,9 @@ import {
   Avatar,
   CalendarClock,
   Location,
+  Pencil,
   Plus,
+  Sparkles,
   StickyNote,
   UserRound,
   UsersRound,
@@ -19,15 +21,28 @@ import {
   joinPlan,
   leaveEvent,
 } from '@/shared/client_api/event';
+import { RecapModal } from './RecapModal';
 import s from './eventCard.module.scss';
 
 type Props = {
   event: FeedEvent;
+  isOwn?: boolean;
+  isArchived?: boolean;
+  showEventType?: boolean;
+  onEdit?: (id: string) => void;
+  onPlanIt?: (id: string) => void;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
 
-export const EventCard = ({ event }: Props) => {
+export const EventCard = ({
+  event,
+  isOwn = false,
+  isArchived = false,
+  showEventType = true,
+  onEdit,
+  onPlanIt,
+}: Props) => {
   const {
     id,
     type,
@@ -47,6 +62,7 @@ export const EventCard = ({ event }: Props) => {
   const [count, setCount] = useState(initialCount);
   const [isPending, setIsPending] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
+  const [isRecapOpen, setIsRecapOpen] = useState(false);
 
   const isParticipating = status !== null;
   const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
@@ -105,11 +121,18 @@ export const EventCard = ({ event }: Props) => {
     <article className={s.card}>
       <div className={s.media}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={s.image} src={image} alt={title} loading="lazy" />
+        <img
+          className={clsx(s.image, isArchived && s.imageArchived)}
+          src={image}
+          alt={title}
+          loading="lazy"
+        />
         <div className={s.tags}>
-          <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
-            {type}
-          </span>
+          {showEventType && (
+            <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
+              {type}
+            </span>
+          )}
           {hashtag && <span className={clsx(s.tag, s.hashtag)}>{hashtag}</span>}
         </div>
       </div>
@@ -181,28 +204,63 @@ export const EventCard = ({ event }: Props) => {
           </div>
         )}
 
-        <button
-          type="button"
-          className={clsx(s.action, isParticipating && s.joined)}
-          onClick={handleActionClick}
-          disabled={isPending}
-        >
-          {isParticipating ? (
-            <>
-              <span className={s.selectedFace}>{selectedLabel}</span>
-              <span className={s.leaveFace}>
-                <X />
-                Leave
-              </span>
-            </>
-          ) : (
-            <>
-              <Plus />
-              <span>{actionLabel}</span>
-            </>
-          )}
-        </button>
+        {isArchived ? (
+          <button
+            type="button"
+            className={s.viewRecap}
+            onClick={() => setIsRecapOpen(true)}
+          >
+            <span>View recap</span>
+          </button>
+        ) : isOwn ? (
+          <div className={s.ownerActions}>
+            <button
+              type="button"
+              className={s.edit}
+              onClick={() => onEdit?.(id)}
+            >
+              <Pencil />
+              <span>Edit</span>
+            </button>
+            {type === 'wish' && (
+              <button
+                type="button"
+                className={s.planIt}
+                onClick={() => onPlanIt?.(id)}
+              >
+                <Sparkles />
+                <span>Plan it</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={clsx(s.action, isParticipating && s.joined)}
+            onClick={handleActionClick}
+            disabled={isPending}
+          >
+            {isParticipating ? (
+              <>
+                <span className={s.selectedFace}>{selectedLabel}</span>
+                <span className={s.leaveFace}>
+                  <X />
+                  Leave
+                </span>
+              </>
+            ) : (
+              <>
+                <Plus />
+                <span>{actionLabel}</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
+
+      {isRecapOpen && (
+        <RecapModal event={event} onClose={() => setIsRecapOpen(false)} />
+      )}
 
       {isLeaveDialogOpen && (
         <div className={s.leaveOverlay}>

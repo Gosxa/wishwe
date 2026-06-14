@@ -3,11 +3,15 @@
 
 $ERR_SHADOW:
   inset 0 0 0 1px clr.$err,
-  0 0 8px 0 rgba(#ffb3b3, 0.7);
+  0 0 4px 0 rgba(#ffb3b3, 0.7);
 
 $SUCESS_SHADOW:
   inset 0 0 0 1px clr.$success,
-  0 0 8px 0 rgba(clr.$success, 0.2);
+  0 0 3px 0 rgba(#a1de94, 0.5);
+
+$FOCUS_SHADOW:
+  inset 0 0 0 1px clr.$prm,
+  0 0 4px 0 rgba(clr.$prm-light, 0.1);
 
 .wrapper {
   display: flex;
@@ -33,6 +37,18 @@ $SUCESS_SHADOW:
   position: relative;
 }
 
+.counter {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.counterOver {
+  color: clr.$err;
+}
+
 .input {
   display: flex;
   width: 100%;
@@ -46,15 +62,21 @@ $SUCESS_SHADOW:
   box-shadow: inset 0 0 0 1px clr.$ns-300;
 
   &::placeholder {
-    color: clr.$ns-300;
+    color: clr.$ns-500;
   }
 
   &:hover {
     box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
 
+  &:not(:placeholder-shown) {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+
+  // After :not(:placeholder-shown) so a filled input still shows the
+  // focus ring while being edited.
   &:focus-visible {
-    box-shadow: inset 0 0 0 1px clr.$prm;
+    box-shadow: $FOCUS_SHADOW;
 
     &::placeholder {
       color: clr.$ns-900;
@@ -62,15 +84,12 @@ $SUCESS_SHADOW:
   }
 
   &:disabled {
-    box-shadow: inset 0 0 0 1px clr.$ns-100;
+    box-shadow: inset 0 0 0 1px clr.$ns-200;
+    color: clr.$ns-300;
 
     &::placeholder {
-      color: clr.$ns-100;
+      color: clr.$ns-300;
     }
-  }
-
-  &:not(:placeholder-shown) {
-    box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
 
   &.inputError {

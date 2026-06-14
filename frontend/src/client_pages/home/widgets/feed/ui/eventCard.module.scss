@@ -18,12 +18,25 @@
   aspect-ratio: 16 / 9;
   border-radius: 16px;
   overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    box-shadow: inset 0 0 0 1px clr.$ns-900;
+    pointer-events: none;
+  }
 }
 
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.imageArchived {
+  filter: grayscale(100%);
 }
 
 .tags {
@@ -44,15 +57,18 @@
 
 .plan {
   background: clr.$acc-purple;
+  box-shadow: inset 0 0 0 1px clr.$ns-900;
 }
 
 .wish {
   background: clr.$acc-yellow;
+  outline: 2px dashed clr.$ns-900;
+  outline-offset: -2px;
 }
 
 .hashtag {
   background: clr.$ns-50;
-  box-shadow: inset 0 0 0 1px clr.$ns-200;
+  box-shadow: inset 0 0 0 1px clr.$ns-900;
 }
 
 /* ---- Body (right) ---- */
@@ -204,6 +220,39 @@
   @include btn.sec-selected;
 }
 
+.viewRecap {
+  @include btn.secondary(8px, 100%, 40px);
+  grid-column: 4 / 6;
+  grid-row: 3;
+  align-self: end;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+
+.ownerActions {
+  display: flex;
+  grid-column: 4 / 6;
+  grid-row: 3;
+  align-self: end;
+  gap: 8px;
+  min-width: 0;
+}
+
+.edit {
+  @include btn.secondary(8px, 100%, 40px);
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+}
+
+.planIt {
+  @include btn.primary(8px, 100%, 40px);
+  flex: 1;
+  min-width: 0;
+  padding: 0 12px;
+}
+
 .selectedFace,
 .leaveFace {
   display: inline-flex;
@@ -293,7 +342,9 @@
 
   .details,
   .participants,
-  .action {
+  .action,
+  .viewRecap,
+  .ownerActions {
     grid-column: 1;
   }
 
@@ -302,7 +353,9 @@
   }
 
   .participants,
-  .action {
+  .action,
+  .viewRecap,
+  .ownerActions {
     grid-row: auto;
   }
 

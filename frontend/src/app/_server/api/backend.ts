@@ -63,6 +63,17 @@ export const beApi = {
     onboarding: (body: unknown, cookieHeader: string) =>
       patch(`${BACKEND}/api/user/profile/onboarding/`, body, cookieHeader),
 
+    updateProfile: (body: unknown, cookieHeader: string) =>
+      patch(`${BACKEND}/api/user/profile/update_profile/`, body, cookieHeader),
+
+    changePassword: (body: unknown, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/change-password/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      }),
+
     avatar: (body: FormData, cookieHeader: string) =>
       fetch(`${BACKEND}/api/user/profile/avatar/`, {
         method: 'PATCH',
@@ -76,6 +87,22 @@ export const beApi = {
         `${BACKEND}/api/username-check/?username=${encodeURIComponent(username)}`,
         { cache: 'no-store' },
       ),
+
+    invite: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/invite/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    events: (id: string, query: string, cookieHeader: string) =>
+      fetch(
+        `${BACKEND}/api/user/users/${id}/events/${query ? `?${query}` : ''}`,
+        {
+          headers: { cookie: cookieHeader },
+          cache: 'no-store',
+        },
+      ),
   },
 
   event: {
@@ -85,10 +112,71 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    get: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    categories: () =>
+      fetch(`${BACKEND}/api/event/category/`, { cache: 'no-store' }),
+
     action: (id: string, action: string, cookieHeader: string) =>
       fetch(`${BACKEND}/api/event/events/${id}/${action}/`, {
         method: 'POST',
         headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    create: (
+      type: 'plan' | 'wish',
+      body: FormData | unknown,
+      cookieHeader: string,
+    ) => {
+      const url = `${BACKEND}/api/event/events/create_${type}/`;
+
+      if (body instanceof FormData) {
+        return fetch(url, {
+          method: 'POST',
+          headers: { cookie: cookieHeader },
+          body,
+          cache: 'no-store',
+        });
+      }
+
+      return fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      });
+    },
+
+    update: (
+      id: string,
+      type: 'plan' | 'wish',
+      body: FormData | unknown,
+      cookieHeader: string,
+    ) => {
+      const url = `${BACKEND}/api/event/events/${id}/update_${type}/`;
+
+      if (body instanceof FormData) {
+        return fetch(url, {
+          method: 'PATCH',
+          headers: { cookie: cookieHeader },
+          body,
+          cache: 'no-store',
+        });
+      }
+
+      return patch(url, body, cookieHeader);
+    },
+
+    convert: (id: string, body: unknown, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/convert_to_plan/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
         cache: 'no-store',
       }),
   },

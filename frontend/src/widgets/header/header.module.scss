@@ -58,6 +58,19 @@
   }
 }
 
+.searchBarDisabled {
+  box-shadow: inset 0 0 0 1px clr.$ns-200;
+  color: clr.$ns-300;
+  cursor: not-allowed;
+
+  &:hover,
+  &:focus-within,
+  &:has(.searchInput:not(:placeholder-shown)) {
+    box-shadow: inset 0 0 0 1px clr.$ns-200;
+    color: clr.$ns-300;
+  }
+}
+
 .searchInput {
   flex: 1;
   min-width: 0;
@@ -74,6 +87,15 @@
 
   &:focus-visible::placeholder {
     color: clr.$ns-900;
+  }
+
+  &:disabled {
+    color: clr.$ns-300;
+    cursor: not-allowed;
+
+    &::placeholder {
+      color: clr.$ns-300;
+    }
   }
 }
 

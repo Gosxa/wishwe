@@ -1,0 +1,74 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.choice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  width: fit-content;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+
+  &:disabled + .track {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  &:checked + .track {
+    background-color: clr.$prm;
+
+    > .thumb {
+      transform: translateX(18px);
+    }
+  }
+
+  &:focus-visible + .track {
+    box-shadow:
+      0 0 0 2px clr.$ns-50,
+      0 0 0 3px clr.$prm;
+  }
+}
+
+.track {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 20px;
+  padding: 1px;
+  border-radius: 48px;
+  background-color: clr.$ns-300;
+  transition: background-color 0.3s ease;
+}
+
+.thumb {
+  width: 16px;
+  height: 16px;
+  margin-left: 1px;
+  border-radius: 50%;
+  background-color: clr.$ns-50;
+  transition: transform 0.3s ease;
+}
+
+.label {
+  @include typo.text-body;
+  color: clr.$ns-900;
+}

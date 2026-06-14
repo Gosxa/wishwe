@@ -165,6 +165,11 @@ poetry.toml
 
 pyrightconfig.json
 
+# Re-include frontend source under shared/lib (the unanchored `lib/` rule
+# in the Python section above otherwise ignores frontend/src/shared/lib).
+!frontend/src/shared/lib/
+!frontend/src/shared/lib/**
+
 
 # ---------------- DEVOPS ----------------
 

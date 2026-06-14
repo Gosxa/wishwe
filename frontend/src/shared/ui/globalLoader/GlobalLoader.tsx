@@ -17,5 +17,5 @@ export const GlobalLoader = () => {
 
   if (!isLoading) return null;
 
-  return <Spinner />;
+  return <Spinner fullscreen />;
 };

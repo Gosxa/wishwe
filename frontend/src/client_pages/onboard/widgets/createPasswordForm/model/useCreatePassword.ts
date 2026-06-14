@@ -1,7 +1,6 @@
 'use client';
 
 import { type ChangeEvent, useState } from 'react';
-import { z } from 'zod';
 import { useValidation } from '@/features/useValidation/useValidation';
 import {
   SCREEN_ID,
@@ -11,13 +10,10 @@ import {
 } from '@/client_pages/onboard/model';
 import { setNewPassword, login } from '@/shared/client_api/auth';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
-
-const HELPER_TEXT = 'Minimum 8 characters with letters and numbers';
-
-const passwordSchema = z
-  .string()
-  .min(8, HELPER_TEXT)
-  .regex(/(?=.*[a-zA-Z])(?=.*[0-9])/, HELPER_TEXT);
+import {
+  passwordSchema,
+  PASSWORD_HELPER_TEXT as HELPER_TEXT,
+} from '@/shared/lib/validation/password';
 
 export const useCreatePassword = (variant: CreatePasswordVariant) => {
   const email = useOnboardDataStore(s => s.email);

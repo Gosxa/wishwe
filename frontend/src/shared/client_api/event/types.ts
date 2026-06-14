@@ -40,6 +40,11 @@ type BackendEvent = {
   user_participation_status: UserParticipationStatus | null;
 };
 
+type Category = {
+  id: number;
+  name: string;
+};
+
 type Paginated<T> = {
   count: number;
   next: string | null;
@@ -59,6 +64,7 @@ type EventListParams = {
 export type {
   BackendEvent,
   BackendEventType,
+  Category,
   EventListParams,
   MutualFriend,
   ParticipantPreview,

@@ -18,7 +18,9 @@ export async function POST(request: NextRequest) {
   const tokenRes = await beApi.auth.getTokens(data);
 
   if (!tokenRes.ok) {
-    return NextResponse.json(await tokenRes.json(), { status: tokenRes.status });
+    return NextResponse.json(await tokenRes.json(), {
+      status: tokenRes.status,
+    });
   }
 
   const cookieHeader = extractCookieHeader(tokenRes);

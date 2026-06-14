@@ -1,0 +1,54 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 136px;
+}
+
+.label {
+  @include tp.text-caption;
+  color: clr.$ns-500;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  color: clr.$ns-900;
+  cursor: pointer;
+
+  &:disabled {
+    color: clr.$ns-300;
+    cursor: not-allowed;
+  }
+}
+
+.value {
+  @include tp.text-body;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  outline: none;
+  color: clr.$ns-900;
+  line-height: 1;
+  text-align: center;
+}

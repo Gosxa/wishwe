@@ -1,15 +1,22 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Spinner } from '@/shared';
+import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
 import { useFeedToolbarStore } from '@client_pages/home/model/useFeedToolbarStore';
+import { SEARCH_PARAM } from '@client_pages/home/model/useFeedSearch';
 import { EventCard } from './EventCard';
 import { FeedEmptyState } from './FeedEmptyState';
 import { FeedToolbar } from './FeedToolbar';
 import s from './feed.module.scss';
 
-export const Feed = () => {
+type Props = {
+  onSearchDisabledChange?: (disabled: boolean) => void;
+};
+
+export const Feed = ({ onSearchDisabledChange }: Props) => {
   const filter = useFeedToolbarStore(state => state.filter);
   const reach = useFeedToolbarStore(state => state.reach);
   const sort = useFeedToolbarStore(state => state.sort);
@@ -19,6 +26,10 @@ export const Feed = () => {
 
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
     useFeedEvents();
+
+  const search = useSearchParams().get(SEARCH_PARAM) ?? '';
+
+  useSearchDisabledSync(onSearchDisabledChange, events, search);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 

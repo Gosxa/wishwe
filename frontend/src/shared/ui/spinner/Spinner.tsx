@@ -1,7 +1,11 @@
 import s from './spinner.module.scss';
 
-export const Spinner = () => (
-  <div className={s.backdrop}>
+type Props = {
+  fullscreen?: boolean;
+};
+
+export const Spinner = ({ fullscreen = false }: Props) => (
+  <div className={fullscreen ? `${s.backdrop} ${s.fullscreen}` : s.backdrop}>
     <div className={s.wrapper}>
       <svg className={s.svg} viewBox="0 0 80 80" fill="none">
         <circle

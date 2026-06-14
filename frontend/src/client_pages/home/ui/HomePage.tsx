@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { Header } from '@widgets/header';
 import { Sidebar } from '@widgets/sidebar';
 import { useFeedSearch } from '@client_pages/home/model/useFeedSearch';
@@ -19,14 +19,15 @@ export default function HomePage() {
 
 function HomePageContent() {
   const search = useFeedSearch();
+  const [searchDisabled, setSearchDisabled] = useState(false);
 
   return (
     <div className={s.shell}>
-      <Header search={search} />
+      <Header search={{ ...search, disabled: searchDisabled }} />
       <div className={s.body}>
         <Sidebar activeKey="home" />
         <main className={s.content}>
-          <Feed />
+          <Feed onSearchDisabledChange={setSearchDisabled} />
         </main>
       </div>
     </div>

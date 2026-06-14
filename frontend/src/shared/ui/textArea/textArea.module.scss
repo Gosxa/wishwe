@@ -1,0 +1,114 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+$ERR_SHADOW:
+  inset 0 0 0 1px clr.$err,
+  0 0 4px 0 rgba(#ffb3b3, 0.7);
+
+$SUCESS_SHADOW:
+  inset 0 0 0 1px clr.$success,
+  0 0 3px 0 rgba(#a1de94, 0.5);
+
+$FOCUS_SHADOW:
+  inset 0 0 0 1px clr.$prm,
+  0 0 4px 0 rgba(clr.$prm-light, 0.1);
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  @include typo.text-body;
+  color: clr.$ns-900;
+
+  > label {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    > svg {
+      color: clr.$err;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.textareaWrapper {
+  position: relative;
+}
+
+.counter {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.counterOver {
+  color: clr.$err;
+}
+
+.textarea {
+  display: flex;
+  width: 100%;
+  outline: none;
+  border-radius: 8px;
+  border: none;
+  padding: 9px 16px;
+  color: clr.$ns-900;
+  transition: all 0.3s ease;
+  background-color: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+  resize: none;
+  font: inherit;
+
+  &::placeholder {
+    color: clr.$ns-500;
+  }
+
+  &:hover {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+
+  &:not(:placeholder-shown) {
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+
+  &:focus-visible {
+    box-shadow: $FOCUS_SHADOW;
+
+    &::placeholder {
+      color: clr.$ns-900;
+    }
+  }
+
+  &:disabled {
+    box-shadow: inset 0 0 0 1px clr.$ns-200;
+    color: clr.$ns-300;
+
+    &::placeholder {
+      color: clr.$ns-300;
+    }
+  }
+
+  &.textareaError {
+    box-shadow: $ERR_SHADOW;
+
+    &:not(:placeholder-shown),
+    &:hover,
+    &:focus-visible {
+      box-shadow: $ERR_SHADOW;
+    }
+  }
+
+  &.textareaSuccess {
+    box-shadow: $SUCESS_SHADOW;
+
+    &:not(:placeholder-shown),
+    &:hover,
+    &:focus-visible {
+      box-shadow: $SUCESS_SHADOW;
+    }
+  }
+}
