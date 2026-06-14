@@ -1,7 +1,7 @@
 import { Plus } from '@shared/ui/icons';
 import type { ProfileTab } from '@client_pages/profile/model/types';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
-import s from '@client_pages/home/widgets/feed/ui/feedEmptyState.module.scss';
+import s from './profileFeedEmptyState.module.scss';
 
 type Props = {
   tab: ProfileTab;
@@ -9,15 +9,19 @@ type Props = {
 
 const copy: Record<
   ProfileTab,
-  { title: string; subtitle: string; create?: string }
+  { title: string; subtitle: string; create: string }
 > = {
   plans: {
-    title: 'No plans yet',
-    subtitle: 'Plans you create or join will show up here.',
+    title: 'No active plans',
+    subtitle:
+      'Looks like your calendar is free. Time to organize something cool!',
+    create: 'Create a plan',
   },
   wishes: {
     title: 'No wishes yet',
-    subtitle: 'Wishes you create or show interest in will show up here.',
+    subtitle:
+      "Your future adventures start here. Add something you'd love to do.",
+    create: 'Create a plan',
   },
   archive: {
     title: 'No past events yet',
@@ -35,18 +39,14 @@ export const ProfileFeedEmptyState = ({ tab }: Props) => {
       <h2 className={s.title}>{title}</h2>
       <p className={s.subtitle}>{subtitle}</p>
 
-      {create && (
-        <div className={s.actions}>
-          <button
-            type="button"
-            className={s.create}
-            onClick={() => openCreate('plan')}
-          >
-            <Plus />
-            <span>{create}</span>
-          </button>
-        </div>
-      )}
+      <button
+        type="button"
+        className={s.create}
+        onClick={() => openCreate('plan')}
+      >
+        <Plus />
+        <span>{create}</span>
+      </button>
     </div>
   );
 };
