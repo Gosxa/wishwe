@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { BellDot, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
+import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import { CreateEventModal } from '@widgets/createEventModal';
 import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
@@ -23,8 +24,11 @@ type Props = {
 export const Header = ({ search }: Props) => {
   const router = useRouter();
   const requestRefresh = useEventsRefreshStore(state => state.requestRefresh);
+  const isCreateOpen = useCreateEventStore(state => state.isOpen);
+  const createDefaultType = useCreateEventStore(state => state.defaultType);
+  const openCreate = useCreateEventStore(state => state.open);
+  const closeCreate = useCreateEventStore(state => state.close);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
   const settingsActions: Partial<Record<string, () => void>> = {
@@ -65,12 +69,13 @@ export const Header = ({ search }: Props) => {
         <Logo height={36} />
       </div>
       <SearchBar {...search} />
-      <CreateButton onClick={() => setIsCreateOpen(true)} />
+      <CreateButton onClick={() => openCreate()} />
       {isCreateOpen && (
         <CreateEventModal
-          onClose={() => setIsCreateOpen(false)}
+          defaultType={createDefaultType}
+          onClose={closeCreate}
           onCreated={() => {
-            setIsCreateOpen(false);
+            closeCreate();
             requestRefresh();
           }}
         />

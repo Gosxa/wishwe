@@ -1,5 +1,6 @@
 import { Plus } from '@shared/ui/icons';
 import type { ProfileTab } from '@client_pages/profile/model/types';
+import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import s from '@client_pages/home/widgets/feed/ui/feedEmptyState.module.scss';
 
 type Props = {
@@ -27,6 +28,7 @@ const copy: Record<
 
 export const ProfileFeedEmptyState = ({ tab }: Props) => {
   const { title, subtitle, create } = copy[tab];
+  const openCreate = useCreateEventStore(state => state.open);
 
   return (
     <div className={s.empty}>
@@ -35,8 +37,11 @@ export const ProfileFeedEmptyState = ({ tab }: Props) => {
 
       {create && (
         <div className={s.actions}>
-          {/* Static for now */}
-          <button type="button" className={s.create}>
+          <button
+            type="button"
+            className={s.create}
+            onClick={() => openCreate('plan')}
+          >
             <Plus />
             <span>{create}</span>
           </button>
