@@ -2,7 +2,8 @@
 
 import { Sparkles } from '@shared/ui/icons';
 import { useInviteLink } from '@shared/hooks/useInviteLink';
-import s from './profileHeader.module.scss';
+import { Card } from './Card';
+import s from './findMoreFriends.module.scss';
 
 const LABELS = {
   idle: 'Copy link!',
@@ -11,25 +12,24 @@ const LABELS = {
   error: 'Try again',
 } as const;
 
-export const InviteFriends = () => {
+export const FindMoreFriends = () => {
   const { copy, status } = useInviteLink();
 
   return (
-    <div className={s.invite}>
-      <h2 className={s.inviteTitle}>Invite friends</h2>
-      <p className={s.inviteText}>
-        Copy your profile link and share it with friends to connect with you.
+    <Card title="Find more friends">
+      <p className={s.text}>
+        Share your unique link with friends so they can find your profile and
+        join you.
       </p>
-
       <button
         type="button"
         className={s.copyButton}
         onClick={copy}
         disabled={status === 'copying'}
       >
-        <Sparkles />
         <span>{LABELS[status]}</span>
+        <Sparkles />
       </button>
-    </div>
+    </Card>
   );
 };

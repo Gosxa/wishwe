@@ -1,0 +1,54 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+
+.list {
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.status {
+  position: relative;
+  min-height: 220px;
+}
+
+.empty {
+  margin: 8px 0 0;
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.accept {
+  @include btn.primary(8px, 88px, 40px);
+}
+
+.decline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: clr.$prm;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  @include tp.text-button;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+
+  &:active {
+    background: #d2cfc5;
+  }
+}

@@ -1,0 +1,63 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.list {
+  margin: 40px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+
+.status {
+  position: relative;
+  min-height: 220px;
+}
+
+.empty {
+  margin-top: 8px;
+}
+
+.emptyText {
+  margin: 0;
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.illustration {
+  display: block;
+  width: 376px;
+  max-width: 100%;
+  height: auto;
+  margin: 24px auto 0;
+}
+
+.noMatch {
+  margin: 40px 0 0;
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.unfriend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: clr.$ns-500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: clr.$ns-100;
+    color: clr.$err;
+  }
+
+  > svg {
+    width: 24px;
+    height: 24px;
+  }
+}

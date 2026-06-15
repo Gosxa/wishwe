@@ -103,6 +103,42 @@ export const beApi = {
           cache: 'no-store',
         },
       ),
+
+    friendshipFriends: (query: string, cookieHeader: string) =>
+      fetch(
+        `${BACKEND}/api/user/friendship/friends/${query ? `?${query}` : ''}`,
+        {
+          headers: { cookie: cookieHeader },
+          cache: 'no-store',
+        },
+      ),
+
+    friendshipIncoming: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/friendship/incoming/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    friendshipAccept: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/friendship/${id}/accept/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    friendshipDecline: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/friendship/${id}/decline/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    friendshipRemove: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/friendship/${id}/`, {
+        method: 'DELETE',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
   },
 
   event: {
