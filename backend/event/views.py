@@ -200,7 +200,8 @@ class EventViewSet(
                 name="sort",
                 type=OpenApiTypes.STR,
                 description="Sort parameter in feed(recently added -> by default "
-                            "/ ?sort=soonest -> soonest first)",
+                            "/ ?sort=soonest -> soonest first)"
+                            "/ ?sort=heat -> sorting by joined/interested friends count",
             )
         ]
     )
