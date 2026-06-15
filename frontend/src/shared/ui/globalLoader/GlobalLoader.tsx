@@ -15,7 +15,7 @@ export const GlobalLoader = () => {
     setLoading(false);
   }, [pathname, setLoading]);
 
-  if (!isLoading) return null;
+  if (!isLoading || pathname === '/onboard') return null;
 
   return <Spinner fullscreen />;
 };
