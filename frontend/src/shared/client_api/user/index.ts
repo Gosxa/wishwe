@@ -1,8 +1,10 @@
 import type { Profile } from '../auth/types';
 import { avatarFormData } from '@/shared/lib/avatarFormData';
 import type { BackendEvent, Paginated } from '../event';
+import type { FriendApi, FriendRequestApi } from './types';
 
 const EVENTS_PAGE_SIZE = 20;
+const FRIENDS_PAGE_SIZE = 20;
 
 export type UserEventsTab = 'plans' | 'wishes' | 'archive';
 
@@ -146,4 +148,52 @@ export const createInvite = async (): Promise<{ token: string }> => {
   if (!res.ok) throw new Error('Failed to create invite');
 
   return res.json();
+};
+
+export const listFriends = async (
+  page: number = 1,
+  pageSize: number = FRIENDS_PAGE_SIZE,
+): Promise<Paginated<FriendApi>> => {
+  const query = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+
+  const res = await fetch(`/api/user/friendship/friends?${query.toString()}`);
+
+  if (!res.ok) throw new Error('Failed to load friends');
+
+  return res.json();
+};
+
+export const listIncomingRequests = async (): Promise<FriendRequestApi[]> => {
+  const res = await fetch('/api/user/friendship/incoming');
+
+  if (!res.ok) throw new Error('Failed to load friend requests');
+
+  return res.json();
+};
+
+export const acceptRequest = async (id: number): Promise<void> => {
+  const res = await fetch(`/next_api/user/friendship/${id}/accept`, {
+    method: 'POST',
+  });
+
+  if (!res.ok) throw new Error('Failed to accept friend request');
+};
+
+export const declineRequest = async (id: number): Promise<void> => {
+  const res = await fetch(`/next_api/user/friendship/${id}/decline`, {
+    method: 'POST',
+  });
+
+  if (!res.ok) throw new Error('Failed to decline friend request');
+};
+
+export const removeFriend = async (friendshipId: number): Promise<void> => {
+  const res = await fetch(`/next_api/user/friendship/${friendshipId}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) throw new Error('Failed to remove friend');
 };

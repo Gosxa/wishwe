@@ -1,0 +1,29 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-height: 48px;
+  list-style: none;
+
+  &:not(:last-child) {
+    border-bottom: 1px solid clr.$ns-200;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+}
+
+.username {
+  @include tp.text-body;
+  color: clr.$ns-900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action {
+  margin-left: auto;
+  flex-shrink: 0;
+}

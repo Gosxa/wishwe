@@ -24,3 +24,4 @@ export { Location } from './location/Location';
 export { StickyNote } from './stickyNote/StickyNote';
 export { UserRound } from './userRound/UserRound';
 export { UsersRound } from './usersRound/UsersRound';
+export { UserX } from './userX/UserX';

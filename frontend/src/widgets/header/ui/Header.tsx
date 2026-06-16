@@ -19,9 +19,10 @@ const settingsItems = [
 
 type Props = {
   search?: SearchBarProps;
+  showSearch?: boolean;
 };
 
-export const Header = ({ search }: Props) => {
+export const Header = ({ search, showSearch = true }: Props) => {
   const router = useRouter();
   const requestRefresh = useEventsRefreshStore(state => state.requestRefresh);
   const isCreateOpen = useCreateEventStore(state => state.isOpen);
@@ -68,7 +69,7 @@ export const Header = ({ search }: Props) => {
       <div className={s.logoSlot}>
         <Logo height={36} />
       </div>
-      <SearchBar {...search} />
+      {showSearch && <SearchBar {...search} />}
       <CreateButton onClick={() => openCreate()} />
       {isCreateOpen && (
         <CreateEventModal
