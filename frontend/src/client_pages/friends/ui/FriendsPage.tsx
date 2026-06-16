@@ -34,12 +34,14 @@ export default function FriendsPage() {
         <Sidebar activeKey="friends" />
         <main className={s.content}>
           <div className={s.columns}>
-            <FriendsList
-              friends={friends}
-              query={query}
-              isLoading={isLoading}
-              onRemove={removeFriend}
-            />
+            <div className={s.leftCol}>
+              <FriendsList
+                friends={friends}
+                query={query}
+                isLoading={isLoading}
+                onRemove={removeFriend}
+              />
+            </div>
             <div className={s.rightCol}>
               <FindMoreFriends />
               <Requests

@@ -36,7 +36,7 @@ export default function EditProfilePage({ initialUser }: Props) {
 
   return (
     <div className={s.shell}>
-      <Header />
+      <Header showSearch={false} />
       <div className={s.body}>
         <Sidebar activeKey="profile" />
         <main className={s.content}>
