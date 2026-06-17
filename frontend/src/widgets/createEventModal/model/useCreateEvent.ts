@@ -55,7 +55,7 @@ export const useCreateEvent = (
   const [maxParticipants, setMaxParticipants] = useState(2);
   const [unlimited, setUnlimited] = useState(true);
   const [timeframeText, setTimeframeText] = useState('');
-  const [visibility, setVisibility] = useState<EventVisibility>('friends-only');
+  const [visibility, setVisibility] = useState<EventVisibility>('f-o-f');
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);

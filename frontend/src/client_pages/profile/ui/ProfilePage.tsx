@@ -34,6 +34,8 @@ function ProfilePageContent({ initialUser }: Props) {
           ...search,
           placeholder: 'Search my events',
           disabled: searchDisabled,
+          disabledHint:
+            'Search is available once you have events. Create a wish or plan to get started.',
         }}
       />
       <div className={s.body}>

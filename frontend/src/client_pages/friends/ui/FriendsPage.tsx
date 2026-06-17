@@ -28,6 +28,8 @@ export default function FriendsPage() {
           onChange: setQuery,
           placeholder: 'Search friends',
           disabled: !isLoading && friends.length === 0,
+          disabledHint:
+            'Search is available once you have friends. Add some friends to get started.',
         }}
       />
       <div className={s.body}>

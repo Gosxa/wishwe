@@ -239,18 +239,24 @@
   min-width: 0;
 }
 
-.edit {
-  @include btn.secondary(8px, 100%, 40px);
+.edit,
+.planIt {
   flex: 1;
   min-width: 0;
   padding: 0 12px;
+  white-space: nowrap;
+
+  > svg {
+    flex-shrink: 0;
+  }
+}
+
+.edit {
+  @include btn.secondary(8px, 100%, 40px);
 }
 
 .planIt {
   @include btn.primary(8px, 100%, 40px);
-  flex: 1;
-  min-width: 0;
-  padding: 0 12px;
 }
 
 .selectedFace,

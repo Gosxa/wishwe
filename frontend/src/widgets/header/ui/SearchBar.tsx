@@ -10,6 +10,7 @@ export type SearchBarProps = {
   onSearch?: (q: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  disabledHint?: string;
 };
 
 export const SearchBar = ({
@@ -18,6 +19,7 @@ export const SearchBar = ({
   onSearch,
   placeholder = 'Search events',
   disabled = false,
+  disabledHint,
 }: SearchBarProps) => {
   const [localValue, setLocalValue] = useState('');
 
@@ -39,22 +41,35 @@ export const SearchBar = ({
     onSearch?.(current);
   };
 
+  const showHint = disabled && !!disabledHint;
+
   return (
-    <div
-      className={
-        disabled ? `${s.searchBar} ${s.searchBarDisabled}` : s.searchBar
-      }
-    >
-      <SearchIcon />
-      <input
-        className={s.searchInput}
-        type="text"
-        placeholder={placeholder}
-        value={current}
-        disabled={disabled}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-      />
+    <div className={s.searchBarWrap}>
+      <div
+        className={
+          disabled ? `${s.searchBar} ${s.searchBarDisabled}` : s.searchBar
+        }
+      >
+        <SearchIcon />
+        <input
+          className={s.searchInput}
+          type="text"
+          placeholder={placeholder}
+          value={current}
+          disabled={disabled}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      {showHint && (
+        <span
+          id="search-disabled-hint"
+          role="tooltip"
+          className={s.searchTooltip}
+        >
+          {disabledHint}
+        </span>
+      )}
     </div>
   );
 };

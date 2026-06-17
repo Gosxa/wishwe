@@ -8,7 +8,6 @@ import {
   Location,
   Pencil,
   Plus,
-  Sparkles,
   StickyNote,
   UserRound,
   UsersRound,
@@ -228,7 +227,6 @@ export const EventCard = ({
                 className={s.planIt}
                 onClick={() => onPlanIt?.(id)}
               >
-                <Sparkles />
                 <span>Plan it</span>
               </button>
             )}

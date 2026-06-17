@@ -23,7 +23,14 @@ function HomePageContent() {
 
   return (
     <div className={s.shell}>
-      <Header search={{ ...search, disabled: searchDisabled }} />
+      <Header
+        search={{
+          ...search,
+          disabled: searchDisabled,
+          disabledHint:
+            'Search is available once there are events in your feed. Add friends or create an event to get started.',
+        }}
+      />
       <div className={s.body}>
         <Sidebar activeKey="home" />
         <main className={s.content}>
