@@ -61,7 +61,7 @@ class Event(models.Model):
     event_visibility = models.CharField(
         max_length=15,
         choices=EventVisibility.choices,
-        default=EventVisibility.FRIENDS,
+        default=EventVisibility.FRIENDS_OF_FRIENDS,
     )
     title = models.CharField(
         max_length=50,
@@ -244,6 +244,7 @@ class EventParticipant(models.Model):
     )
 
     class Meta:
+        db_table = "event_participant"
         constraints = [
             models.UniqueConstraint(
                 fields=["event", "user"],
