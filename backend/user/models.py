@@ -71,7 +71,6 @@ class SocialAccount(models.Model):
     uid = models.CharField(max_length=255)
 
     class Meta:
-        db_table = "social_account"
         constraints = [
             models.UniqueConstraint(
                 fields=["uid", "provider"],
@@ -150,9 +149,6 @@ class EmailVerification(models.Model):
     attempts = models.IntegerField(default=0)
     purpose = models.CharField(max_length=20, default="registration")
 
-    class Meta:
-        db_table = "email_verification"
-
     def __str__(self):
         return self.email
 
@@ -200,7 +196,5 @@ class FriendInvite(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
 
-    class Meta:
-        db_table = "friend_invite"
     def __str__(self):
         return f"Invite from {self.inviter}"
