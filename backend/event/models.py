@@ -23,8 +23,8 @@ class EventType(models.TextChoices):
 
 
 class EventVisibility(models.TextChoices):
-    FRIENDS = "friends-only", "FRIENDS-ONLY"
     FRIENDS_OF_FRIENDS = "f-o-f", "F-O-F"
+    FRIENDS = "friends-only", "FRIENDS-ONLY"
 
 
 class EventStatus(models.TextChoices):
@@ -244,7 +244,6 @@ class EventParticipant(models.Model):
     )
 
     class Meta:
-        db_table = "event_participant"
         constraints = [
             models.UniqueConstraint(
                 fields=["event", "user"],
