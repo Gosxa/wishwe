@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
 import { cropImage } from './cropImage';
@@ -28,7 +29,9 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
     onConfirm(url);
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div className={s.overlay}>
       <div className={s.modal}>
         <div className={s.cropArea}>
@@ -53,6 +56,7 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
