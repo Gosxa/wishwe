@@ -12,7 +12,7 @@ const postAction = async (
   id: string,
   action: string,
 ): Promise<BackendEvent> => {
-  const res = await fetch(`/api/event/events/${id}/${action}`, {
+  const res = await fetch(`/api/event/events/${id}/${action}/`, {
     method: 'POST',
   });
 
