@@ -216,4 +216,25 @@ export const beApi = {
         cache: 'no-store',
       }),
   },
+
+  notifications: {
+    list: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/notifications/?page_size=10`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    unreadCount: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/notifications/unread_count/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    readAll: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/notifications/read_all/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+  },
 };

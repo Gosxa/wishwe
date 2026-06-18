@@ -1,6 +1,7 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/scrollbars' as scroll;
 
 .header {
   position: sticky;
@@ -160,10 +161,145 @@
   &:hover {
     background: clr.$ns-100;
   }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
 }
 
+.iconBtnActive {
+  background: clr.$ns-100;
+  color: clr.$ns-900;
+}
+
+.notifications,
 .settings {
   position: relative;
+}
+
+.notificationsMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-sizing: border-box;
+  width: min(400px, calc(100vw - 32px));
+  max-height: min(467px, calc(100vh - 96px));
+  padding: 16px 24px;
+  overflow: hidden;
+  border: 1px solid clr.$prm;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  box-shadow: 0 0 4px clr.$ns-200;
+}
+
+@media (max-width: 480px) {
+  .notificationsMenu {
+    position: fixed;
+    top: 64px;
+    right: 16px;
+  }
+}
+
+.notificationsTitle {
+  flex: 0 0 auto;
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid clr.$ns-200;
+  color: clr.$ns-900;
+
+  @include tp.h2;
+}
+
+.notificationsContent {
+  flex: 1;
+  min-height: 0;
+  padding-right: 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  @include scroll.thin;
+}
+
+.notificationsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.notificationItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid clr.$ns-200;
+
+  & + & {
+    padding-top: 8px;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  p {
+    margin: 0;
+    color: clr.$ns-700;
+
+    @include tp.text-body;
+  }
+
+  time {
+    color: clr.$ns-500;
+
+    @include tp.text-caption;
+  }
+}
+
+.notificationsState {
+  margin: 0;
+  padding: 24px 0;
+  color: clr.$ns-500;
+  text-align: center;
+
+  @include tp.text-body;
+}
+
+.notificationsError {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid clr.$ns-200;
+  color: clr.$err;
+
+  @include tp.text-body;
+
+  p {
+    margin: 0;
+  }
+
+  button {
+    flex: 0 0 auto;
+    color: clr.$prm;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+
+    &:focus-visible {
+      outline: 2px solid clr.$prm;
+      outline-offset: 2px;
+    }
+  }
+
+  & + .notificationsList {
+    padding-top: 16px;
+  }
 }
 
 .settingsMenu {

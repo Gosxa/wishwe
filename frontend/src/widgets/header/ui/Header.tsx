@@ -9,6 +9,8 @@ import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import { CreateEventModal } from '@widgets/createEventModal';
 import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
+import { NotificationsDropdown } from './NotificationsDropdown';
+import { useNotifications } from '../model/useNotifications';
 import s from '../header.module.scss';
 
 const settingsItems = [
@@ -29,29 +31,40 @@ export const Header = ({ search, showSearch = true }: Props) => {
   const createDefaultType = useCreateEventStore(state => state.defaultType);
   const openCreate = useCreateEventStore(state => state.open);
   const closeCreate = useCreateEventStore(state => state.close);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const settingsRef = useRef<HTMLDivElement>(null);
+  const [openMenu, setOpenMenu] = useState<'notifications' | 'settings' | null>(
+    null,
+  );
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const isNotificationsOpen = openMenu === 'notifications';
+  const isSettingsOpen = openMenu === 'settings';
+  const {
+    unreadCount,
+    notifications,
+    isLoading: areNotificationsLoading,
+    error: notificationsError,
+    retry: retryNotifications,
+  } = useNotifications(isNotificationsOpen);
 
   const settingsActions: Partial<Record<string, () => void>> = {
     'Log out': logout,
     'Edit profile': () => {
-      setIsSettingsOpen(false);
+      setOpenMenu(null);
       router.push('/edit-profile');
     },
   };
 
   useEffect(() => {
-    if (!isSettingsOpen) return;
+    if (!openMenu) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!settingsRef.current?.contains(event.target as Node)) {
-        setIsSettingsOpen(false);
+      if (!actionsRef.current?.contains(event.target as Node)) {
+        setOpenMenu(null);
       }
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsSettingsOpen(false);
+        setOpenMenu(null);
       }
     };
 
@@ -62,7 +75,7 @@ export const Header = ({ search, showSearch = true }: Props) => {
       document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isSettingsOpen]);
+  }, [openMenu]);
 
   return (
     <header className={s.header}>
@@ -81,21 +94,52 @@ export const Header = ({ search, showSearch = true }: Props) => {
           }}
         />
       )}
-      <div className={s.actions}>
-        <button className={s.iconBtn}>
-          <BellDot />
-        </button>
-        <div className={s.settings} ref={settingsRef}>
+      <div className={s.actions} ref={actionsRef}>
+        <div className={s.notifications}>
           <button
-            className={s.iconBtn}
+            className={`${s.iconBtn} ${
+              isNotificationsOpen ? s.iconBtnActive : ''
+            }`}
             type="button"
-            onClick={() => setIsSettingsOpen(current => !current)}
+            aria-label={`Notifications${
+              unreadCount > 0 ? `, ${unreadCount} unread` : ''
+            }`}
+            onClick={() =>
+              setOpenMenu(current =>
+                current === 'notifications' ? null : 'notifications',
+              )
+            }
+          >
+            <BellDot hasUnread={unreadCount > 0} />
+          </button>
+          {isNotificationsOpen && (
+            <NotificationsDropdown
+              id="notifications-menu"
+              titleId="notifications-title"
+              notifications={notifications}
+              isLoading={areNotificationsLoading}
+              error={notificationsError}
+              onRetry={retryNotifications}
+            />
+          )}
+        </div>
+        <div className={s.settings}>
+          <button
+            className={`${s.iconBtn} ${isSettingsOpen ? s.iconBtnActive : ''}`}
+            type="button"
+            onClick={() =>
+              setOpenMenu(current =>
+                current === 'settings' ? null : 'settings',
+              )
+            }
           >
             <Gear />
           </button>
           {isSettingsOpen && (
-            <div id="settings-menu" className={s.settingsMenu}>
-              <h2 className={s.settingsTitle}>Settings</h2>
+            <div id="settings-menu" className={s.settingsMenu} role="region">
+              <h2 id="settings-title" className={s.settingsTitle}>
+                Settings
+              </h2>
               <div className={s.settingsList}>
                 {settingsItems.map(item => (
                   <button
