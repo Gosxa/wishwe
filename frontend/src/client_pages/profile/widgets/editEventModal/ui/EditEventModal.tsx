@@ -32,6 +32,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
     timeInput,
     participants,
     timeframeInput,
+    chatLinkInput,
     cover,
     submit,
   } = useEditEvent(event, onSaved);
@@ -269,6 +270,17 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
                   )}
                 </div>
               </>
+            )}
+
+            {isPlan && (
+              <TextInput
+                id="eventChatLink"
+                label="Chat link"
+                placeholder="Link to telegram or whatsapp group chat"
+                value={chatLinkInput.value}
+                onChange={e => chatLinkInput.onChange(e.target.value)}
+                error={chatLinkInput.error}
+              />
             )}
 
             {submit.error && (

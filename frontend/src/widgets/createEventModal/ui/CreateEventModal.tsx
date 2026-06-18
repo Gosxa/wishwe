@@ -38,6 +38,7 @@ export const CreateEventModal = ({
     timeInput,
     participants,
     timeframeInput,
+    chatLinkInput,
     visibility,
     cover,
     canShare,
@@ -290,6 +291,17 @@ export const CreateEventModal = ({
               value={visibility.value}
               onChange={visibility.onChange}
             />
+
+            {isPlan && (
+              <TextInput
+                id="eventChatLink"
+                label="Chat link"
+                placeholder="Link to telegram or whatsapp group chat"
+                value={chatLinkInput.value}
+                onChange={e => chatLinkInput.onChange(e.target.value)}
+                error={chatLinkInput.error}
+              />
+            )}
 
             {submit.error && (
               <HelperText text={submit.error} type="error" inline />

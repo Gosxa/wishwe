@@ -23,6 +23,16 @@ const errorBody = (body: Record<string, unknown>): Record<string, unknown> =>
     ? (body.error as Record<string, unknown>)
     : body;
 
+const isValidUrl = (value: string): boolean => {
+  try {
+    new URL(value);
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   category: 'category',
   title: 'title',
@@ -33,6 +43,7 @@ const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   min_participants: 'minParticipants',
   max_participants: 'maxParticipants',
   timeframe_text: 'timeframeText',
+  external_link: 'chatLink',
   cover_image: 'cover',
 };
 
@@ -63,6 +74,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
   const [timeframeText, setTimeframeText] = useState(
     event.timeframe_text ?? '',
   );
+  const [chatLink, setChatLink] = useState(event.external_link ?? '');
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(
@@ -149,6 +161,10 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
           next.maxParticipants = 'Max cannot be less than min';
         }
       }
+
+      if (chatLink.trim() && !isValidUrl(chatLink.trim())) {
+        next.chatLink = 'Enter a valid link (https://…)';
+      }
     } else if (!timeframeText.trim()) {
       next.timeframeText = 'Timeframe is required';
     }
@@ -170,6 +186,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
       fields.event_date = eventDate;
       fields.event_time = eventTime;
       fields.max_participants = unlimited ? UNLIMITED_MAX : maxParticipants;
+      fields.external_link = chatLink.trim();
     } else {
       fields.timeframe_text = timeframeText.trim();
     }
@@ -307,6 +324,14 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
         clearError('timeframeText');
       },
       error: errors.timeframeText,
+    },
+    chatLinkInput: {
+      value: chatLink,
+      onChange: (value: string) => {
+        setChatLink(value);
+        clearError('chatLink');
+      },
+      error: errors.chatLink,
     },
     cover: {
       previewUrl: coverPreviewUrl,

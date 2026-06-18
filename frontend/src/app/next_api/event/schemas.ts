@@ -16,6 +16,7 @@ export const planSchema = z.object({
   event_date: z.string().min(1),
   event_time: z.string().min(1),
   max_participants: z.coerce.number().int().min(2),
+  external_link: z.union([z.url().max(200), z.literal('')]).optional(),
 });
 
 export const wishSchema = z.object({

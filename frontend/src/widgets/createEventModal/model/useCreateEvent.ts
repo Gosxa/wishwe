@@ -22,6 +22,16 @@ const errorBody = (body: Record<string, unknown>): Record<string, unknown> =>
     ? (body.error as Record<string, unknown>)
     : body;
 
+const isValidUrl = (value: string): boolean => {
+  try {
+    new URL(value);
+
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   category: 'category',
   title: 'title',
@@ -32,6 +42,7 @@ const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   min_participants: 'minParticipants',
   max_participants: 'maxParticipants',
   timeframe_text: 'timeframeText',
+  external_link: 'chatLink',
   cover_image: 'cover',
 };
 
@@ -55,6 +66,7 @@ export const useCreateEvent = (
   const [maxParticipants, setMaxParticipants] = useState(2);
   const [unlimited, setUnlimited] = useState(true);
   const [timeframeText, setTimeframeText] = useState('');
+  const [chatLink, setChatLink] = useState('');
   const [visibility, setVisibility] = useState<EventVisibility>('f-o-f');
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
@@ -147,6 +159,10 @@ export const useCreateEvent = (
           next.maxParticipants = 'Max cannot be less than min';
         }
       }
+
+      if (chatLink.trim() && !isValidUrl(chatLink.trim())) {
+        next.chatLink = 'Enter a valid link (https://…)';
+      }
     } else if (!timeframeText.trim()) {
       next.timeframeText = 'Timeframe is required';
     }
@@ -177,6 +193,8 @@ export const useCreateEvent = (
       fields.event_date = eventDate;
       fields.event_time = eventTime;
       fields.max_participants = unlimited ? UNLIMITED_MAX : maxParticipants;
+
+      if (chatLink.trim()) fields.external_link = chatLink.trim();
     } else {
       fields.timeframe_text = timeframeText.trim();
     }
@@ -319,6 +337,14 @@ export const useCreateEvent = (
         clearError('timeframeText');
       },
       error: errors.timeframeText,
+    },
+    chatLinkInput: {
+      value: chatLink,
+      onChange: (value: string) => {
+        setChatLink(value);
+        clearError('chatLink');
+      },
+      error: errors.chatLink,
     },
     visibility: {
       value: visibility,

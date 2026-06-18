@@ -10,6 +10,7 @@ export type FieldErrors = {
   minParticipants?: string;
   maxParticipants?: string;
   timeframeText?: string;
+  chatLink?: string;
   cover?: string;
   submit?: string;
 };
