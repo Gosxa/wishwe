@@ -6,8 +6,8 @@ from django.db import transaction
 from django.db.models import Prefetch, Q
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiExample
+from requests import RequestException
 from rest_framework.decorators import api_view, action, throttle_classes
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status, viewsets, mixins
@@ -55,8 +55,7 @@ from .serializers import (
     MutualFriendsSerializer,
     InviteSerializer,
     InviteUseSerializer,
-    EmailStartResponseSerializer,
-    FriendshipRequestSerializer
+    EmailStartResponseSerializer, FriendshipRequestSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -780,33 +779,6 @@ class InviteViewSet(
         )
 
         return Response({"detail": "Invite accepted"})
-
-    @action(
-        detail=False,
-        methods=["get"],
-        url_path=r"(?P<token>[^/.]+)/details"
-    )
-    def details(self, request, token=None):
-        invite = get_object_or_404(
-            FriendInvite.objects.select_related("inviter"),
-            token=token,
-        )
-        sender = User.objects.get(pk=invite.inviter_id)
-        sender_profile = sender.profile
-
-        if sender_profile.avatar:
-            avatar = sender_profile.avatar.url
-        else:
-            avatar = None
-
-        return Response(
-            {
-                "sender_id": invite.inviter_id,
-                "username": sender_profile.username,
-                "avatar": avatar,
-            },
-            status=status.HTTP_200_OK
-        )
 
 
 @api_view(["GET"])
