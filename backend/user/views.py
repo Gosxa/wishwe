@@ -784,7 +784,8 @@ class InviteViewSet(
     @action(
         detail=False,
         methods=["get"],
-        url_path=r"(?P<token>[^/.]+)/details"
+        url_path=r"(?P<token>[^/.]+)/details",
+        permission_classes=[],
     )
     def details(self, request, token=None):
         invite = get_object_or_404(
