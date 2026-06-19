@@ -49,7 +49,10 @@ export const useCreatePassword = (variant: CreatePasswordVariant) => {
     }
   };
 
-  const isValid = isSuccess && confirm === password && confirm.length > 0;
+  const isValid =
+    variant === 'reset'
+      ? isSuccess && confirm === password && confirm.length > 0
+      : isSuccess;
 
   const onSubmit = async () => {
     if (!isValid) return;

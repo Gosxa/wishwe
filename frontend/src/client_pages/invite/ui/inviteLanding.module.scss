@@ -1,0 +1,77 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.landing {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  display: flex;
+  width: 400px;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.avatar {
+  display: flex;
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid clr.$prm;
+  border-radius: 50%;
+  background: clr.$ns-100;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.content,
+.primaryGroup,
+.headingGroup {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+}
+
+.content {
+  align-items: center;
+  gap: 24px;
+}
+
+.primaryGroup {
+  gap: 64px;
+}
+
+.headingGroup {
+  gap: 8px;
+
+  > h1 {
+    @include tp.h1;
+    color: clr.$ns-900;
+  }
+
+  > p {
+    @include tp.text-body;
+    color: clr.$ns-700;
+  }
+}
+
+.primary {
+  @include btn.primary(8px, 100%, 40px);
+}
+
+.tertiary {
+  @include btn.tertiary(4px, 100%, 40px);
+}

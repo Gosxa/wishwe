@@ -7,9 +7,16 @@ import {
   SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
+  useInviteContext,
 } from '@/client_pages/onboard/model';
 import { register } from '@/shared/client_api/auth';
-import { checkUsername, onBoard, changeAvatar } from '@/shared/client_api/user';
+import {
+  acceptInvite,
+  AcceptInviteError,
+  checkUsername,
+  onBoard,
+  changeAvatar,
+} from '@/shared/client_api/user';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import {
@@ -29,11 +36,13 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   const setLoading = useLoadingStore(s => s.setLoading);
   const resetOnboard = useOnboardDataStore(s => s.reset);
   const setUser = useUserStore(s => s.setUser);
+  const invite = useInviteContext();
   const { next } = useTrackContext();
 
   const [rawImageUrl, setRawImageUrl] = useState<string | null>(null);
   const [avatarChanged, setAvatarChanged] = useState(false);
   const [isUnique, setIsUnique] = useState<boolean | null>(null);
+  const [submitError, setSubmitError] = useState('');
 
   const { error, isSuccess, check, set } = useValidation(nicknameSchema);
 
@@ -92,6 +101,7 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
 
     if (!check(nickname) || !available) return;
     setLoading(true);
+    setSubmitError('');
 
     try {
       if (variant === 'email') {
@@ -118,8 +128,20 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
         if (avatarChanged && avatarUrl) await changeAvatar(avatarUrl);
       }
 
-      resetOnboard();
-      next(SCREEN_ID.DONE_ONBOARD);
+      if (invite) {
+        await acceptInvite(invite.token);
+        resetOnboard();
+        next(SCREEN_ID.INVITE_REQUEST_SENT);
+      } else {
+        resetOnboard();
+        next(SCREEN_ID.DONE_ONBOARD);
+      }
+    } catch (e) {
+      if (e instanceof AcceptInviteError) {
+        setSubmitError('Unable to accept invite. Please try again.');
+      } else {
+        setSubmitError('Service temporarily unavailable');
+      }
     } finally {
       setLoading(false);
     }
@@ -150,5 +172,6 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
     firstName: { value: firstName, onChange: onFirstNameChange },
     lastName: { value: lastName, onChange: onLastNameChange },
     submit: { onSubmit },
+    submitError,
   };
 };

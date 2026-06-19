@@ -1,18 +1,22 @@
 'use client';
 
-import { TrackProvider } from './model';
-import s from './onBoard.module.scss';
+import { AuthLayout } from '@/shared';
+import { TrackProvider, InviteProvider } from './model';
+import type { InviteContext } from './model/screensConfig';
 import { Track } from './ui';
 
-export const OnBoard = () => {
+type Props = {
+  invite?: InviteContext;
+};
+
+export const OnBoard = ({ invite }: Props) => {
   return (
     <TrackProvider>
-      <main className={s.container}>
-        <picture>
-          <img src="/onboard_image.jpg" alt="" className={s.image} />
-        </picture>
-        <Track />
-      </main>
+      <InviteProvider invite={invite}>
+        <AuthLayout>
+          <Track invite={invite} />
+        </AuthLayout>
+      </InviteProvider>
     </TrackProvider>
   );
 };

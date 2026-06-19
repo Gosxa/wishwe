@@ -5,14 +5,21 @@ import { PasswordInput } from '@shared/ui/passwordInput/PasswordInput';
 import s from './loginPassword.module.scss';
 import { type useLoginPassword } from '../model';
 
-type Props = ReturnType<typeof useLoginPassword>;
+type Props = ReturnType<typeof useLoginPassword> & {
+  submitLabel?: string;
+};
 
-export const LoginPassword = ({ input, submit, forgot }: Props) => (
+export const LoginPassword = ({
+  input,
+  submit,
+  forgot,
+  submitLabel = 'Log in',
+}: Props) => (
   <div className={s.wrapper}>
     <PasswordInput id="password" {...input} />
     <div className={s.submitWrapper}>
       <button className={s.logIn} onClick={submit.onSubmit}>
-        <span>Log in</span>
+        <span>{submitLabel}</span>
       </button>
       {submit.error && <HelperText type="error" text={submit.error} />}
     </div>

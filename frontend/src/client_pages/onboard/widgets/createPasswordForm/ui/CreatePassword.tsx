@@ -20,8 +20,14 @@ export const CreatePassword = ({ variant }: Props) => {
 
   return (
     <div className={s.wrapper}>
-      <PasswordInput id="password" {...passwordInput} />
-      <PasswordInput id="confirm-password" {...confirmInput} />
+      <PasswordInput
+        id="password"
+        placeholder="At least 8 characters"
+        {...passwordInput}
+      />
+      {variant === 'reset' && (
+        <PasswordInput id="confirm-password" {...confirmInput} />
+      )}
       <div className={s.submitWrapper}>
         <button className={s.submit} onClick={submit.onSubmit}>
           <span>{BUTTON_CONFIG[variant]}</span>

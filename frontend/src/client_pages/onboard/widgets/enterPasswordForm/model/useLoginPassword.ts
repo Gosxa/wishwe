@@ -6,8 +6,10 @@ import {
   SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
+  useInviteContext,
 } from '@/client_pages/onboard/model';
 import { login, resetPassword } from '@/shared/client_api/auth';
+import { acceptInvite, AcceptInviteError } from '@/shared/client_api/user';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
@@ -17,6 +19,7 @@ export const useLoginPassword = () => {
   const setField = useOnboardDataStore(s => s.setField);
   const setLoading = useLoadingStore(s => s.setLoading);
   const { next } = useTrackContext();
+  const invite = useInviteContext();
   const router = useRouter();
 
   const setUser = useUserStore(s => s.setUser);
@@ -36,9 +39,19 @@ export const useLoginPassword = () => {
       const user = await login(email, password);
 
       setUser(user);
-      router.push('/');
-    } catch {
-      setError('Login failed');
+
+      if (invite) {
+        await acceptInvite(invite.token);
+        next(SCREEN_ID.INVITE_REQUEST_SENT);
+      } else {
+        router.push('/');
+      }
+    } catch (e) {
+      if (e instanceof AcceptInviteError) {
+        setError('Unable to accept invite. Please try again.');
+      } else {
+        setError('Login failed');
+      }
     } finally {
       setLoading(false);
     }

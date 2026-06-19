@@ -1,0 +1,87 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/colors' as clr;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 40px;
+  align-items: center;
+}
+
+.avatarGroup {
+  display: flex;
+  align-items: center;
+}
+
+.avatarLeft,
+.avatarRight {
+  display: flex;
+  width: 160px;
+  height: 160px;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: clr.$ns-100;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatarLeft {
+  margin-right: -24px;
+  border-color: clr.$prm;
+  z-index: 0;
+}
+
+.avatarRight {
+  border-color: clr.$ns-50;
+  z-index: 1;
+}
+
+.primary {
+  @include btn.primary(0, 100%, 40px);
+  text-decoration: none;
+}
+
+.screenTitle {
+  @include tp.h2;
+  color: clr.$ns-900;
+  margin: 0;
+}
+
+.screenHeadline {
+  @include tp.text-body;
+  color: clr.$ns-700;
+  margin: 0;
+}
+
+.contentStack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 64px;
+}
+
+.textStack {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 8px;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 400px;
+  box-sizing: border-box;
+}

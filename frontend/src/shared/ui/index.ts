@@ -8,3 +8,4 @@ export { HelperText } from './helperText/HelperText';
 export { CategoryPicker } from './categoryPicker/CategoryPicker';
 export { Stepper } from './stepper/Stepper';
 export { CoverUpload } from './coverUpload/CoverUpload';
+export { AuthLayout } from './authLayout/AuthLayout';

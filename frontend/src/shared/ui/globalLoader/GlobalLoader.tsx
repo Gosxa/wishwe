@@ -6,6 +6,9 @@ import { usePathname } from 'next/navigation';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { Spinner } from '@/shared/ui/spinner/Spinner';
 
+const hasOwnOnboardLoader = (pathname: string) =>
+  pathname === '/onboard' || /^\/invite\/[^/]+\/join\/?$/.test(pathname);
+
 export const GlobalLoader = () => {
   const isLoading = useLoadingStore(s => s.isLoading);
   const setLoading = useLoadingStore(s => s.setLoading);
@@ -15,7 +18,7 @@ export const GlobalLoader = () => {
     setLoading(false);
   }, [pathname, setLoading]);
 
-  if (!isLoading || pathname === '/onboard') return null;
+  if (!isLoading || hasOwnOnboardLoader(pathname)) return null;
 
   return <Spinner fullscreen />;
 };

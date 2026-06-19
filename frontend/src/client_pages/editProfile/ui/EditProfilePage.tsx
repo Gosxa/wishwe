@@ -44,7 +44,9 @@ export default function EditProfilePage({ initialUser }: Props) {
             <h1 className={s.title}>Edit your profile</h1>
 
             <div className={s.avatarBlock}>
-              <span className={s.avatarPreview}>
+              <span
+                className={`${s.avatarPreview}${avatar.url ? ` ${s.avatarUploaded}` : ''}`}
+              >
                 {avatar.url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={avatar.url} alt="avatar" />

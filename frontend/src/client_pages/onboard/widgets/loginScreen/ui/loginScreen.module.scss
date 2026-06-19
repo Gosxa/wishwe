@@ -9,6 +9,10 @@
   gap: 24px;
 }
 
+.inviteWrapper {
+  gap: 16px;
+}
+
 .googleWrapper {
   position: relative;
 }
@@ -38,4 +42,9 @@
 
 .email {
   @include btn.secondary(0, 100%, 40px);
+}
+
+.tertiary {
+  @include btn.tertiary(4px, 100%, 40px);
+  margin-top: 8px;
 }

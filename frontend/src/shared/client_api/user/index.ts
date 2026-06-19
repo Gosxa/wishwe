@@ -150,6 +150,26 @@ export const createInvite = async (): Promise<{ token: string }> => {
   return res.json();
 };
 
+export class AcceptInviteError extends Error {
+  constructor(public body: Record<string, unknown>) {
+    super('Failed to accept invite');
+  }
+}
+
+export const acceptInvite = async (token: string): Promise<void> => {
+  const res = await fetch('/next_api/user/invite/use', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+
+    throw new AcceptInviteError(body);
+  }
+};
+
 export const listFriends = async (
   page: number = 1,
   pageSize: number = FRIENDS_PAGE_SIZE,

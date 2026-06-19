@@ -194,7 +194,7 @@
   border: 1px solid clr.$prm;
   border-radius: 16px;
   background: clr.$ns-50;
-  box-shadow: 0 0 4px clr.$ns-200;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 480px) {

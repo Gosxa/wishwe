@@ -90,3 +90,18 @@
   @include btn.primary(0, 100%, 40px);
   margin-top: 8px;
 }
+
+.inviteAvatarWrapper {
+  gap: 16px;
+}
+
+.inviteAvatarBtnWrap {
+  width: 120px;
+  height: 120px;
+}
+
+.inviteAvatarBtn {
+  width: 120px;
+  height: 120px;
+  border: solid 1px clr.$prm;
+}

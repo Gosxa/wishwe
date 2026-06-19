@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.db.models import Q, Case, When, F, Subquery
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from notifications.services.notification_service import NotificationService
@@ -8,6 +9,7 @@ from user.models import Friendship, FriendshipStatus
 class FriendshipService:
 
     @staticmethod
+    @transaction.atomic
     def send_request(sender, receiver):
         if sender == receiver:
             raise ValidationError("Cannot add yourself")

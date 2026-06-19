@@ -6,8 +6,11 @@ import {
   SCREEN_ID,
   useOnboardDataStore,
   useTrackContext,
+  useInviteContext,
+  handleGooglePostAuth,
 } from '@/client_pages/onboard/model';
 import { loginWithGoogle } from '@/shared/client_api/auth';
+import { AcceptInviteError } from '@/shared/client_api/user';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
@@ -77,6 +80,7 @@ export const useLoginScreen = () => {
   const setField = useOnboardDataStore(s => s.setField);
   const setAvatarUrl = useOnboardDataStore(s => s.setAvatarUrl);
   const { next } = useTrackContext();
+  const invite = useInviteContext();
   const router = useRouter();
   const setUser = useUserStore(s => s.setUser);
   const [googleError, setGoogleError] = useState('');
@@ -92,18 +96,25 @@ export const useLoginScreen = () => {
 
       setUser(user);
 
-      if (user.username) {
-        router.push('/');
-      } else {
-        setField('firstName', user.first_name ?? '');
-        setField('lastName', user.last_name ?? '');
-        setAvatarUrl(user.avatar ?? null);
-        next(SCREEN_ID.PERSONAL_GOOGLE);
-      }
+      await handleGooglePostAuth({
+        user,
+        invite,
+        next,
+        navigateHome: () => router.push('/'),
+        prefillGoogleProfile: profileUser => {
+          setField('firstName', profileUser.first_name ?? '');
+          setField('lastName', profileUser.last_name ?? '');
+          setAvatarUrl(profileUser.avatar ?? null);
+        },
+      });
     } catch (e) {
       const err = e as Error;
 
-      if (err.message !== 'Cancelled') {
+      if (err.message === 'Cancelled') return;
+
+      if (err instanceof AcceptInviteError) {
+        setGoogleError('Unable to accept invite. Please try again.');
+      } else {
         setGoogleError('Service temporarily unavailable');
       }
     } finally {

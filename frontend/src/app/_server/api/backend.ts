@@ -95,6 +95,20 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    inviteDetails: (token: string) =>
+      fetch(
+        `${BACKEND}/api/user/invite/${encodeURIComponent(token)}/details/`,
+        { cache: 'no-store' },
+      ),
+
+    inviteUse: (token: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/invite/use/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify({ token }),
+        cache: 'no-store',
+      }),
+
     events: (id: string, query: string, cookieHeader: string) =>
       fetch(
         `${BACKEND}/api/user/users/${id}/events/${query ? `?${query}` : ''}`,

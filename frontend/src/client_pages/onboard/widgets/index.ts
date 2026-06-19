@@ -5,3 +5,4 @@ export * from './createPasswordForm';
 export * from './enterPasswordForm';
 export * from './personalDataForm';
 export * from './doneScreen';
+export * from './inviteRequestSent';

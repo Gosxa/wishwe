@@ -1,7 +1,9 @@
 import { type ChangeEvent, useRef } from 'react';
+import clsx from 'clsx';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { Avatar } from '@shared/ui/icons';
 import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
+import { HelperText } from '@/shared';
 import s from './personalData.module.scss';
 
 type AvatarConfig = {
@@ -29,6 +31,8 @@ type Props = {
   firstName: InputConfig;
   lastName: InputConfig;
   submit: { onSubmit: () => void };
+  submitError?: string;
+  inviteLayout?: boolean;
 };
 
 export const PersonalDataContent = ({
@@ -37,6 +41,8 @@ export const PersonalDataContent = ({
   firstName,
   lastName,
   submit,
+  submitError,
+  inviteLayout = false,
 }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,9 +55,18 @@ export const PersonalDataContent = ({
           onCancel={avatar.onCropCancel}
         />
       )}
-      <div className={s.avatarWrapper}>
-        <div className={s.avatarBtnWrap}>
-          <label className={s.avatarBtn}>
+      <div
+        className={clsx(s.avatarWrapper, inviteLayout && s.inviteAvatarWrapper)}
+      >
+        <div
+          className={clsx(
+            s.avatarBtnWrap,
+            inviteLayout && s.inviteAvatarBtnWrap,
+          )}
+        >
+          <label
+            className={clsx(s.avatarBtn, inviteLayout && s.inviteAvatarBtn)}
+          >
             {avatar.url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -102,6 +117,7 @@ export const PersonalDataContent = ({
         placeholder="Shevchenko"
         {...lastName}
       />
+      {!!submitError && <HelperText type="error" text={submitError} />}
       <button className={s.submit} onClick={submit.onSubmit}>
         <span>{"Let's go"}</span>
       </button>

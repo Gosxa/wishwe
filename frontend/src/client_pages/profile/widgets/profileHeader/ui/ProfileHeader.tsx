@@ -24,7 +24,7 @@ export const ProfileHeader = ({ initialUser }: Props) => {
   return (
     <section className={s.header}>
       <div className={s.identity}>
-        <span className={s.avatar}>
+        <span className={`${s.avatar}${avatar ? ` ${s.avatarUploaded}` : ''}`}>
           {avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatar} alt={username} />

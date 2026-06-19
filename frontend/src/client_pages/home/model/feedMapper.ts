@@ -1,37 +1,11 @@
 import { formatCategoryHashtag } from '@/shared/lib/formatCategoryName';
+import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import type { BackendEvent } from '@/shared/client_api/event';
 import type { FeedEvent } from './types';
 
+export { toAbsoluteMediaUrl };
+
 const fallbackCover = '/bg-gradient-noise.webp';
-const apiBaseURL = process.env.NEXT_PUBLIC_API_URL ?? '';
-
-const apiOrigin = (() => {
-  try {
-    return apiBaseURL ? new URL(apiBaseURL).origin : '';
-  } catch {
-    return '';
-  }
-})();
-
-export const toAbsoluteMediaUrl = (
-  path: string | null | undefined,
-): string | null => {
-  const value = path?.trim();
-
-  if (!value) {
-    return null;
-  }
-
-  if (/^(https?:)?\/\//.test(value)) {
-    return value;
-  }
-
-  if (apiOrigin) {
-    return `${apiOrigin}/${value.replace(/^\/+/, '')}`;
-  }
-
-  return value;
-};
 
 const eventImage = (coverImage: string | null) =>
   toAbsoluteMediaUrl(coverImage) ?? fallbackCover;
