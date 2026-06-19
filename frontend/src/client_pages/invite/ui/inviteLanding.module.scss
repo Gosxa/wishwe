@@ -26,7 +26,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border: 1px solid clr.$prm;
+  border: 1px solid clr.$ns-300;
   border-radius: 50%;
   background: clr.$ns-100;
 
@@ -34,6 +34,10 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  &.avatarUploaded {
+    border-color: clr.$prm;
   }
 }
 

@@ -38,8 +38,12 @@
 
 .avatarLeft {
   margin-right: -24px;
-  border-color: clr.$prm;
+  border-color: clr.$ns-300;
   z-index: 0;
+
+  &.avatarUploaded {
+    border-color: clr.$prm;
+  }
 }
 
 .avatarRight {

@@ -21,7 +21,9 @@ export const InviteLanding = ({ token, username, avatarSrc }: Props) => {
     <AuthLayout>
       <section className={s.landing}>
         <div className={s.card}>
-          <div className={s.avatar}>
+          <div
+            className={`${s.avatar}${avatarSrc ? ` ${s.avatarUploaded}` : ''}`}
+          >
             {avatarSrc ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarSrc} alt={`${inviteHandle} profile`} />

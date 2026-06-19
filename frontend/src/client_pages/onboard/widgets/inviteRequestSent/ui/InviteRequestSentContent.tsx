@@ -21,7 +21,9 @@ export const InviteRequestSentContent = () => {
   return (
     <div className={s.wrapper}>
       <div className={s.avatarGroup}>
-        <div className={s.avatarLeft}>
+        <div
+          className={`${s.avatarLeft}${userAvatar ? ` ${s.avatarUploaded}` : ''}`}
+        >
           {userAvatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={userAvatar} alt="Your profile" />

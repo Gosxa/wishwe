@@ -32,7 +32,7 @@
   border: solid 1px clr.$ns-300;
 
   &:has(img) {
-    border: solid 1px clr.$success;
+    border: solid 1px clr.$prm;
   }
   
   &:hover {
@@ -103,5 +103,9 @@
 .inviteAvatarBtn {
   width: 120px;
   height: 120px;
-  border: solid 1px clr.$prm;
+  border: solid 1px clr.$ns-300;
+
+  &:has(img) {
+    border: solid 1px clr.$prm;
+  }
 }
