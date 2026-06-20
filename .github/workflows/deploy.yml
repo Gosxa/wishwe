@@ -55,3 +55,23 @@ jobs:
             docker compose up -d --remove-orphans
 
             docker image prune -f
+
+      - name: Notify Discord (success)
+        if: success()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: success
+          title: "Deployment succeeded"
+          description: "✅ `${{ github.repository }}` was deployed to EC2 by **${{ github.actor }}**"
+          color: 0x2ecc71
+ 
+      - name: Notify Discord (failure)
+        if: failure()
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          status: failure
+          title: "Deployment failed"
+          description: "❌ `${{ github.repository }}` deployment failed — triggered by **${{ github.actor }}**"
+          color: 0xe74c3c
