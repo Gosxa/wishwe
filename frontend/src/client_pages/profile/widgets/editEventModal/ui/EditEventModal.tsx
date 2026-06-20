@@ -207,17 +207,16 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
                       min={1}
                       onChange={participants.onMinChange}
                     />
-                    <fieldset
-                      className={s.maxField}
-                      disabled={participants.unlimited}
-                    >
-                      <Stepper
-                        label="Max"
-                        value={participants.max}
-                        min={2}
-                        onChange={participants.onMaxChange}
-                      />
-                    </fieldset>
+                    {!participants.unlimited && (
+                      <fieldset className={s.maxField}>
+                        <Stepper
+                          label="Max"
+                          value={participants.max}
+                          min={2}
+                          onChange={participants.onMaxChange}
+                        />
+                      </fieldset>
+                    )}
                     <div className={s.unlimited}>
                       <span className={s.unlimitedLabel}>Unlimited</span>
                       <div className={s.unlimitedControl}>

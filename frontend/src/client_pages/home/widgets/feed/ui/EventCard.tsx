@@ -52,26 +52,31 @@ export const EventCard = ({
     date,
     location,
     description,
-    participants,
+    participants: initialParticipants,
     participantCount: initialCount,
     userParticipationStatus: initialStatus,
   } = event;
 
   const [status, setStatus] = useState(initialStatus);
   const [count, setCount] = useState(initialCount);
+  const [participants, setParticipants] = useState(initialParticipants);
   const [isPending, setIsPending] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isRecapOpen, setIsRecapOpen] = useState(false);
 
   const isParticipating = status !== null;
   const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
-  const extraCount = Math.max(0, count - shownParticipants.length);
+  const extraCount =
+    shownParticipants.length < MAX_VISIBLE_AVATARS
+      ? 0
+      : Math.max(0, count - MAX_VISIBLE_AVATARS);
   const actionLabel = type === 'plan' ? 'Join' : 'Interested';
   const selectedLabel = type === 'plan' ? 'Joined' : 'Interested';
 
   const applyResponse = (resp: ReturnType<typeof toFeedEvents>[number]) => {
     setStatus(resp.userParticipationStatus);
     setCount(resp.participantCount);
+    setParticipants(resp.participants);
   };
 
   const handleActionClick = async () => {

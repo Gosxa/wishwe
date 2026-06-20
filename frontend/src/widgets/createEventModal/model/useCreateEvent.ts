@@ -67,7 +67,7 @@ export const useCreateEvent = (
   const [unlimited, setUnlimited] = useState(true);
   const [timeframeText, setTimeframeText] = useState('');
   const [chatLink, setChatLink] = useState('');
-  const [visibility, setVisibility] = useState<EventVisibility>('f-o-f');
+  const [visibility, setVisibility] = useState<EventVisibility>('friends-only');
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
