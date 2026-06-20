@@ -1,4 +1,5 @@
 import logging
+import re
 import uuid
 
 from django.contrib.auth import get_user_model
@@ -69,6 +70,16 @@ User = get_user_model()
 
 class LoginThrottle(AnonRateThrottle):
     rate = "5/min"
+
+
+GOOGLE_AVATAR_SIZE = 512
+
+
+def _upscale_google_avatar(url):
+    """Request a larger Google profile picture.
+    Google's returns a 96x96 image (URL ending in ``=s96-c``)
+    """
+    return re.sub(r"=s\d+(-c)?$", f"=s{GOOGLE_AVATAR_SIZE}-c", url)
 
 
 @api_view(["POST"])
@@ -151,9 +162,9 @@ def google_auth(request):
             updated = True
 
         if avatar_url and not profile.avatar:
+            avatar_url = _upscale_google_avatar(avatar_url)
             try:
                 response = pyrequests.get(avatar_url, timeout=10)
-                print(f"DEBUG avatar_url={avatar_url} status={response.status_code} len={len(response.content)}")
                 if response.status_code == 200:
                     profile.avatar.save(
                         f"{user.pk}_google_avatar.jpg",
@@ -162,9 +173,12 @@ def google_auth(request):
                     )
                     updated = True
                 else:
-                    print(f"DEBUG avatar download failed: {response.status_code}")
+                    logger.warning(
+                        "Google avatar download failed: status=%s url=%s",
+                        response.status_code, avatar_url
+                    )
             except Exception as e:
-                print(f"DEBUG avatar exception: {e}")
+                logger.warning("Google avatar download error: %s", e)
 
         if updated:
             profile.save()

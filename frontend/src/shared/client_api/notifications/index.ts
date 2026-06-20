@@ -30,7 +30,7 @@ export const getNotifications = async (
 };
 
 export const getUnreadCount = async (signal?: AbortSignal): Promise<number> => {
-  const response = await fetch('/api/notifications/unread-count', {
+  const response = await fetch('/api/notifications/unread_count', {
     method: 'GET',
     signal,
   });
