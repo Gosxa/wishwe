@@ -3,10 +3,9 @@ name: Deploy to EC2
 on:
   workflow_dispatch:
 
-
 env:
   AWS_REGION: eu-central-1
-  ECR_REGISTRY: 760050152559.dkr.ecr.eu-central-1.amazonaws.com/wishwe/ecr
+  ECR_REGISTRY: 760050152559.dkr.ecr.eu-central-1.amazonaws.com
   ECR_REPOSITORY: wishwe/ecr
 
 jobs:
@@ -28,14 +27,27 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build & push Docker image
+      - name: Build & push Django image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-                     $ECR_REGISTRY/$ECR_REPOSITORY:latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY/django:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY/django:latest \
+            -f infra/docker/django/Dockerfile \
+            ./backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY/django:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY/django:latest
+
+      - name: Build & push Next.js image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:latest \
+            -f infra/docker/frontend/Dockerfile \
+            ./frontend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:latest
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
@@ -43,14 +55,12 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: ECR_REGISTRY,ECR_REPOSITORY,AWS_REGION
+          envs: ECR_REGISTRY,AWS_REGION
           script: |
             aws ecr get-login-password --region $AWS_REGION | \
               docker login --username AWS --password-stdin $ECR_REGISTRY
 
-            docker pull $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-            cd /var/www/your-app
+            cd /var/www/app/infra/docker
             docker compose pull
             docker compose up -d --remove-orphans
 
@@ -65,7 +75,7 @@ jobs:
           title: "Deployment succeeded"
           description: "✅ `${{ github.repository }}` was deployed to EC2 by **${{ github.actor }}**"
           color: 0x2ecc71
- 
+
       - name: Notify Discord (failure)
         if: failure()
         uses: sarisia/actions-status-discord@v1

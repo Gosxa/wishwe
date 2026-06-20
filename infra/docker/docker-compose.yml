@@ -1,9 +1,7 @@
 services:
 
   django:
-    build:
-      context: ../../backend
-      dockerfile: ../infra/docker/django/Dockerfile
+    image: 760050152559.dkr.ecr.eu-central-1.amazonaws.com/wishwe/ecr/django:latest
     restart: unless-stopped
     env_file:
       - /var/www/app/backend/.env
@@ -20,13 +18,7 @@ services:
       start_period: 60s
 
   nextjs:
-    build:
-      context: ../../frontend
-      dockerfile: ../infra/docker/frontend/Dockerfile
-      args:
-       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID}
-       - NEXT_PUBLIC_BACKEND_URL=http://django:8000
-       - NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID}
+    image: 760050152559.dkr.ecr.eu-central-1.amazonaws.com/wishwe/ecr/nextjs:latest
     restart: unless-stopped
     expose:
       - "3000"
@@ -104,9 +96,7 @@ services:
       - backend
 
   celery_worker:
-    build:
-      context: ../../backend
-      dockerfile: ../infra/docker/django/Dockerfile
+    image: 760050152559.dkr.ecr.eu-central-1.amazonaws.com/wishwe/ecr/django:latest
     command: celery -A wishwe_api worker -l info
     restart: unless-stopped
     depends_on:
@@ -120,9 +110,7 @@ services:
       - backend
 
   celery_beat:
-    build:
-      context: ../../backend
-      dockerfile: ../infra/docker/django/Dockerfile
+    image: 760050152559.dkr.ecr.eu-central-1.amazonaws.com/wishwe/ecr/django:latest
     command: celery -A wishwe_api beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     restart: unless-stopped
     depends_on:
