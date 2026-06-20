@@ -308,6 +308,8 @@ class EventViewSet(
             user=request.user,
         )
 
+        event = self.get_queryset().get(pk=event.pk)
+
         return Response(
             EventSerializer(
                 event,
@@ -328,6 +330,8 @@ class EventViewSet(
             user=request.user,
         )
 
+        event = self.get_queryset().get(pk=event.pk)
+
         return Response(
             EventSerializer(
                 event,
@@ -347,6 +351,8 @@ class EventViewSet(
             event=event,
             user=request.user,
         )
+
+        event = self.get_queryset().get(pk=event.pk)
 
         return Response(
             EventSerializer(
