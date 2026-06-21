@@ -146,7 +146,7 @@ AWS_S3_SIGNATURE_VERSION = "s3v4"
 AWS_S3_OBJECT_PARAMETERS = {
     "CacheControl": "max-age=604800",
 }
- 
+
 AWS_S3_CUSTOM_DOMAIN = os.getenv("AWS_CLOUDFRONT_DOMAIN")
 
 if AWS_S3_CUSTOM_DOMAIN:
@@ -219,4 +219,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
     "http://127.0.0.1:5173",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://wishwe.online/",
+    "https://www.wishwe.online/",
 ]
