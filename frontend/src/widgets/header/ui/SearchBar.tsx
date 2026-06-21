@@ -2,7 +2,10 @@
 
 import { useState } from 'react';
 import { SearchIcon } from '@shared/ui/icons';
+import { Tooltip } from '@shared/ui/tooltip/Tooltip';
 import s from '../header.module.scss';
+
+const HINT_ID = 'search-disabled-hint';
 
 export type SearchBarProps = {
   value?: string;
@@ -45,31 +48,24 @@ export const SearchBar = ({
 
   return (
     <div className={s.searchBarWrap}>
-      <div
-        className={
-          disabled ? `${s.searchBar} ${s.searchBarDisabled}` : s.searchBar
-        }
-      >
-        <SearchIcon />
-        <input
-          className={s.searchInput}
-          type="text"
-          placeholder={placeholder}
-          value={current}
-          disabled={disabled}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-        />
-      </div>
-      {showHint && (
-        <span
-          id="search-disabled-hint"
-          role="tooltip"
-          className={s.searchTooltip}
+      <Tooltip text={showHint ? disabledHint : undefined} id={HINT_ID}>
+        <div
+          className={
+            disabled ? `${s.searchBar} ${s.searchBarDisabled}` : s.searchBar
+          }
         >
-          {disabledHint}
-        </span>
-      )}
+          <SearchIcon />
+          <input
+            className={s.searchInput}
+            type="text"
+            placeholder={placeholder}
+            value={current}
+            disabled={disabled}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+          />
+        </div>
+      </Tooltip>
     </div>
   );
 };

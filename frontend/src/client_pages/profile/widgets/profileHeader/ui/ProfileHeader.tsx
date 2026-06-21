@@ -12,9 +12,6 @@ type Props = {
 };
 
 export const ProfileHeader = ({ initialUser }: Props) => {
-  // Prefer the live store (picks up in-session edits) but fall back to the
-  // server-fetched user, so the identity renders during SSR instead of flashing
-  // empty while the client store hydrates — most visible on slow connections.
   const user = useUserStore(state => state.user) ?? initialUser;
 
   const username = user?.username ?? '';

@@ -1,0 +1,43 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.wrapper {
+  position: relative;
+  display: block;
+  min-width: 0;
+
+  &:hover .bubble,
+  &:focus-within .bubble {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+}
+
+.bubble {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 200;
+  max-width: 280px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: clr.$ns-900;
+  color: clr.$ns-50;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 0.2s ease;
+  pointer-events: none;
+
+  @include tp.text-caption;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 16px;
+    border: 5px solid transparent;
+    border-bottom-color: clr.$ns-900;
+  }
+}

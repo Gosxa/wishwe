@@ -13,6 +13,7 @@ import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
 import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
 import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
+import { Tooltip } from '@shared/ui/tooltip/Tooltip';
 import { usePlanIt } from '../model/usePlanIt';
 import s from './planItModal.module.scss';
 
@@ -23,6 +24,8 @@ type Props = {
 };
 
 const noop = () => {};
+
+const LOCKED_HINT = "You'll be able to edit this after the plan is created.";
 
 export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
   const { category, when, participants, submit } = usePlanIt(
@@ -79,11 +82,13 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
 
           <div className={s.coverSlot}>
             <fieldset className={s.readonly} disabled>
-              <CoverUpload
-                previewUrl={coverPreviewUrl}
-                isUploading={false}
-                onSelect={noop}
-              />
+              <Tooltip text={LOCKED_HINT}>
+                <CoverUpload
+                  previewUrl={coverPreviewUrl}
+                  isUploading={false}
+                  onSelect={noop}
+                />
+              </Tooltip>
             </fieldset>
           </div>
         </div>
@@ -95,43 +100,51 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
 
           <div className={s.fields}>
             <fieldset className={s.readonly} disabled>
-              <CategoryPicker
-                categories={category.options}
-                selected={category.selected}
-                onChange={noop}
-              />
+              <Tooltip text={LOCKED_HINT}>
+                <CategoryPicker
+                  categories={category.options}
+                  selected={category.selected}
+                  onChange={noop}
+                />
+              </Tooltip>
 
-              <TextInput
-                id="planTitle"
-                label="What's the plan?"
-                placeholder="Movie night under the stars"
-                required
-                value={event.title}
-                onChange={noop}
-                helperText="Up to 50 characters"
-                maxLength={50}
-                showCounter
-              />
+              <Tooltip text={LOCKED_HINT}>
+                <TextInput
+                  id="planTitle"
+                  label="What's the plan?"
+                  placeholder="Movie night under the stars"
+                  required
+                  value={event.title}
+                  onChange={noop}
+                  helperText="Up to 50 characters"
+                  maxLength={50}
+                  showCounter
+                />
+              </Tooltip>
 
-              <TextInput
-                id="planLocation"
-                label="Where?"
-                placeholder="Add a location"
-                required
-                value={event.location}
-                onChange={noop}
-              />
+              <Tooltip text={LOCKED_HINT}>
+                <TextInput
+                  id="planLocation"
+                  label="Where?"
+                  placeholder="Add a location"
+                  required
+                  value={event.location}
+                  onChange={noop}
+                />
+              </Tooltip>
 
-              <TextArea
-                id="planDescription"
-                label="Description"
-                placeholder="Add details"
-                value={event.description}
-                onChange={noop}
-                helperText="Up to 200 characters"
-                maxLength={200}
-                showCounter
-              />
+              <Tooltip text={LOCKED_HINT}>
+                <TextArea
+                  id="planDescription"
+                  label="Description"
+                  placeholder="Add details"
+                  value={event.description}
+                  onChange={noop}
+                  helperText="Up to 200 characters"
+                  maxLength={200}
+                  showCounter
+                />
+              </Tooltip>
             </fieldset>
 
             <div className={s.field}>
