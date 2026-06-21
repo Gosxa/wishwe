@@ -1,3 +1,4 @@
+@use 'sass:list';
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
 
@@ -33,7 +34,12 @@
 
 @mixin button-visual($bg, $shadows...) {
   background: $bg;
-  box-shadow: if(length($shadows) == 0, none, $shadows);
+
+  @if list.length($shadows) == 0 {
+    box-shadow: none;
+  } @else {
+    box-shadow: $shadows;
+  }
 }
 
 @mixin primary($gap, $width, $height) {
