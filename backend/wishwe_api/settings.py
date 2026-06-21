@@ -222,6 +222,6 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://wishwe.online/",
-    "https://www.wishwe.online/",
+    "https://wishwe.online",
+    "https://www.wishwe.online",
 ]
