@@ -8,6 +8,11 @@ import {
 } from '@/shared/client_api/event';
 import type { BackendEvent, Category } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import {
+  getDateInputValue,
+  getEventDateTimeErrors,
+  getEventTimeInputMin,
+} from '@/shared/lib/validation/eventDate';
 import type { FieldErrors } from './types';
 
 const UNLIMITED_MAX = 3000;
@@ -69,11 +74,22 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
         : prev,
     );
 
+  const applyDateTimeErrors = (nextDate: string, nextTime: string) => {
+    setErrors(prev => ({
+      ...prev,
+      eventDate: undefined,
+      eventTime: undefined,
+      submit: undefined,
+      ...getEventDateTimeErrors(nextDate, nextTime),
+    }));
+  };
+
   const validate = (): FieldErrors => {
     const next: FieldErrors = {};
 
     if (!eventDate) next.eventDate = 'Date is required';
     if (!eventTime) next.eventTime = 'Time is required';
+    Object.assign(next, getEventDateTimeErrors(eventDate, eventTime));
 
     if (!unlimited) {
       if (maxParticipants < 2) {
@@ -139,21 +155,15 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
     when: {
       date: eventDate,
       time: eventTime,
+      minDate: getDateInputValue(),
+      minTime: getEventTimeInputMin(eventDate),
       onDateChange: (value: string) => {
         setEventDate(value);
-        setErrors(prev =>
-          prev.eventDate || prev.submit
-            ? { ...prev, eventDate: undefined, submit: undefined }
-            : prev,
-        );
+        applyDateTimeErrors(value, eventTime);
       },
       onTimeChange: (value: string) => {
         setEventTime(value);
-        setErrors(prev =>
-          prev.eventTime || prev.submit
-            ? { ...prev, eventTime: undefined, submit: undefined }
-            : prev,
-        );
+        applyDateTimeErrors(eventDate, value);
       },
       dateError: errors.eventDate,
       timeError: errors.eventTime,

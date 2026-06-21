@@ -161,6 +161,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
                       when.dateError && s.inputError,
                     )}
                     value={when.date}
+                    min={when.minDate}
                     onChange={e => when.onDateChange(e.target.value)}
                     aria-label="Event date"
                   />
@@ -174,6 +175,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
                       when.timeError && s.inputError,
                     )}
                     value={when.time}
+                    min={when.minTime}
                     onChange={e => when.onTimeChange(e.target.value)}
                     aria-label="Event time"
                   />

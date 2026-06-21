@@ -8,6 +8,12 @@ import {
 } from '@/shared/client_api/event';
 import type { BackendEventType, Category } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import {
+  getDateInputValue,
+  getEventDateTimeErrors,
+  getEventTimeInputMin,
+  getFutureEventDateTimeError,
+} from '@/shared/lib/validation/eventDate';
 import type { EventVisibility, FieldErrors } from './types';
 
 const UNLIMITED_MAX = 3000;
@@ -67,7 +73,7 @@ export const useCreateEvent = (
   const [unlimited, setUnlimited] = useState(true);
   const [timeframeText, setTimeframeText] = useState('');
   const [chatLink, setChatLink] = useState('');
-  const [visibility, setVisibility] = useState<EventVisibility>('friends-only');
+  const [visibility, setVisibility] = useState<EventVisibility>('f-o-f');
 
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState<string | null>(null);
@@ -115,6 +121,16 @@ export const useCreateEvent = (
         : prev,
     );
 
+  const applyDateTimeErrors = (nextDate: string, nextTime: string) => {
+    setErrors(prev => ({
+      ...prev,
+      eventDate: undefined,
+      eventTime: undefined,
+      submit: undefined,
+      ...getEventDateTimeErrors(nextDate, nextTime),
+    }));
+  };
+
   const onCoverSelect = (file: File) => {
     if (!ALLOWED_COVER_TYPES.includes(file.type)) {
       setErrors(prev => ({
@@ -151,6 +167,7 @@ export const useCreateEvent = (
     if (isPlan) {
       if (!eventDate) next.eventDate = 'Date is required';
       if (!eventTime) next.eventTime = 'Time is required';
+      Object.assign(next, getEventDateTimeErrors(eventDate, eventTime));
 
       if (!unlimited) {
         if (maxParticipants < 2) {
@@ -170,12 +187,16 @@ export const useCreateEvent = (
     return next;
   };
 
+  const dateTimeError = isPlan
+    ? getFutureEventDateTimeError(eventDate, eventTime)
+    : undefined;
+
   const canShare =
     Boolean(categoryId) &&
     title.trim().length > 0 &&
     location.trim().length > 0 &&
     (isPlan
-      ? Boolean(eventDate) && Boolean(eventTime)
+      ? Boolean(eventDate) && Boolean(eventTime) && !dateTimeError
       : timeframeText.trim().length > 0);
 
   const buildFields = (): Record<string, string | number> => {
@@ -297,17 +318,19 @@ export const useCreateEvent = (
     },
     dateInput: {
       value: eventDate,
+      min: getDateInputValue(),
       onChange: (value: string) => {
         setEventDate(value);
-        clearError('eventDate');
+        applyDateTimeErrors(value, eventTime);
       },
       error: errors.eventDate,
     },
     timeInput: {
       value: eventTime,
+      min: getEventTimeInputMin(eventDate),
       onChange: (value: string) => {
         setEventTime(value);
-        clearError('eventTime');
+        applyDateTimeErrors(eventDate, value);
       },
       error: errors.eventTime,
     },

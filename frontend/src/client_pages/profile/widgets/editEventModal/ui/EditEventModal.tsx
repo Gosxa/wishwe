@@ -165,6 +165,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
                           dateInput.error && s.inputError,
                         )}
                         value={dateInput.value}
+                        min={dateInput.min}
                         onChange={e => dateInput.onChange(e.target.value)}
                         aria-label="Event date"
                       />
@@ -180,6 +181,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
                           timeInput.error && s.inputError,
                         )}
                         value={timeInput.value}
+                        min={timeInput.min}
                         onChange={e => timeInput.onChange(e.target.value)}
                         aria-label="Event time"
                       />

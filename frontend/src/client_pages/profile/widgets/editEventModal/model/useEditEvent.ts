@@ -8,6 +8,11 @@ import {
 } from '@/shared/client_api/event';
 import type { BackendEvent, Category } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import {
+  getDateInputValue,
+  getEventDateTimeErrors,
+  getEventTimeInputMin,
+} from '@/shared/lib/validation/eventDate';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
 import type { FieldErrors } from './types';
 
@@ -119,6 +124,16 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
         : prev,
     );
 
+  const applyDateTimeErrors = (nextDate: string, nextTime: string) => {
+    setErrors(prev => ({
+      ...prev,
+      eventDate: undefined,
+      eventTime: undefined,
+      submit: undefined,
+      ...getEventDateTimeErrors(nextDate, nextTime),
+    }));
+  };
+
   const onCoverSelect = (file: File) => {
     if (!ALLOWED_COVER_TYPES.includes(file.type)) {
       setErrors(prev => ({
@@ -153,6 +168,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
     if (isPlan) {
       if (!eventDate) next.eventDate = 'Date is required';
       if (!eventTime) next.eventTime = 'Time is required';
+      Object.assign(next, getEventDateTimeErrors(eventDate, eventTime));
 
       if (!unlimited) {
         if (maxParticipants < 2) {
@@ -284,17 +300,19 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
     },
     dateInput: {
       value: eventDate,
+      min: getDateInputValue(),
       onChange: (value: string) => {
         setEventDate(value);
-        clearError('eventDate');
+        applyDateTimeErrors(value, eventTime);
       },
       error: errors.eventDate,
     },
     timeInput: {
       value: eventTime,
+      min: getEventTimeInputMin(eventDate),
       onChange: (value: string) => {
         setEventTime(value);
-        clearError('eventTime');
+        applyDateTimeErrors(eventDate, value);
       },
       error: errors.eventTime,
     },

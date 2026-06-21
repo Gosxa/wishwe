@@ -190,6 +190,7 @@ export const CreateEventModal = ({
                           dateInput.error && s.inputError,
                         )}
                         value={dateInput.value}
+                        min={dateInput.min}
                         onChange={e => dateInput.onChange(e.target.value)}
                         aria-label="Event date"
                       />
@@ -205,6 +206,7 @@ export const CreateEventModal = ({
                           timeInput.error && s.inputError,
                         )}
                         value={timeInput.value}
+                        min={timeInput.min}
                         onChange={e => timeInput.onChange(e.target.value)}
                         aria-label="Event time"
                       />
