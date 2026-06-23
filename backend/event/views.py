@@ -21,7 +21,8 @@ from event.serializers import (
     EventSerializer,
     PlanWriteSerializer,
     WishWriteSerializer,
-    ConvertWishToPlanSerializer
+    ConvertWishToPlanSerializer,
+    ParticipantSerializer
 )
 from event.services.event_service import EventService
 
@@ -360,6 +361,33 @@ class EventViewSet(
                 context=self.get_serializer_context(),
             ).data
         )
+
+    @action(
+        detail=True,
+        methods=["get"],
+        url_path="participants"
+    )
+    def participants(self, request, pk=None):
+        event = self.get_object()
+
+        participants = (
+            EventParticipant.objects.filter(
+                event=event,
+                status__in=[
+                    ParticipationStatus.JOINED,
+                    ParticipationStatus.INTERESTED,
+                ]
+            )
+            .select_related("user__profile")
+        )
+
+        serializer = ParticipantSerializer(
+            participants,
+            many=True,
+            context={"request": request},
+        )
+
+        return Response(serializer.data)
 
     @action(detail=True, methods=["post"], )
     def convert_to_plan(self, request, pk=None):
