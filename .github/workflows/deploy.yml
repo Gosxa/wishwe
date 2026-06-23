@@ -42,6 +42,7 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           docker build \
+            --no-cache \
             --build-arg NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID }} \
             -t $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:latest \
