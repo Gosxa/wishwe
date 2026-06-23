@@ -13,6 +13,8 @@ const eventImage = (coverImage: string | null) =>
 const handle = (username: string | null | undefined) =>
   username ? `@${username}` : '@someone';
 
+export { handle };
+
 const eventStartDate = (event: BackendEvent): Date | null => {
   if (event.event_type === 'wish' || !event.event_date) return null;
 
@@ -71,10 +73,12 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
       createdAt: new Date(event.created_at).getTime(),
       location: event.location,
       description: event.description,
+      chatLink: event.external_link,
       participantCount:
         event.event_type === 'wish'
           ? event.interested_count
           : event.participants_count,
+      maxParticipants: event.max_participants,
       participants: (event.participants_preview ?? []).map(participant => ({
         username: handle(participant.username),
         avatar: toAbsoluteMediaUrl(participant.avatar),

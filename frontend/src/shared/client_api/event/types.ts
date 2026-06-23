@@ -12,6 +12,11 @@ type ParticipantPreview = {
   avatar: string | null;
 };
 
+type BackendParticipant = {
+  username: string | null;
+  avatar: string | null;
+};
+
 type BackendEvent = {
   id: number;
   creator: string | null;
@@ -64,6 +69,7 @@ type EventListParams = {
 export type {
   BackendEvent,
   BackendEventType,
+  BackendParticipant,
   Category,
   EventListParams,
   MutualFriend,

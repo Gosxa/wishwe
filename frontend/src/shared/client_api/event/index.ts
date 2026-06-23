@@ -1,6 +1,7 @@
 import {
   BackendEvent,
   BackendEventType,
+  BackendParticipant,
   Category,
   EventListParams,
   Paginated,
@@ -64,6 +65,20 @@ export const getEvent = async (id: string): Promise<BackendEvent> => {
   }
 
   return (await res.json()) as BackendEvent;
+};
+
+export const listParticipants = async (
+  id: string,
+): Promise<BackendParticipant[]> => {
+  const res = await fetch(`/api/event/events/${id}/participants/`, {
+    method: 'GET',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to load participants');
+  }
+
+  return (await res.json()) as BackendParticipant[];
 };
 
 export const listCategories = async (): Promise<Category[]> => {
@@ -191,6 +206,7 @@ export const convertToPlan = async (
 export type {
   BackendEvent,
   BackendEventType,
+  BackendParticipant,
   Category,
   EventListParams,
   MutualFriend,

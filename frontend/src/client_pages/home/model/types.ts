@@ -30,7 +30,9 @@ export type FeedEvent = {
   createdAt: number;
   location: string;
   description?: string;
+  chatLink: string | null;
   participantCount: number;
+  maxParticipants: number | null;
   participants: ParticipantAvatar[];
   userParticipationStatus: 'joined' | 'interested' | null;
 };

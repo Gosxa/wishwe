@@ -76,7 +76,7 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
       ) : (
         <div className={s.list}>
           {events.map(event => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} enableDetails />
           ))}
           {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
           {isLoadingMore && (

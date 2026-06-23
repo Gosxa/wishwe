@@ -8,6 +8,8 @@ export { ChevronLeft } from './chevron/ChevronLeft';
 export { ChevronDown } from './chevron/ChevronDown';
 export { ChevronRight } from './chevron/ChevronRight';
 export { Clock } from './clock/Clock';
+export { Copy } from './copy/Copy';
+export { MessagesSquare } from './messagesSquare/MessagesSquare';
 export { Minus } from './minus/Minus';
 export { Logo } from './logo/Logo';
 export { SearchIcon } from './search/SearchIcon';

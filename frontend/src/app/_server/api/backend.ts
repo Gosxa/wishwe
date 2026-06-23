@@ -178,6 +178,12 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    participants: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/participants/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     create: (
       type: 'plan' | 'wish',
       body: FormData | unknown,

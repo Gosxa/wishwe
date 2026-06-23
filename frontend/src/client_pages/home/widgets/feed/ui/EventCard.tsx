@@ -6,6 +6,7 @@ import {
   Avatar,
   CalendarClock,
   Location,
+  MessagesSquare,
   Pencil,
   Plus,
   StickyNote,
@@ -20,6 +21,7 @@ import {
   joinPlan,
   leaveEvent,
 } from '@/shared/client_api/event';
+import { EventDetailsModal } from './EventDetailsModal';
 import { RecapModal } from './RecapModal';
 import s from './eventCard.module.scss';
 
@@ -28,6 +30,8 @@ type Props = {
   isOwn?: boolean;
   isArchived?: boolean;
   showEventType?: boolean;
+  enableDetails?: boolean;
+  showChat?: boolean;
   onEdit?: (id: string) => void;
   onPlanIt?: (id: string) => void;
 };
@@ -39,6 +43,8 @@ export const EventCard = ({
   isOwn = false,
   isArchived = false,
   showEventType = true,
+  enableDetails = false,
+  showChat = false,
   onEdit,
   onPlanIt,
 }: Props) => {
@@ -52,6 +58,7 @@ export const EventCard = ({
     date,
     location,
     description,
+    chatLink,
     participants: initialParticipants,
     participantCount: initialCount,
     userParticipationStatus: initialStatus,
@@ -63,7 +70,9 @@ export const EventCard = ({
   const [isPending, setIsPending] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isRecapOpen, setIsRecapOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
+  const canOpenDetails = enableDetails && !isArchived;
   const isParticipating = status !== null;
   const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
   const extraCount =
@@ -72,6 +81,27 @@ export const EventCard = ({
       : Math.max(0, count - MAX_VISIBLE_AVATARS);
   const actionLabel = type === 'plan' ? 'Join' : 'Interested';
   const selectedLabel = type === 'plan' ? 'Joined' : 'Interested';
+
+  const chatButton = chatLink ? (
+    <a
+      className={s.chat}
+      href={chatLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Open chat"
+    >
+      <MessagesSquare />
+    </a>
+  ) : (
+    <button
+      type="button"
+      className={s.chat}
+      disabled
+      aria-label="No chat available"
+    >
+      <MessagesSquare />
+    </button>
+  );
 
   const applyResponse = (resp: ReturnType<typeof toFeedEvents>[number]) => {
     setStatus(resp.userParticipationStatus);
@@ -94,7 +124,7 @@ export const EventCard = ({
 
       applyResponse(toFeedEvents([resp])[0]);
     } catch {
-      // silent revert — button stays in previous state
+      // silent revert
     } finally {
       setIsPending(false);
     }
@@ -109,7 +139,7 @@ export const EventCard = ({
       applyResponse(toFeedEvents([resp])[0]);
       setIsLeaveDialogOpen(false);
     } catch {
-      // silent revert — button stays in previous state
+      // silent revert
     } finally {
       setIsPending(false);
     }
@@ -121,148 +151,197 @@ export const EventCard = ({
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!canOpenDetails) return;
+    if (isDetailsOpen || isRecapOpen || isLeaveDialogOpen) return;
+    if ((e.target as HTMLElement).closest('button, a')) return;
+
+    setIsDetailsOpen(true);
+  };
+
   return (
     <article className={s.card}>
-      <div className={s.media}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className={clsx(s.image, isArchived && s.imageArchived)}
-          src={image}
-          alt={title}
-          loading="lazy"
-        />
-        <div className={s.tags}>
-          {showEventType && (
-            <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
-              {type}
-            </span>
-          )}
-          {hashtag && <span className={clsx(s.tag, s.hashtag)}>{hashtag}</span>}
-        </div>
-      </div>
-
-      <div className={s.body}>
-        <div className={s.details}>
-          <h2 className={s.title}>{title}</h2>
-
-          <ul className={s.meta}>
-            <li className={s.metaRow}>
-              <UserRound />
-              <span className={s.avatar}>
-                {host.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={host.avatar} alt={host.username} loading="lazy" />
-                ) : (
-                  <Avatar width={14} height={14} />
-                )}
+      <div
+        className={clsx(s.surface, canOpenDetails && s.clickable)}
+        onClick={handleCardClick}
+      >
+        <div className={s.media}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className={clsx(s.image, isArchived && s.imageArchived)}
+            src={image}
+            alt={title}
+            loading="lazy"
+          />
+          <div className={s.tags}>
+            {showEventType && (
+              <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
+                {type}
               </span>
-              <span className={s.username}>{host.username}</span>
-              {host.mutualFriend && (
-                <span className={s.muted}>· friend of {host.mutualFriend}</span>
-              )}
-            </li>
-            <li className={s.metaRow}>
-              <CalendarClock />
-              <span>{date}</span>
-            </li>
-            <li className={s.metaRow}>
-              <Location />
-              <span>{location}</span>
-            </li>
-            <li className={clsx(s.metaRow, s.metaRowTop)}>
-              <StickyNote />
-              {description ? (
-                <span className={s.description}>{description}</span>
-              ) : (
-                <span className={s.muted}>No details added by the host.</span>
-              )}
-            </li>
-          </ul>
+            )}
+            {hashtag && (
+              <span className={clsx(s.tag, s.hashtag)}>{hashtag}</span>
+            )}
+          </div>
         </div>
 
-        {count > 0 ? (
-          <div className={s.participants}>
-            <UsersRound />
-            <div className={s.avatars}>
-              {shownParticipants.map((participant, index) => (
-                <span key={index} className={s.stackAvatar}>
-                  {participant.avatar ? (
+        <div className={s.body}>
+          <div className={s.details}>
+            <h2 className={s.title}>
+              {enableDetails && !isArchived ? (
+                <button
+                  type="button"
+                  className={s.titleButton}
+                  onClick={() => setIsDetailsOpen(true)}
+                >
+                  {title}
+                </button>
+              ) : (
+                title
+              )}
+            </h2>
+
+            <ul className={s.meta}>
+              <li className={s.metaRow}>
+                <UserRound />
+                <span className={s.avatar}>
+                  {host.avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={participant.avatar}
-                      alt={participant.username}
-                      loading="lazy"
-                    />
+                    <img src={host.avatar} alt={host.username} loading="lazy" />
                   ) : (
-                    <Avatar width={28} height={28} />
+                    <Avatar width={14} height={14} />
                   )}
                 </span>
-              ))}
-            </div>
-            {extraCount > 0 && <span className={s.extra}>+{extraCount}</span>}
+                <span className={s.username}>{host.username}</span>
+                {host.mutualFriend && (
+                  <span className={s.muted}>
+                    · friend of {host.mutualFriend}
+                  </span>
+                )}
+              </li>
+              <li className={s.metaRow}>
+                <CalendarClock />
+                <span>{date}</span>
+              </li>
+              <li className={s.metaRow}>
+                <Location />
+                <span>{location}</span>
+              </li>
+              <li className={clsx(s.metaRow, s.metaRowTop)}>
+                <StickyNote />
+                {description ? (
+                  <span className={s.description}>{description}</span>
+                ) : (
+                  <span className={s.muted}>No details added by the host.</span>
+                )}
+              </li>
+            </ul>
           </div>
-        ) : (
-          <div className={s.participants}>
-            <UsersRound />
-            <span className={s.muted}>Be the first to join</span>
-          </div>
-        )}
 
-        {isArchived ? (
-          <button
-            type="button"
-            className={s.viewRecap}
-            onClick={() => setIsRecapOpen(true)}
-          >
-            <span>View recap</span>
-          </button>
-        ) : isOwn ? (
-          <div className={s.ownerActions}>
+          {count > 0 ? (
+            <div className={s.participants}>
+              <UsersRound />
+              <div className={s.avatars}>
+                {shownParticipants.map((participant, index) => (
+                  <span key={index} className={s.stackAvatar}>
+                    {participant.avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={participant.avatar}
+                        alt={participant.username}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Avatar width={28} height={28} />
+                    )}
+                  </span>
+                ))}
+              </div>
+              {extraCount > 0 && <span className={s.extra}>+{extraCount}</span>}
+            </div>
+          ) : (
+            <div className={s.participants}>
+              <UsersRound />
+              <span className={s.muted}>Be the first to join</span>
+            </div>
+          )}
+
+          {isArchived ? (
             <button
               type="button"
-              className={s.edit}
-              onClick={() => onEdit?.(id)}
+              className={s.viewRecap}
+              onClick={() => setIsRecapOpen(true)}
             >
-              <Pencil />
-              <span>Edit</span>
+              <span>View recap</span>
             </button>
-            {type === 'wish' && (
+          ) : isOwn ? (
+            <div className={s.actions}>
+              {showChat && chatButton}
+              <div className={s.ownerActions}>
+                <button
+                  type="button"
+                  className={s.edit}
+                  onClick={() => onEdit?.(id)}
+                >
+                  <Pencil />
+                  <span>Edit</span>
+                </button>
+                {type === 'wish' && (
+                  <button
+                    type="button"
+                    className={s.planIt}
+                    onClick={() => onPlanIt?.(id)}
+                  >
+                    <span>Plan it</span>
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={s.actions}>
+              {showChat && chatButton}
               <button
                 type="button"
-                className={s.planIt}
-                onClick={() => onPlanIt?.(id)}
+                className={clsx(s.action, isParticipating && s.joined)}
+                onClick={handleActionClick}
+                disabled={isPending}
               >
-                <span>Plan it</span>
+                {isParticipating ? (
+                  <>
+                    <span className={s.selectedFace}>{selectedLabel}</span>
+                    <span className={s.leaveFace}>
+                      <X />
+                      Leave
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Plus />
+                    <span>{actionLabel}</span>
+                  </>
+                )}
               </button>
-            )}
-          </div>
-        ) : (
-          <button
-            type="button"
-            className={clsx(s.action, isParticipating && s.joined)}
-            onClick={handleActionClick}
-            disabled={isPending}
-          >
-            {isParticipating ? (
-              <>
-                <span className={s.selectedFace}>{selectedLabel}</span>
-                <span className={s.leaveFace}>
-                  <X />
-                  Leave
-                </span>
-              </>
-            ) : (
-              <>
-                <Plus />
-                <span>{actionLabel}</span>
-              </>
-            )}
-          </button>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       {isRecapOpen && (
         <RecapModal event={event} onClose={() => setIsRecapOpen(false)} />
+      )}
+
+      {isDetailsOpen && (
+        <EventDetailsModal
+          event={event}
+          count={count}
+          participants={participants}
+          isParticipating={isParticipating}
+          isPending={isPending}
+          actionLabel={actionLabel}
+          selectedLabel={selectedLabel}
+          onAction={handleActionClick}
+          onClose={() => setIsDetailsOpen(false)}
+        />
       )}
 
       {isLeaveDialogOpen && (

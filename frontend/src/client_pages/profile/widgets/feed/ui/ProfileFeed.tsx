@@ -121,7 +121,9 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
                 currentHandle != null && event.host.username === currentHandle
               }
               isArchived={tab === 'archive'}
+              enableDetails={tab !== 'archive'}
               showEventType={false}
+              showChat
               onEdit={handleEditOpen}
               onPlanIt={handlePlanItOpen}
             />
