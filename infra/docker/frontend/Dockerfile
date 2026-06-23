@@ -5,6 +5,8 @@ COPY package*.json ./
 RUN npm ci
 COPY . .
 
+ARG NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID
+ENV NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID:-904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com}
 
 RUN echo "Длина Client ID при сборке:" ${#NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID}
 
