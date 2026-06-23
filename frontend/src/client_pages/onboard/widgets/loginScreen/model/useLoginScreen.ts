@@ -14,6 +14,8 @@ import { AcceptInviteError } from '@/shared/client_api/user';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
+const GOOGLE_CLIENT_ID = '904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com';
+
 const requestGoogleToken = (clientId: string): Promise<string> =>
   new Promise((resolve, reject) => {
     const nonce = Math.random().toString(36).slice(2);
@@ -36,7 +38,6 @@ const requestGoogleToken = (clientId: string): Promise<string> =>
 
     if (!popup) {
       reject(new Error('Popup blocked'));
-
       return;
     }
 
@@ -90,8 +91,7 @@ export const useLoginScreen = () => {
     setGoogleError('');
 
     try {
-      const clientId = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID ?? '';
-      const idToken = await requestGoogleToken(clientId);
+      const idToken = await requestGoogleToken(GOOGLE_CLIENT_ID);
       const user = await loginWithGoogle(idToken);
 
       setUser(user);
