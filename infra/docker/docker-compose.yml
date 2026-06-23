@@ -47,7 +47,7 @@ services:
       django:
         condition: service_healthy
       nextjs:
-        condition: service_started
+        condition: service_healthy
     networks:
       - backend
 
