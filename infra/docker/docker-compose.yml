@@ -24,11 +24,10 @@ services:
       - "3000"
     networks:
       - backend
-    env_file:
-      - /var/www/app/frontend/.env
     environment:
-      - NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID}
       - NODE_ENV=production
+      - NEXT_PUBLIC_BACKEND_URL=http://django:8000
+      - NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health 2>/dev/null || wget -qO- http://localhost:3000 2>/dev/null || exit 1"]
       interval: 30s
