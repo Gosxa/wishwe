@@ -42,6 +42,7 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           docker build \
+            --build-arg NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=${{ secrets.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID }} \
             -t $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY/nextjs:latest \
             -f infra/docker/frontend/Dockerfile \
@@ -63,7 +64,7 @@ jobs:
             cd /var/www/app/infra/docker
             docker compose pull
             docker compose up -d --remove-orphans
-            
+
             sleep 30
             docker compose restart nginx
 
