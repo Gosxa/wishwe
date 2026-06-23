@@ -11,6 +11,7 @@ from event.models import (
     ParticipationStatus,
 )
 from event.services.event_service import EventService
+from user.models import Profile
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -353,3 +354,20 @@ class ConvertWishToPlanSerializer(serializers.ModelSerializer):
             })
 
         return attrs
+
+
+
+class ParticipantSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source="user.profile.username"
+    )
+    avatar = serializers.ImageField(
+        source="user.profile.avatar"
+    )
+
+    class Meta:
+        model = EventParticipant
+        fields = (
+            "username",
+            "avatar",
+        )
