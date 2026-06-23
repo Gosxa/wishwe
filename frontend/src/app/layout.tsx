@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import { Instrument_Serif } from 'next/font/google';
+import { Instrument_Serif, Poppins } from 'next/font/google';
 import { GlobalLoader } from '@/shared/ui/globalLoader/GlobalLoader';
 import './globals.scss';
 
@@ -27,6 +27,13 @@ const instrumentSerif = Instrument_Serif({
   variable: '--font-instrument-serif',
 });
 
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+  style: 'normal',
+  variable: '--font-poppins',
+});
+
 export const metadata: Metadata = {
   title: 'WishWe',
   description: 'Share your wishes',
@@ -40,7 +47,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${skModernist.variable} ${instrumentSerif.variable}`}
+      className={`${skModernist.variable} ${instrumentSerif.variable} ${poppins.variable}`}
     >
       <body>
         <GlobalLoader />

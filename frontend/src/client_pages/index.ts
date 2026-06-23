@@ -4,3 +4,4 @@ export { ProfilePage } from './profile';
 export { EditProfilePage } from './editProfile';
 export { FriendsPage } from './friends';
 export { InviteLanding } from './invite';
+export { LandingPage } from './landing';

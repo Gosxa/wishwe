@@ -1,3 +1,5 @@
+export { ArrowDown } from './arrowDown/ArrowDown';
+export { ArrowDownShort } from './arrowDownShort/ArrowDownShort';
 export { Asterisk } from './asterisk/Asterisk';
 export * from './badge';
 export { Avatar } from './avatar/Avatar';
@@ -11,6 +13,7 @@ export { Logo } from './logo/Logo';
 export { SearchIcon } from './search/SearchIcon';
 export { Plus } from './plus/Plus';
 export { Pencil } from './pencil/Pencil';
+export { RefreshArc } from './refreshArc/RefreshArc';
 export { Upload } from './upload/Upload';
 export { Sparkles } from './sparkles/Sparkles';
 export { X } from './x/X';

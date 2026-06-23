@@ -1,0 +1,197 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+// Local, hero-only values (not part of the shared token set)
+$subtitle-color: #f0f0f0;
+$overlay-end: #14080f;
+
+.hero {
+  position: relative;
+  display: flex;
+  min-height: 100svh;
+  width: 100%;
+  overflow: hidden;
+  background: clr.$ns-50;
+}
+
+.bg,
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center bottom;
+}
+
+.overlay {
+  // Darken the lower portion so the headline/CTAs stay legible (per Figma)
+  background: linear-gradient(180deg, rgba(20, 8, 15, 0) 35%, $overlay-end 100%);
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 80px 80px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  max-width: 844px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: clamp(40px, 6.5vw, 72px);
+  line-height: 1.05;
+  color: clr.$ns-50;
+}
+
+.subtitle {
+  margin: 0;
+  max-width: 620px;
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: clamp(16px, 2vw, 20px);
+  line-height: 1.4;
+  color: $subtitle-color;
+}
+
+.actions {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+%hero-btn {
+  @include tp.text-button;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 302px;
+  height: 40px;
+  padding: 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.primaryBtn {
+  @extend %hero-btn;
+
+  border: none;
+  color: #fff;
+  background: clr.$cta;
+
+  &:hover {
+    background: clr.$cta-hover;
+  }
+
+  &:active {
+    background: clr.$cta-active;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px $overlay-end,
+      0 0 0 4px clr.$cta;
+  }
+}
+
+.secondaryBtn {
+  @extend %hero-btn;
+
+  color: clr.$ns-50;
+  background: transparent;
+  border: 2px solid clr.$ns-50;
+
+  &:hover {
+    background: rgba(247, 243, 227, 0.12);
+  }
+
+  &:active {
+    background: rgba(247, 243, 227, 0.2);
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px clr.$cta;
+  }
+}
+
+.scrollDown {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  color: clr.$ns-50;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(4px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$ns-50;
+    outline-offset: 4px;
+    border-radius: 4px;
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+@media (max-width: 768px) {
+  .inner {
+    padding: 0 24px 48px;
+  }
+
+  .content {
+    gap: 32px;
+    width: 100%;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .primaryBtn,
+  .secondaryBtn {
+    width: 100%;
+  }
+
+  .scrollDown {
+    display: none;
+  }
+}

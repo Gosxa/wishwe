@@ -1,0 +1,8 @@
+@use '@shared/styles/colors' as clr;
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: clr.$ns-50;
+}

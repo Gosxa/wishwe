@@ -1,0 +1,195 @@
+@use '@shared/styles/colors' as clr;
+
+.section {
+  width: 100%;
+  background: clr.$ns-50;
+}
+
+.inner {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: clamp(64px, 10vw, 120px) 80px;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 24px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+
+.card {
+  border-radius: 24px;
+  padding: 32px 48px;
+}
+
+.proseCard {
+  padding: 48px;
+}
+
+.prose {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 1.5;
+  color: #fff;
+
+  strong {
+    font-weight: 600; // Poppins SemiBold
+  }
+}
+
+
+.problemCard {
+  background: clr.$landing-plum;
+}
+
+.problemTitle {
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.2;
+  color: clr.$landing-sky;
+}
+
+.orangeCard {
+  background: clr.$cta;
+}
+
+.solutionCard {
+  background-image: url('/landing/gradient-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.photo {
+  position: relative;
+  height: 246px;
+  overflow: hidden;
+  border-radius: 24px;
+
+  img {
+    object-fit: cover;
+  }
+}
+
+
+.birds {
+  position: relative;
+  height: 260px;
+  overflow: hidden;
+  border-radius: 24px 1000000px 24px 24px;
+
+  img {
+    object-fit: cover;
+    object-position: center 18%;
+  }
+}
+
+.benefitsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  background: clr.$landing-plum;
+}
+
+.benefitsHeaderTitle {
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 1.2;
+  color: clr.$landing-sky;
+}
+
+.benefitsArrow {
+  flex-shrink: 0;
+  color: clr.$landing-sky;
+
+  svg {
+    height: 28px;
+    width: auto;
+  }
+}
+
+.benefitList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.benefit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: clr.$landing-heading;
+}
+
+.benefitFilled {
+  background-image: url('/landing/benefit-card-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.benefitOutlined {
+  background: clr.$ns-50;
+  border: 2px solid clr.$landing-sky-border;
+}
+
+.benefitNum,
+.benefitTitle {
+  font-family: var(--font-poppins);
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.benefitBody {
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+
+@media (max-width: 768px) {
+  .inner {
+    padding: clamp(48px, 12vw, 64px) 24px;
+  }
+
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 24px;
+  }
+
+  .proseCard {
+    padding: 32px 24px;
+  }
+
+  .problemTitle,
+  .benefitsHeaderTitle {
+    font-size: 26px;
+  }
+
+  .prose {
+    font-size: 18px;
+  }
+
+  .benefitBody {
+    font-size: 16px;
+  }
+}

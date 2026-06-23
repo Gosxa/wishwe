@@ -38,6 +38,9 @@ const mergeCookieHeader = (
 };
 
 export async function authMiddleware(request: NextRequest) {
+  // The landing page at "/" is public; it handles the authed→/feed redirect itself.
+  if (request.nextUrl.pathname === '/') return NextResponse.next();
+
   const accessToken = request.cookies.get('access_token')?.value;
   const refreshToken = request.cookies.get('refresh_token')?.value;
 
