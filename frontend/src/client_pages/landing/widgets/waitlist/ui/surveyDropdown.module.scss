@@ -1,0 +1,112 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.label {
+  @include tp.text-body;
+  color: clr.$landing-heading;
+}
+
+.control {
+  position: relative;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+  transition: box-shadow 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1px clr.$ns-700;
+  }
+}
+
+.triggerFilled {
+  box-shadow: inset 0 0 0 1px clr.$ns-700;
+}
+
+.value {
+  @include tp.text-body;
+  overflow: hidden;
+  color: clr.$ns-900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  color: clr.$ns-500;
+}
+
+.chevron {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: clr.$ns-900;
+  transition: transform 0.2s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 16px 20px;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px;
+  border-radius: 8px;
+  text-align: left;
+  color: clr.$ns-900;
+  box-shadow: inset 0 0 0 1px transparent;
+  transition:
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+  @include tp.text-body;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 1px clr.$cta;
+  }
+}
+
+.optionSelected {
+  box-shadow: inset 0 0 0 1px clr.$cta;
+
+  &:hover {
+    background: transparent;
+  }
+}
