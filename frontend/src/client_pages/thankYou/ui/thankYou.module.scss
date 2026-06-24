@@ -1,0 +1,89 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;
+  padding: 64px 24px;
+  overflow: hidden;
+  background: clr.$ns-50;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(40px, 6vw, 64px);
+  width: 100%;
+  max-width: 519px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: clamp(32px, 5vw, 48px);
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+  color: clr.$landing-heading;
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-poppins);
+  font-weight: 400;
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.5;
+  color: clr.$landing-body;
+}
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  padding: 8px;
+  border-radius: 8px;
+  color: clr.$ns-50;
+  background: clr.$cta;
+  text-decoration: none;
+  transition: background 0.2s ease;
+  @include tp.text-button;
+
+  &:hover {
+    background: clr.$cta-hover;
+  }
+
+  &:active {
+    background: clr.$cta-active;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px clr.$ns-50,
+      0 0 0 4px clr.$cta;
+  }
+}

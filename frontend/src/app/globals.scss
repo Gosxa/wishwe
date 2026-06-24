@@ -11,6 +11,7 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   tab-size: 4;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -37,7 +38,6 @@ textarea,
 select {
   font: inherit;
   font-size: max(16px, 1em);
-  -webkit-appearance: none;
   border-radius: 0;
 }
 

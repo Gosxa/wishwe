@@ -41,9 +41,9 @@ export const ReadyToWish = () => {
             </p>
           </div>
 
-          <button type="button" className={s.cta}>
+          <a className={s.cta} href="#waitlist">
             Get Early Access
-          </button>
+          </a>
         </div>
 
         <div className={s.gallery}>

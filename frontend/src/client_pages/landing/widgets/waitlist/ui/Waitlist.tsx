@@ -1,9 +1,12 @@
 'use client';
 
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { type SubmitEvent, useState } from 'react';
+import z from 'zod';
 
 import { TextInput } from '@shared/ui/textInput/TextInput';
+import { useValidation } from '@/features/useValidation/useValidation';
 
 import { SurveyDropdown } from './SurveyDropdown';
 import s from './waitlist.module.scss';
@@ -16,14 +19,37 @@ const SURVEY_OPTIONS = [
   'Everything is easy for me',
 ];
 
+const nameSchema = z
+  .string()
+  .min(2, 'Name must be at least 2 characters')
+  .max(50, 'Name must be less than 50 characters')
+  .regex(
+    /^[a-zA-Z\s'-]+$/,
+    'Name can only contain letters, spaces, hyphens and apostrophes',
+  );
+
+const emailSchema = z.email('Please enter a valid email address');
+
 export const Waitlist = () => {
+  const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [struggle, setStruggle] = useState<string | null>(null);
 
+  const nameValidation = useValidation(nameSchema);
+  const emailValidation = useValidation(emailSchema);
+
   const handleSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // TODO: wire up to the waitlist endpoint
+
+    const isNameValid = nameValidation.check(name);
+    const isEmailValid = emailValidation.check(email);
+
+    if (!isNameValid || !isEmailValid) {
+      return;
+    }
+
+    router.push('/thank-you');
   };
 
   return (
@@ -45,12 +71,16 @@ export const Waitlist = () => {
                   placeholder="Name"
                   value={name}
                   onChange={event => setName(event.target.value)}
+                  error={nameValidation.error}
+                  isSuccess={nameValidation.isSuccess}
                 />
                 <TextInput
                   id="waitlist-email"
                   placeholder="Email"
                   value={email}
                   onChange={event => setEmail(event.target.value)}
+                  error={emailValidation.error}
+                  isSuccess={emailValidation.isSuccess}
                 />
               </div>
 
