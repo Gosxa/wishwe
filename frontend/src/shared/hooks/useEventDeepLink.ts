@@ -7,7 +7,10 @@ const EVENT_PARAM = 'event';
 
 type LoadedEvent = { id: string };
 
-export const useEventDeepLink = (loadedEvents: LoadedEvent[]) => {
+export const useEventDeepLink = (
+  loadedEvents: LoadedEvent[],
+  isFeedLoading = false,
+) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -39,7 +42,9 @@ export const useEventDeepLink = (loadedEvents: LoadedEvent[]) => {
   const isLinkedEventLoaded = loadedEvents.some(
     event => event.id === openEventId,
   );
-  const showDeepLinkCard = Boolean(openEventId) && !isLinkedEventLoaded;
+
+  const showDeepLinkCard =
+    Boolean(openEventId) && !isFeedLoading && !isLinkedEventLoaded;
 
   return { openEventId, setEventParam, clearEventParam, showDeepLinkCard };
 };

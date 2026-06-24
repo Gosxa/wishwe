@@ -51,7 +51,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const isArchive = tab === 'archive';
 
   const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
-    useEventDeepLink(events);
+    useEventDeepLink(events, isLoading);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 

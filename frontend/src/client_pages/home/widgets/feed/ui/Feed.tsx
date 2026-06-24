@@ -34,7 +34,7 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
   useSearchDisabledSync(onSearchDisabledChange, events, search);
 
   const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
-    useEventDeepLink(events);
+    useEventDeepLink(events, isLoading);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 

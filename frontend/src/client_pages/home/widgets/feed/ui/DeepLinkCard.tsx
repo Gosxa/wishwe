@@ -37,6 +37,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
       event={event}
       enableDetails
       autoOpenDetails
+      detailsOnly
       onDetailsClose={onClose}
     />
   );

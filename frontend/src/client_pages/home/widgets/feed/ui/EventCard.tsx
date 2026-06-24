@@ -32,6 +32,7 @@ type Props = {
   showEventType?: boolean;
   enableDetails?: boolean;
   autoOpenDetails?: boolean;
+  detailsOnly?: boolean;
   showChat?: boolean;
   onEdit?: (id: string) => void;
   onPlanIt?: (id: string) => void;
@@ -48,6 +49,7 @@ export const EventCard = ({
   showEventType = true,
   enableDetails = false,
   autoOpenDetails = false,
+  detailsOnly = false,
   showChat = false,
   onEdit,
   onPlanIt,
@@ -169,6 +171,61 @@ export const EventCard = ({
 
     openDetails();
   };
+
+  const modals = (
+    <>
+      {isRecapOpen && (
+        <RecapModal event={event} onClose={() => setIsRecapOpen(false)} />
+      )}
+
+      {isDetailsOpen && (
+        <EventDetailsModal
+          event={event}
+          count={count}
+          participants={participants}
+          isParticipating={isParticipating}
+          isPending={isPending}
+          actionLabel={actionLabel}
+          selectedLabel={selectedLabel}
+          onAction={handleActionClick}
+          onClose={() => {
+            setIsDetailsOpen(false);
+            onDetailsClose?.();
+          }}
+        />
+      )}
+
+      {isLeaveDialogOpen && (
+        <div className={s.leaveOverlay}>
+          <div className={s.leaveDialog} role="dialog">
+            <h2 className={s.leaveDialogTitle}>Leave this event?</h2>
+            <div className={s.leaveDialogActions}>
+              <button
+                type="button"
+                className={s.noThanksButton}
+                onClick={handleLeaveDialogClose}
+                disabled={isPending}
+              >
+                <span>No, thanks</span>
+              </button>
+              <button
+                type="button"
+                className={s.leaveButton}
+                onClick={handleLeaveConfirm}
+                disabled={isPending}
+              >
+                <span>Leave</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  if (detailsOnly) {
+    return modals;
+  }
 
   return (
     <article className={s.card}>
@@ -337,52 +394,7 @@ export const EventCard = ({
         </div>
       </div>
 
-      {isRecapOpen && (
-        <RecapModal event={event} onClose={() => setIsRecapOpen(false)} />
-      )}
-
-      {isDetailsOpen && (
-        <EventDetailsModal
-          event={event}
-          count={count}
-          participants={participants}
-          isParticipating={isParticipating}
-          isPending={isPending}
-          actionLabel={actionLabel}
-          selectedLabel={selectedLabel}
-          onAction={handleActionClick}
-          onClose={() => {
-            setIsDetailsOpen(false);
-            onDetailsClose?.();
-          }}
-        />
-      )}
-
-      {isLeaveDialogOpen && (
-        <div className={s.leaveOverlay}>
-          <div className={s.leaveDialog} role="dialog">
-            <h2 className={s.leaveDialogTitle}>Leave this event?</h2>
-            <div className={s.leaveDialogActions}>
-              <button
-                type="button"
-                className={s.noThanksButton}
-                onClick={handleLeaveDialogClose}
-                disabled={isPending}
-              >
-                <span>No, thanks</span>
-              </button>
-              <button
-                type="button"
-                className={s.leaveButton}
-                onClick={handleLeaveConfirm}
-                disabled={isPending}
-              >
-                <span>Leave</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {modals}
     </article>
   );
 };
