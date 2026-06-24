@@ -23,7 +23,8 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
   gap: 48px;
   width: min(1200px, 100%);
-  height: min(880px, 100%);
+  height: auto;
+  max-height: min(880px, 100%);
   padding: 72px 56px 56px;
   border: 1px solid clr.$prm;
   border-radius: 16px;
@@ -104,7 +105,17 @@
 }
 
 .coverSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin: auto 0;
+}
+
+.cover {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 12px;
+  object-fit: cover;
 }
 
 .right {
@@ -129,17 +140,6 @@
   overflow-y: auto;
   overflow-x: hidden;
   @include scroll.thin;
-}
-
-
-.readonly {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
 }
 
 .field {

@@ -3,17 +3,12 @@
 import { useEffect } from 'react';
 import clsx from 'clsx';
 import { Asterisk, BadgeInfo, CalendarClock, Clock, X } from '@shared/ui/icons';
-import { TextInput } from '@shared/ui/textInput/TextInput';
-import { TextArea } from '@shared/ui/textArea/TextArea';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { Toggle } from '@shared/ui/toggle/Toggle';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
-import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
-import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
-import { Tooltip } from '@shared/ui/tooltip/Tooltip';
 import { usePlanIt } from '../model/usePlanIt';
 import s from './planItModal.module.scss';
 
@@ -23,17 +18,13 @@ type Props = {
   onConverted: () => void;
 };
 
-const noop = () => {};
-
-const LOCKED_HINT = "You'll be able to edit this after the plan is created.";
+const FALLBACK_COVER = '/bg-gradient-noise.webp';
 
 export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
-  const { category, when, participants, submit } = usePlanIt(
-    event,
-    onConverted,
-  );
+  const { when, participants, submit } = usePlanIt(event, onConverted);
 
-  const coverPreviewUrl = toAbsoluteMediaUrl(event.cover_image);
+  const coverPreviewUrl =
+    toAbsoluteMediaUrl(event.cover_image) ?? FALLBACK_COVER;
 
   useBodyScrollLock();
 
@@ -81,15 +72,9 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
           </div>
 
           <div className={s.coverSlot}>
-            <fieldset className={s.readonly} disabled>
-              <Tooltip text={LOCKED_HINT}>
-                <CoverUpload
-                  previewUrl={coverPreviewUrl}
-                  isUploading={false}
-                  onSelect={noop}
-                />
-              </Tooltip>
-            </fieldset>
+            <span className={s.label}>Cover</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={s.cover} src={coverPreviewUrl} alt="Event cover" />
           </div>
         </div>
 
@@ -99,54 +84,6 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
           </h2>
 
           <div className={s.fields}>
-            <fieldset className={s.readonly} disabled>
-              <Tooltip text={LOCKED_HINT}>
-                <CategoryPicker
-                  categories={category.options}
-                  selected={category.selected}
-                  onChange={noop}
-                />
-              </Tooltip>
-
-              <Tooltip text={LOCKED_HINT}>
-                <TextInput
-                  id="planTitle"
-                  label="What's the plan?"
-                  placeholder="Movie night under the stars"
-                  required
-                  value={event.title}
-                  onChange={noop}
-                  helperText="Up to 50 characters"
-                  maxLength={50}
-                  showCounter
-                />
-              </Tooltip>
-
-              <Tooltip text={LOCKED_HINT}>
-                <TextInput
-                  id="planLocation"
-                  label="Where?"
-                  placeholder="Add a location"
-                  required
-                  value={event.location}
-                  onChange={noop}
-                />
-              </Tooltip>
-
-              <Tooltip text={LOCKED_HINT}>
-                <TextArea
-                  id="planDescription"
-                  label="Description"
-                  placeholder="Add details"
-                  value={event.description}
-                  onChange={noop}
-                  helperText="Up to 200 characters"
-                  maxLength={200}
-                  showCounter
-                />
-              </Tooltip>
-            </fieldset>
-
             <div className={s.field}>
               <span className={s.label}>
                 When?

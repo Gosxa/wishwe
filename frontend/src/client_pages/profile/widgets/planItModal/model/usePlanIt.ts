@@ -1,12 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import {
-  ConvertEventError,
-  convertToPlan,
-  listCategories,
-} from '@/shared/client_api/event';
-import type { BackendEvent, Category } from '@/shared/client_api/event';
+import { useState } from 'react';
+import { ConvertEventError, convertToPlan } from '@/shared/client_api/event';
+import type { BackendEvent } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import {
   getDateInputValue,
@@ -34,9 +30,6 @@ const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
 export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
   const setLoading = useLoadingStore(s => s.setLoading);
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryId, setCategoryId] = useState<number | null>(null);
-
   const [eventDate, setEventDate] = useState('');
   const [eventTime, setEventTime] = useState('');
   const [minParticipants, setMinParticipants] = useState(
@@ -47,25 +40,6 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    let isActive = true;
-
-    listCategories()
-      .then(data => {
-        if (!isActive) return;
-
-        setCategories(data);
-        setCategoryId(
-          data.find(category => category.name === event.category)?.id ?? null,
-        );
-      })
-      .catch(() => {});
-
-    return () => {
-      isActive = false;
-    };
-  }, [event.category]);
 
   const clearMaxError = () =>
     setErrors(prev =>
@@ -148,10 +122,6 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
   };
 
   return {
-    category: {
-      options: categories,
-      selected: categoryId,
-    },
     when: {
       date: eventDate,
       time: eventTime,
