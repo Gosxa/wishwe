@@ -1,5 +1,6 @@
 import type { FeedFilter } from '@client_pages/home/model/types';
 import { Plus } from '@shared/ui/icons';
+import { useInviteLink } from '@shared/hooks/useInviteLink';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import s from './feedEmptyState.module.scss';
 
@@ -7,7 +8,7 @@ type Props = {
   filter: FeedFilter;
 };
 
-const copy: Record<
+const text: Record<
   FeedFilter,
   { title: string; subtitle: string; create: string }
 > = {
@@ -30,9 +31,17 @@ const copy: Record<
   },
 };
 
+const INVITE_LABELS = {
+  idle: 'Invite friends',
+  copying: 'Generating…',
+  copied: 'Copied!',
+  error: 'Try again',
+} as const;
+
 export const FeedEmptyState = ({ filter }: Props) => {
-  const { title, subtitle, create } = copy[filter];
+  const { title, subtitle, create } = text[filter];
   const openCreate = useCreateEventStore(state => state.open);
+  const { copy, status } = useInviteLink();
 
   return (
     <div className={s.empty}>
@@ -48,8 +57,13 @@ export const FeedEmptyState = ({ filter }: Props) => {
           <Plus />
           <span>{create}</span>
         </button>
-        <button type="button" className={s.invite}>
-          <span>Invite friends</span>
+        <button
+          type="button"
+          className={s.invite}
+          onClick={copy}
+          disabled={status === 'copying'}
+        >
+          <span>{INVITE_LABELS[status]}</span>
         </button>
       </div>
     </div>

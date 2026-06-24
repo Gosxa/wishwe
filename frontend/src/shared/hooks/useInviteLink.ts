@@ -7,11 +7,6 @@ export type InviteLinkStatus = 'idle' | 'copying' | 'copied' | 'error';
 
 const RESET_MS = 2500;
 
-/**
- * Generates a fresh friend-invite link on the backend and copies it to the
- * clipboard. The link points at `/invite/<token>`, which a friend can open to
- * connect with the inviter.
- */
 export const useInviteLink = () => {
   const [status, setStatus] = useState<InviteLinkStatus>('idle');
   const resetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
