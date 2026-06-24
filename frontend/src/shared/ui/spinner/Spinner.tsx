@@ -2,10 +2,17 @@ import s from './spinner.module.scss';
 
 type Props = {
   fullscreen?: boolean;
+  inline?: boolean;
 };
 
-export const Spinner = ({ fullscreen = false }: Props) => (
-  <div className={fullscreen ? `${s.backdrop} ${s.fullscreen}` : s.backdrop}>
+const rootClass = ({ fullscreen, inline }: Props) => {
+  if (inline) return s.inline;
+
+  return fullscreen ? `${s.backdrop} ${s.fullscreen}` : s.backdrop;
+};
+
+export const Spinner = ({ fullscreen = false, inline = false }: Props) => (
+  <div className={rootClass({ fullscreen, inline })}>
     <div className={s.wrapper}>
       <svg className={s.svg} viewBox="0 0 80 80" fill="none">
         <circle

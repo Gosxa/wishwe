@@ -6,8 +6,10 @@ import { Spinner } from '@/shared';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { getEvent } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
+import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useUserStore } from '@/shared/store/useUserStore';
+import { DeepLinkCard } from '@client_pages/home/widgets/feed/ui/DeepLinkCard';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { EditEventModal } from '@client_pages/profile/widgets/editEventModal';
 import { PlanItModal } from '@client_pages/profile/widgets/planItModal';
@@ -45,6 +47,11 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
   useSearchDisabledSync(onSearchDisabledChange, events, search);
+
+  const isArchive = tab === 'archive';
+
+  const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
+    useEventDeepLink(events);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +101,10 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
 
   return (
     <div className={s.feed}>
+      {showDeepLinkCard && openEventId && (
+        <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
+      )}
+
       <div className={s.toolbarSlot}>
         <ProfileFeedToolbar
           activeTab={tab}
@@ -120,18 +131,21 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
               isOwn={
                 currentHandle != null && event.host.username === currentHandle
               }
-              isArchived={tab === 'archive'}
-              enableDetails={tab !== 'archive'}
+              isArchived={isArchive}
+              enableDetails={!isArchive}
+              autoOpenDetails={!isArchive && event.id === openEventId}
               showEventType={false}
               showChat
               onEdit={handleEditOpen}
               onPlanIt={handlePlanItOpen}
+              onDetailsOpen={() => setEventParam(event.id)}
+              onDetailsClose={clearEventParam}
             />
           ))}
           {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
           {isLoadingMore && (
             <div className={s.statusSlot}>
-              <Spinner />
+              <Spinner inline />
             </div>
           )}
         </div>

@@ -3,7 +3,7 @@ import { avatarFormData } from '@/shared/lib/avatarFormData';
 import type { BackendEvent, Paginated } from '../event';
 import type { FriendApi, FriendRequestApi } from './types';
 
-const EVENTS_PAGE_SIZE = 20;
+const EVENTS_PAGE_SIZE = 5;
 const FRIENDS_PAGE_SIZE = 20;
 
 export type UserEventsTab = 'plans' | 'wishes' | 'archive';

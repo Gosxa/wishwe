@@ -34,7 +34,7 @@ const text: Record<
 const INVITE_LABELS = {
   idle: 'Invite friends',
   copying: 'Generating…',
-  copied: 'Copied!',
+  copied: 'Link Copied!',
   error: 'Try again',
 } as const;
 

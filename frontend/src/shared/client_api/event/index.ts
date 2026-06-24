@@ -7,7 +7,7 @@ import {
   Paginated,
 } from './types';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 5;
 
 const postAction = async (
   id: string,

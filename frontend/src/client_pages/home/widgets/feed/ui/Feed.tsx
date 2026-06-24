@@ -3,10 +3,12 @@
 import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Spinner } from '@/shared';
+import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
 import { useFeedToolbarStore } from '@client_pages/home/model/useFeedToolbarStore';
 import { SEARCH_PARAM } from '@client_pages/home/model/useFeedSearch';
+import { DeepLinkCard } from './DeepLinkCard';
 import { EventCard } from './EventCard';
 import { FeedEmptyState } from './FeedEmptyState';
 import { FeedToolbar } from './FeedToolbar';
@@ -31,6 +33,9 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
 
   useSearchDisabledSync(onSearchDisabledChange, events, search);
 
+  const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
+    useEventDeepLink(events);
+
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,6 +59,10 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
 
   return (
     <div className={s.feed}>
+      {showDeepLinkCard && openEventId && (
+        <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
+      )}
+
       <div className={s.toolbarSlot}>
         <FeedToolbar
           activeFilter={filter}
@@ -76,12 +85,19 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
       ) : (
         <div className={s.list}>
           {events.map(event => (
-            <EventCard key={event.id} event={event} enableDetails />
+            <EventCard
+              key={event.id}
+              event={event}
+              enableDetails
+              autoOpenDetails={event.id === openEventId}
+              onDetailsOpen={() => setEventParam(event.id)}
+              onDetailsClose={clearEventParam}
+            />
           ))}
           {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
           {isLoadingMore && (
             <div className={s.statusSlot}>
-              <Spinner />
+              <Spinner inline />
             </div>
           )}
         </div>

@@ -31,9 +31,12 @@ type Props = {
   isArchived?: boolean;
   showEventType?: boolean;
   enableDetails?: boolean;
+  autoOpenDetails?: boolean;
   showChat?: boolean;
   onEdit?: (id: string) => void;
   onPlanIt?: (id: string) => void;
+  onDetailsOpen?: () => void;
+  onDetailsClose?: () => void;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
@@ -44,9 +47,12 @@ export const EventCard = ({
   isArchived = false,
   showEventType = true,
   enableDetails = false,
+  autoOpenDetails = false,
   showChat = false,
   onEdit,
   onPlanIt,
+  onDetailsOpen,
+  onDetailsClose,
 }: Props) => {
   const {
     id,
@@ -70,7 +76,7 @@ export const EventCard = ({
   const [isPending, setIsPending] = useState(false);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isRecapOpen, setIsRecapOpen] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(autoOpenDetails);
 
   const canOpenDetails = enableDetails && !isArchived;
   const isParticipating = status !== null;
@@ -151,12 +157,17 @@ export const EventCard = ({
     }
   };
 
+  const openDetails = () => {
+    setIsDetailsOpen(true);
+    onDetailsOpen?.();
+  };
+
   const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
     if (!canOpenDetails) return;
     if (isDetailsOpen || isRecapOpen || isLeaveDialogOpen) return;
     if ((e.target as HTMLElement).closest('button, a')) return;
 
-    setIsDetailsOpen(true);
+    openDetails();
   };
 
   return (
@@ -192,7 +203,7 @@ export const EventCard = ({
                 <button
                   type="button"
                   className={s.titleButton}
-                  onClick={() => setIsDetailsOpen(true)}
+                  onClick={openDetails}
                 >
                   {title}
                 </button>
@@ -340,7 +351,10 @@ export const EventCard = ({
           actionLabel={actionLabel}
           selectedLabel={selectedLabel}
           onAction={handleActionClick}
-          onClose={() => setIsDetailsOpen(false)}
+          onClose={() => {
+            setIsDetailsOpen(false);
+            onDetailsClose?.();
+          }}
         />
       )}
 
