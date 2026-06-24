@@ -364,6 +364,27 @@ class EventViewSet(
 
     @action(
         detail=True,
+        methods=["post"],
+    )
+    def archive_plan(self, request, pk=None):
+        event = self.get_object()
+
+        if event.event_type == EventType.WISH:
+            return Response(
+                {"detail": "You can't archive a wish."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        event.status = EventStatus.COMPLETED
+        event.save()
+
+        return Response(
+            {"detail": f"You successfully archived your plan {event.title}"},
+            status=status.HTTP_200_OK,
+        )
+
+    @action(
+        detail=True,
         methods=["get"],
         url_path="participants"
     )
