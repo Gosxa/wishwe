@@ -22,11 +22,27 @@ export const useInviteLink = () => {
     if (resetRef.current) clearTimeout(resetRef.current);
     setStatus('copying');
 
-    try {
+    const buildLink = async () => {
       const { token } = await createInvite();
-      const link = `${window.location.origin}/invite/${token}`;
 
-      await navigator.clipboard.writeText(link);
+      return `${window.location.origin}/invite/${token}`;
+    };
+
+    try {
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+        const item = new ClipboardItem({
+          'text/plain': buildLink().then(
+            link => new Blob([link], { type: 'text/plain' }),
+          ),
+        });
+
+        await navigator.clipboard.write([item]);
+      } else {
+        const link = await buildLink();
+
+        await navigator.clipboard.writeText(link);
+      }
+
       setStatus('copied');
     } catch {
       setStatus('error');
