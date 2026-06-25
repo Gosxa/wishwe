@@ -163,6 +163,15 @@
   }
 }
 
+.readOnlyValue {
+  margin: 0;
+  @include tp.text-body;
+  font-size: 20px;
+  color: clr.$ns-900;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .whenRow {
   display: flex;
   gap: 16px;

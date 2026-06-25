@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+
 import { authUser } from '@/app/_server/auth/getMe';
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
 
@@ -7,6 +9,8 @@ export default async function UserLayout({
   children: React.ReactNode;
 }) {
   const user = await authUser();
+
+  if (user && !user.username) redirect('/onboard');
 
   return (
     <>

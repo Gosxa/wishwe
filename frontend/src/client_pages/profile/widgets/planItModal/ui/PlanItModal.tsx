@@ -85,6 +85,11 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
 
           <div className={s.fields}>
             <div className={s.field}>
+              <span className={s.label}>What?</span>
+              <p className={s.readOnlyValue}>{event.title}</p>
+            </div>
+
+            <div className={s.field}>
               <span className={s.label}>
                 When?
                 <Asterisk />
