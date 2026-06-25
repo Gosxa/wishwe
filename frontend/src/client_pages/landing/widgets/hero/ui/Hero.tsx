@@ -2,6 +2,10 @@
 
 import Image from 'next/image';
 
+import {
+  smoothScrollTo,
+  smoothScrollToSelector,
+} from '@/shared/lib/smoothScroll';
 import { ArrowDown } from '@shared/ui/icons';
 
 import s from './hero.module.scss';
@@ -31,10 +35,24 @@ export const Hero = () => {
           </div>
 
           <div className={s.actions}>
-            <a className={s.primaryBtn} href="#waitlist">
+            <a
+              className={s.primaryBtn}
+              href="#waitlist"
+              onClick={e => {
+                e.preventDefault();
+                smoothScrollToSelector('#waitlist');
+              }}
+            >
               Get Early Access
             </a>
-            <a className={s.secondaryBtn} href="#how-it-works">
+            <a
+              className={s.secondaryBtn}
+              href="#how-it-works"
+              onClick={e => {
+                e.preventDefault();
+                smoothScrollToSelector('#how-it-works');
+              }}
+            >
               How it works?
             </a>
           </div>
@@ -44,9 +62,7 @@ export const Hero = () => {
           type="button"
           className={s.scrollDown}
           aria-label="Scroll down"
-          onClick={() =>
-            window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })
-          }
+          onClick={() => smoothScrollTo(window.scrollY + window.innerHeight)}
         >
           <ArrowDown />
         </button>

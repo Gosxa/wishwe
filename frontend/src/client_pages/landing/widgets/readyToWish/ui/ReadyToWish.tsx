@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 
+import { smoothScrollToSelector } from '@/shared/lib/smoothScroll';
+
 import s from './readyToWish.module.scss';
 
 const POLAROIDS = [
@@ -41,7 +43,14 @@ export const ReadyToWish = () => {
             </p>
           </div>
 
-          <a className={s.cta} href="#waitlist">
+          <a
+            className={s.cta}
+            href="#waitlist"
+            onClick={e => {
+              e.preventDefault();
+              smoothScrollToSelector('#waitlist');
+            }}
+          >
             Get Early Access
           </a>
         </div>
