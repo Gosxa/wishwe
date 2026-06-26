@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation';
 
 import { authUser } from '@/app/_server/auth/getMe';
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
+import { EventModalHost } from './EventModalHost';
 
 export default async function UserLayout({
   children,
@@ -16,6 +17,7 @@ export default async function UserLayout({
     <>
       {user && <UserStoreInitializer user={user} />}
       {children}
+      <EventModalHost />
     </>
   );
 }

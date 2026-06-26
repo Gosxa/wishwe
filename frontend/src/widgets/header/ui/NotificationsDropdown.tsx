@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type { NotificationItem } from '@/shared/client_api/notifications';
 import s from '../header.module.scss';
 
@@ -8,6 +9,7 @@ type Props = {
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
+  onEventClick: (eventId: number) => void;
 };
 
 const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
@@ -40,6 +42,7 @@ export const NotificationsDropdown = ({
   isLoading,
   error,
   onRetry,
+  onEventClick,
 }: Props) => (
   <section
     id={id}
@@ -73,17 +76,38 @@ export const NotificationsDropdown = ({
 
       {notifications.length > 0 && (
         <div className={s.notificationsList}>
-          {notifications.map(notification => (
-            <article key={notification.id} className={s.notificationItem}>
-              <p>{notification.message}</p>
-              <time
-                dateTime={notification.created_at}
-                title={new Date(notification.created_at).toLocaleString()}
-              >
-                {formatRelativeTime(notification.created_at)}
-              </time>
-            </article>
-          ))}
+          {notifications.map(notification => {
+            const body = (
+              <>
+                <p>{notification.message}</p>
+                <time
+                  dateTime={notification.created_at}
+                  title={new Date(notification.created_at).toLocaleString()}
+                >
+                  {formatRelativeTime(notification.created_at)}
+                </time>
+              </>
+            );
+
+            if (notification.related_object_type === 'event') {
+              return (
+                <button
+                  key={notification.id}
+                  type="button"
+                  className={clsx(s.notificationItem, s.notificationItemButton)}
+                  onClick={() => onEventClick(notification.related_object_id)}
+                >
+                  {body}
+                </button>
+              );
+            }
+
+            return (
+              <article key={notification.id} className={s.notificationItem}>
+                {body}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

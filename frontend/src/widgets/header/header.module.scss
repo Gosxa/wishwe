@@ -225,6 +225,33 @@
   }
 }
 
+.notificationItemButton {
+  width: 100%;
+  margin: 0;
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  p {
+    transition: color 0.15s ease;
+  }
+
+  &:hover p,
+  &:focus-visible p {
+    color: clr.$prm;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
 .notificationsState {
   margin: 0;
   padding: 24px 0;

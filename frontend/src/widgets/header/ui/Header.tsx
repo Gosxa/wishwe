@@ -6,6 +6,7 @@ import { BellDot, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
+import { useEventModalStore } from '@/shared/store/useEventModalStore';
 import { CreateEventModal } from '@widgets/createEventModal';
 import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
@@ -31,6 +32,7 @@ export const Header = ({ search, showSearch = true }: Props) => {
   const createDefaultType = useCreateEventStore(state => state.defaultType);
   const openCreate = useCreateEventStore(state => state.open);
   const closeCreate = useCreateEventStore(state => state.close);
+  const openEventModal = useEventModalStore(state => state.open);
   const [openMenu, setOpenMenu] = useState<'notifications' | 'settings' | null>(
     null,
   );
@@ -120,6 +122,10 @@ export const Header = ({ search, showSearch = true }: Props) => {
               isLoading={areNotificationsLoading}
               error={notificationsError}
               onRetry={retryNotifications}
+              onEventClick={eventId => {
+                setOpenMenu(null);
+                openEventModal(String(eventId));
+              }}
             />
           )}
         </div>
