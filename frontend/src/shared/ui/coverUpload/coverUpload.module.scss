@@ -32,23 +32,9 @@
   width: 100%;
   max-width: 560px;
   aspect-ratio: 7 / 4;
+  border: 2px dashed clr.$prm;
   border-radius: 16px;
   overflow: hidden;
-
-  &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 16px;
-    background-image: url(
-      'data:image/svg+xml,' +
-      '<svg xmlns="http://www.w3.org/2000/svg">' +
-      '<rect width="100%25" height="100%25" fill="none" rx="16" ry="16" ' +
-      'stroke="%23474B24" stroke-width="2" stroke-dasharray="16 14" stroke-linecap="round"/>' +
-      '</svg>'
-    );
-    pointer-events: none;
-  }
 }
 
 .dragging {
