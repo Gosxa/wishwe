@@ -6,7 +6,12 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Prefetch, Q
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import (
+    extend_schema,
+    OpenApiResponse,
+    OpenApiParameter,
+    OpenApiExample
+)
 from rest_framework.decorators import api_view, action, throttle_classes
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -57,7 +62,8 @@ from .serializers import (
     InviteSerializer,
     InviteUseSerializer,
     EmailStartResponseSerializer,
-    FriendshipRequestSerializer
+    FriendshipRequestSerializer,
+    PublicProfileSerializer
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
@@ -427,6 +433,8 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
             return AvatarSerializer
         elif self.action == "change_password":
             return ChangePasswordSerializer
+        elif self.action == "by_username":
+            return PublicProfileSerializer
         return ProfileSerializer
 
     @extend_schema(
@@ -520,6 +528,40 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         user.save()
 
         return Response({"message": "Password changed"})
+
+    @extend_schema(
+        summary="Get public profile by username",
+        description=(
+                "Returns a public profile by exact username match.\n\n"
+                "Possible `friendship_status` values:\n"
+                "- `self` — requested profile belongs to the current user.\n"
+                "- `friends` — users are friends.\n"
+                "- `requested` — current user sent a friend request.\n"
+                "- `incoming_request` — current user received a friend request.\n"
+                "- `none` — no friendship or pending requests."
+        ),
+        responses={
+            200: PublicProfileSerializer,
+            404: OpenApiResponse(
+                description="Profile with the specified username was not found."
+            ),
+        },
+        tags=["Profile"],
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        url_path=r"by-username/(?P<username>[^/.]+)",
+    )
+    def by_username(self, request, username=None):
+        profile = get_object_or_404(
+            Profile.objects.select_related("user"),
+            username=username,
+        )
+
+        serializer = self.get_serializer(profile)
+
+        return Response(serializer.data)
 
 
 class FriendshipViewSet(
