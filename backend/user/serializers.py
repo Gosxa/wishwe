@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.db.models import Q
 from rest_framework import serializers
 
 from common.validators import validate_image_type, validate_image_size
-from user.models import Profile, Friendship, FriendInvite
+from user.models import Profile, Friendship, FriendInvite, FriendshipStatus
 
 
 class EmailSerializer(serializers.Serializer):
@@ -166,3 +167,49 @@ class FriendshipRequestSerializer(
         queryset=get_user_model().objects.all(),
         source="receiver",
     )
+
+
+class PublicProfileSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    friendship_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = (
+            "user_id",
+            "username",
+            "avatar",
+            "bio",
+            "is_private",
+            "friendship_status",
+        )
+
+    def get_friendship_status(self, obj):
+        request = self.context.get("request")
+
+        if request is None or request.user.is_anonymous:
+            return None
+
+        if request.user == obj.user:
+            return "self"
+
+        friendship = Friendship.objects.filter(
+            (
+                Q(sender=request.user, receiver=obj.user)
+                | Q(sender=obj.user, receiver=request.user)
+            )
+        ).first()
+
+        if friendship is None:
+            return "none"
+
+        if friendship.status == FriendshipStatus.ACCEPTED:
+            return "friends"
+
+        if friendship.status == FriendshipStatus.PENDING:
+            if friendship.sender == request.user:
+                return "requested"
+
+            return "incoming_request"
+
+        return "none"
