@@ -24,6 +24,8 @@ export const UserProfileFeed = ({ profile }: Props) => {
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
     useProfileEvents({ userId: profile.user_id, tab, sort });
 
+  const isArchive = tab === 'archive';
+
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,7 +73,8 @@ export const UserProfileFeed = ({ profile }: Props) => {
               key={event.id}
               event={event}
               isOwn={false}
-              enableDetails
+              isArchived={isArchive}
+              enableDetails={!isArchive}
               showEventType={false}
               showChat
             />
