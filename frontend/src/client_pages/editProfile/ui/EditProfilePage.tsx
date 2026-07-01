@@ -25,6 +25,9 @@ export default function EditProfilePage({ initialUser }: Props) {
     bio,
     firstName,
     lastName,
+    socialMediaUrl,
+    dateOfBirth,
+    gender,
     privacy,
     formError,
     isDirty,
@@ -102,6 +105,36 @@ export default function EditProfilePage({ initialUser }: Props) {
                   {...lastName}
                 />
               </div>
+              <TextInput
+                id="dateOfBirth"
+                type="date"
+                label="Date of birth"
+                placeholder=""
+                {...dateOfBirth}
+              />
+              <div className={s.field}>
+                <label htmlFor="gender" className={s.fieldLabel}>
+                  Gender
+                </label>
+                <select
+                  id="gender"
+                  className={s.select}
+                  value={gender.value}
+                  onChange={gender.onChange}
+                >
+                  <option value="">Prefer not to say</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <TextInput
+                id="socialMediaUrl"
+                type="url"
+                label="Social media link"
+                placeholder="https://instagram.com/username"
+                {...socialMediaUrl}
+              />
             </div>
 
             <button

@@ -7,6 +7,7 @@ import {
   declineRequest,
   listFriends,
   listIncomingRequests,
+  listOutgoingRequests,
   removeFriend,
   sendFriendRequest,
 } from '@/shared/client_api/user';
@@ -54,7 +55,21 @@ export const UserProfileFriendButton = ({
     return match.id;
   };
 
+  const resolveOutgoingId = async () => {
+    const requests = await listOutgoingRequests();
+    const match = requests.find(request => request.receiver === username);
+
+    if (!match) throw new Error('Outgoing request not found');
+
+    return match.id;
+  };
+
   const handleAdd = () => run(() => sendFriendRequest(userId), 'requested');
+
+  const handleCancelRequest = () =>
+    run(async () => {
+      await removeFriend(await resolveOutgoingId());
+    }, 'none');
 
   const handleAccept = () =>
     run(async () => {
@@ -112,8 +127,17 @@ export const UserProfileFriendButton = ({
 
   if (status === 'requested') {
     return (
-      <button type="button" className={f.action} style={{ cursor: 'default' }}>
-        <span>Requested</span>
+      <button
+        type="button"
+        className={f.requested}
+        onClick={handleCancelRequest}
+        disabled={isPending}
+      >
+        <span className={f.defaultLabel}>Requested</span>
+        <span className={f.hoverLabel}>
+          <X />
+          Cancel request
+        </span>
       </button>
     );
   }

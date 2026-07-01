@@ -133,6 +133,12 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    friendshipList: (query: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/friendship/${query ? `?${query}` : ''}`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     friendshipAccept: (id: string, cookieHeader: string) =>
       fetch(`${BACKEND}/api/user/friendship/${id}/accept/`, {
         method: 'POST',

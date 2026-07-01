@@ -8,6 +8,7 @@ type Props = {
   id: string;
   label?: string;
   placeholder: string;
+  type?: 'text' | 'date' | 'url';
   value: string;
   onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onBlur?: () => void;
@@ -23,6 +24,7 @@ export const TextInput = ({
   id,
   label,
   placeholder,
+  type = 'text',
   value,
   onChange,
   onBlur,
@@ -47,7 +49,7 @@ export const TextInput = ({
       <div className={s.inputWrapper}>
         <input
           id={id}
-          type="text"
+          type={type}
           placeholder={placeholder}
           required={required}
           value={value}

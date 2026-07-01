@@ -10,6 +10,9 @@ const schema = z.object({
   last_name: z.string().optional(),
   bio: z.string().max(150).optional(),
   is_private: z.boolean().optional(),
+  social_media_url: z.string().max(200).optional(),
+  date_of_birth: z.string().nullable().optional(),
+  gender: z.enum(['Male', 'Female', 'Other']).nullable().optional(),
 });
 
 export async function PATCH(request: NextRequest) {

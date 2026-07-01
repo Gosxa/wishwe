@@ -65,6 +65,11 @@ $FOCUS_SHADOW:
     color: clr.$ns-500;
   }
 
+  // Hide the native calendar icon on date inputs (Chrome/WebKit).
+  &::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+
   &:hover {
     box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
@@ -73,8 +78,6 @@ $FOCUS_SHADOW:
     box-shadow: inset 0 0 0 1px clr.$ns-700;
   }
 
-  // After :not(:placeholder-shown) so a filled input still shows the
-  // focus ring while being edited.
   &:focus-visible {
     box-shadow: $FOCUS_SHADOW;
 

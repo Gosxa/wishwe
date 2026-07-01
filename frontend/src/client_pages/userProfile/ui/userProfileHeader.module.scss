@@ -1,13 +1,8 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/colors' as clr;
 
-.action {
-  @include btn.secondary(8px, 100%, 40px);
-  margin-top: 24px;
-  padding: 0 24px;
-}
-
-.friends {
+.friends,
+.requested {
   @include btn.secondary(8px, 100%, 40px);
   margin-top: 24px;
   padding: 0 24px;

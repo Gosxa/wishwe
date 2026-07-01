@@ -89,7 +89,17 @@ export const changeAvatar = async (
 };
 
 export type UpdateProfilePayload = Partial<
-  Pick<Profile, 'username' | 'first_name' | 'last_name' | 'bio' | 'is_private'>
+  Pick<
+    Profile,
+    | 'username'
+    | 'first_name'
+    | 'last_name'
+    | 'bio'
+    | 'is_private'
+    | 'social_media_url'
+    | 'date_of_birth'
+    | 'gender'
+  >
 >;
 
 export class UpdateProfileError extends Error {
@@ -202,6 +212,16 @@ export const listIncomingRequests = async (): Promise<FriendRequestApi[]> => {
   if (!res.ok) throw new Error('Failed to load friend requests');
 
   return res.json();
+};
+
+export const listOutgoingRequests = async (): Promise<FriendRequestApi[]> => {
+  const res = await fetch('/api/user/friendship/?page_size=1000');
+
+  if (!res.ok) throw new Error('Failed to load friend requests');
+
+  const data = (await res.json()) as Paginated<FriendRequestApi>;
+
+  return data.results.filter(request => request.status === 'pending');
 };
 
 export const acceptRequest = async (id: number): Promise<void> => {

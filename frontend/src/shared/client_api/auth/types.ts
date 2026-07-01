@@ -8,7 +8,7 @@ export type Profile = {
   bio: string | null;
   date_of_birth: string | null;
   city: string | null;
-  gender: 'Male' | 'Female' | null;
+  gender: 'Male' | 'Female' | 'Other' | null;
   avatar: string | null;
   social_media_url: string | null;
   is_private: boolean;
