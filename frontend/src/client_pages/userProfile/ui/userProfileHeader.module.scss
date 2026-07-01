@@ -1,7 +1,53 @@
 @use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
 
 .action {
   @include btn.secondary(8px, 100%, 40px);
+  margin-top: 24px;
+  padding: 0 24px;
+}
+
+.friends {
+  @include btn.secondary(8px, 100%, 40px);
+  margin-top: 24px;
+  padding: 0 24px;
+
+  .defaultLabel {
+    display: block;
+  }
+
+  .hoverLabel {
+    display: none;
+    align-items: center;
+    gap: 8px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+  }
+
+  &:hover:not(:disabled) {
+    background: rgba(clr.$err, 0.1);
+    box-shadow: inset 0 0 0 1px clr.$err;
+
+    > span {
+      color: clr.$err;
+    }
+
+    .defaultLabel {
+      display: none;
+    }
+
+    .hoverLabel {
+      display: flex;
+    }
+  }
+}
+
+.addFriend {
+  @include btn.primary(8px, 100%, 40px);
   margin-top: 24px;
   padding: 0 24px;
 }

@@ -12,6 +12,7 @@ import {
 } from '@/shared/client_api/user';
 import type { FriendshipStatus } from '@/shared/client_api/user/types';
 import { UnfriendModal } from '@client_pages/friends/ui/UnfriendModal';
+import { X } from '@shared/ui/icons';
 import f from './userProfileHeader.module.scss';
 
 type Props = {
@@ -111,7 +112,7 @@ export const UserProfileFriendButton = ({
 
   if (status === 'requested') {
     return (
-      <button type="button" className={f.action} disabled>
+      <button type="button" className={f.action} style={{ cursor: 'default' }}>
         <span>Requested</span>
       </button>
     );
@@ -122,11 +123,15 @@ export const UserProfileFriendButton = ({
       <>
         <button
           type="button"
-          className={f.action}
+          className={f.friends}
           onClick={() => setShowUnfriend(true)}
           disabled={isPending}
         >
-          <span>You are friends</span>
+          <span className={f.defaultLabel}>You are friends</span>
+          <span className={f.hoverLabel}>
+            <X />
+            Unfriend
+          </span>
         </button>
 
         {showUnfriend && (
@@ -144,7 +149,7 @@ export const UserProfileFriendButton = ({
   return (
     <button
       type="button"
-      className={f.action}
+      className={f.addFriend}
       onClick={handleAdd}
       disabled={isPending}
     >

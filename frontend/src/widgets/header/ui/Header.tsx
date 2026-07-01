@@ -53,6 +53,10 @@ export const Header = ({ search, showSearch = true }: Props) => {
       setOpenMenu(null);
       router.push('/edit-profile');
     },
+    Support: () => {
+      setOpenMenu(null);
+      window.location.href = 'mailto:support@wishwe.online';
+    },
   };
 
   useEffect(() => {

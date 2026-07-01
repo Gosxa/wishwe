@@ -23,6 +23,7 @@
   gap: 32px;
   width: min(440px, 100%);
   padding: 40px;
+  border: 1px solid clr.$prm;
   border-radius: 16px;
   background: clr.$ns-50;
   text-align: center;
@@ -50,7 +51,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: clr.$ns-900;
+  color: clr.$prm;
   cursor: pointer;
   transition: background 0.2s ease;
 
