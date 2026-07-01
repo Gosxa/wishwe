@@ -12,3 +12,19 @@ export type FriendRequestApi = {
   receiver: string;
   status: 'pending' | 'accepted' | 'rejected';
 };
+
+export type FriendshipStatus =
+  | 'self'
+  | 'friends'
+  | 'requested'
+  | 'incoming_request'
+  | 'none';
+
+export type PublicProfile = {
+  user_id: number;
+  username: string | null;
+  avatar: string | null;
+  bio: string | null;
+  is_private: boolean;
+  friendship_status: FriendshipStatus;
+};

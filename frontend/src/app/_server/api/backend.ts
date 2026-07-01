@@ -153,6 +153,14 @@ export const beApi = {
         headers: { cookie: cookieHeader },
         cache: 'no-store',
       }),
+
+    friendshipSend: (body: unknown, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/friendship/send/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      }),
   },
 
   event: {

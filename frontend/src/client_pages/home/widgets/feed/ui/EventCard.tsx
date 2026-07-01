@@ -14,6 +14,7 @@ import {
   UsersRound,
   X,
 } from '@shared/ui/icons';
+import { ProfileLink } from '@shared/ui/profileLink';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import {
@@ -21,6 +22,7 @@ import {
   joinPlan,
   leaveEvent,
 } from '@/shared/client_api/event';
+import { EventCardMenu } from './EventCardMenu';
 import { EventDetailsModal } from './EventDetailsModal';
 import { RecapModal } from './RecapModal';
 import s from './eventCard.module.scss';
@@ -255,19 +257,22 @@ export const EventCard = ({
 
         <div className={s.body}>
           <div className={s.details}>
-            <h2 className={s.title}>
-              {enableDetails && !isArchived ? (
-                <button
-                  type="button"
-                  className={s.titleButton}
-                  onClick={openDetails}
-                >
-                  {title}
-                </button>
-              ) : (
-                title
-              )}
-            </h2>
+            <div className={s.titleRow}>
+              <h2 className={s.title}>
+                {enableDetails && !isArchived ? (
+                  <button
+                    type="button"
+                    className={s.titleButton}
+                    onClick={openDetails}
+                  >
+                    {title}
+                  </button>
+                ) : (
+                  title
+                )}
+              </h2>
+              {!isArchived && <EventCardMenu isOwn={isOwn} />}
+            </div>
 
             <ul className={s.meta}>
               <li className={s.metaRow}>
@@ -280,10 +285,18 @@ export const EventCard = ({
                     <Avatar width={14} height={14} />
                   )}
                 </span>
-                <span className={s.username}>{host.username}</span>
+                <ProfileLink username={host.username} className={s.username}>
+                  {host.username}
+                </ProfileLink>
                 {host.mutualFriend && (
                   <span className={s.muted}>
-                    · friend of {host.mutualFriend}
+                    · friend of{' '}
+                    <ProfileLink
+                      username={host.mutualFriend}
+                      className={s.muted}
+                    >
+                      {host.mutualFriend}
+                    </ProfileLink>
                   </span>
                 )}
               </li>

@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Avatar, X } from '@shared/ui/icons';
+import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import s from './recapModal.module.scss';
@@ -99,7 +100,11 @@ export const RecapModal = ({ event, onClose }: Props) => {
                   <div className={s.attendees}>
                     <div className={s.avatars}>
                       {shownParticipants.map((participant, index) => (
-                        <span key={index} className={s.stackAvatar}>
+                        <ProfileLink
+                          key={index}
+                          username={participant.username}
+                          className={s.stackAvatar}
+                        >
                           {participant.avatar ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
@@ -110,7 +115,7 @@ export const RecapModal = ({ event, onClose }: Props) => {
                           ) : (
                             <Avatar width={28} height={28} />
                           )}
-                        </span>
+                        </ProfileLink>
                       ))}
                     </div>
                     {extraCount > 0 && (

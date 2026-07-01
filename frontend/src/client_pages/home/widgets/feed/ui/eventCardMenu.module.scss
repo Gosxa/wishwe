@@ -1,0 +1,60 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.root {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: clr.$ns-900;
+  cursor: pointer;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 24px;
+  border: 1px solid clr.$prm;
+  border-radius: 12px;
+  background: clr.$ns-50;
+  box-shadow: 0 0 2px clr.$ns-200;
+}
+
+.item {
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  white-space: nowrap;
+  color: clr.$ns-700;
+  cursor: pointer;
+
+  @include tp.text-body;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.divider {
+  height: 1px;
+  background: clr.$ns-200;
+}
+
+.danger {
+  color: clr.$err;
+}

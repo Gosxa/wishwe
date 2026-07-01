@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { ProfileLink } from '@shared/ui/profileLink';
 import { UserAvatar } from './UserAvatar';
 import s from './personRow.module.scss';
 
@@ -11,7 +12,9 @@ type Props = {
 export const PersonRow = ({ username, avatar, children }: Props) => (
   <li className={s.row}>
     <UserAvatar src={avatar} alt={username} />
-    <span className={s.username}>@{username}</span>
+    <ProfileLink username={username} className={s.username}>
+      @{username}
+    </ProfileLink>
     {children && <div className={s.action}>{children}</div>}
   </li>
 );

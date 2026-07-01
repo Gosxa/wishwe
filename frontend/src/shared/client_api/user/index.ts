@@ -186,6 +186,16 @@ export const listFriends = async (
   return res.json();
 };
 
+export const sendFriendRequest = async (receiverId: number): Promise<void> => {
+  const res = await fetch('/next_api/user/friendship/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ receiver_id: receiverId }),
+  });
+
+  if (!res.ok) throw new Error('Failed to send friend request');
+};
+
 export const listIncomingRequests = async (): Promise<FriendRequestApi[]> => {
   const res = await fetch('/api/user/friendship/incoming');
 

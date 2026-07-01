@@ -103,8 +103,17 @@
   min-width: 0;
 }
 
-.title {
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 16px;
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
   color: clr.$ns-900;
 
   @include tp.h2;

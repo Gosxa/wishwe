@@ -14,6 +14,7 @@ type Props = {
   onTabChange: (tab: ProfileTab) => void;
   activeSort: ProfileSort;
   onSortChange: (sort: ProfileSort) => void;
+  showArchive?: boolean;
 };
 
 const tabs: { key: ProfileTab; label: string }[] = [
@@ -112,19 +113,22 @@ export const ProfileFeedToolbar = ({
   onTabChange,
   activeSort,
   onSortChange,
+  showArchive = true,
 }: Props) => (
   <div className={s.toolbar}>
     <div className={s.filters}>
-      {tabs.map(({ key, label }) => (
-        <button
-          key={key}
-          type="button"
-          className={clsx(s.filter, key === activeTab && s.active)}
-          onClick={() => onTabChange(key)}
-        >
-          {label}
-        </button>
-      ))}
+      {tabs
+        .filter(({ key }) => showArchive || key !== 'archive')
+        .map(({ key, label }) => (
+          <button
+            key={key}
+            type="button"
+            className={clsx(s.filter, key === activeTab && s.active)}
+            onClick={() => onTabChange(key)}
+          >
+            {label}
+          </button>
+        ))}
     </div>
 
     <div className={s.controls}>

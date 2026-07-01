@@ -25,6 +25,7 @@ export { HomeIcon } from './home/HomeIcon';
 export { FriendsIcon } from './friends/FriendsIcon';
 export { ProfileIcon } from './profile/ProfileIcon';
 export { CalendarClock } from './calendarClock/CalendarClock';
+export { DotsVertical } from './dotsVertical/DotsVertical';
 export { Location } from './location/Location';
 export { StickyNote } from './stickyNote/StickyNote';
 export { UserRound } from './userRound/UserRound';

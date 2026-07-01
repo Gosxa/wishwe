@@ -1,0 +1,32 @@
+@use '@shared/styles/buttons' as btn;
+
+.action {
+  @include btn.secondary(8px, 100%, 40px);
+  margin-top: 24px;
+  padding: 0 24px;
+}
+
+.actionRow {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.accept {
+  @include btn.primary(8px, 100%, 40px);
+  flex: 1;
+  padding: 0 24px;
+}
+
+.decline {
+  @include btn.secondary(8px, 100%, 40px);
+  flex: 1;
+  padding: 0 24px;
+}
+
+.link {
+  @include btn.secondary(8px, 100%, 40px);
+  margin-top: 24px;
+  padding: 0 24px;
+  text-decoration: none;
+}

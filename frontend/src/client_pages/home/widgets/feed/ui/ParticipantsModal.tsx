@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Avatar, X } from '@shared/ui/icons';
+import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { listParticipants } from '@/shared/client_api/event';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
@@ -131,7 +132,12 @@ export const ParticipantsModal = ({
                     <Avatar width={48} height={48} />
                   )}
                 </span>
-                <span className={s.username}>{participant.username}</span>
+                <ProfileLink
+                  username={participant.username}
+                  className={s.username}
+                >
+                  {participant.username}
+                </ProfileLink>
               </li>
             ))}
           </ul>
