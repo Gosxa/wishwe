@@ -104,16 +104,7 @@ export const EventCard = ({
     >
       <MessagesSquare />
     </a>
-  ) : (
-    <button
-      type="button"
-      className={s.chat}
-      disabled
-      aria-label="No chat available"
-    >
-      <MessagesSquare />
-    </button>
-  );
+  ) : null;
 
   const applyResponse = (resp: ReturnType<typeof toFeedEvents>[number]) => {
     setStatus(resp.userParticipationStatus);
