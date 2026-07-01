@@ -53,7 +53,6 @@ export const UserProfileFeed = ({ profile }: Props) => {
           onTabChange={setTab}
           activeSort={sort}
           onSortChange={setSort}
-          showArchive={false}
         />
       </div>
 

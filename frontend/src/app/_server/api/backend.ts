@@ -176,6 +176,13 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    remove: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/`, {
+        method: 'DELETE',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     categories: () =>
       fetch(`${BACKEND}/api/event/category/`, { cache: 'no-store' }),
 

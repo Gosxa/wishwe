@@ -80,6 +80,10 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
     setRefreshKey(key => key + 1);
   }, []);
 
+  const handleEventCancelled = useCallback(() => {
+    setRefreshKey(key => key + 1);
+  }, []);
+
   useEffect(() => {
     const node = sentinelRef.current;
 
@@ -138,6 +142,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
               showChat
               onEdit={handleEditOpen}
               onPlanIt={handlePlanItOpen}
+              onCancel={handleEventCancelled}
               onDetailsOpen={() => setEventParam(event.id)}
               onDetailsClose={clearEventParam}
             />

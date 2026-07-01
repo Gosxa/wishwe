@@ -126,6 +126,12 @@ export const Header = ({ search, showSearch = true }: Props) => {
                 setOpenMenu(null);
                 openEventModal(String(eventId));
               }}
+              onUserClick={username => {
+                setOpenMenu(null);
+                const handle = username.replace(/^@/, '').trim();
+
+                router.push(`/user/${encodeURIComponent(handle)}`);
+              }}
             />
           )}
         </div>

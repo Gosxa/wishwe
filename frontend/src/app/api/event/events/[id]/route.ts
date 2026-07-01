@@ -13,3 +13,15 @@ export async function GET(
 
   return NextResponse.json(await res.json(), { status: res.status });
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+
+  const cookieHeader = request.headers.get('cookie') ?? '';
+  const res = await beApi.event.remove(id, cookieHeader);
+
+  return new NextResponse(null, { status: res.status });
+}

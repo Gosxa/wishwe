@@ -57,6 +57,16 @@ export const listEvents = async (
   return (await res.json()) as Paginated<BackendEvent>;
 };
 
+export const archiveEvent = async (id: string): Promise<void> => {
+  const res = await fetch(`/api/event/events/${id}/archive_plan/`, {
+    method: 'POST',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to archive event');
+  }
+};
+
 export const getEvent = async (id: string): Promise<BackendEvent> => {
   const res = await fetch(`/api/event/events/${id}`, { method: 'GET' });
 

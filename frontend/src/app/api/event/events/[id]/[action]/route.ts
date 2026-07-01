@@ -6,6 +6,7 @@ const ALLOWED_ACTIONS = [
   'join_plan',
   'interested_in_wish',
   'leave_event',
+  'archive_plan',
 ] as const;
 
 type AllowedAction = (typeof ALLOWED_ACTIONS)[number];

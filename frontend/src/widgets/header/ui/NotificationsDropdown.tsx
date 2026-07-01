@@ -10,6 +10,7 @@ type Props = {
   error: string | null;
   onRetry: () => void;
   onEventClick: (eventId: number) => void;
+  onUserClick: (username: string) => void;
 };
 
 const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
@@ -43,6 +44,7 @@ export const NotificationsDropdown = ({
   error,
   onRetry,
   onEventClick,
+  onUserClick,
 }: Props) => (
   <section
     id={id}
@@ -96,6 +98,22 @@ export const NotificationsDropdown = ({
                   type="button"
                   className={clsx(s.notificationItem, s.notificationItemButton)}
                   onClick={() => onEventClick(notification.related_object_id)}
+                >
+                  {body}
+                </button>
+              );
+            }
+
+            if (
+              notification.related_object_type === 'friendship' &&
+              notification.creator
+            ) {
+              return (
+                <button
+                  key={notification.id}
+                  type="button"
+                  className={clsx(s.notificationItem, s.notificationItemButton)}
+                  onClick={() => onUserClick(notification.creator)}
                 >
                   {body}
                 </button>

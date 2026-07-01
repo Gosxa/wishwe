@@ -38,6 +38,7 @@ type Props = {
   showChat?: boolean;
   onEdit?: (id: string) => void;
   onPlanIt?: (id: string) => void;
+  onCancel?: (id: string) => void;
   onDetailsOpen?: () => void;
   onDetailsClose?: () => void;
 };
@@ -55,6 +56,7 @@ export const EventCard = ({
   showChat = false,
   onEdit,
   onPlanIt,
+  onCancel,
   onDetailsOpen,
   onDetailsClose,
 }: Props) => {
@@ -271,7 +273,14 @@ export const EventCard = ({
                   title
                 )}
               </h2>
-              {!isArchived && <EventCardMenu isOwn={isOwn} />}
+              {!isArchived && (
+                <EventCardMenu
+                  eventId={id}
+                  eventType={type}
+                  isOwn={isOwn}
+                  onCancelled={() => onCancel?.(id)}
+                />
+              )}
             </div>
 
             <ul className={s.meta}>
