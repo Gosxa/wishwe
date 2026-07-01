@@ -44,6 +44,11 @@
       display: flex;
     }
   }
+
+  &:active:not(:disabled) {
+    background: rgba(clr.$err, 0.25);
+    box-shadow: inset 0 0 0 1px clr.$err;
+  }
 }
 
 .addFriend {
