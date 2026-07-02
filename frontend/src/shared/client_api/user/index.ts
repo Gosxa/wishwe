@@ -5,6 +5,7 @@ import type { FriendApi, FriendRequestApi } from './types';
 
 const EVENTS_PAGE_SIZE = 5;
 const FRIENDS_PAGE_SIZE = 20;
+const PROFILE_SEARCH_PAGE_SIZE = 10;
 
 export type UserEventsTab = 'plans' | 'wishes' | 'archive';
 
@@ -178,6 +179,22 @@ export const acceptInvite = async (token: string): Promise<void> => {
 
     throw new AcceptInviteError(body);
   }
+};
+
+export const searchProfiles = async (
+  username: string,
+  pageSize: number = PROFILE_SEARCH_PAGE_SIZE,
+): Promise<Paginated<Profile>> => {
+  const query = new URLSearchParams({
+    username,
+    page_size: String(pageSize),
+  });
+
+  const res = await fetch(`/api/user/profile?${query.toString()}`);
+
+  if (!res.ok) throw new Error('Failed to search profiles');
+
+  return res.json();
 };
 
 export const listFriends = async (

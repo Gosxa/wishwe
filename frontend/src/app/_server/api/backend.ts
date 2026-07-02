@@ -109,6 +109,12 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    profileList: (query: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/${query ? `?${query}` : ''}`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     events: (id: string, query: string, cookieHeader: string) =>
       fetch(
         `${BACKEND}/api/user/users/${id}/events/${query ? `?${query}` : ''}`,

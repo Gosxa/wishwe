@@ -1,0 +1,35 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.hint {
+  margin: 8px 0 0;
+  @include tp.text-caption;
+  color: clr.$ns-700;
+}
+
+.list {
+  margin: 24px 0 0;
+  padding: 0;
+  list-style: none;
+  transition: opacity 0.2s ease;
+}
+
+.stale {
+  opacity: 0.6;
+}
+
+.status {
+  margin-top: 24px;
+}
+
+.message {
+  margin: 24px 0 0;
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.more {
+  margin: 16px 0 0;
+  @include tp.text-caption;
+  color: clr.$ns-500;
+}

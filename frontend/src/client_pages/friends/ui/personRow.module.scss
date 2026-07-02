@@ -15,9 +15,24 @@
   }
 }
 
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
 .username {
   @include tp.text-body;
   color: clr.$ns-900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.name {
+  @include tp.text-caption;
+  color: clr.$ns-700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

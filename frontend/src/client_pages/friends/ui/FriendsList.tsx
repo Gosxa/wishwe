@@ -33,7 +33,7 @@ export const FriendsList = ({ friends, query, isLoading, onRemove }: Props) => {
         <Spinner />
       </div>
     );
-  } else if (friends.length === 0) {
+  } else if (friends.length === 0 && !query.trim()) {
     body = (
       <div className={s.empty}>
         <p className={s.emptyText}>

@@ -61,6 +61,9 @@ export const SearchBar = ({
             placeholder={placeholder}
             value={current}
             disabled={disabled}
+            spellCheck={false}
+            autoComplete="off"
+            autoCorrect="off"
             onChange={handleChange}
             onKeyDown={handleKeyDown}
           />

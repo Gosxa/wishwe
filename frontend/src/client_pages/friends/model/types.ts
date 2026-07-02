@@ -10,3 +10,10 @@ export type FriendRequest = {
   username: string;
   avatar: string | null;
 };
+
+export type SearchResult = {
+  userId: number;
+  username: string;
+  name: string;
+  avatar: string | null;
+};
