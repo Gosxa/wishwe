@@ -1,8 +1,11 @@
 from django.db.models import Prefetch, Q, Count
+from django.http import Http404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
 from common.pagination import DefaultPagination
@@ -25,6 +28,7 @@ from event.serializers import (
     ParticipantSerializer
 )
 from event.services.event_service import EventService
+from user.services.friendship_service import FriendshipService
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -209,6 +213,28 @@ class EventViewSet(
     def list(self, request, *args, **kwargs):
         """Returns a filtered list of events."""
         return super(EventViewSet, self).list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        event = get_object_or_404(
+            Event.objects.select_related("creator"),
+            pk=kwargs["pk"],
+        )
+
+        if not EventService.can_view(request.user, event):
+            try:
+                FriendshipService.send_request(
+                    sender=request.user,
+                    receiver=event.creator,
+                )
+            except ValidationError:
+                pass
+
+            raise PermissionDenied(
+                "You don't have permission to view this event."
+            )
+
+        serializer = self.get_serializer(event)
+        return Response(serializer.data)
 
     @action(detail=False, methods=["post"])
     def create_wish(self, request):
