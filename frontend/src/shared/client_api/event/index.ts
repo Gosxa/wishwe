@@ -67,11 +67,17 @@ export const archiveEvent = async (id: string): Promise<void> => {
   }
 };
 
+export class GetEventError extends Error {
+  constructor(public readonly status: number) {
+    super('Failed to load event');
+  }
+}
+
 export const getEvent = async (id: string): Promise<BackendEvent> => {
   const res = await fetch(`/api/event/events/${id}`, { method: 'GET' });
 
   if (!res.ok) {
-    throw new Error('Failed to load event');
+    throw new GetEventError(res.status);
   }
 
   return (await res.json()) as BackendEvent;

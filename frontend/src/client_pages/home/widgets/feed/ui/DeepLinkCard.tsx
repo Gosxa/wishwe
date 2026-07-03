@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from '@shared/ui/icons';
-import { getEvent } from '@/shared/client_api/event';
+import { getEvent, GetEventError } from '@/shared/client_api/event';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { EventCard } from './EventCard';
@@ -13,11 +14,17 @@ type Props = {
   onClose: () => void;
 };
 
+type LoadError = 'forbidden' | 'unavailable';
+
 const NOTICE_DISMISS_MS = 4000;
+const FORBIDDEN_DISMISS_MS = 10000;
+
+const FORBIDDEN_MESSAGE =
+  'This event is only visible to the creator’s friends. We’ve sent them a friend request for you — once they accept, you’ll see the event.';
 
 export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   const [event, setEvent] = useState<FeedEvent | null>(null);
-  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState<LoadError | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,8 +33,14 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
       .then(fetched => {
         if (!cancelled) setEvent(toFeedEvents([fetched])[0]);
       })
-      .catch(() => {
-        if (!cancelled) setHasError(true);
+      .catch((err: unknown) => {
+        if (cancelled) return;
+
+        setError(
+          err instanceof GetEventError && err.status === 403
+            ? 'forbidden'
+            : 'unavailable',
+        );
       });
 
     return () => {
@@ -36,13 +49,16 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   }, [eventId]);
 
   useEffect(() => {
-    if (!hasError) return;
+    if (!error) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
 
-    const timeout = window.setTimeout(onClose, NOTICE_DISMISS_MS);
+    const timeout = window.setTimeout(
+      onClose,
+      error === 'forbidden' ? FORBIDDEN_DISMISS_MS : NOTICE_DISMISS_MS,
+    );
 
     document.addEventListener('keydown', handleKeyDown);
 
@@ -50,9 +66,18 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
       window.clearTimeout(timeout);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [hasError, onClose]);
+  }, [error, onClose]);
 
-  if (hasError) {
+  if (error === 'forbidden') {
+    return createPortal(
+      <div className={s.toast} role="status">
+        {FORBIDDEN_MESSAGE}
+      </div>,
+      document.body,
+    );
+  }
+
+  if (error === 'unavailable') {
     return (
       <div className={s.overlay} onClick={onClose}>
         <div
