@@ -13,12 +13,12 @@ from event.models import (
     EventParticipant,
     EventStatus,
     EventType,
-    ParticipationStatus,
+    ParticipationStatus, EventVisibility,
 )
 from notifications.services.notification_service import NotificationService
 from notifications.tasks import send_event_start_reminder_notifications
 from user.models import FriendshipStatus, Friendship
-
+from user.services.friendship_service import FriendshipService
 
 IMPORTANT_PLAN_FIELDS = {
     "event_date",
@@ -488,3 +488,24 @@ class EventService:
             )
 
         event.delete()
+
+    @staticmethod
+    def can_view(user, event) -> bool:
+        if event.creator_id == user.id:
+            return True
+
+        if event.event_visibility == EventVisibility.FRIENDS:
+            return Friendship.objects.filter(
+                status=FriendshipStatus.ACCEPTED,
+            ).filter(
+                Q(sender=user, receiver=event.creator) |
+                Q(sender=event.creator, receiver=user)
+            ).exists()
+
+        if event.event_visibility == EventVisibility.FRIENDS_OF_FRIENDS:
+            return FriendshipService.get_mutual_friends(
+                user1=user,
+                user2=event.creator,
+            ).exists()
+
+        return False
