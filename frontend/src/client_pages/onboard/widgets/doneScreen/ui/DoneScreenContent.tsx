@@ -21,7 +21,7 @@ export const DoneScreenContent = ({ variant }: Props) => {
       <a href="/feed" className={s.primary}>
         <span>To feed</span>
       </a>
-      <a href="/find-friends" className={s.secondary}>
+      <a href="/friends" className={s.secondary}>
         <span>Find friends</span>
       </a>
     </div>

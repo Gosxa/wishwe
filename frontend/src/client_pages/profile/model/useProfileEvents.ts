@@ -15,6 +15,7 @@ type Args = {
   tab: ProfileTab;
   sort: ProfileSort;
   refreshKey?: number;
+  enabled?: boolean;
 };
 
 export const useProfileEvents = ({
@@ -22,6 +23,7 @@ export const useProfileEvents = ({
   tab,
   sort,
   refreshKey = 0,
+  enabled = true,
 }: Args) => {
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
   const refreshToken = useEventsRefreshStore(state => state.refreshToken);
@@ -45,7 +47,7 @@ export const useProfileEvents = ({
   }
 
   useEffect(() => {
-    if (userId == null) return;
+    if (userId == null || !enabled) return;
 
     const requestId = ++requestIdRef.current;
 
@@ -75,10 +77,10 @@ export const useProfileEvents = ({
 
         setIsLoading(false);
       });
-  }, [userId, tab, sort, search, refreshKey, refreshToken]);
+  }, [userId, tab, sort, search, refreshKey, refreshToken, enabled]);
 
   const loadMore = useCallback(() => {
-    if (loadingRef.current || !hasMore || userId == null) return;
+    if (loadingRef.current || !hasMore || userId == null || !enabled) return;
 
     loadingRef.current = true;
     const requestId = requestIdRef.current;
@@ -102,7 +104,14 @@ export const useProfileEvents = ({
         loadingRef.current = false;
         setIsLoadingMore(false);
       });
-  }, [userId, tab, sort, search, hasMore]);
+  }, [userId, tab, sort, search, hasMore, enabled]);
 
-  return { events, isLoading, isLoadingMore, hasMore, loadMore, error };
+  return {
+    events: enabled ? events : [],
+    isLoading: enabled ? isLoading : false,
+    isLoadingMore,
+    hasMore: enabled ? hasMore : false,
+    loadMore,
+    error,
+  };
 };
