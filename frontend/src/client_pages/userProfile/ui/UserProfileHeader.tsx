@@ -1,15 +1,24 @@
 'use client';
 
-import type { PublicProfile } from '@/shared/client_api/user/types';
+import type {
+  FriendshipStatus,
+  PublicProfile,
+} from '@/shared/client_api/user/types';
 import { Avatar } from '@shared/ui/icons';
 import s from '@client_pages/profile/widgets/profileHeader/ui/profileHeader.module.scss';
 import { UserProfileFriendButton } from './UserProfileFriendButton';
 
 type Props = {
   profile: PublicProfile;
+  friendshipStatus: FriendshipStatus;
+  onFriendshipStatusChange: (status: FriendshipStatus) => void;
 };
 
-export const UserProfileHeader = ({ profile }: Props) => {
+export const UserProfileHeader = ({
+  profile,
+  friendshipStatus,
+  onFriendshipStatusChange,
+}: Props) => {
   const username = profile.username ?? '';
   const bio = profile.bio ?? '';
   const avatar = profile.avatar ?? null;
@@ -33,7 +42,8 @@ export const UserProfileHeader = ({ profile }: Props) => {
           <UserProfileFriendButton
             userId={profile.user_id}
             username={username}
-            initialStatus={profile.friendship_status}
+            status={friendshipStatus}
+            onStatusChange={onFriendshipStatusChange}
           />
         </div>
       </div>

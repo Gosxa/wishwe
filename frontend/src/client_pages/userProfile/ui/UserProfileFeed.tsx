@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Spinner } from '@/shared';
-import type { PublicProfile } from '@/shared/client_api/user/types';
+import type {
+  FriendshipStatus,
+  PublicProfile,
+} from '@/shared/client_api/user/types';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
 import { ProfileFeedToolbar } from '@client_pages/profile/widgets/feed/ui/ProfileFeedToolbar';
@@ -12,17 +15,27 @@ import type {
 } from '@client_pages/profile/model/types';
 import s from '@client_pages/profile/widgets/feed/ui/profileFeed.module.scss';
 import { UserProfileEmptyState } from './UserProfileEmptyState';
+import { FriendsOnlyState } from './FriendsOnlyState';
 
 type Props = {
   profile: PublicProfile;
+  friendshipStatus: FriendshipStatus;
 };
 
-export const UserProfileFeed = ({ profile }: Props) => {
+export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
   const [tab, setTab] = useState<ProfileTab>('plans');
   const [sort, setSort] = useState<ProfileSort>('recent');
 
+  const canSeeEvents =
+    friendshipStatus === 'friends' || friendshipStatus === 'self';
+
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
-    useProfileEvents({ userId: profile.user_id, tab, sort });
+    useProfileEvents({
+      userId: profile.user_id,
+      tab,
+      sort,
+      enabled: canSeeEvents,
+    });
 
   const isArchive = tab === 'archive';
 
@@ -58,7 +71,11 @@ export const UserProfileFeed = ({ profile }: Props) => {
         />
       </div>
 
-      {isLoading ? (
+      {!canSeeEvents ? (
+        <div className={s.emptySlot}>
+          <FriendsOnlyState username={profile.username ?? ''} />
+        </div>
+      ) : isLoading ? (
         <div className={s.statusSlot}>
           <Spinner />
         </div>

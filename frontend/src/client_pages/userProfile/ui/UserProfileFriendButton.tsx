@@ -19,15 +19,16 @@ import f from './userProfileHeader.module.scss';
 type Props = {
   userId: number;
   username: string;
-  initialStatus: FriendshipStatus;
+  status: FriendshipStatus;
+  onStatusChange: (status: FriendshipStatus) => void;
 };
 
 export const UserProfileFriendButton = ({
   userId,
   username,
-  initialStatus,
+  status,
+  onStatusChange,
 }: Props) => {
-  const [status, setStatus] = useState<FriendshipStatus>(initialStatus);
   const [isPending, setIsPending] = useState(false);
   const [showUnfriend, setShowUnfriend] = useState(false);
 
@@ -38,7 +39,7 @@ export const UserProfileFriendButton = ({
 
     try {
       await action();
-      setStatus(next);
+      onStatusChange(next);
     } catch {
       // keep the current status if the request fails
     } finally {

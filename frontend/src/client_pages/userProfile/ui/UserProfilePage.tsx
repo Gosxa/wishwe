@@ -1,7 +1,10 @@
 'use client';
 
-import { Suspense } from 'react';
-import type { PublicProfile } from '@/shared/client_api/user/types';
+import { Suspense, useState } from 'react';
+import type {
+  FriendshipStatus,
+  PublicProfile,
+} from '@/shared/client_api/user/types';
 import { Header } from '@widgets/header';
 import { Sidebar } from '@widgets/sidebar';
 import { useProfileSearch } from '@client_pages/profile/model/useProfileSearch';
@@ -23,6 +26,9 @@ export default function UserProfilePage({ profile }: Props) {
 
 function UserProfilePageContent({ profile }: Props) {
   const search = useProfileSearch();
+  const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>(
+    profile.friendship_status,
+  );
 
   return (
     <div className={s.shell}>
@@ -30,8 +36,15 @@ function UserProfilePageContent({ profile }: Props) {
       <div className={s.body}>
         <Sidebar />
         <main className={s.content}>
-          <UserProfileHeader profile={profile} />
-          <UserProfileFeed profile={profile} />
+          <UserProfileHeader
+            profile={profile}
+            friendshipStatus={friendshipStatus}
+            onFriendshipStatusChange={setFriendshipStatus}
+          />
+          <UserProfileFeed
+            profile={profile}
+            friendshipStatus={friendshipStatus}
+          />
         </main>
       </div>
     </div>
