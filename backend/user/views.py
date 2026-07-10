@@ -551,7 +551,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     @action(
         detail=False,
         methods=["get"],
-        url_path=r"by-username/(?P<username>[^/.]+)",
+        url_path=r"by-username/(?P<username>[^/]+)",
     )
     def by_username(self, request, username=None):
         profile = get_object_or_404(
