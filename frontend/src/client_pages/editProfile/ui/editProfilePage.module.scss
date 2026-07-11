@@ -178,6 +178,10 @@
 
 .cancel {
   @include btn.tertiary(4px, 100%, 40px);
+
+  > span {
+    text-decoration: none;
+  }
 }
 
 .save {

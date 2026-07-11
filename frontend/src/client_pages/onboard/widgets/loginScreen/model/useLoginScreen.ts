@@ -14,7 +14,8 @@ import { AcceptInviteError } from '@/shared/client_api/user';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 
-const GOOGLE_CLIENT_ID = '904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID =
+  '904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com';
 
 const requestGoogleToken = (clientId: string): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -38,6 +39,7 @@ const requestGoogleToken = (clientId: string): Promise<string> =>
 
     if (!popup) {
       reject(new Error('Popup blocked'));
+
       return;
     }
 
