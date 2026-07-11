@@ -14,5 +14,5 @@ type Props = {
 };
 
 export const InviteProvider = ({ invite, children }: Props) => (
-  <InviteCtx.Provider value={invite ?? null}>{children}</InviteCtx.Provider>
+  <InviteCtx value={invite ?? null}>{children}</InviteCtx>
 );

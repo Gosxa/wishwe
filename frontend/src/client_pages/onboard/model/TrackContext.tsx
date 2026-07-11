@@ -24,7 +24,5 @@ type Props = {
 export const TrackProvider = ({ children }: Props) => {
   const value = useTrack();
 
-  return (
-    <TrackContext.Provider value={value}>{children}</TrackContext.Provider>
-  );
+  return <TrackContext value={value}>{children}</TrackContext>;
 };

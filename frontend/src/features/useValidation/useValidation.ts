@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import z from 'zod';
 
-const validate = <S extends z.ZodTypeAny>(
+const validate = <S extends z.ZodType>(
   schema: S,
   input: unknown,
 ): z.infer<S> => {
@@ -14,7 +14,7 @@ const validate = <S extends z.ZodTypeAny>(
   return result.data;
 };
 
-const useValidation = <S extends z.ZodTypeAny>(schema: S) => {
+const useValidation = <S extends z.ZodType>(schema: S) => {
   const [error, setError] = useState<string | undefined>();
   const [isSuccess, setIsSuccess] = useState(false);
 

@@ -8,6 +8,6 @@ export const socialMediaUrlSchema = z
   .trim()
   .max(200, '200 characters max')
   .refine(
-    value => value === '' || z.string().url().safeParse(value).success,
+    value => value === '' || z.url().safeParse(value).success,
     SOCIAL_MEDIA_URL_HELPER_TEXT,
   );

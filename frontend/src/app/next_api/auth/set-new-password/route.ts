@@ -11,7 +11,7 @@ const schema = z
     re_new_password: z.string().min(8),
   })
   .refine(d => d.new_password === d.re_new_password, {
-    message: 'Passwords do not match',
+    error: 'Passwords do not match',
     path: ['re_new_password'],
   });
 

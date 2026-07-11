@@ -11,7 +11,7 @@ export const validate = <T>(
     return {
       data: null,
       error: NextResponse.json(
-        { error: result.error.flatten().fieldErrors },
+        { error: z.flattenError(result.error).fieldErrors },
         { status: 400 },
       ),
     };

@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { beApi } from '@/app/_server/api/backend';
 import { validate } from '@/app/_server/api/validate';
 
-const schema = z.object({ token: z.string().uuid() });
+const schema = z.object({ token: z.uuid() });
 
 export async function POST(request: NextRequest) {
   const { data, error } = validate(schema, await request.json());
