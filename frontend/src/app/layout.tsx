@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Instrument_Serif, Poppins } from 'next/font/google';
 import { GlobalLoader } from '@/shared/ui/globalLoader/GlobalLoader';
+import { buildMetadata, SITE_URL } from '@/shared/lib/metadata';
 import './globals.scss';
 
 const skModernist = localFont({
@@ -34,9 +35,15 @@ const poppins = Poppins({
   variable: '--font-poppins',
 });
 
+// Defaults for every route. Pages that are reached by a shared link override
+// the share copy; everything else inherits this.
 export const metadata: Metadata = {
-  title: 'WishWe',
-  description: 'Share your wishes',
+  metadataBase: new URL(SITE_URL),
+  ...buildMetadata({
+    title: 'WishWe — see faces, not screens',
+    description:
+      'Share an idea, see who’s down to join, and actually meet up — without endless group chats.',
+  }),
 };
 
 export default function RootLayout({
