@@ -172,6 +172,8 @@ class Friendship(models.Model):
     )
     status = models.CharField(max_length=10, choices=FriendshipStatus.choices)
     created_at = models.DateTimeField(auto_now_add=True)
+    accepted_at = models.DateTimeField(null=True, blank=True)
+    followup_email_sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [
