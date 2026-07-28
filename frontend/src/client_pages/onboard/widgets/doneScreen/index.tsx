@@ -1,6 +1,10 @@
 'use client';
 
-import { useOnboardDataStore, DoneScreenVariant } from '../../model';
+import {
+  useOnboardDataStore,
+  useNextPath,
+  DoneScreenVariant,
+} from '../../model';
 import { Screen } from '../../ui';
 import { DoneScreenContent } from './ui/DoneScreenContent';
 
@@ -15,7 +19,7 @@ const SCREEN_CONFIG: Record<
   create: {
     h2: 'Welcome aboard,\n',
     headline:
-      'Wish.we is all about sharing moments with your inner circle, add your friends now to see what they are planning.',
+      'WishWe is all about sharing moments with your inner circle, add your friends now to see what they are planning.',
   },
   reset: {
     h2: 'Congrats',
@@ -25,13 +29,14 @@ const SCREEN_CONFIG: Record<
 
 export const DoneScreen = ({ variant }: Props) => {
   const firstName = useOnboardDataStore(s => s.firstName);
+  const nextPath = useNextPath();
 
   return (
     <Screen
       {...SCREEN_CONFIG[variant]}
       h2Suffix={variant === 'create' ? firstName : undefined}
     >
-      <DoneScreenContent variant={variant} />
+      <DoneScreenContent variant={variant} feedHref={nextPath ?? '/feed'} />
     </Screen>
   );
 };

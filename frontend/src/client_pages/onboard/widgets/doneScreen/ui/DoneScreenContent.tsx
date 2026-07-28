@@ -3,13 +3,15 @@ import s from './doneScreen.module.scss';
 
 type Props = {
   variant: DoneScreenVariant;
+  /** Deep link the user arrived from, or /feed when there was none */
+  feedHref: string;
 };
 
-export const DoneScreenContent = ({ variant }: Props) => {
+export const DoneScreenContent = ({ variant, feedHref }: Props) => {
   if (variant === 'reset') {
     return (
       <div className={s.wrapper}>
-        <a href="/feed" className={s.primary}>
+        <a href={feedHref} className={s.primary}>
           <span>To feed</span>
         </a>
       </div>
@@ -18,7 +20,7 @@ export const DoneScreenContent = ({ variant }: Props) => {
 
   return (
     <div className={s.wrapper}>
-      <a href="/feed" className={s.primary}>
+      <a href={feedHref} className={s.primary}>
         <span>To feed</span>
       </a>
       <a href="/friends" className={s.secondary}>

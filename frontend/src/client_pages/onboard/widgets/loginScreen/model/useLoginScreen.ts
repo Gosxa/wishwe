@@ -7,6 +7,7 @@ import {
   useOnboardDataStore,
   useTrackContext,
   useInviteContext,
+  useNextPath,
   handleGooglePostAuth,
 } from '@/client_pages/onboard/model';
 import { loginWithGoogle } from '@/shared/client_api/auth';
@@ -84,6 +85,7 @@ export const useLoginScreen = () => {
   const setAvatarUrl = useOnboardDataStore(s => s.setAvatarUrl);
   const { next } = useTrackContext();
   const invite = useInviteContext();
+  const nextPath = useNextPath();
   const router = useRouter();
   const setUser = useUserStore(s => s.setUser);
   const [googleError, setGoogleError] = useState('');
@@ -102,7 +104,7 @@ export const useLoginScreen = () => {
         user,
         invite,
         next,
-        navigateHome: () => router.push('/'),
+        navigateHome: () => router.push(nextPath ?? '/'),
         prefillGoogleProfile: profileUser => {
           setField('firstName', profileUser.first_name ?? '');
           setField('lastName', profileUser.last_name ?? '');

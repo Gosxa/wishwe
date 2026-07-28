@@ -1,9 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { beApi } from '@/app/_server/api/backend';
+import {
+  NEXT_PARAM,
+  PATHNAME_HEADER,
+  safeNextPath,
+} from '@/shared/lib/nextPath';
 
-const redirectToOnboard = (request: NextRequest) =>
-  NextResponse.redirect(new URL('/onboard', request.url));
+const requestedPath = (request: NextRequest) =>
+  safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`);
+
+const redirectToOnboard = (request: NextRequest) => {
+  const url = new URL('/onboard', request.url);
+  const next = requestedPath(request);
+
+  if (next) url.searchParams.set(NEXT_PARAM, next);
+
+  return NextResponse.redirect(url);
+};
+
+const forward = (request: NextRequest, cookieHeader?: string) => {
+  const headers = new Headers(request.headers);
+  const next = requestedPath(request);
+
+  if (cookieHeader) headers.set('cookie', cookieHeader);
+
+  if (next) headers.set(PATHNAME_HEADER, next);
+  else headers.delete(PATHNAME_HEADER);
+
+  return NextResponse.next({ request: { headers } });
+};
 
 const parseSetCookie = (setCookie: string): [string, string] => {
   const pair = setCookie.split(';')[0];
@@ -50,7 +76,7 @@ export async function authMiddleware(request: NextRequest) {
 
   const meRes = await beApi.user.me(cookieHeader);
 
-  if (meRes.ok) return NextResponse.next();
+  if (meRes.ok) return forward(request);
 
   const refreshRes = await beApi.auth.refreshToken(cookieHeader);
 
@@ -66,11 +92,7 @@ export async function authMiddleware(request: NextRequest) {
 
   if (!retryRes.ok) return redirectToOnboard(request);
 
-  const requestHeaders = new Headers(request.headers);
-
-  requestHeaders.set('cookie', updatedCookieHeader);
-
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  const response = forward(request, updatedCookieHeader);
 
   setCookies.forEach(c => response.headers.append('set-cookie', c));
 

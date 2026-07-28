@@ -4,6 +4,7 @@ import {
   SHARE_DESCRIPTION,
   SHARE_TITLE,
 } from '@/shared/lib/metadata';
+import { NEXT_PARAM, safeNextPath } from '@/shared/lib/nextPath';
 
 // Messenger crawlers carry no cookies, so the auth middleware redirects them
 // here from every protected link — including shared events. This is the page
@@ -15,6 +16,15 @@ export const metadata = buildMetadata({
   shareDescription: SHARE_DESCRIPTION,
 });
 
-export default function Page() {
-  return <OnBoard />;
+type Props = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function Page({ searchParams }: Props) {
+  const params = await searchParams;
+  const next = params[NEXT_PARAM];
+
+  return (
+    <OnBoard next={safeNextPath(typeof next === 'string' ? next : null)} />
+  );
 }

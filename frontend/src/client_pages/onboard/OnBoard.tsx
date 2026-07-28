@@ -1,21 +1,24 @@
 'use client';
 
 import { AuthLayout } from '@/shared';
-import { TrackProvider, InviteProvider } from './model';
+import { TrackProvider, InviteProvider, NextPathProvider } from './model';
 import type { InviteContext } from './model/screensConfig';
 import { Track } from './ui';
 
 type Props = {
   invite?: InviteContext;
+  next?: string | null;
 };
 
-export const OnBoard = ({ invite }: Props) => {
+export const OnBoard = ({ invite, next }: Props) => {
   return (
     <TrackProvider>
       <InviteProvider invite={invite}>
-        <AuthLayout>
-          <Track invite={invite} />
-        </AuthLayout>
+        <NextPathProvider next={next}>
+          <AuthLayout>
+            <Track invite={invite} />
+          </AuthLayout>
+        </NextPathProvider>
       </InviteProvider>
     </TrackProvider>
   );
