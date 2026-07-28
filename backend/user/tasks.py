@@ -39,7 +39,7 @@ def send_friend_request_reminder_email(self, friendship_id: int) -> None:
     context = {
         "name": receiver.profile.username,
         "sender_name": friendship.sender.profile.username,
-        "friends_url": f"{settings.FRONTEND_URL}/friends",
+        "friend_request_url": f"{settings.FRONTEND_URL}/friends",
     }
 
     html_content = render_to_string(
