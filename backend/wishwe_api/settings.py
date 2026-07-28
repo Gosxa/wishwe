@@ -131,7 +131,7 @@ USE_TZ = True
 
 AUTH_USER_MODEL = "user.User"
 
-FRONTEND_URL = os.getenv("FRONTEND_URL")
+FRONTEND_URL="https://wishwe.online/"
 
 INTERNAL_IPS = ["127.0.0.1",]
 
