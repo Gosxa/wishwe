@@ -121,6 +121,20 @@ class Event(models.Model):
         auto_now=True,
     )
 
+    share_token = models.UUIDField(
+        unique=True,
+        null=True,
+        blank=True,
+    )
+    share_expires_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+    share_revoked_at = models.DateTimeField(
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         ordering = ["-created_at"]
 
