@@ -91,3 +91,44 @@ def send_joined_event_email(event_id: str, actor_id: str) -> None:
     )
     message.attach_alternative(html_message, "text/html")
     message.send()
+
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
+def send_event_confirm_reminder_email(event_id: str) -> None:
+    event = (
+        Event.objects
+        .select_related("creator")
+        .prefetch_related("participants__user")
+        .get(id=event_id)
+    )
+
+    interested_participants = (
+        event.participants
+        .filter(status=ParticipationStatus.INTERESTED)
+        .select_related("user")
+    )
+
+    for participant in interested_participants:
+        context = {
+            "name": participant.user.username,
+            "plan_name": event.title,
+            "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+        }
+
+        html_message = render_to_string(
+            "emails/event_confirm_reminder.html",
+            context,
+        )
+
+        message = EmailMultiAlternatives(
+            subject=f'"{event.title}" has been confirmed!',
+            body="",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[participant.user.email],
+        )
+        message.attach_alternative(html_message, "text/html")
+        message.send()
