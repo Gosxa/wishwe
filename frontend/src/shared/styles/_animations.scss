@@ -1,3 +1,25 @@
+$sheet-duration: 0.5s;
+$sheet-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+@keyframes sheet-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@mixin sheet-reveal($delay: 0s) {
+  animation: sheet-reveal 0.32s ease-out $delay both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 @keyframes modal-overlay-in {
   from {
     opacity: 0;

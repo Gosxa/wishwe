@@ -14,12 +14,10 @@ import {
   PersonalDataForm,
   VerifyEmail,
 } from '../../widgets';
-import { cloneElement } from 'react';
+import { cloneElement, useEffect, useRef, useState } from 'react';
 import type { InviteContext } from '../../model/screensConfig';
 
-const ANIMATION_SPEED = 300;
-const FLEX = 400;
-const GAP = 40;
+const VIEWPORT_PADDING = 8;
 
 type Props = {
   invite?: InviteContext;
@@ -28,6 +26,8 @@ type Props = {
 export const Track = ({ invite }: Props) => {
   const { screenStack, pointer, setScreenStack } = useTrackContext();
   const isLoading = useLoadingStore(s => s.isLoading);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const screens = {
     [SCREEN_ID.LOGIN_SCREEN]: <LoginScreen invite={invite} />,
     [SCREEN_ID.ENTER_EMAIL]: <EnterEmail />,
@@ -43,6 +43,25 @@ export const Track = ({ invite }: Props) => {
     [SCREEN_ID.INVITE_REQUEST_SENT]: <InviteRequestSent />,
   };
 
+  useEffect(() => {
+    const active = trackRef.current?.children[pointer];
+
+    if (!(active instanceof HTMLElement)) return;
+
+    const measure = () =>
+      setViewportHeight(
+        Math.ceil(active.getBoundingClientRect().height) + VIEWPORT_PADDING,
+      );
+
+    measure();
+
+    const observer = new ResizeObserver(measure);
+
+    observer.observe(active);
+
+    return () => observer.disconnect();
+  }, [pointer, screenStack]);
+
   const onTransitionEnd = (e: React.TransitionEvent<HTMLDivElement>) => {
     if (e.propertyName !== 'transform' || e.target !== e.currentTarget) return;
 
@@ -52,17 +71,18 @@ export const Track = ({ invite }: Props) => {
   };
 
   const cssVars = {
-    '--flex': `${FLEX}px`,
-    '--gap': `${GAP}px`,
-    '--animation-speed': `${ANIMATION_SPEED}ms`,
+    '--pointer': String(pointer),
+    ...(viewportHeight !== null && {
+      '--viewport-height': `${viewportHeight}px`,
+    }),
   } as React.CSSProperties;
 
   return (
     <div className={s.inner} style={cssVars}>
       <div className={s.viewport}>
         <div
+          ref={trackRef}
           className={s.track}
-          style={{ transform: `translateX(-${pointer * (FLEX + GAP)}px)` }}
           onTransitionEnd={onTransitionEnd}
         >
           {screenStack.map(id => cloneElement(screens[id], { key: id }))}

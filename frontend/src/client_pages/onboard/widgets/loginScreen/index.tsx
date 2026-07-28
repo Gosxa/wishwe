@@ -2,6 +2,7 @@
 
 import { Screen } from '../../ui/screen/Screen';
 import { getInviteHandle, type InviteContext } from '../../model/screensConfig';
+import { useIntroContext } from '../../model';
 import { useLoginScreen } from './model/useLoginScreen';
 import { LoginScreenContent } from './ui';
 
@@ -16,6 +17,7 @@ type Props = {
 
 export const LoginScreen = ({ invite }: Props) => {
   const { onGoogle, onEmail, googleError } = useLoginScreen();
+  const { start } = useIntroContext();
   const screenConfig = invite
     ? {
         h2: `Join ${getInviteHandle(invite.username)} on wish.we`,
@@ -29,6 +31,7 @@ export const LoginScreen = ({ invite }: Props) => {
       <LoginScreenContent
         onGoogle={onGoogle}
         onEmail={onEmail}
+        onStart={start}
         googleError={googleError}
         showJoinWithoutInvite={Boolean(invite)}
       />

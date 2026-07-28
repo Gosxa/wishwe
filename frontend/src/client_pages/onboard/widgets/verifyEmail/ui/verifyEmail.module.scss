@@ -1,6 +1,7 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as typo;
+@use '@shared/styles/breakpoints' as bp;
 
 .wrapper {
   display: flex;
@@ -77,6 +78,24 @@
 
 
   width: 400px;
+}
+
+@include bp.compact {
+  .cells {
+    gap: 8px;
+    justify-content: space-between;
+  }
+
+  .cell {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .resend {
+    position: static;
+    width: 100%;
+  }
 }
 
 .resendLabel {

@@ -1,11 +1,12 @@
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/breakpoints' as bp;
 
 .screen {
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 400px;
+  width: 100%;
   box-sizing: border-box;
 
   > h2 {
@@ -19,5 +20,11 @@
     @include tp.text-body;
     color: clr.$ns-700;
     margin-bottom: 64px;
+  }
+}
+
+@include bp.mobile {
+  .screen > h2 {
+    @include tp.h2;
   }
 }

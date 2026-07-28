@@ -1,7 +1,14 @@
-@use '@shared/styles/colors' as clr;
+@use '@shared/styles/breakpoints' as bp;
+@use '@shared/styles/animations' as anim;
+
+$screen-width: 400px;
+$screen-gap: 40px;
+$viewport-padding: 4px;
+$slide-speed: 300ms;
+
 
 .inner {
-  position: relative;
+  border-radius: var(--sheet-radius, 0);
   display: flex;
   width: 100%;
   height: 100%;
@@ -10,18 +17,44 @@
 }
 
 .viewport {
-  width: calc(var(--flex) + 8px);
+  width: $screen-width + $viewport-padding * 2;
   height: 100%;
-  box-sizing: border-box;
-  padding: 4px;
+  padding: $viewport-padding;
   overflow-x: hidden;
 }
 
 .track {
   display: flex;
+  width: 100%;
   height: 100%;
   flex-direction: row;
   align-items: center;
-  gap: var(--gap);
-  transition: transform var(--animation-speed) ease;
+  gap: $screen-gap;
+  transform: translateX(calc(-1 * var(--pointer, 0) * (100% + #{$screen-gap})));
+  transition: transform $slide-speed ease;
+}
+
+@include bp.compact {
+  .inner {
+    height: auto;
+  }
+
+  .viewport {
+    width: calc(100% + #{$viewport-padding * 2});
+    height: var(--viewport-height, auto);
+    margin-inline: -$viewport-padding;
+    overflow: hidden;
+    transition: height anim.$sheet-duration anim.$sheet-ease;
+  }
+
+  .track {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viewport,
+  .track {
+    transition: none;
+  }
 }

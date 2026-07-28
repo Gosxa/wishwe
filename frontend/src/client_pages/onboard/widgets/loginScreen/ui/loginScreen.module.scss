@@ -1,6 +1,8 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/breakpoints' as bp;
+@use '@shared/styles/animations' as anim;
 
 .wrapper {
   display: flex;
@@ -11,6 +13,16 @@
 
 .inviteWrapper {
   gap: 16px;
+}
+
+.getStarted {
+  @include btn.primary(0, 100%, 40px);
+  display: none;
+}
+
+
+.options {
+  display: contents;
 }
 
 .googleWrapper {
@@ -47,4 +59,31 @@
 .tertiary {
   @include btn.tertiary(4px, 100%, 40px);
   margin-top: 8px;
+}
+
+@include bp.compact {
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .spacer {
+    display: none;
+  }
+
+
+  :global([data-auth-expanded='false']) {
+    .getStarted {
+      display: flex;
+    }
+
+    .options {
+      display: none;
+    }
+  }
+
+  :global([data-auth-expanded='true']) .options {
+    @include anim.sheet-reveal(0.14s);
+  }
 }
