@@ -61,3 +61,33 @@ def send_interested_event_email(event_id: str, actor_id: str):
     )
     message.attach_alternative(html, "text/html")
     message.send()
+
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
+def send_joined_event_email(event_id: str, actor_id: str) -> None:
+    event = Event.objects.select_related("creator").get(id=event_id)
+    actor = get_user_model().objects.get(id=actor_id)
+
+    context = {
+        "name": actor.username,
+        "plan_name": event.title,
+        "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+    }
+
+    html_message = render_to_string(
+        "emails/joined_event.html",
+        context,
+    )
+
+    message = EmailMultiAlternatives(
+        subject=f"{actor.username} joined your Plan",
+        body="",
+        from_email=settings.EMAIL_HOST_USER,
+        to=[event.creator.email],
+    )
+    message.attach_alternative(html_message, "text/html")
+    message.send()
