@@ -522,6 +522,16 @@ class EventService:
             ).exists()
 
         if event.event_visibility == EventVisibility.FRIENDS_OF_FRIENDS:
+            are_friends = Friendship.objects.filter(
+                status=FriendshipStatus.ACCEPTED,
+            ).filter(
+                Q(sender=user, receiver=event.creator)
+                | Q(sender=event.creator, receiver=user)
+            ).exists()
+
+            if are_friends:
+                return True
+
             return FriendshipService.get_mutual_friends(
                 user1=user,
                 user2=event.creator,
