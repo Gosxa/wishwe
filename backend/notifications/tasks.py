@@ -1,7 +1,12 @@
 from celery import shared_task
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 from event.models import EventParticipant, Event, ParticipationStatus
 from notifications.services.notification_service import NotificationService
+from user.models import Profile
 
 
 @shared_task
@@ -27,3 +32,106 @@ def send_event_start_reminder_notifications(event_id):
             creator=event.creator,
             event=event,
         )
+
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
+def send_interested_event_email(event_id: str, actor_id: str):
+    event = Event.objects.select_related("creator").get(id=event_id)
+    actor = get_user_model().objects.get(id=actor_id)
+
+    context = {
+        "name": actor.profile.username,
+        "wish_name": event.title,
+        "wish_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+    }
+
+    html = render_to_string(
+        "emails/interested_event.html",
+        context,
+    )
+
+    message = EmailMultiAlternatives(
+        subject=f"{actor.profile.username} is interested in your Wish",
+        body="",
+        from_email=settings.EMAIL_HOST_USER,
+        to=[event.creator.email],
+    )
+    message.attach_alternative(html, "text/html")
+    message.send()
+
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
+def send_joined_event_email(event_id: str, actor_id: str) -> None:
+    event = Event.objects.select_related("creator").get(id=event_id)
+    actor = get_user_model().objects.get(id=actor_id)
+
+    context = {
+        "name": actor.profile.username,
+        "plan_name": event.title,
+        "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+    }
+
+    html_message = render_to_string(
+        "emails/joined_event.html",
+        context,
+    )
+
+    message = EmailMultiAlternatives(
+        subject=f"{actor.profile.username} joined your Plan",
+        body="",
+        from_email=settings.EMAIL_HOST_USER,
+        to=[event.creator.email],
+    )
+    message.attach_alternative(html_message, "text/html")
+    message.send()
+
+
+@shared_task(
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={"max_retries": 3},
+)
+def send_event_confirm_reminder_email(event_id: str) -> None:
+    event = (
+        Event.objects
+        .select_related("creator")
+        .prefetch_related("participants__user")
+        .get(id=event_id)
+    )
+
+    interested_participants = (
+        event.participants
+        .filter(status=ParticipationStatus.INTERESTED)
+        .select_related("user")
+    )
+    creator = get_user_model().objects.get(id=event.creator_id)
+    creator_profile = Profile.objects.get(user=creator)
+
+    for participant in interested_participants:
+        context = {
+            "name": creator_profile.username,
+            "plan_name": event.title,
+            "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+        }
+
+        html_message = render_to_string(
+            "emails/event_confirm_reminder.html",
+            context,
+        )
+
+        message = EmailMultiAlternatives(
+            subject=f'"{event.title}" has been confirmed!',
+            body="",
+            from_email=settings.EMAIL_HOST_USER,
+            to=[participant.user.email],
+        )
+        message.attach_alternative(html_message, "text/html")
+        message.send()

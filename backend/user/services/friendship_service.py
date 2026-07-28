@@ -4,6 +4,7 @@ from django.db.models import Q, Case, When, F, Subquery
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from notifications.services.notification_service import NotificationService
 from user.models import Friendship, FriendshipStatus
+from user.tasks import send_friend_request_reminder_email
 
 
 class FriendshipService:
@@ -29,6 +30,16 @@ class FriendshipService:
             existing.sender = sender
             existing.receiver = receiver
             existing.save()
+
+            NotificationService.create_friend_request_notification(
+                friendship=existing,
+            )
+
+            send_friend_request_reminder_email.apply_async(
+                kwargs={"friendship_id": existing.id},
+                countdown=30 * 60,
+            )
+
             return existing
 
 
@@ -40,6 +51,11 @@ class FriendshipService:
 
         NotificationService.create_friend_request_notification(
             friendship=friendship
+        )
+
+        send_friend_request_reminder_email.apply_async(
+            kwargs={"friendship_id": friendship.id},
+            countdown=30 * 60,
         )
 
         return friendship
