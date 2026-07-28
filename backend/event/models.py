@@ -126,14 +126,6 @@ class Event(models.Model):
         null=True,
         blank=True,
     )
-    share_expires_at = models.DateTimeField(
-        null=True,
-        blank=True,
-    )
-    share_revoked_at = models.DateTimeField(
-        null=True,
-        blank=True,
-    )
 
     class Meta:
         ordering = ["-created_at"]
