@@ -16,7 +16,12 @@ from event.models import (
     ParticipationStatus, EventVisibility,
 )
 from notifications.services.notification_service import NotificationService
-from notifications.tasks import send_event_start_reminder_notifications
+from notifications.tasks import (
+    send_event_start_reminder_notifications,
+    send_interested_event_email,
+    send_joined_event_email,
+    send_event_confirm_reminder_email
+)
 from user.models import FriendshipStatus, Friendship
 from user.services.friendship_service import FriendshipService
 
@@ -282,6 +287,11 @@ class EventService:
             event=event, user=user
         )
 
+        send_joined_event_email.delay(
+            event_id=event.id,
+            actor_id=user.id,
+        )
+
         return event
 
     @staticmethod
@@ -324,6 +334,11 @@ class EventService:
 
         NotificationService.create_interested_event_notification(
             event=event, user=user
+        )
+
+        send_interested_event_email.delay(
+            event_id=event.id,
+            actor_id=user.id,
         )
 
         return event
@@ -429,6 +444,10 @@ class EventService:
                 creator=event.creator,
                 recipient=participant.user,
             )
+
+        send_event_confirm_reminder_email.delay(
+            event_id=event.id,
+        )
 
         return event
 
