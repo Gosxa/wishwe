@@ -48,7 +48,9 @@
     right: 0;
     left: 0;
     height: var(--picture-height);
-    transition: height anim.$sheet-duration anim.$sheet-ease;
+    transition:
+      height anim.$sheet-duration anim.$sheet-ease,
+      opacity anim.$sheet-duration anim.$sheet-ease;
   }
 
   .content {
@@ -68,6 +70,7 @@
       right anim.$sheet-duration anim.$sheet-ease,
       bottom anim.$sheet-duration anim.$sheet-ease,
       left anim.$sheet-duration anim.$sheet-ease,
+      min-height anim.$sheet-duration anim.$sheet-ease,
       border-radius anim.$sheet-duration anim.$sheet-ease,
       box-shadow anim.$sheet-duration anim.$sheet-ease;
 
@@ -93,17 +96,17 @@
 
 
 @include bp.mobile {
-  .container[data-auth-hide-picture-mobile='true'] {
+  .container[data-auth-expanded='true'] {
+    --sheet-inset: 0px;
+    --sheet-radius: 0px;
+    --sheet-shadow: 0 0 0 0 rgb(26 28 30 / 0%);
+
     .picture {
-      display: none;
+      opacity: 0;
     }
 
     .content {
-      inset: 0;
-      max-height: 100dvh;
-      border-radius: 0;
-      box-shadow: none;
-      transition: none;
+      min-height: 100dvh;
     }
   }
 }
