@@ -106,7 +106,13 @@
     }
 
     .content {
+      display: flex;
       min-height: 100dvh;
+      flex-direction: column;
+
+      > * {
+        margin-block: auto;
+      }
     }
   }
 }

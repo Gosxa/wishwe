@@ -53,19 +53,6 @@ $slide-speed: 300ms;
 }
 
 
-@include bp.mobile {
-  [data-auth-expanded='true'] {
-    .inner {
-      height: 100%;
-      align-items: flex-start;
-    }
-
-    .viewport {
-      margin-block: auto;
-    }
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .viewport,
   .track {
