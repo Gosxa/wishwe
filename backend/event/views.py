@@ -1,12 +1,15 @@
+from uuid import UUID
+
 from django.db.models import Prefetch, Q, Count
 from django.http import Http404
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from common.pagination import DefaultPagination
 from event.models import (
@@ -25,9 +28,11 @@ from event.serializers import (
     PlanWriteSerializer,
     WishWriteSerializer,
     ConvertWishToPlanSerializer,
-    ParticipantSerializer
+    ParticipantSerializer,
+    EventPreviewSerializer
 )
 from event.services.event_service import EventService
+from event.services.share_service import EventShareService
 from user.services.friendship_service import FriendshipService
 
 
@@ -476,4 +481,25 @@ class EventViewSet(
                 context=self.get_serializer_context(),
             ).data,
             status=status.HTTP_201_CREATED,
+        )
+
+
+class ShareView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def get(self, request, token: UUID):
+        event = EventShareService.get_shared_event(token)
+
+        if event is None:
+            raise NotFound("Share link not found.")
+
+        # TODO:
+        # If the authenticated user already has access to this event,
+        # return the full event representation instead of the preview.
+
+        serializer = EventPreviewSerializer(event)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_200_OK,
         )
