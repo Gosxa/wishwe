@@ -5,10 +5,19 @@ import s from './authLayout.module.scss';
 type Props = {
   children: ReactNode;
   expanded?: boolean;
+  hidePictureOnMobile?: boolean;
 };
 
-export const AuthLayout = ({ children, expanded = true }: Props) => (
-  <main className={s.container} data-auth-expanded={expanded}>
+export const AuthLayout = ({
+  children,
+  expanded = true,
+  hidePictureOnMobile = false,
+}: Props) => (
+  <main
+    className={s.container}
+    data-auth-expanded={expanded}
+    data-auth-hide-picture-mobile={hidePictureOnMobile}
+  >
     <picture className={s.picture}>
       <img src="/onboard_image.jpg" alt="" className={s.image} />
     </picture>

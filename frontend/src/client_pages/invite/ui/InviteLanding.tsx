@@ -18,7 +18,7 @@ export const InviteLanding = ({ token, username, avatarSrc }: Props) => {
   const joinHref = `/invite/${encodeURIComponent(token)}/join`;
 
   return (
-    <AuthLayout>
+    <AuthLayout hidePictureOnMobile>
       <section className={s.landing}>
         <div className={s.card}>
           <div

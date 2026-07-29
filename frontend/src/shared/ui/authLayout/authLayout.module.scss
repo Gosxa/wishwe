@@ -92,6 +92,23 @@
 }
 
 
+@include bp.mobile {
+  .container[data-auth-hide-picture-mobile='true'] {
+    .picture {
+      display: none;
+    }
+
+    .content {
+      inset: 0;
+      max-height: 100dvh;
+      border-radius: 0;
+      box-shadow: none;
+      transition: none;
+    }
+  }
+}
+
+
 @include bp.tablet {
   .content {
     width: min(520px, 100%);
