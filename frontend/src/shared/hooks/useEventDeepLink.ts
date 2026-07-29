@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import { useQuerySync } from './useQuerySync';
 
 const EVENT_PARAM = 'event';
 
@@ -12,32 +13,20 @@ export const useEventDeepLink = (
   isFeedLoading = false,
 ) => {
   const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
+  const updateQuery = useQuerySync();
 
   const openEventId = searchParams.get(EVENT_PARAM);
 
   const setEventParam = useCallback(
     (id: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-
-      params.set(EVENT_PARAM, id);
-      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      updateQuery(params => params.set(EVENT_PARAM, id));
     },
-    [router, pathname, searchParams],
+    [updateQuery],
   );
 
   const clearEventParam = useCallback(() => {
-    const params = new URLSearchParams(searchParams.toString());
-
-    params.delete(EVENT_PARAM);
-
-    const query = params.toString();
-
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
-  }, [router, pathname, searchParams]);
+    updateQuery(params => params.delete(EVENT_PARAM));
+  }, [updateQuery]);
 
   const isLinkedEventLoaded = loadedEvents.some(
     event => event.id === openEventId,

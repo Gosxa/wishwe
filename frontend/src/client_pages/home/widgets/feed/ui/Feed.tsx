@@ -6,7 +6,7 @@ import { Spinner } from '@/shared';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
-import { useFeedToolbarStore } from '@client_pages/home/model/useFeedToolbarStore';
+import { useFeedToolbar } from '@client_pages/home/model/useFeedToolbar';
 import { SEARCH_PARAM } from '@client_pages/home/model/useFeedSearch';
 import { DeepLinkCard } from './DeepLinkCard';
 import { EventCard } from './EventCard';
@@ -19,12 +19,8 @@ type Props = {
 };
 
 export const Feed = ({ onSearchDisabledChange }: Props) => {
-  const filter = useFeedToolbarStore(state => state.filter);
-  const reach = useFeedToolbarStore(state => state.reach);
-  const sort = useFeedToolbarStore(state => state.sort);
-  const setFilter = useFeedToolbarStore(state => state.setFilter);
-  const setReach = useFeedToolbarStore(state => state.setReach);
-  const setSort = useFeedToolbarStore(state => state.setSort);
+  const { filter, reach, sort, setFilter, setReach, setSort } =
+    useFeedToolbar();
 
   const { events, isLoading, isLoadingMore, hasMore, loadMore } =
     useFeedEvents();

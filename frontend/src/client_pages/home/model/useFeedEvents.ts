@@ -7,14 +7,11 @@ import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { toEventListParams } from './feedQuery';
 import { toFeedEvents } from './feedMapper';
 import { SEARCH_PARAM } from './useFeedSearch';
-import { useFeedToolbarStore } from './useFeedToolbarStore';
+import { useFeedToolbar } from './useFeedToolbar';
 import type { FeedEvent } from './types';
 
 export const useFeedEvents = () => {
-  const filter = useFeedToolbarStore(state => state.filter);
-  const reach = useFeedToolbarStore(state => state.reach);
-  const sort = useFeedToolbarStore(state => state.sort);
-  const hasHydrated = useFeedToolbarStore(state => state._hasHydrated);
+  const { filter, reach, sort } = useFeedToolbar();
   const refreshToken = useEventsRefreshStore(state => state.refreshToken);
 
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
@@ -38,8 +35,6 @@ export const useFeedEvents = () => {
   }
 
   useEffect(() => {
-    if (!hasHydrated) return;
-
     const requestId = ++requestIdRef.current;
 
     pageRef.current = 1;
@@ -65,7 +60,7 @@ export const useFeedEvents = () => {
 
         setIsLoading(false);
       });
-  }, [filter, reach, sort, search, hasHydrated, refreshToken]);
+  }, [filter, reach, sort, search, refreshToken]);
 
   const loadMore = useCallback(() => {
     if (loadingRef.current || !hasMore) return;

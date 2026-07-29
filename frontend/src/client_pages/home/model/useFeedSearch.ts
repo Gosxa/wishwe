@@ -2,17 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useQuerySync } from '@shared/hooks/useQuerySync';
 
 export const SEARCH_PARAM = 'title';
 
 const DEBOUNCE_MS = 500;
 
-/**
- * Syncs the feed search with the `title` URL query param.
- * pressing Enter commits immediately.
- */
 export const useFeedSearch = () => {
   const searchParams = useSearchParams();
+  const updateQuery = useQuerySync();
   const committed = searchParams.get(SEARCH_PARAM) ?? '';
 
   const [value, setValue] = useState(committed);
@@ -31,20 +29,17 @@ export const useFeedSearch = () => {
     }
   }, []);
 
-  const commit = useCallback((next: string) => {
-    const params = new URLSearchParams(window.location.search);
-    const trimmed = next.trim();
+  const commit = useCallback(
+    (next: string) => {
+      const trimmed = next.trim();
 
-    if (trimmed) params.set(SEARCH_PARAM, trimmed);
-    else params.delete(SEARCH_PARAM);
-
-    const queryString = params.toString();
-    const url = queryString
-      ? `${window.location.pathname}?${queryString}`
-      : window.location.pathname;
-
-    window.history.replaceState(null, '', url);
-  }, []);
+      updateQuery(params => {
+        if (trimmed) params.set(SEARCH_PARAM, trimmed);
+        else params.delete(SEARCH_PARAM);
+      });
+    },
+    [updateQuery],
+  );
 
   const onChange = useCallback(
     (next: string) => {
