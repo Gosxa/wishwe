@@ -14,11 +14,13 @@ import {
   getEventTimeInputMin,
   getFutureEventDateTimeError,
 } from '@/shared/lib/validation/eventDate';
+import {
+  isAllowedCoverImageType,
+  MAX_COVER_IMAGE_SIZE,
+} from '@/shared/lib/validation/imageUpload';
 import type { EventVisibility, FieldErrors } from './types';
 
 const UNLIMITED_MAX = 3000;
-const ALLOWED_COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_COVER_SIZE = 5 * 1024 * 1024;
 
 const fieldError = (value: unknown): string | undefined =>
   Array.isArray(value) && value.length > 0 ? String(value[0]) : undefined;
@@ -132,16 +134,16 @@ export const useCreateEvent = (
   };
 
   const onCoverSelect = (file: File) => {
-    if (!ALLOWED_COVER_TYPES.includes(file.type)) {
+    if (!isAllowedCoverImageType(file.type)) {
       setErrors(prev => ({
         ...prev,
-        cover: 'Supported formats: PNG, JPG, and WebP',
+        cover: 'Unsupported image format',
       }));
 
       return;
     }
 
-    if (file.size > MAX_COVER_SIZE) {
+    if (file.size > MAX_COVER_IMAGE_SIZE) {
       setErrors(prev => ({ ...prev, cover: 'Image must be 5 MB or less' }));
 
       return;

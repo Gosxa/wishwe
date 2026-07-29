@@ -77,17 +77,3 @@
   position: relative;
   cursor: pointer;
 }
-
-.formats {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-
-  @include tp.text-caption;
-  color: clr.$ns-700;
-
-  > svg {
-    width: 16px;
-    height: 16px;
-  }
-}

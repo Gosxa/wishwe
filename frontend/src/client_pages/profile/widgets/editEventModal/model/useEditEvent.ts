@@ -13,11 +13,13 @@ import {
   getEventDateTimeErrors,
   getEventTimeInputMin,
 } from '@/shared/lib/validation/eventDate';
+import {
+  isAllowedCoverImageType,
+  MAX_COVER_IMAGE_SIZE,
+} from '@/shared/lib/validation/imageUpload';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
 import type { FieldErrors } from './types';
 
-const ALLOWED_COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_COVER_SIZE = 5 * 1024 * 1024;
 const UNLIMITED_MAX = 3000;
 
 const fieldError = (value: unknown): string | undefined =>
@@ -135,16 +137,16 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
   };
 
   const onCoverSelect = (file: File) => {
-    if (!ALLOWED_COVER_TYPES.includes(file.type)) {
+    if (!isAllowedCoverImageType(file.type)) {
       setErrors(prev => ({
         ...prev,
-        cover: 'Supported formats: PNG, JPG, and WebP',
+        cover: 'Unsupported image format',
       }));
 
       return;
     }
 
-    if (file.size > MAX_COVER_SIZE) {
+    if (file.size > MAX_COVER_IMAGE_SIZE) {
       setErrors(prev => ({ ...prev, cover: 'Image must be 5 MB or less' }));
 
       return;

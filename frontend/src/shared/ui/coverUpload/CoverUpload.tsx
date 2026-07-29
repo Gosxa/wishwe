@@ -2,7 +2,8 @@
 
 import { type DragEvent, useRef, useState } from 'react';
 import clsx from 'clsx';
-import { BadgeInfo, Pencil, Upload } from '@shared/ui/icons';
+import { getCoverImageAcceptAttribute } from '@shared/lib/validation/imageUpload';
+import { Pencil, Upload } from '@shared/ui/icons';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import s from './coverUpload.module.scss';
 
@@ -85,7 +86,7 @@ export const CoverUpload = ({
         <input
           ref={inputRef}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept={getCoverImageAcceptAttribute()}
           hidden
           onChange={e => {
             const file = e.target.files?.[0];
@@ -97,14 +98,7 @@ export const CoverUpload = ({
         />
       </div>
 
-      {error ? (
-        <HelperText text={error} type="error" inline />
-      ) : (
-        <span className={s.formats}>
-          <BadgeInfo />
-          Supported formats: PNG, JPG, and WebP
-        </span>
-      )}
+      {error && <HelperText text={error} type="error" inline />}
     </div>
   );
 };
