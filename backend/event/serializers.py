@@ -371,3 +371,29 @@ class ParticipantSerializer(serializers.ModelSerializer):
             "username",
             "avatar",
         )
+
+
+class CreatorPreviewSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source="user.id", read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = (
+            "user_id",
+            "username",
+            "avatar",
+        )
+
+
+class EventPreviewSerializer(serializers.ModelSerializer):
+    creator = CreatorPreviewSerializer(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = (
+            "id",
+            "title",
+            "description",
+            "cover_image",
+            "creator",
+        )
