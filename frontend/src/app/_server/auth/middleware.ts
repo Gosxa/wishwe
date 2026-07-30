@@ -4,13 +4,44 @@ import { beApi } from '@/app/_server/api/backend';
 import {
   NEXT_PARAM,
   PATHNAME_HEADER,
+  USER_ID_HEADER,
   safeNextPath,
 } from '@/shared/lib/nextPath';
 
 const requestedPath = (request: NextRequest) =>
   safeNextPath(`${request.nextUrl.pathname}${request.nextUrl.search}`);
 
+const isJsonRequest = (request: NextRequest) => {
+  // Soft navigations are still page loads; they must keep the 307 redirect.
+  if (
+    request.headers.has('rsc') ||
+    request.headers.has('next-router-state-tree')
+  ) {
+    return false;
+  }
+
+  const pathname = request.nextUrl.pathname;
+  const accept = request.headers.get('accept') ?? '';
+  const fetchMode = request.headers.get('sec-fetch-mode');
+  const fetchDest = request.headers.get('sec-fetch-dest');
+
+  return (
+    pathname === '/api' ||
+    pathname.startsWith('/api/') ||
+    accept.includes('application/json') ||
+    fetchMode === 'cors' ||
+    fetchDest === 'empty'
+  );
+};
+
 const redirectToOnboard = (request: NextRequest) => {
+  if (isJsonRequest(request)) {
+    return NextResponse.json(
+      { detail: 'Authentication required' },
+      { status: 401 },
+    );
+  }
+
   const url = new URL('/onboard', request.url);
   const next = requestedPath(request);
 
@@ -19,16 +50,42 @@ const redirectToOnboard = (request: NextRequest) => {
   return NextResponse.redirect(url);
 };
 
-const forward = (request: NextRequest, cookieHeader?: string) => {
+const forward = (
+  request: NextRequest,
+  options?: { cookieHeader?: string; userId?: string },
+) => {
   const headers = new Headers(request.headers);
   const next = requestedPath(request);
 
-  if (cookieHeader) headers.set('cookie', cookieHeader);
+  if (options?.cookieHeader) headers.set('cookie', options.cookieHeader);
 
   if (next) headers.set(PATHNAME_HEADER, next);
   else headers.delete(PATHNAME_HEADER);
 
+  if (options?.userId) headers.set(USER_ID_HEADER, options.userId);
+  else headers.delete(USER_ID_HEADER);
+
   return NextResponse.next({ request: { headers } });
+};
+
+const attempt = async (
+  send: () => Promise<Response>,
+): Promise<Response | null> => {
+  try {
+    return await send();
+  } catch {
+    return null;
+  }
+};
+
+const sessionIdFrom = async (meRes: Response): Promise<string | undefined> => {
+  try {
+    const { user_id: userId } = (await meRes.json()) as { user_id?: number };
+
+    return typeof userId === 'number' ? String(userId) : undefined;
+  } catch {
+    return undefined;
+  }
 };
 
 const parseSetCookie = (setCookie: string): [string, string] => {
@@ -64,35 +121,51 @@ const mergeCookieHeader = (
 };
 
 export async function authMiddleware(request: NextRequest) {
-  // The landing page at "/" is public; it handles the authed→/feed redirect itself.
-  if (request.nextUrl.pathname === '/') return NextResponse.next();
-
   const accessToken = request.cookies.get('access_token')?.value;
   const refreshToken = request.cookies.get('refresh_token')?.value;
 
-  if (!accessToken || !refreshToken) return redirectToOnboard(request);
+  const isPublicRoot = request.nextUrl.pathname === '/';
+  const rejectRequest = () =>
+    isPublicRoot ? forward(request) : redirectToOnboard(request);
+
+  const acceptRequest = (options?: {
+    cookieHeader?: string;
+    userId?: string;
+  }) =>
+    isPublicRoot
+      ? NextResponse.redirect(new URL('/feed', request.url))
+      : forward(request, options);
+
+  if (!refreshToken) return rejectRequest();
 
   const cookieHeader = request.headers.get('cookie') ?? '';
 
-  const meRes = await beApi.user.me(cookieHeader);
+  if (accessToken) {
+    const meRes = await attempt(() => beApi.user.me(cookieHeader));
 
-  if (meRes.ok) return forward(request);
+    if (meRes?.ok) {
+      return acceptRequest({ userId: await sessionIdFrom(meRes) });
+    }
+  }
 
-  const refreshRes = await beApi.auth.refreshToken(cookieHeader);
+  const refreshRes = await attempt(() => beApi.auth.refreshToken(cookieHeader));
 
-  if (!refreshRes.ok) return redirectToOnboard(request);
+  if (!refreshRes?.ok) return rejectRequest();
 
   const setCookies = refreshRes.headers.getSetCookie();
 
-  if (setCookies.length === 0) return redirectToOnboard(request);
+  if (setCookies.length === 0) return rejectRequest();
 
   const updatedCookieHeader = mergeCookieHeader(cookieHeader, setCookies);
 
-  const retryRes = await beApi.user.me(updatedCookieHeader);
+  const retryRes = await attempt(() => beApi.user.me(updatedCookieHeader));
 
-  if (!retryRes.ok) return redirectToOnboard(request);
+  if (!retryRes?.ok) return rejectRequest();
 
-  const response = forward(request, updatedCookieHeader);
+  const response = acceptRequest({
+    cookieHeader: updatedCookieHeader,
+    userId: await sessionIdFrom(retryRes),
+  });
 
   setCookies.forEach(c => response.headers.append('set-cookie', c));
 

@@ -1,3 +1,5 @@
+import { handleUnauthorized } from '@/shared/client_api/handleResponse';
+
 import type { NotificationsPage } from './types';
 
 export class NotificationApiError extends Error {
@@ -12,6 +14,7 @@ export class NotificationApiError extends Error {
 
 const ensureOk = (response: Response, message: string) => {
   if (!response.ok) {
+    handleUnauthorized(response);
     throw new NotificationApiError(message, response.status);
   }
 };

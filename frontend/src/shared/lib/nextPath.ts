@@ -2,11 +2,12 @@ export const NEXT_PARAM = 'next';
 
 export const PATHNAME_HEADER = 'x-pathname';
 
+export const USER_ID_HEADER = 'x-user-id';
+
 const ORIGIN = 'http://localhost';
 
 const BLOCKED_PREFIXES = ['/onboard', '/api', '/next_api'];
 
-// Makes a redirect target safe: only same-site paths, not APIs or another site.
 export const safeNextPath = (
   value: string | null | undefined,
 ): string | null => {

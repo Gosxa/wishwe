@@ -1,3 +1,5 @@
+import { handleUnauthorized } from '@/shared/client_api/handleResponse';
+
 import {
   BackendEvent,
   BackendEventType,
@@ -18,6 +20,7 @@ const postAction = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new Error(`Failed to ${action}`);
   }
 
@@ -51,6 +54,7 @@ export const listEvents = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new Error('Failed to load events');
   }
 
@@ -63,6 +67,7 @@ export const archiveEvent = async (id: string): Promise<void> => {
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new Error('Failed to archive event');
   }
 };
@@ -77,6 +82,7 @@ export const getEvent = async (id: string): Promise<BackendEvent> => {
   const res = await fetch(`/api/event/events/${id}`, { method: 'GET' });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new GetEventError(res.status);
   }
 
@@ -91,6 +97,7 @@ export const listParticipants = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new Error('Failed to load participants');
   }
 
@@ -101,6 +108,7 @@ export const listCategories = async (): Promise<Category[]> => {
   const res = await fetch('/api/event/category', { method: 'GET' });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new Error('Failed to load categories');
   }
 
@@ -134,6 +142,7 @@ export const createEvent = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const body = (await res.json().catch(() => ({}))) as Record<
       string,
       unknown
@@ -173,6 +182,7 @@ export const updateEvent = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const body = (await res.json().catch(() => ({}))) as Record<
       string,
       unknown
@@ -208,6 +218,7 @@ export const convertToPlan = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const body = (await res.json().catch(() => ({}))) as Record<
       string,
       unknown

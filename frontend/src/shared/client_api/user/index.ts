@@ -1,5 +1,7 @@
-import type { Profile } from '../auth/types';
+import { handleUnauthorized } from '@/shared/client_api/handleResponse';
 import { avatarFormData } from '@/shared/lib/avatarFormData';
+
+import type { Profile } from '../auth/types';
 import type { BackendEvent, Paginated } from '../event';
 import type { FriendApi, FriendRequestApi } from './types';
 
@@ -40,6 +42,7 @@ export const listUserEvents = async (
   );
 
   if (!res.ok) {
+    handleUnauthorized(res);
     throw new Error('Failed to load events');
   }
 
@@ -53,7 +56,10 @@ export const checkUsername = async (
     `/next_api/user/check-username?username=${encodeURIComponent(username)}`,
   );
 
-  if (!res.ok) throw new Error('Failed');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed');
+  }
 
   return res.json();
 };
@@ -73,7 +79,10 @@ export const onBoard = async (
     }),
   });
 
-  if (!res.ok) throw new Error('Failed to onboard');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to onboard');
+  }
 };
 
 export const changeAvatar = async (
@@ -84,7 +93,10 @@ export const changeAvatar = async (
     body: await avatarFormData(avatar),
   });
 
-  if (!res.ok) throw new Error('Failed to upload avatar');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to upload avatar');
+  }
 
   return res.json();
 };
@@ -119,6 +131,7 @@ export const updateProfile = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const body = await res.json().catch(() => ({}));
 
     throw new UpdateProfileError(body);
@@ -147,6 +160,7 @@ export const changePassword = async (
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const body = await res.json().catch(() => ({}));
 
     throw new ChangePasswordError(body);
@@ -156,7 +170,10 @@ export const changePassword = async (
 export const createInvite = async (): Promise<{ token: string }> => {
   const res = await fetch('/next_api/user/invite', { method: 'POST' });
 
-  if (!res.ok) throw new Error('Failed to create invite');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to create invite');
+  }
 
   return res.json();
 };
@@ -175,6 +192,7 @@ export const acceptInvite = async (token: string): Promise<void> => {
   });
 
   if (!res.ok) {
+    handleUnauthorized(res);
     const body = await res.json().catch(() => ({}));
 
     throw new AcceptInviteError(body);
@@ -192,7 +210,10 @@ export const searchProfiles = async (
 
   const res = await fetch(`/api/user/profile?${query.toString()}`);
 
-  if (!res.ok) throw new Error('Failed to search profiles');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to search profiles');
+  }
 
   return res.json();
 };
@@ -208,7 +229,10 @@ export const listFriends = async (
 
   const res = await fetch(`/api/user/friendship/friends?${query.toString()}`);
 
-  if (!res.ok) throw new Error('Failed to load friends');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to load friends');
+  }
 
   return res.json();
 };
@@ -220,13 +244,19 @@ export const sendFriendRequest = async (receiverId: number): Promise<void> => {
     body: JSON.stringify({ receiver_id: receiverId }),
   });
 
-  if (!res.ok) throw new Error('Failed to send friend request');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to send friend request');
+  }
 };
 
 export const listIncomingRequests = async (): Promise<FriendRequestApi[]> => {
   const res = await fetch('/api/user/friendship/incoming');
 
-  if (!res.ok) throw new Error('Failed to load friend requests');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to load friend requests');
+  }
 
   return res.json();
 };
@@ -234,7 +264,10 @@ export const listIncomingRequests = async (): Promise<FriendRequestApi[]> => {
 export const listOutgoingRequests = async (): Promise<FriendRequestApi[]> => {
   const res = await fetch('/api/user/friendship/?page_size=1000');
 
-  if (!res.ok) throw new Error('Failed to load friend requests');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to load friend requests');
+  }
 
   const data = (await res.json()) as Paginated<FriendRequestApi>;
 
@@ -246,7 +279,10 @@ export const acceptRequest = async (id: number): Promise<void> => {
     method: 'POST',
   });
 
-  if (!res.ok) throw new Error('Failed to accept friend request');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to accept friend request');
+  }
 };
 
 export const declineRequest = async (id: number): Promise<void> => {
@@ -254,7 +290,10 @@ export const declineRequest = async (id: number): Promise<void> => {
     method: 'POST',
   });
 
-  if (!res.ok) throw new Error('Failed to decline friend request');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to decline friend request');
+  }
 };
 
 export const removeFriend = async (friendshipId: number): Promise<void> => {
@@ -262,5 +301,8 @@ export const removeFriend = async (friendshipId: number): Promise<void> => {
     method: 'DELETE',
   });
 
-  if (!res.ok) throw new Error('Failed to remove friend');
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to remove friend');
+  }
 };
