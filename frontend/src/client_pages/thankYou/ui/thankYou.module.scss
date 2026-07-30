@@ -12,6 +12,42 @@
   background: clr.$ns-50;
 }
 
+
+$enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+@keyframes thank-you-bg-in {
+  from {
+    opacity: 0;
+    transform: scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes thank-you-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes thank-you-cta-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .bg {
   position: absolute;
   inset: 0;
@@ -21,6 +57,7 @@
   object-position: center;
   pointer-events: none;
   user-select: none;
+  animation: thank-you-bg-in 1s $enter-ease 0.05s both;
 }
 
 .content {
@@ -40,6 +77,7 @@
 }
 
 .title {
+  animation: thank-you-rise-in 0.6s $enter-ease 0.22s both;
   margin: 0;
   font-family: var(--font-sk-modernist);
   font-weight: 700;
@@ -50,6 +88,7 @@
 }
 
 .subtitle {
+  animation: thank-you-rise-in 0.6s $enter-ease 0.36s both;
   margin: 0;
   font-family: var(--font-poppins);
   font-weight: 400;
@@ -70,6 +109,7 @@
   background: clr.$cta;
   text-decoration: none;
   transition: background 0.2s ease;
+  animation: thank-you-cta-in 0.6s $enter-ease 0.52s both;
   @include tp.text-button;
 
   &:hover {
@@ -85,5 +125,14 @@
     box-shadow:
       0 0 0 2px clr.$ns-50,
       0 0 0 4px clr.$cta;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg,
+  .title,
+  .subtitle,
+  .cta {
+    animation: none;
   }
 }

@@ -77,6 +77,20 @@
   border-radius: 8px;
   background: clr.$ns-50;
   box-shadow: inset 0 0 0 1px clr.$ns-300;
+  transform-origin: top center;
+  animation: panel-open 0.18s ease;
+}
+
+@keyframes panel-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .option {

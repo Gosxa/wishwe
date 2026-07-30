@@ -70,7 +70,12 @@ $subtitle-color: #2f3e46;
   gap: 28px;
 }
 
+.survey {
+  width: 100%;
+}
+
 .submit {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -96,6 +101,120 @@ $subtitle-color: #2f3e46;
     box-shadow:
       0 0 0 2px clr.$ns-50,
       0 0 0 4px clr.$cta;
+  }
+}
+
+
+
+$exit-ease: cubic-bezier(0.32, 0, 0.28, 1);
+
+@keyframes waitlist-lift-out {
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+    filter: blur(3px);
+  }
+}
+
+@keyframes waitlist-visual-settle {
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(-8px);
+  }
+}
+
+@keyframes waitlist-confirm-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  45% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes waitlist-label-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes waitlist-veil-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.innerLeaving {
+  pointer-events: none;
+
+  .intro,
+  .pair,
+  .survey {
+    animation: waitlist-lift-out 0.42s $exit-ease both;
+  }
+
+  .intro {
+    animation-delay: 0.26s;
+  }
+
+  .pair {
+    animation-delay: 0.19s;
+  }
+
+  .survey {
+    animation-delay: 0.12s;
+  }
+
+  .visual {
+    animation: waitlist-visual-settle 0.46s $exit-ease 0.1s both;
+  }
+}
+
+.submitDone {
+  background: clr.$success;
+  animation: waitlist-confirm-pop 0.4s ease-out;
+
+  &:hover,
+  &:active {
+    background: clr.$success;
+  }
+}
+
+.submitLabel {
+  animation: waitlist-label-in 0.28s ease-out both;
+}
+
+.veil {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: clr.$ns-50;
+  pointer-events: none;
+  animation: waitlist-veil-in 0.3s ease-in 0.4s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .innerLeaving .intro,
+  .innerLeaving .pair,
+  .innerLeaving .survey,
+  .innerLeaving .visual,
+  .submitDone,
+  .submitLabel,
+  .veil {
+    animation: none;
   }
 }
 
