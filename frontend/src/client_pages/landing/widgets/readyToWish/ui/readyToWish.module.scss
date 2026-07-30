@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 $title-color: #fff;
 $subtitle-color: #f0f0f0;
@@ -115,15 +116,17 @@ $subtitle-color: #f0f0f0;
   }
 }
 
-@media (max-width: 900px) {
+@include bp.compact {
   .inner {
     flex-direction: column;
     align-items: stretch;
+    justify-content: flex-start;
     gap: 48px;
-    padding: clamp(48px, 9vw, 80px) 24px;
+    padding: clamp(48px, 9vw, 80px) clamp(24px, 6vw, 48px);
   }
 
   .content {
+    flex: none;
     max-width: 100%;
   }
 

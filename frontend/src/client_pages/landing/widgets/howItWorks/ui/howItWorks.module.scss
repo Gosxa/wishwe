@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 .section {
   width: 100%;
@@ -127,7 +128,17 @@
   color: clr.$landing-body;
 }
 
-@media (max-width: 768px) {
+@include bp.tablet {
+  .inner {
+    padding: clamp(56px, 8vw, 80px) 48px;
+  }
+
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@include bp.mobile {
   .inner {
     padding: clamp(48px, 12vw, 64px) 24px;
   }

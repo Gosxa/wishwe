@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 // Local, hero-only values (not part of the shared token set)
 $subtitle-color: #f0f0f0;
@@ -170,14 +171,20 @@ $overlay-end: #14080f;
   }
 }
 
-@media (max-width: 768px) {
+@include bp.compact {
   .inner {
-    padding: 0 24px 48px;
+    padding: 0 clamp(24px, 6vw, 48px) 64px;
   }
 
   .content {
     gap: 32px;
     width: 100%;
+  }
+}
+
+@include bp.mobile {
+  .inner {
+    padding-bottom: 48px;
   }
 
   .actions {
