@@ -48,6 +48,18 @@ $enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
   }
 }
 
+@keyframes thank-you-page-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.995);
+  }
+}
+
+.leaving {
+  pointer-events: none;
+  animation: thank-you-page-out 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
 .bg {
   position: absolute;
   inset: 0;
@@ -133,6 +145,10 @@ $enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
   .title,
   .subtitle,
   .cta {
+    animation: none;
+  }
+
+  .leaving {
     animation: none;
   }
 }
