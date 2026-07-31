@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import { router } from 'expo-router';
 
 import { GoogleIcon } from '@/components/google-icon';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
@@ -169,10 +170,10 @@ export function OnboardingScreen() {
             </Pressable>
 
             <Pressable
-              style={styles.secondaryButton}
-              disabled
+              style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
+              onPress={() => router.push('/enter-email')}
               accessibilityRole="button"
-              accessibilityState={{ disabled: true }}
+              accessibilityLabel="Continue with email"
             >
               <Text style={styles.secondaryButtonLabel}>Continue with email</Text>
             </Pressable>
@@ -270,6 +271,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
+  },
+  secondaryPressed: {
+    opacity: 0.75,
   },
   secondaryButtonLabel: {
     fontFamily: Fonts.bold,
