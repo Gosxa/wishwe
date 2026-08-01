@@ -486,6 +486,8 @@ class EventViewSet(
 
 class ShareView(APIView):
     permission_classes = (permissions.AllowAny,)
+class SharedEventPreviewView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get(self, request, token: UUID):
         event = EventShareService.get_shared_event(token)
@@ -493,11 +495,15 @@ class ShareView(APIView):
         if event is None:
             raise NotFound("Share link not found.")
 
-        # TODO:
-        # If the authenticated user already has access to this event,
-        # return the full event representation instead of the preview.
+        has_access = EventService.can_view(request.user, event)
 
-        serializer = EventPreviewSerializer(event)
+        serializer = SharedEventResponseSerializer(
+            {
+                "has_access": has_access,
+                "event": event,
+            },
+            context={"request": request},
+        )
 
         return Response(
             serializer.data,

@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from event.views import (
     CategoryViewSet,
     EventViewSet,
-    ShareView
+    SharedEventPreviewView
 )
 
 
@@ -16,7 +16,7 @@ urlpatterns = [
     path("", include(router.urls)),
     path(
         "share/<uuid:token>/",
-        ShareView.as_view(),
+        SharedEventPreviewView.as_view(),
         name="event-share",
     )
 ]
