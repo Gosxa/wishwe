@@ -6,7 +6,7 @@ from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -29,11 +29,11 @@ from event.serializers import (
     WishWriteSerializer,
     ConvertWishToPlanSerializer,
     ParticipantSerializer,
-    EventPreviewSerializer
+    SharedEventResponseSerializer,
+    ShareLinkSerializer
 )
 from event.services.event_service import EventService
 from event.services.share_service import EventShareService
-from user.services.friendship_service import FriendshipService
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -475,9 +475,25 @@ class EventViewSet(
             status=status.HTTP_201_CREATED,
         )
 
+    @action(
+        methods=["POST"],
+        detail=True,
+    )
+    def share(self, request, *args, **kwargs):
+        event = self.get_object()
 
-class ShareView(APIView):
-    permission_classes = (permissions.AllowAny,)
+        if event.creator != request.user:
+            raise PermissionDenied(
+                "Only the event creator can share this event."
+            )
+
+        EventShareService.create_share_link(event)
+
+        serializer = ShareLinkSerializer(event)
+
+        return Response(serializer.data)
+
+
 class SharedEventPreviewView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
