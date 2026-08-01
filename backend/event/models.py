@@ -121,6 +121,12 @@ class Event(models.Model):
         auto_now=True,
     )
 
+    share_token = models.UUIDField(
+        unique=True,
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         ordering = ["-created_at"]
 
@@ -216,6 +222,10 @@ class Event(models.Model):
                 and not self.is_full
                 and not self.is_expired
         )
+
+    @property
+    def has_share_link(self) -> bool:
+        return self.share_token is not None
 
 
 class ParticipationStatus(models.TextChoices):

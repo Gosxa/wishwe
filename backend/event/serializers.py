@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from common.validators import validate_image_size, validate_image_type
@@ -370,4 +372,71 @@ class ParticipantSerializer(serializers.ModelSerializer):
         fields = (
             "username",
             "avatar",
+        )
+
+
+class CreatorPreviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        source="profile.username",
+        read_only=True,
+    )
+    avatar = serializers.ImageField(
+        source="profile.avatar",
+        read_only=True,
+    )
+
+    class Meta:
+        model = get_user_model()
+        fields = (
+            "id",
+            "username",
+            "avatar",
+        )
+
+
+class EventPreviewSerializer(serializers.ModelSerializer):
+    creator = CreatorPreviewSerializer(read_only=True)
+
+    class Meta:
+        model = Event
+        fields = (
+            "id",
+            "title",
+            "description",
+            "cover_image",
+            "creator",
+        )
+
+
+class SharedEventResponseSerializer(serializers.Serializer):
+    has_access = serializers.BooleanField()
+
+    def to_representation(self, instance):
+        if instance["has_access"]:
+            return {
+                "has_access": True,
+                "event": EventSerializer(
+                    instance["event"],
+                    context=self.context,
+                ).data,
+                "preview": None,
+            }
+
+        return {
+            "has_access": False,
+            "event": None,
+            "preview": EventPreviewSerializer(
+                instance["event"],
+                context=self.context,
+            ).data,
+        }
+
+
+class ShareLinkSerializer(serializers.Serializer):
+    share_url = serializers.SerializerMethodField()
+
+    def get_share_url(self, obj):
+        return (
+            f"{settings.FRONTEND_URL}"
+            f"/share/{obj.share_token}"
         )
