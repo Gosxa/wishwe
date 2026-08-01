@@ -397,3 +397,27 @@ class EventPreviewSerializer(serializers.ModelSerializer):
             "cover_image",
             "creator",
         )
+
+
+class SharedEventResponseSerializer(serializers.Serializer):
+    has_access = serializers.BooleanField()
+
+    def to_representation(self, instance):
+        if instance["has_access"]:
+            return {
+                "has_access": True,
+                "event": EventSerializer(
+                    instance["event"],
+                    context=self.context,
+                ).data,
+                "preview": None,
+            }
+
+        return {
+            "has_access": False,
+            "event": None,
+            "preview": EventPreviewSerializer(
+                instance["event"],
+                context=self.context,
+            ).data,
+        }
