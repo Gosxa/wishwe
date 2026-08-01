@@ -3,7 +3,7 @@ from uuid import UUID
 from django.db.models import Prefetch, Q, Count
 from django.http import Http404
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse, OpenApiExample
 from rest_framework import viewsets, permissions, status, mixins
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, NotFound
@@ -475,6 +475,35 @@ class EventViewSet(
             status=status.HTTP_201_CREATED,
         )
 
+    @extend_schema(
+        summary="Create event share link",
+        description=(
+                "Creates a share link for the specified event. "
+                "If the event already has an active share link, "
+                "the existing link is returned."
+        ),
+        responses={
+            status.HTTP_200_OK: ShareLinkSerializer,
+            status.HTTP_403_FORBIDDEN: OpenApiResponse(
+                description="Only the event creator can create a share link."
+            ),
+            status.HTTP_404_NOT_FOUND: OpenApiResponse(
+                description="Event not found."
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Success",
+                value={
+                    "share_url": (
+                            "https://wishwe.online/"
+                            "share/ac966711-751a-4da5-a733-223ba91c50e0"
+                    ),
+                },
+                response_only=True,
+            ),
+        ]
+    )
     @action(
         methods=["POST"],
         detail=True,
@@ -484,7 +513,7 @@ class EventViewSet(
 
         if event.creator != request.user:
             raise PermissionDenied(
-                "Only the event creator can share this event."
+                "You can only create share links for your own events."
             )
 
         EventShareService.create_share_link(event)
@@ -494,6 +523,48 @@ class EventViewSet(
         return Response(serializer.data)
 
 
+@extend_schema(
+    summary="Get shared event preview",
+    description=(
+        "Returns a shared event by its share token. "
+        "If the authenticated user has access to the event, "
+        "the full event representation is returned. "
+        "Otherwise, only the public event preview is returned."
+    ),
+    responses={
+        status.HTTP_200_OK: SharedEventResponseSerializer,
+        status.HTTP_401_UNAUTHORIZED: OpenApiResponse(
+            description="Authentication credentials were not provided.",
+        ),
+        status.HTTP_404_NOT_FOUND: OpenApiResponse(
+            description="Share link not found.",
+        ),
+    },
+    examples=[
+        OpenApiExample(
+            "User has access",
+            value={
+                "has_access": True,
+                "event": {
+                    "...": "Full EventSerializer response"
+                },
+                "preview": None,
+            },
+            response_only=True,
+        ),
+        OpenApiExample(
+            "User has no access",
+            value={
+                "has_access": False,
+                "event": None,
+                "preview": {
+                    "...": "EventPreviewSerializer response"
+                },
+            },
+            response_only=True,
+        ),
+    ],
+)
 class SharedEventPreviewView(APIView):
     permission_classes = (permissions.IsAuthenticated,)
 
