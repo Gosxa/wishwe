@@ -226,14 +226,6 @@ class EventViewSet(
         )
 
         if not EventService.can_view(request.user, event):
-            try:
-                FriendshipService.send_request(
-                    sender=request.user,
-                    receiver=event.creator,
-                )
-            except ValidationError:
-                pass
-
             raise PermissionDenied(
                 "You don't have permission to view this event."
             )
