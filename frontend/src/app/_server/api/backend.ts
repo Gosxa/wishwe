@@ -82,6 +82,13 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    feedTourSeen: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/feed-tour-seen/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     checkUsername: (username: string) =>
       fetch(
         `${BACKEND}/api/username-check/?username=${encodeURIComponent(username)}`,

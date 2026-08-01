@@ -22,6 +22,7 @@ export const Sidebar = ({ activeKey }: Props) => {
           href={item.href}
           isActive={item.key === activeKey}
           avatarUrl={item.key === 'profile' ? avatar : null}
+          tourId={`nav-${item.key}`}
         />
       ))}
     </nav>

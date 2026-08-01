@@ -124,7 +124,7 @@ export const FeedToolbar = ({
   activeSort,
   onSortChange,
 }: Props) => (
-  <div className={s.toolbar}>
+  <div className={s.toolbar} data-tour="feed-toolbar">
     <div className={s.filters}>
       {filters.map(({ key, label }) => (
         <button

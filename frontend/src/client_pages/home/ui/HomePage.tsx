@@ -3,13 +3,12 @@
 import { Suspense, useState } from 'react';
 import { Header } from '@widgets/header';
 import { Sidebar } from '@widgets/sidebar';
+import { FeedTour } from '@widgets/productTour';
 import { useFeedSearch } from '@client_pages/home/model/useFeedSearch';
 import { Feed } from '../widgets/feed';
 import s from './homePage.module.scss';
 
 export default function HomePage() {
-  // useFeedSearch and the feed read the URL via useSearchParams, which must sit
-  // under a Suspense boundary so any page rendering HomePage can prerender.
   return (
     <Suspense fallback={null}>
       <HomePageContent />
@@ -37,6 +36,7 @@ function HomePageContent() {
           <Feed onSearchDisabledChange={setSearchDisabled} />
         </main>
       </div>
+      <FeedTour />
     </div>
   );
 }

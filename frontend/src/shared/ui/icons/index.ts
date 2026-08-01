@@ -4,6 +4,7 @@ export { Asterisk } from './asterisk/Asterisk';
 export * from './badge';
 export { Avatar } from './avatar/Avatar';
 export * from './eye';
+export { Check } from './check/Check';
 export { ChevronLeft } from './chevron/ChevronLeft';
 export { ChevronDown } from './chevron/ChevronDown';
 export { ChevronRight } from './chevron/ChevronRight';

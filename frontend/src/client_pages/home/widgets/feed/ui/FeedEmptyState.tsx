@@ -45,26 +45,28 @@ export const FeedEmptyState = ({ filter }: Props) => {
 
   return (
     <div className={s.empty}>
-      <h2 className={s.title}>{title}</h2>
-      <p className={s.subtitle}>{subtitle}</p>
+      <div className={s.inner} data-tour="feed-empty">
+        <h2 className={s.title}>{title}</h2>
+        <p className={s.subtitle}>{subtitle}</p>
 
-      <div className={s.actions}>
-        <button
-          type="button"
-          className={s.create}
-          onClick={() => openCreate(filter === 'wishes' ? 'wish' : 'plan')}
-        >
-          <Plus />
-          <span>{create}</span>
-        </button>
-        <button
-          type="button"
-          className={s.invite}
-          onClick={copy}
-          disabled={status === 'copying'}
-        >
-          <span>{INVITE_LABELS[status]}</span>
-        </button>
+        <div className={s.actions}>
+          <button
+            type="button"
+            className={s.create}
+            onClick={() => openCreate(filter === 'wishes' ? 'wish' : 'plan')}
+          >
+            <Plus />
+            <span>{create}</span>
+          </button>
+          <button
+            type="button"
+            className={s.invite}
+            onClick={copy}
+            disabled={status === 'copying'}
+          >
+            <span>{INVITE_LABELS[status]}</span>
+          </button>
+        </div>
       </div>
     </div>
   );

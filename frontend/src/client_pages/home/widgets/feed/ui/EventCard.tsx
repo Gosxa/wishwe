@@ -41,6 +41,7 @@ type Props = {
   onCancel?: (id: string) => void;
   onDetailsOpen?: () => void;
   onDetailsClose?: () => void;
+  tourId?: string;
 };
 
 const MAX_VISIBLE_AVATARS = 3;
@@ -59,6 +60,7 @@ export const EventCard = ({
   onCancel,
   onDetailsOpen,
   onDetailsClose,
+  tourId,
 }: Props) => {
   const {
     id,
@@ -228,7 +230,7 @@ export const EventCard = ({
         className={clsx(s.surface, canOpenDetails && s.clickable)}
         onClick={handleCardClick}
       >
-        <div className={s.media}>
+        <div className={s.media} data-tour={tourId}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className={clsx(s.image, isArchived && s.imageArchived)}
@@ -248,7 +250,7 @@ export const EventCard = ({
           </div>
         </div>
 
-        <div className={s.body}>
+        <div className={s.body} data-tour={tourId}>
           <div className={s.details}>
             <div className={s.titleRow}>
               <h2 className={s.title}>

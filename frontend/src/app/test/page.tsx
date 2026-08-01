@@ -16,6 +16,7 @@ const STUB_USER: Profile = {
   avatar: null,
   social_media_url: null,
   is_private: false,
+  has_seen_feed_tour: true,
 };
 
 export default function TestPage() {

@@ -12,6 +12,7 @@ export type Profile = {
   avatar: string | null;
   social_media_url: string | null;
   is_private: boolean;
+  has_seen_feed_tour: boolean;
 };
 
 export type CheckEmailRes = { flow: 'login' | 'register' };

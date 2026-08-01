@@ -80,10 +80,11 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
         </div>
       ) : (
         <div className={s.list}>
-          {events.map(event => (
+          {events.map((event, position) => (
             <EventCard
               key={event.id}
               event={event}
+              tourId={position === 0 ? 'feed-card' : undefined}
               enableDetails
               autoOpenDetails={event.id === openEventId}
               onDetailsOpen={() => setEventParam(event.id)}

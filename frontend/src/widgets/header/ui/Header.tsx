@@ -103,6 +103,7 @@ export const Header = ({ search, showSearch = true }: Props) => {
       <div className={s.actions} ref={actionsRef}>
         <div className={s.notifications}>
           <button
+            data-tour="notifications"
             className={`${s.iconBtn} ${
               isNotificationsOpen ? s.iconBtnActive : ''
             }`}

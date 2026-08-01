@@ -50,6 +50,7 @@ export const SearchBar = ({
     <div className={s.searchBarWrap}>
       <Tooltip text={showHint ? disabledHint : undefined} id={HINT_ID}>
         <div
+          data-tour="feed-search"
           className={
             disabled ? `${s.searchBar} ${s.searchBarDisabled}` : s.searchBar
           }

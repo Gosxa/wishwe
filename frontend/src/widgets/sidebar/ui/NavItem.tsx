@@ -9,11 +9,20 @@ type Props = {
   href: string;
   isActive?: boolean;
   avatarUrl?: string | null;
+  tourId?: string;
 };
 
-export const NavItem = ({ Icon, label, href, isActive, avatarUrl }: Props) => (
+export const NavItem = ({
+  Icon,
+  label,
+  href,
+  isActive,
+  avatarUrl,
+  tourId,
+}: Props) => (
   <Link
     href={href}
+    data-tour={tourId}
     className={clsx(s.navItem, isActive && s.active)}
     aria-current={isActive ? 'page' : undefined}
   >

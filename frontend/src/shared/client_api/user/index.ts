@@ -85,6 +85,15 @@ export const onBoard = async (
   }
 };
 
+export const markFeedTourSeen = async (): Promise<void> => {
+  const res = await fetch('/next_api/user/feed-tour', { method: 'POST' });
+
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to mark the feed tour as seen');
+  }
+};
+
 export const changeAvatar = async (
   avatar: string,
 ): Promise<{ avatar: string }> => {

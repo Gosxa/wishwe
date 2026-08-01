@@ -6,7 +6,7 @@ type Props = {
 };
 
 export const CreateButton = ({ onClick }: Props) => (
-  <button className={s.createBtn} onClick={onClick}>
+  <button data-tour="create-event" className={s.createBtn} onClick={onClick}>
     <Plus />
     <span>Create</span>
   </button>

@@ -1,0 +1,362 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+$travel: 0.42s;
+$dim: rgba(clr.$ns-900, 0.62);
+$ring: clr.$acc-purple;
+
+@keyframes tour-overlay-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tour-overlay-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes tour-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tour-halo-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 4px rgba($ring, 0.14);
+  }
+
+  50% {
+    box-shadow: 0 0 0 10px rgba($ring, 0.22);
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  animation: tour-overlay-in 0.34s ease-out both;
+}
+
+.overlayExiting {
+  animation: tour-overlay-out 0.26s ease-in both;
+}
+
+
+.spotlight {
+  position: fixed;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px $dim;
+  transition:
+    top $travel $ease,
+    left $travel $ease,
+    width $travel $ease,
+    height $travel $ease,
+    border-radius $travel $ease;
+}
+
+.halo {
+  position: fixed;
+  pointer-events: none;
+  border: 2px solid rgba($ring, 0.9);
+  opacity: 1;
+  animation: tour-halo-glow 2.6s ease-in-out infinite;
+  transition:
+    top $travel $ease,
+    left $travel $ease,
+    width $travel $ease,
+    height $travel $ease,
+    border-radius $travel $ease,
+    opacity 0.3s ease-out;
+}
+
+.haloHidden {
+  opacity: 0;
+}
+
+.card {
+  position: fixed;
+  z-index: 1;
+  width: 344px;
+  max-width: calc(100vw - 40px);
+  padding: 18px 20px 20px;
+  border: 1px solid clr.$prm;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.3);
+  outline: none;
+  transition:
+    top $travel $ease,
+    left $travel $ease;
+}
+
+.cardMeasuring {
+  visibility: hidden;
+}
+
+.cardCenter {
+  width: 420px;
+  padding: 28px 32px 26px;
+  text-align: center;
+}
+
+.arrow {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: clr.$ns-50;
+  border: 1px solid clr.$prm;
+  transform: rotate(45deg);
+}
+
+.placeBottom .arrow {
+  top: -7px;
+  margin-left: -6px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.placeTop .arrow {
+  bottom: -7px;
+  margin-left: -6px;
+  border-top: 0;
+  border-left: 0;
+}
+
+.placeRight .arrow {
+  left: -7px;
+  margin-top: -6px;
+  border-top: 0;
+  border-right: 0;
+}
+
+.placeLeft .arrow {
+  right: -7px;
+  margin-top: -6px;
+  border-bottom: 0;
+  border-left: 0;
+}
+
+.content {
+  animation: tour-content-in 0.3s ease-out both;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.counter {
+  color: clr.$ns-500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  @include tp.text-caption;
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: -4px -6px -4px 0;
+  border-radius: 8px;
+  color: clr.$ns-500;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background: clr.$ns-100;
+    color: clr.$ns-900;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.sparkle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: clr.$acc-purple;
+  color: clr.$prm;
+}
+
+.title {
+  margin: 0 0 6px;
+  color: clr.$ns-900;
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: 0.01em;
+}
+
+.cardCenter .title {
+  margin-bottom: 8px;
+
+  @include tp.h2;
+}
+
+.body {
+  margin: 0;
+  color: clr.$ns-700;
+
+  @include tp.text-body;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.cardCenter .footer {
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: clr.$ns-300;
+  transition:
+    width 0.3s $ease,
+    background 0.3s ease;
+}
+
+.dotActive {
+  width: 18px;
+  background: clr.$prm;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.next {
+  @include btn.primary(6px, auto, 36px);
+  padding: 0 14px;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: clr.$ns-700;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+  @include tp.text-button;
+
+  &:hover {
+    background: clr.$ns-100;
+    color: clr.$ns-900;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.skip {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: clr.$ns-500;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+
+  @include tp.text-body;
+
+  &:hover {
+    background: clr.$ns-100;
+    color: clr.$ns-900;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlayExiting,
+  .content {
+    animation: none;
+  }
+
+  .spotlight,
+  .halo,
+  .card,
+  .dot {
+    transition: none;
+  }
+
+  .halo {
+    animation: none;
+    box-shadow: 0 0 0 6px rgba($ring, 0.18);
+  }
+}
