@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from common.validators import validate_image_size, validate_image_type
@@ -428,3 +430,13 @@ class SharedEventResponseSerializer(serializers.Serializer):
                 context=self.context,
             ).data,
         }
+
+
+class ShareLinkSerializer(serializers.Serializer):
+    share_url = serializers.SerializerMethodField()
+
+    def get_share_url(self, obj):
+        return (
+            f"{settings.FRONTEND_URL}"
+            f"/share/{obj.share_token}"
+        )
