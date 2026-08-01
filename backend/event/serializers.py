@@ -374,12 +374,19 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
 
 class CreatorPreviewSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(source="user.id", read_only=True)
+    username = serializers.CharField(
+        source="profile.username",
+        read_only=True,
+    )
+    avatar = serializers.ImageField(
+        source="profile.avatar",
+        read_only=True,
+    )
 
     class Meta:
-        model = Profile
+        model = get_user_model()
         fields = (
-            "user_id",
+            "id",
             "username",
             "avatar",
         )
