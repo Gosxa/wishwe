@@ -1,0 +1,214 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import {
+  Avatar,
+  CalendarClock,
+  Check,
+  Location,
+  Lock,
+  UserPlus,
+  UsersRound,
+  X,
+} from '@shared/ui/icons';
+import { ProfileLink } from '@shared/ui/profileLink';
+import { useBodyScrollLock } from '@/features';
+import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
+import type { EventPreview } from '@/shared/client_api/event';
+import {
+  SendFriendRequestError,
+  sendFriendRequest,
+} from '@/shared/client_api/user';
+import type { FriendshipStatus } from '@/shared/client_api/user/types';
+import { eventImage, handle } from '@client_pages/home/model/feedMapper';
+import s from './eventPreviewModal.module.scss';
+
+type Props = {
+  preview: EventPreview;
+  friendshipStatus: FriendshipStatus | null;
+  onClose: () => void;
+};
+
+type RequestState = 'idle' | 'pending' | 'sent' | 'failed';
+
+const ALREADY_LINKED = /already/i;
+
+export const EventPreviewModal = ({
+  preview,
+  friendshipStatus,
+  onClose,
+}: Props) => {
+  const { title, description, creator } = preview;
+
+  const [request, setRequest] = useState<RequestState>(
+    friendshipStatus === 'requested' ? 'sent' : 'idle',
+  );
+
+  useBodyScrollLock();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [onClose]);
+
+  const username = handle(creator.username);
+  const avatar = toAbsoluteMediaUrl(creator.avatar);
+  const cover = eventImage(preview.cover_image);
+  const isSent = request === 'sent';
+
+  const handleAddFriend = async () => {
+    if (request === 'pending' || request === 'sent') {
+      return;
+    }
+
+    setRequest('pending');
+
+    try {
+      await sendFriendRequest(creator.id);
+      setRequest('sent');
+    } catch (err: unknown) {
+      const isDuplicate =
+        err instanceof SendFriendRequestError &&
+        ALREADY_LINKED.test(err.detail ?? '');
+
+      setRequest(isDuplicate ? 'sent' : 'failed');
+    }
+  };
+
+  return (
+    <div className={s.overlay} onClick={onClose}>
+      <div
+        className={s.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sharedEventPreviewTitle"
+        onClick={e => e.stopPropagation()}
+      >
+        <button
+          type="button"
+          className={s.close}
+          onClick={onClose}
+          aria-label="Close"
+        >
+          <X />
+        </button>
+
+        <div className={s.left}>
+          <div className={s.cover}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={cover} alt={title} />
+            <span className={s.privacyPill}>
+              <Lock width={14} height={14} />
+              <span>Friends only</span>
+            </span>
+          </div>
+
+          <div className={s.hostCard}>
+            <span className={s.hostAvatar}>
+              {avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={avatar} alt={username} />
+              ) : (
+                <Avatar width={40} height={40} />
+              )}
+            </span>
+            <div className={s.hostText}>
+              <ProfileLink username={username} className={s.hostName}>
+                {username}
+              </ProfileLink>
+              <span className={s.hostSub}>shared this event with you</span>
+            </div>
+          </div>
+
+          <div className={s.actions}>
+            {isSent ? (
+              <span className={s.requested}>
+                <Check />
+                <span>Requested</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={s.addFriend}
+                onClick={handleAddFriend}
+                disabled={request === 'pending'}
+              >
+                <UserPlus />
+                <span>Add friend</span>
+              </button>
+            )}
+
+            <ProfileLink username={username} className={s.profileLink}>
+              See {username}&apos;s profile
+            </ProfileLink>
+
+            {request === 'failed' ? (
+              <p className={s.error} role="alert">
+                Couldn&apos;t send the friend request. Please try again.
+              </p>
+            ) : (
+              <p className={s.status}>
+                {isSent
+                  ? `Request sent. We’ll open the full event here as soon as it’s accepted.`
+                  : `We’ll open the full event here the moment ${username} accepts.`}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className={s.right}>
+          <h2 id="sharedEventPreviewTitle" className={s.title}>
+            {title}
+          </h2>
+
+          <div className={s.divider} />
+
+          <div className={s.field}>
+            <span className={s.fieldLabel}>Description</span>
+            {description ? (
+              <span className={s.fieldValue}>{description}</span>
+            ) : (
+              <span className={s.emptyValue}>No details added by the host</span>
+            )}
+          </div>
+
+          <div className={s.locked}>
+            <div className={s.lockedHeader}>
+              <Lock />
+              <span>
+                {isSent
+                  ? `Still hidden — waiting on ${username}`
+                  : `Hidden until ${username} adds you back`}
+              </span>
+            </div>
+
+            <div className={s.redactedRow}>
+              <CalendarClock />
+              <span>Timeframe</span>
+              <span className={s.redactedBar} />
+            </div>
+            <div className={s.redactedRow}>
+              <Location />
+              <span>Where</span>
+              <span className={s.redactedBar} />
+            </div>
+            <div className={s.redactedRow}>
+              <UsersRound />
+              <span>Who is going</span>
+              <span className={s.redactedBar} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

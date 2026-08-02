@@ -10,6 +10,8 @@ const fallbackCover = '/bg-gradient-noise.webp';
 const eventImage = (coverImage: string | null) =>
   toAbsoluteMediaUrl(coverImage) ?? fallbackCover;
 
+export { eventImage };
+
 const handle = (username: string | null | undefined) =>
   username ? `@${username}` : '@someone';
 

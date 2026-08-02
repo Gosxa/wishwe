@@ -246,6 +246,37 @@ export const listFriends = async (
   return res.json();
 };
 
+export class SendFriendRequestError extends Error {
+  constructor(
+    public readonly status: number,
+    public readonly detail: string | null,
+  ) {
+    super(detail ?? 'Failed to send friend request');
+  }
+}
+
+const firstErrorMessage = (body: unknown): string | null => {
+  if (typeof body === 'string') {
+    return body;
+  }
+
+  if (Array.isArray(body)) {
+    return body.reduce<string | null>(
+      (found, item) => found ?? firstErrorMessage(item),
+      null,
+    );
+  }
+
+  if (body && typeof body === 'object') {
+    return Object.values(body).reduce<string | null>(
+      (found, value) => found ?? firstErrorMessage(value),
+      null,
+    );
+  }
+
+  return null;
+};
+
 export const sendFriendRequest = async (receiverId: number): Promise<void> => {
   const res = await fetch('/next_api/user/friendship/send', {
     method: 'POST',
@@ -255,7 +286,9 @@ export const sendFriendRequest = async (receiverId: number): Promise<void> => {
 
   if (!res.ok) {
     handleUnauthorized(res);
-    throw new Error('Failed to send friend request');
+    const body = await res.json().catch(() => null);
+
+    throw new SendFriendRequestError(res.status, firstErrorMessage(body));
   }
 };
 

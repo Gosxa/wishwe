@@ -115,6 +115,20 @@ export const listCategories = async (): Promise<Category[]> => {
   return (await res.json()) as Category[];
 };
 
+
+export const createShareLink = async (id: string): Promise<string> => {
+  const res = await fetch(`/next_api/event/${id}/share`, { method: 'POST' });
+
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to create a share link');
+  }
+
+  const { share_url: shareUrl } = (await res.json()) as { share_url: string };
+
+  return shareUrl;
+};
+
 export class CreateEventError extends Error {
   constructor(public body: Record<string, unknown>) {
     super('Failed to create event');
@@ -236,7 +250,10 @@ export type {
   BackendParticipant,
   Category,
   EventListParams,
+  EventPreview,
+  EventPreviewCreator,
   MutualFriend,
   Paginated,
+  SharedEventResponse,
   UserParticipationStatus,
 } from './types';

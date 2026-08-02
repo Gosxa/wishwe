@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
-import { archiveEvent } from '@/shared/client_api/event';
+import { archiveEvent, createShareLink } from '@/shared/client_api/event';
 import { DotsVertical } from '@shared/ui/icons';
 import s from './eventCardMenu.module.scss';
 
@@ -12,6 +12,28 @@ type Props = {
   eventType: 'plan' | 'wish';
   isOwn?: boolean;
   onCancelled?: () => void;
+};
+
+const toCurrentOrigin = (shareUrl: string) => {
+  try {
+    return `${window.location.origin}${new URL(shareUrl).pathname}`;
+  } catch {
+    return shareUrl;
+  }
+};
+
+const shareLink = async (eventId: string, isOwn: boolean) => {
+  const fallback = `${window.location.origin}/feed?event=${eventId}`;
+
+  if (!isOwn) {
+    return fallback;
+  }
+
+  try {
+    return toCurrentOrigin(await createShareLink(eventId));
+  } catch {
+    return fallback;
+  }
 };
 
 export const EventCardMenu = ({
@@ -60,10 +82,22 @@ export const EventCardMenu = ({
   }, [isOpen]);
 
   const handleCopyLink = async () => {
-    const link = `${window.location.origin}/feed?event=${eventId}`;
+    const linkPromise = shareLink(eventId, isOwn);
 
     try {
-      await navigator.clipboard.writeText(link);
+      // Safari fix
+      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+        const item = new ClipboardItem({
+          'text/plain': linkPromise.then(
+            link => new Blob([link], { type: 'text/plain' }),
+          ),
+        });
+
+        await navigator.clipboard.write([item]);
+      } else {
+        await navigator.clipboard.writeText(await linkPromise);
+      }
+
       setIsLinkCopied(true);
 
       if (copiedTimeoutRef.current) {

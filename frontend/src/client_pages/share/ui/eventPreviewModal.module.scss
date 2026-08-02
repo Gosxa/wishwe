@@ -1,0 +1,326 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/animations' as anim;
+@use '@shared/styles/scrollbars' as scroll;
+@use '@shared/styles/breakpoints' as bp;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  @include anim.modal-overlay-enter;
+}
+
+.modal {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 40px;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 48px);
+  padding: 40px;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  overflow-y: auto;
+  @include scroll.thin;
+  @include anim.modal-enter;
+
+  @include bp.compact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 56px 24px 24px;
+  }
+}
+
+.close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: clr.$ns-700;
+  cursor: pointer;
+
+  > svg {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cover {
+  position: relative;
+  align-self: start;
+  aspect-ratio: 7 / 4;
+  width: 100%;
+  border: 1px dashed clr.$prm;
+  border-radius: 16px;
+  overflow: hidden;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(26, 28, 31, 0) 0%,
+      rgba(26, 28, 31, 0.35) 100%
+    );
+    pointer-events: none;
+  }
+}
+
+.privacyPill {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 64px;
+  background: clr.$ns-50;
+  color: clr.$prm;
+  @include tp.text-caption;
+
+  > svg {
+    flex-shrink: 0;
+    color: clr.$prm;
+  }
+}
+
+.hostCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid clr.$ns-200;
+  border-radius: 12px;
+}
+
+.hostAvatar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: clr.$acc-purple;
+
+  > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.hostText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hostName {
+  @include tp.text-body;
+  font-weight: 700;
+  color: clr.$ns-900;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.hostSub {
+  @include tp.text-caption;
+  color: clr.$ns-700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.addFriend {
+  @include btn.primary(8px, 100%, 40px);
+  width: 100%;
+}
+
+.requested {
+  @include btn.secondary(8px, 100%, 40px);
+  width: 100%;
+  cursor: default;
+
+  &,
+  &:hover {
+    @include btn.button-visual(
+      rgba(clr.$prm-light, 0.1),
+      inset 0 0 0 1px clr.$prm
+    );
+  }
+}
+
+.profileLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  color: clr.$prm;
+  text-decoration: none;
+  @include tp.text-button;
+
+  &:hover {
+    background: clr.$ns-100;
+    text-decoration: none;
+  }
+}
+
+.status {
+  @include tp.text-caption;
+  margin: 0;
+  color: clr.$ns-500;
+  text-align: center;
+}
+
+.error {
+  @include tp.text-caption;
+  margin: 0;
+  color: clr.$err;
+  text-align: center;
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.title {
+  @include tp.h2;
+  color: clr.$ns-900;
+  padding-right: 56px;
+  word-break: break-word;
+}
+
+.divider {
+  height: 1px;
+  background: clr.$ns-200;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.fieldValue {
+  @include tp.text-body;
+  color: clr.$ns-900;
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+.emptyValue {
+  @include tp.text-body;
+  color: clr.$ns-700;
+}
+
+.locked {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid clr.$ns-200;
+  border-radius: 12px;
+  background: clr.$ns-100;
+}
+
+.lockedHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  > svg {
+    flex-shrink: 0;
+    color: clr.$ns-900;
+  }
+
+  > span {
+    @include tp.text-body;
+    font-weight: 700;
+    color: clr.$ns-900;
+  }
+}
+
+.redactedRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  > svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: clr.$ns-700;
+  }
+
+  > span {
+    @include tp.text-body;
+    flex-shrink: 0;
+    width: 92px;
+    color: clr.$ns-700;
+  }
+}
+
+.redactedBar {
+  flex: 1;
+  min-width: 0;
+  height: 10px;
+  border-radius: 5px;
+  background: clr.$ns-300;
+  filter: blur(1.5px);
+}

@@ -5,5 +5,6 @@ export { UserProfilePage } from './userProfile';
 export { EditProfilePage } from './editProfile';
 export { FriendsPage } from './friends';
 export { InviteLanding } from './invite';
+export { SharedEventPage } from './share';
 export { LandingPage } from './landing';
 export { ThankYou } from './thankYou';

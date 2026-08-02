@@ -218,6 +218,19 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    shared: (token: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/share/${encodeURIComponent(token)}/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
+    createShareLink: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/event/events/${id}/share/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     create: (
       type: 'plan' | 'wish',
       body: FormData | unknown,

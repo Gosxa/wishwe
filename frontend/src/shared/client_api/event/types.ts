@@ -45,6 +45,25 @@ type BackendEvent = {
   user_participation_status: UserParticipationStatus | null;
 };
 
+type EventPreviewCreator = {
+  id: number;
+  username: string | null;
+  avatar: string | null;
+};
+
+type EventPreview = {
+  id: number;
+  title: string;
+  description: string;
+  cover_image: string | null;
+  creator: EventPreviewCreator;
+};
+
+
+type SharedEventResponse =
+  | { has_access: true; event: BackendEvent; preview: null }
+  | { has_access: false; event: null; preview: EventPreview };
+
 type Category = {
   id: number;
   name: string;
@@ -72,8 +91,11 @@ export type {
   BackendParticipant,
   Category,
   EventListParams,
+  EventPreview,
+  EventPreviewCreator,
   MutualFriend,
   ParticipantPreview,
   Paginated,
+  SharedEventResponse,
   UserParticipationStatus,
 };

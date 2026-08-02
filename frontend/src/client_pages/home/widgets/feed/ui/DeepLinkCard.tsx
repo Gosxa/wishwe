@@ -20,7 +20,7 @@ const NOTICE_DISMISS_MS = 4000;
 const FORBIDDEN_DISMISS_MS = 10000;
 
 const FORBIDDEN_MESSAGE =
-  'This event is only visible to the creator’s friends. We’ve sent them a friend request for you — once they accept, you’ll see the event.';
+  'This event is only visible to the host’s friends. Add them as a friend — once they accept, the event shows up in your feed.';
 
 export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   const [event, setEvent] = useState<FeedEvent | null>(null);
