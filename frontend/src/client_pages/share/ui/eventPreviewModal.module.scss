@@ -23,37 +23,52 @@
   }
 }
 
+$shell-inset: 12px;
+
 .modal {
+  position: relative;
+  display: flex;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 48px);
+  padding: $shell-inset 0;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  overflow: hidden;
+  @include anim.modal-enter;
+
+  @include bp.mobile {
+    max-height: calc(100vh - 32px);
+  }
+}
+
+.body {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
+  flex: 1;
   gap: 40px;
-  width: min(920px, 100%);
-  max-height: calc(100vh - 48px);
-  padding: 40px;
-  border-radius: 16px;
-  background: clr.$ns-50;
+  min-width: 0;
+  padding: (40px - $shell-inset) 40px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   @include scroll.thin;
-  @include anim.modal-enter;
 
   @include bp.compact {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
-    padding: 72px 24px 24px;
+    padding: (72px - $shell-inset) 24px (24px - $shell-inset);
   }
 
   @include bp.mobile {
     gap: 20px;
-    max-height: calc(100vh - 32px);
-    padding: 68px 16px 16px;
+    padding: (68px - $shell-inset) 16px (16px - $shell-inset);
   }
 }
 
 .close {
   position: absolute;
-  top: 24px;
+  top: (24px - $shell-inset);
   right: 24px;
   display: flex;
   align-items: center;
@@ -72,7 +87,7 @@
   }
 
   @include bp.mobile {
-    top: 12px;
+    top: (12px - $shell-inset);
     right: 12px;
   }
 }

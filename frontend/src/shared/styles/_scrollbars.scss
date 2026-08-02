@@ -1,6 +1,6 @@
 @use '@shared/styles/colors' as clr;
 
-@mixin thin($size: 8px) {
+@mixin thin($size: 8px, $inset: 2px) {
   // Firefox
   scrollbar-width: thin;
   scrollbar-color: clr.$prm transparent;
@@ -11,13 +11,21 @@
     height: $size;
   }
 
+  &::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
   &::-webkit-scrollbar-track {
     background: transparent;
   }
 
   &::-webkit-scrollbar-thumb {
+    border: $inset solid transparent;
     border-radius: 999px;
     background-color: clr.$prm;
+    background-clip: content-box;
   }
 
   &::-webkit-scrollbar-thumb:hover {

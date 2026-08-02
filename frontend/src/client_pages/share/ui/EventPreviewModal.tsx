@@ -93,118 +93,122 @@ export const EventPreviewModal = ({
         aria-labelledby="sharedEventPreviewTitle"
         onClick={e => e.stopPropagation()}
       >
-        <button
-          type="button"
-          className={s.close}
-          onClick={onClose}
-          aria-label="Close"
-        >
-          <X />
-        </button>
+        <div className={s.body}>
+          <button
+            type="button"
+            className={s.close}
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X />
+          </button>
 
-        <div className={s.left}>
-          <div className={s.cover}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={cover} alt={title} />
-            <span className={s.privacyPill}>
-              <Lock width={14} height={14} />
-              <span>Friends only</span>
-            </span>
-          </div>
+          <div className={s.left}>
+            <div className={s.cover}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={cover} alt={title} />
+              <span className={s.privacyPill}>
+                <Lock width={14} height={14} />
+                <span>Friends only</span>
+              </span>
+            </div>
 
-          <div className={s.hostCard}>
-            <span className={s.hostAvatar}>
-              {avatar ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatar} alt={username} />
+            <div className={s.hostCard}>
+              <span className={s.hostAvatar}>
+                {avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatar} alt={username} />
+                ) : (
+                  <Avatar width={40} height={40} />
+                )}
+              </span>
+              <div className={s.hostText}>
+                <ProfileLink username={username} className={s.hostName}>
+                  {username}
+                </ProfileLink>
+                <span className={s.hostSub}>shared this event with you</span>
+              </div>
+            </div>
+
+            <div className={s.actions}>
+              {isSent ? (
+                <span className={s.requested}>
+                  <Check />
+                  <span>Requested</span>
+                </span>
               ) : (
-                <Avatar width={40} height={40} />
+                <button
+                  type="button"
+                  className={s.addFriend}
+                  onClick={handleAddFriend}
+                  disabled={request === 'pending'}
+                >
+                  <UserPlus />
+                  <span>Add friend</span>
+                </button>
               )}
-            </span>
-            <div className={s.hostText}>
-              <ProfileLink username={username} className={s.hostName}>
-                {username}
+
+              <ProfileLink username={username} className={s.profileLink}>
+                See {username}&apos;s profile
               </ProfileLink>
-              <span className={s.hostSub}>shared this event with you</span>
+
+              {request === 'failed' ? (
+                <p className={s.error} role="alert">
+                  Couldn&apos;t send the friend request. Please try again.
+                </p>
+              ) : (
+                <p className={s.status}>
+                  {isSent
+                    ? `Request sent. We’ll open the full event here as soon as it’s accepted.`
+                    : `We’ll open the full event here the moment ${username} accepts.`}
+                </p>
+              )}
             </div>
           </div>
 
-          <div className={s.actions}>
-            {isSent ? (
-              <span className={s.requested}>
-                <Check />
-                <span>Requested</span>
-              </span>
-            ) : (
-              <button
-                type="button"
-                className={s.addFriend}
-                onClick={handleAddFriend}
-                disabled={request === 'pending'}
-              >
-                <UserPlus />
-                <span>Add friend</span>
-              </button>
-            )}
+          <div className={s.right}>
+            <h2 id="sharedEventPreviewTitle" className={s.title}>
+              {title}
+            </h2>
 
-            <ProfileLink username={username} className={s.profileLink}>
-              See {username}&apos;s profile
-            </ProfileLink>
+            <div className={s.divider} />
 
-            {request === 'failed' ? (
-              <p className={s.error} role="alert">
-                Couldn&apos;t send the friend request. Please try again.
-              </p>
-            ) : (
-              <p className={s.status}>
-                {isSent
-                  ? `Request sent. We’ll open the full event here as soon as it’s accepted.`
-                  : `We’ll open the full event here the moment ${username} accepts.`}
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className={s.right}>
-          <h2 id="sharedEventPreviewTitle" className={s.title}>
-            {title}
-          </h2>
-
-          <div className={s.divider} />
-
-          <div className={s.field}>
-            <span className={s.fieldLabel}>Description</span>
-            {description ? (
-              <span className={s.fieldValue}>{description}</span>
-            ) : (
-              <span className={s.emptyValue}>No details added by the host</span>
-            )}
-          </div>
-
-          <div className={s.locked}>
-            <div className={s.lockedHeader}>
-              <Lock />
-              <span>
-                {isSent
-                  ? `Still hidden — waiting on ${username}`
-                  : `Hidden until ${username} adds you back`}
-              </span>
+            <div className={s.field}>
+              <span className={s.fieldLabel}>Description</span>
+              {description ? (
+                <span className={s.fieldValue}>{description}</span>
+              ) : (
+                <span className={s.emptyValue}>
+                  No details added by the host
+                </span>
+              )}
             </div>
 
-            <div className={s.redactedRow}>
-              <CalendarClock />
-              <span>Timeframe</span>
-              <span className={s.redactedBar} />
-            </div>
-            <div className={s.redactedRow}>
-              <Location />
-              <span>Where</span>
-              <span className={s.redactedBar} />
-            </div>
-            <div className={s.redactedRow}>
-              <UsersRound />
-              <span>Who is going</span>
-              <span className={s.redactedBar} />
+            <div className={s.locked}>
+              <div className={s.lockedHeader}>
+                <Lock />
+                <span>
+                  {isSent
+                    ? `Still hidden — waiting on ${username}`
+                    : `Hidden until ${username} adds you back`}
+                </span>
+              </div>
+
+              <div className={s.redactedRow}>
+                <CalendarClock />
+                <span>Timeframe</span>
+                <span className={s.redactedBar} />
+              </div>
+              <div className={s.redactedRow}>
+                <Location />
+                <span>Where</span>
+                <span className={s.redactedBar} />
+              </div>
+              <div className={s.redactedRow}>
+                <UsersRound />
+                <span>Who is going</span>
+                <span className={s.redactedBar} />
+              </div>
             </div>
           </div>
         </div>
