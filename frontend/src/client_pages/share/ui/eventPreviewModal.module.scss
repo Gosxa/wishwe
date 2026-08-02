@@ -16,6 +16,11 @@
   backdrop-filter: blur(8px);
   z-index: 100;
   @include anim.modal-overlay-enter;
+
+  @include bp.mobile {
+    padding: 16px;
+    align-items: flex-start;
+  }
 }
 
 .modal {
@@ -36,7 +41,13 @@
   @include bp.compact {
     grid-template-columns: minmax(0, 1fr);
     gap: 24px;
-    padding: 56px 24px 24px;
+    padding: 72px 24px 24px;
+  }
+
+  @include bp.mobile {
+    gap: 20px;
+    max-height: calc(100vh - 32px);
+    padding: 68px 16px 16px;
   }
 }
 
@@ -58,6 +69,11 @@
   > svg {
     width: 40px;
     height: 40px;
+  }
+
+  @include bp.mobile {
+    top: 12px;
+    right: 12px;
   }
 }
 
@@ -134,7 +150,7 @@
   height: 40px;
   border-radius: 50%;
   overflow: hidden;
-  background: clr.$acc-purple;
+  background: clr.$ns-100;
 
   > img {
     width: 100%;
@@ -239,6 +255,10 @@
   color: clr.$ns-900;
   padding-right: 56px;
   word-break: break-word;
+
+  @include bp.compact {
+    padding-right: 0;
+  }
 }
 
 .divider {
