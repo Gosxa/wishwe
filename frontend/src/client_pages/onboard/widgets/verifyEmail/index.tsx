@@ -1,6 +1,10 @@
 'use client';
 
-import { type VerifyEmailVariant } from '../../model';
+import {
+  type VerifyEmailVariant,
+  useRegisterBack,
+  SCREEN_ID,
+} from '../../model';
 import { Screen } from '../../ui';
 import { useVerifyEmail } from './model/useVerifyEmail';
 import { VerifyEmailContent } from './ui/VerifyEmailContent';
@@ -15,6 +19,11 @@ const SCREEN_CONFIG = {
 
 export const VerifyEmail = ({ variant }: Props) => {
   const { cells, submit, back, resend, email } = useVerifyEmail(variant);
+
+  useRegisterBack(
+    variant === 'reset' ? SCREEN_ID.VERIFY_RESET : SCREEN_ID.VERIFY_REGISTER,
+    { label: back.label, onBack: back.onBack },
+  );
 
   return (
     <Screen

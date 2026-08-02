@@ -17,6 +17,7 @@
 
 .getStarted {
   @include btn.primary(0, 100%, 40px);
+  @include btn.tap-target;
   display: none;
 }
 
@@ -31,6 +32,7 @@
 
 .google {
   @include btn.primary(0, 100%, 40px);
+  @include btn.tap-target;
 }
 
 .spacer {
@@ -54,10 +56,12 @@
 
 .email {
   @include btn.secondary(0, 100%, 40px);
+  @include btn.tap-target;
 }
 
 .tertiary {
   @include btn.tertiary(4px, 100%, 40px);
+  @include btn.tap-target(44px);
   margin-top: 8px;
 }
 

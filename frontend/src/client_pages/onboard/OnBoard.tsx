@@ -1,11 +1,13 @@
 'use client';
 
-import { AuthLayout } from '@/shared';
+import { AuthLayout, BackButton } from '@/shared';
 import {
   TrackProvider,
   InviteProvider,
   NextPathProvider,
   IntroProvider,
+  BackProvider,
+  useActiveBackAction,
   useIntroContext,
   useTrackContext,
 } from './model';
@@ -17,14 +19,20 @@ type Props = {
   next?: string | null;
 };
 
-// Past the first screen the sheet is always expanded, so resizing a desktop
-// window down to phone width mid-flow does not drop back to the intro.
 const OnBoardShell = ({ invite }: Pick<Props, 'invite'>) => {
   const { isStarted } = useIntroContext();
-  const { pointer } = useTrackContext();
+  const { screenStack, pointer } = useTrackContext();
+  const backAction = useActiveBackAction(screenStack[pointer]);
 
   return (
-    <AuthLayout expanded={isStarted || pointer > 0}>
+    <AuthLayout
+      expanded={isStarted || pointer > 0}
+      overlay={
+        backAction && (
+          <BackButton label={backAction.label} onClick={backAction.onBack} />
+        )
+      }
+    >
       <Track invite={invite} />
     </AuthLayout>
   );
@@ -36,7 +44,9 @@ export const OnBoard = ({ invite, next }: Props) => {
       <InviteProvider invite={invite}>
         <NextPathProvider next={next}>
           <IntroProvider>
-            <OnBoardShell invite={invite} />
+            <BackProvider>
+              <OnBoardShell invite={invite} />
+            </BackProvider>
           </IntroProvider>
         </NextPathProvider>
       </InviteProvider>

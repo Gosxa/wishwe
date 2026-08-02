@@ -54,6 +54,7 @@
 
 .primary {
   @include btn.primary(0, 100%, 40px);
+  @include btn.tap-target;
   text-decoration: none;
 }
 
@@ -92,13 +93,22 @@
 }
 
 @include bp.mobile {
+  .wrapper {
+    gap: 24px;
+    align-items: flex-start;
+  }
+
   .avatarLeft,
   .avatarRight {
-    width: 120px;
-    height: 120px;
+    width: 80px;
+    height: 80px;
   }
 
   .avatarLeft {
     margin-right: -18px;
+  }
+
+  .contentStack {
+    gap: 24px;
   }
 }

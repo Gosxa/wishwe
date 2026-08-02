@@ -1,3 +1,4 @@
+@use '@shared/styles/breakpoints' as bp;
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as typo;
 
@@ -113,6 +114,14 @@ $FOCUS_SHADOW:
     &:focus-visible {
       box-shadow: $SUCESS_SHADOW;
     }
+  }
+}
+
+@include bp.mobile {
+  .input {
+    min-height: 48px;
+    padding-block: 12px;
+    font-size: 16px;
   }
 }
 

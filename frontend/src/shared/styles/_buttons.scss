@@ -1,6 +1,14 @@
 @use 'sass:list';
+@use '@shared/styles/breakpoints' as bp;
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+
+
+@mixin tap-target($height: 48px) {
+  @include bp.mobile {
+    height: $height;
+  }
+}
 
 // TODO: clear selected + leave logic
 @mixin button-base($gap, $width, $height) {

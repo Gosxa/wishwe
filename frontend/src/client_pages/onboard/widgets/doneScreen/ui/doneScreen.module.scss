@@ -9,10 +9,12 @@
 
 .primary {
   @include btn.primary(0, 100%, 40px);
+  @include btn.tap-target;
   text-decoration: none;
 }
 
 .secondary {
   @include btn.secondary(0, 100%, 40px);
+  @include btn.tap-target;
   text-decoration: none;
 }

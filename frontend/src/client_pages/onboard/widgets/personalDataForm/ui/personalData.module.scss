@@ -1,3 +1,4 @@
+@use '@shared/styles/breakpoints' as bp;
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/colors' as clr;
 
@@ -84,10 +85,12 @@
 
 .btnCh {
   @include btn.tertiary(0, 50%, 40px);
+  @include btn.tap-target(44px);
 }
 
 .submit {
   @include btn.primary(0, 100%, 40px);
+  @include btn.tap-target;
   margin-top: 8px;
 }
 
@@ -107,5 +110,25 @@
 
   &:has(img) {
     border: solid 1px clr.$prm;
+  }
+}
+
+@include bp.mobile {
+  .avatarWrapper:not(.inviteAvatarWrapper) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+
+    .avatarBtnWrap,
+    .avatarBtn {
+      width: 72px;
+      height: 72px;
+    }
+
+    .btnCh {
+      width: auto;
+      flex: 1;
+    }
   }
 }

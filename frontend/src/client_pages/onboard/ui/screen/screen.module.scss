@@ -27,4 +27,8 @@
   .screen > h2 {
     @include tp.h2;
   }
+
+  .screen > .headline {
+    margin-bottom: 24px;
+  }
 }

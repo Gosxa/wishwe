@@ -1,7 +1,12 @@
 'use client';
 
 import { Screen } from '../../ui';
-import { getInviteHandle, useInviteContext } from '../../model';
+import {
+  getInviteHandle,
+  useInviteContext,
+  useRegisterBack,
+  SCREEN_ID,
+} from '../../model';
 import { useEnterEmail } from './model/useEnterEmail';
 import { EnterEmailContent } from './ui/EnterEmailContent';
 
@@ -13,6 +18,11 @@ const SCREEN_CONFIG = {
 export const EnterEmail = () => {
   const { input, submit, back } = useEnterEmail();
   const invite = useInviteContext();
+
+  useRegisterBack(SCREEN_ID.ENTER_EMAIL, {
+    label: 'Back to login',
+    onBack: back.onBack,
+  });
 
   const screenConfig = invite
     ? {

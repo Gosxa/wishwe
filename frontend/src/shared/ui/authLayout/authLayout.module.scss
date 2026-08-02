@@ -3,6 +3,8 @@
 @use '@shared/styles/animations' as anim;
 @use '@shared/styles/scrollbars' as sb;
 
+$sheet-peek: 96px;
+
 .container {
   display: grid;
   position: relative;
@@ -30,6 +32,10 @@
   overflow: hidden;
 }
 
+.overlay {
+  display: none;
+}
+
 .image {
   width: 100%;
   height: 100%;
@@ -39,6 +45,15 @@
 
 @include bp.compact {
   .container {
+    --picture-height: 100%;
+
+    display: block;
+  }
+
+  .overlay {
+    position: absolute;
+    top: max(16px, env(safe-area-inset-top));
+    left: 16px;
     display: block;
   }
 
@@ -48,9 +63,7 @@
     right: 0;
     left: 0;
     height: var(--picture-height);
-    transition:
-      height anim.$sheet-duration anim.$sheet-ease,
-      opacity anim.$sheet-duration anim.$sheet-ease;
+    transition: height anim.$sheet-duration anim.$sheet-ease;
   }
 
   .content {
@@ -78,15 +91,13 @@
   }
 
   .container[data-auth-expanded='false'] {
-    --picture-height: 63%;
     --sheet-inset: 0px;
     --sheet-bottom: 0px;
-    --sheet-radius: 16px 16px 0 0;
-    --sheet-shadow: 0 0 0 0 rgb(26 28 30 / 0%);
+    --sheet-radius: 28px 28px 0 0;
+    --sheet-shadow: 0 -8px 32px rgb(26 28 30 / 18%);
   }
 
   .container[data-auth-expanded='true'] {
-    --picture-height: 100%;
     --sheet-inset: 8px;
     --sheet-bottom: 0px;
     --sheet-radius: 32px;
@@ -98,22 +109,19 @@
 @include bp.mobile {
   .container[data-auth-expanded='true'] {
     --sheet-inset: 0px;
-    --sheet-radius: 0px;
-    --sheet-shadow: 0 0 0 0 rgb(26 28 30 / 0%);
-
-    .picture {
-      opacity: 0;
-    }
+    --sheet-radius: 28px 28px 0 0;
+    --sheet-shadow: 0 -8px 32px rgb(26 28 30 / 18%);
 
     .content {
-      display: flex;
-      min-height: 100dvh;
-      flex-direction: column;
-
-      > * {
-        margin-block: auto;
-      }
+      max-height: calc(100dvh - #{$sheet-peek});
+      padding: 32px 24px max(32px, calc(24px + env(safe-area-inset-bottom)));
     }
+  }
+}
+
+@media (max-width: bp.$mobile-max) and (max-height: 700px) {
+  .container[data-auth-expanded='true'] .content {
+    padding-top: 24px;
   }
 }
 
@@ -133,10 +141,6 @@
 
 
 @media (max-width: bp.$tablet-max) and (max-height: 600px) {
-  .container[data-auth-expanded='false'] {
-    --picture-height: 45%;
-  }
-
   .content {
     padding: 24px;
   }
