@@ -117,7 +117,7 @@
 
 .resendBtn {
   @include btn.secondary(0, 100%, 40px);
-  @include btn.tap-target(44px);
+  @include btn.tap-target;
 }
 
 @keyframes spin {

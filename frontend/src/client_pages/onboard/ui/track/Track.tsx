@@ -88,7 +88,7 @@ export const Track = ({ invite }: Props) => {
           {screenStack.map(id => cloneElement(screens[id], { key: id }))}
         </div>
       </div>
-      {isLoading && <Spinner />}
+      {isLoading && <Spinner compact />}
     </div>
   );
 };

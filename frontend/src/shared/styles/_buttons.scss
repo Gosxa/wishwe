@@ -4,7 +4,7 @@
 @use '@shared/styles/typography' as tp;
 
 
-@mixin tap-target($height: 48px) {
+@mixin tap-target($height: 40px) {
   @include bp.mobile {
     height: $height;
   }
