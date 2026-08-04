@@ -15,24 +15,32 @@
   gap: 16px;
 }
 
-.getStarted {
-  @include btn.primary(0, 100%, 40px);
-  @include btn.tap-target;
-  display: none;
-}
-
-
 .options {
   display: contents;
 }
 
-.googleWrapper {
+.primaryWrapper {
   position: relative;
 }
 
-.google {
+.primary {
   @include btn.primary(0, 100%, 40px);
   @include btn.tap-target;
+  display: grid;
+  grid-template-areas: 'label';
+  place-items: center;
+}
+
+.label {
+  grid-area: label;
+  transition:
+    opacity 0.18s ease,
+    visibility 0.18s ease;
+}
+
+.startLabel {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .spacer {
@@ -66,6 +74,11 @@
 }
 
 @include bp.compact {
+  .wrapper,
+  .inviteWrapper {
+    gap: 8px;
+  }
+
   .options {
     display: flex;
     flex-direction: column;
@@ -78,8 +91,14 @@
 
 
   :global([data-auth-expanded='false']) {
-    .getStarted {
-      display: flex;
+    .startLabel {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .googleLabel {
+      opacity: 0;
+      visibility: hidden;
     }
 
     .options {
@@ -89,5 +108,11 @@
 
   :global([data-auth-expanded='true']) .options {
     @include anim.sheet-reveal(0.14s);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .label {
+    transition: none;
   }
 }

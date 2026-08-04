@@ -11,13 +11,25 @@ const SCREEN_CONFIG = {
   headline: 'No random people. No noise. Just you and your inner circle',
 } as const;
 
+const COMPACT_QUERY = '(max-width: 1023px)';
+
 type Props = {
   invite?: InviteContext;
 };
 
 export const LoginScreen = ({ invite }: Props) => {
   const { onGoogle, onEmail, googleError } = useLoginScreen();
-  const { start } = useIntroContext();
+  const { isStarted, start } = useIntroContext();
+  const onPrimary = () => {
+    if (!isStarted && window.matchMedia(COMPACT_QUERY).matches) {
+      start();
+
+      return;
+    }
+
+    onGoogle();
+  };
+
   const screenConfig = invite
     ? {
         h2: `Join ${getInviteHandle(invite.username)} on wish.we`,
@@ -29,9 +41,8 @@ export const LoginScreen = ({ invite }: Props) => {
   return (
     <Screen {...screenConfig}>
       <LoginScreenContent
-        onGoogle={onGoogle}
+        onPrimary={onPrimary}
         onEmail={onEmail}
-        onStart={start}
         googleError={googleError}
         showJoinWithoutInvite={Boolean(invite)}
       />
