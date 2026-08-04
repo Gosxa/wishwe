@@ -170,6 +170,10 @@ pyrightconfig.json
 !frontend/src/shared/lib/
 !frontend/src/shared/lib/**
 
+# Same for mobile source under src/lib.
+!mobile/src/lib/
+!mobile/src/lib/**
+
 
 # ---------------- DEVOPS ----------------
 
