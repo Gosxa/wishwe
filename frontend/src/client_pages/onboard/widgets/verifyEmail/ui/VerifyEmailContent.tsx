@@ -44,6 +44,7 @@ type Props = {
 const inputParams = {
   type: 'text',
   inputMode: 'numeric',
+  autoComplete: 'one-time-code',
   maxLength: 1,
 } as const;
 
