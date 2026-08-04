@@ -5,13 +5,14 @@ import { z } from 'zod';
 
 import { AuthScreen, PrimaryButton, TextField } from '@/components/auth';
 import { Spacing } from '@/constants/theme';
-import { checkEmail } from '@/lib/api/auth';
-import { useAuthFlow } from '@/lib/auth-flow';
+import { emailStart } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
+import { useAuthFlow } from '@/lib/auth/auth-flow';
 
 const emailSchema = z.email('please, enter valid email');
 
 export default function EnterEmailScreen() {
-  const { email, setEmail } = useAuthFlow();
+  const { email, setEmail, setVerificationToken } = useAuthFlow();
   const [error, setError] = useState<string | undefined>();
   const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -30,19 +31,21 @@ export default function EnterEmailScreen() {
 
   const onSubmit = async () => {
     const trimmed = email.trim();
-    if (!validate(trimmed)) return;
+    if (!validate(trimmed) || loading) return;
 
     setLoading(true);
     try {
-      const { flow } = await checkEmail(trimmed);
+      const { flow } = await emailStart(trimmed);
       setEmail(trimmed);
+      setVerificationToken('');
+
       if (flow === 'login') {
         router.push('/enter-password');
       } else {
         router.push('/verify-register');
       }
-    } catch {
-      setError('Service temporarily unavailable');
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Service temporarily unavailable');
       setIsSuccess(false);
     } finally {
       setLoading(false);
@@ -53,7 +56,7 @@ export default function EnterEmailScreen() {
     <AuthScreen
       title="Enter your email"
       headline="We'll get you started or sign you back in."
-      backLabel="Back to login"
+      backLabel="Back"
       onBack={() => router.back()}
     >
       <TextField

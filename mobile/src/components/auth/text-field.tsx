@@ -9,9 +9,12 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { RequiredMarkIcon } from '@/components/icons';
 import { Colors, Fonts, Radii, Spacing } from '@/constants/theme';
 
 type Props = TextInputProps & {
+  label?: string;
+  required?: boolean;
   error?: string;
   helperText?: string;
   isSuccess?: boolean;
@@ -19,6 +22,8 @@ type Props = TextInputProps & {
 };
 
 export function TextField({
+  label,
+  required = false,
   error,
   helperText,
   isSuccess = false,
@@ -33,8 +38,18 @@ export function TextField({
 
   return (
     <View style={[styles.container, containerStyle]}>
+      {label ? (
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>{label}</Text>
+          {required ? <RequiredMarkIcon /> : null}
+        </View>
+      ) : null}
       <TextInput
         {...inputProps}
+        accessibilityLabel={
+          inputProps.accessibilityLabel ??
+          (label ? `${label}${required ? ', required' : ''}` : undefined)
+        }
         placeholderTextColor={Colors.placeholder}
         onFocus={(e) => {
           setFocused(true);
@@ -64,6 +79,18 @@ export function TextField({
 const styles = StyleSheet.create({
   container: {
     gap: Spacing.one,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
+    marginBottom: Spacing.one,
+  },
+  label: {
+    fontFamily: Fonts.regular,
+    fontSize: 14,
+    lineHeight: 22,
+    color: Colors.ink,
   },
   input: {
     minHeight: 48,

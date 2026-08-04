@@ -44,6 +44,8 @@ export function AuthScreen({ title, headline, children, backLabel, onBack, foote
             <Text style={styles.headline}>{headline}</Text>
           </View>
 
+          <View style={styles.spacer} />
+
           <View style={styles.form}>{children}</View>
 
           {backLabel && onBack ? (
@@ -51,6 +53,8 @@ export function AuthScreen({ title, headline, children, backLabel, onBack, foote
               <BackLink label={backLabel} onPress={onBack} />
             </View>
           ) : null}
+
+          <View style={styles.spacer} />
 
           {footer ? <View style={styles.footer}>{footer}</View> : null}
         </ScrollView>
@@ -73,7 +77,10 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: Spacing.two,
-    marginBottom: Spacing.six,
+  },
+  spacer: {
+    flex: 1,
+    minHeight: Spacing.four,
   },
   title: {
     fontFamily: Fonts.bold,
@@ -94,7 +101,6 @@ const styles = StyleSheet.create({
     marginTop: Spacing.four,
   },
   footer: {
-    marginTop: 'auto',
     paddingTop: Spacing.six,
   },
 });

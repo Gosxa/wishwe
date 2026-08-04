@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 
-import { GoogleIcon } from '@/components/google-icon';
+import { GoogleIcon } from '@/components/icons';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
 

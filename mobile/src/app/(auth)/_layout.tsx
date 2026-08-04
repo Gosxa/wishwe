@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 
 import { Colors } from '@/constants/theme';
-import { AuthFlowProvider } from '@/lib/auth-flow';
+import { AuthFlowProvider } from '@/lib/auth/auth-flow';
 
 export default function AuthLayout() {
   return (
