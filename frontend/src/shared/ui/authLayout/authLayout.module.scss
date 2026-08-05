@@ -55,7 +55,6 @@ $sheet-peek: 96px;
   object-fit: cover;
 }
 
-
 @include bp.compact {
   .container {
     --picture-height: 100%;
@@ -120,7 +119,6 @@ $sheet-peek: 96px;
   }
 }
 
-
 @include bp.mobile {
   .container[data-auth-expanded='true'] {
     --sheet-inset: 0px;
@@ -140,7 +138,6 @@ $sheet-peek: 96px;
   }
 }
 
-
 @include bp.tablet {
   .content {
     width: min(520px, 100%);
@@ -156,7 +153,6 @@ $sheet-peek: 96px;
     --sheet-bottom: 24px;
   }
 }
-
 
 @media (max-width: bp.$tablet-max) and (max-height: 600px) {
   .contentScroller {

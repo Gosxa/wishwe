@@ -6,7 +6,6 @@ $screen-gap: 40px;
 $viewport-padding: 4px;
 $slide-speed: 300ms;
 
-
 .inner {
   border-radius: var(--sheet-radius, 0);
   display: flex;
@@ -51,7 +50,6 @@ $slide-speed: 300ms;
     align-items: flex-start;
   }
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .viewport,
