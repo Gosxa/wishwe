@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 
-import { AuthScreen, PasswordField, PrimaryButton } from '@/components/auth';
+import { AuthScreen, PasswordField, PrimaryButton, TermsCheckbox } from '@/components/auth';
 import { Spacing } from '@/constants/theme';
 import { ApiError } from '@/lib/api/client';
 import { useAuth } from '@/lib/auth/auth-context';
@@ -14,6 +14,7 @@ export default function CreatePasswordScreen() {
   const { finishRegistration } = useAuth();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [passwordError, setPasswordError] = useState<string | undefined>();
   const [confirmError, setConfirmError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function CreatePasswordScreen() {
   }
 
   const onSubmit = async () => {
-    if (loading) return;
+    if (loading || !termsAccepted) return;
 
     const nextPasswordError = validatePassword(password);
     const nextConfirmError = password === confirm ? undefined : 'Passwords do not match';
@@ -44,8 +45,6 @@ export default function CreatePasswordScreen() {
 
     setLoading(true);
     try {
-      // Creating the account signs the user in, which flips the route guard in
-      // the root layout and moves them out of the auth stack.
       await finishRegistration(verificationToken, password);
     } catch (e) {
       setPasswordError(e instanceof ApiError ? e.message : 'Service temporarily unavailable');
@@ -87,11 +86,16 @@ export default function CreatePasswordScreen() {
         editable={!loading}
         error={confirmError}
       />
+      <TermsCheckbox
+        value={termsAccepted}
+        onChange={setTermsAccepted}
+        disabled={loading}
+      />
       <PrimaryButton
         label="Create account"
         onPress={onSubmit}
         loading={loading}
-        disabled={!password || !confirm}
+        disabled={!password || !confirm || !termsAccepted}
         style={styles.submit}
       />
     </AuthScreen>

@@ -20,9 +20,9 @@ const useNativeDriver = Platform.OS !== 'web';
 
 export function OnboardingScreen() {
   const [isStarted, setIsStarted] = useState(false);
-  const [showStartButton, setShowStartButton] = useState(true);
   const reduceMotion = useReduceMotion();
   const [sheetProgress] = useState(() => new Animated.Value(0));
+  const [labelProgress] = useState(() => new Animated.Value(0));
   const [optionsProgress] = useState(() => new Animated.Value(0));
 
   const handleStart = () => {
@@ -34,8 +34,8 @@ export function OnboardingScreen() {
 
     if (reduceMotion) {
       sheetProgress.setValue(1);
+      labelProgress.setValue(1);
       optionsProgress.setValue(1);
-      setShowStartButton(false);
       return;
     }
 
@@ -46,6 +46,12 @@ export function OnboardingScreen() {
         easing: Easing.bezier(0.22, 1, 0.36, 1),
         useNativeDriver: false,
       }),
+      Animated.timing(labelProgress, {
+        toValue: 1,
+        duration: 180,
+        easing: Easing.inOut(Easing.ease),
+        useNativeDriver,
+      }),
       Animated.timing(optionsProgress, {
         toValue: 1,
         duration: 320,
@@ -53,11 +59,7 @@ export function OnboardingScreen() {
         easing: Easing.out(Easing.cubic),
         useNativeDriver,
       }),
-    ]).start(({ finished }) => {
-      if (finished) {
-        setShowStartButton(false);
-      }
-    });
+    ]).start();
   };
 
   return (
@@ -102,47 +104,46 @@ export function OnboardingScreen() {
             },
           ]}
         >
-          {showStartButton && (
+          <Pressable
+            style={styles.primaryButton}
+            onPress={handleStart}
+            disabled={isStarted}
+            accessibilityRole="button"
+            accessibilityLabel={isStarted ? 'Continue with Google' : 'Get started'}
+            accessibilityState={{ disabled: isStarted }}
+          >
             <Animated.View
-              accessibilityElementsHidden={isStarted}
-              importantForAccessibility={isStarted ? 'no-hide-descendants' : 'auto'}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
               style={[
-                styles.actionLayer,
+                styles.labelLayer,
                 {
-                  pointerEvents: isStarted ? 'none' : 'auto',
-                  opacity: sheetProgress.interpolate({
-                    inputRange: [0, 0.55, 1],
-                    outputRange: [1, 0, 0],
-                  }),
-                  transform: [
-                    {
-                      translateY: sheetProgress.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [0, -4],
-                      }),
-                    },
-                  ],
+                  pointerEvents: 'none',
+                  opacity: labelProgress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
                 },
               ]}
             >
-              <Pressable
-                style={styles.primaryButton}
-                onPress={handleStart}
-                accessibilityRole="button"
-                accessibilityLabel="Get started"
-              >
-                <Text style={styles.primaryButtonLabel}>Get started</Text>
-              </Pressable>
+              <Text style={styles.primaryButtonLabel}>Get started</Text>
             </Animated.View>
-          )}
+
+            <Animated.View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={[styles.labelLayer, { pointerEvents: 'none', opacity: labelProgress }]}
+            >
+              <Text style={styles.primaryButtonLabel}>Continue with Google</Text>
+              <View style={styles.googleIcon}>
+                <GoogleIcon />
+              </View>
+            </Animated.View>
+          </Pressable>
 
           <Animated.View
             aria-hidden={!isStarted}
             accessibilityElementsHidden={!isStarted}
             importantForAccessibility={isStarted ? 'auto' : 'no-hide-descendants'}
             style={[
-              styles.actionLayer,
-              styles.options,
+              styles.secondaryLayer,
               {
                 pointerEvents: isStarted ? 'auto' : 'none',
                 opacity: optionsProgress,
@@ -157,18 +158,6 @@ export function OnboardingScreen() {
               },
             ]}
           >
-            <Pressable
-              style={styles.primaryButton}
-              disabled
-              accessibilityRole="button"
-              accessibilityState={{ disabled: true }}
-            >
-              <Text style={styles.primaryButtonLabel}>Continue with Google</Text>
-              <View style={styles.googleIcon}>
-                <GoogleIcon />
-              </View>
-            </Pressable>
-
             <Pressable
               style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
               onPress={() => router.push('/enter-email')}
@@ -227,13 +216,21 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
-  actionLayer: {
+  secondaryLayer: {
+    position: 'absolute',
+    right: 0,
+    bottom: 0,
+    left: 0,
+  },
+  labelLayer: {
     position: 'absolute',
     top: 0,
     right: 0,
+    bottom: 0,
     left: 0,
-  },
-  options: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.two,
   },
   primaryButton: {

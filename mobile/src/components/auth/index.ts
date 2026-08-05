@@ -4,4 +4,5 @@ export { BackLink } from '@/components/auth/back-link';
 export { OtpInput } from '@/components/auth/otp-input';
 export { PasswordField } from '@/components/auth/password-field';
 export { PrimaryButton } from '@/components/auth/primary-button';
+export { TermsCheckbox } from '@/components/auth/terms-checkbox';
 export { TextField } from '@/components/auth/text-field';

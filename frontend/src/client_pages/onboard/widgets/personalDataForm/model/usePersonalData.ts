@@ -43,6 +43,7 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   const [avatarChanged, setAvatarChanged] = useState(false);
   const [isUnique, setIsUnique] = useState<boolean | null>(null);
   const [submitError, setSubmitError] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const { error, isSuccess, check, set } = useValidation(nicknameSchema);
 
@@ -97,6 +98,8 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   const onRemoveAvatar = () => setAvatarUrl(null);
 
   const onSubmit = async () => {
+    if (!termsAccepted) return;
+
     const { available } = await checkUsername(nickname);
 
     if (!check(nickname) || !available) return;
@@ -171,7 +174,15 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
     },
     firstName: { value: firstName, onChange: onFirstNameChange },
     lastName: { value: lastName, onChange: onLastNameChange },
-    submit: { onSubmit },
+    terms: {
+      checked: termsAccepted,
+      onChange: (e: ChangeEvent<HTMLInputElement>) =>
+        setTermsAccepted(e.target.checked),
+    },
+    submit: {
+      onSubmit,
+      disabled: !termsAccepted || !nickname.trim(),
+    },
     submitError,
   };
 };

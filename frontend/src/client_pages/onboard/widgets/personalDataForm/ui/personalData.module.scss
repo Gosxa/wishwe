@@ -1,6 +1,6 @@
-@use '@shared/styles/breakpoints' as bp;
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
 
 .wrapper {
   display: flex;
@@ -88,6 +88,36 @@
   @include btn.tap-target(44px);
 }
 
+.terms {
+  @include tp.text-body;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: clr.$ns-700;
+
+  > input {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin: 3px 0 0;
+    accent-color: clr.$prm;
+    cursor: pointer;
+  }
+
+  label {
+    cursor: pointer;
+  }
+
+  a {
+    color: clr.$prm;
+    text-decoration: underline;
+
+    &:hover {
+      color: clr.$prm-light;
+    }
+  }
+}
+
 .submit {
   @include btn.primary(0, 100%, 40px);
   @include btn.tap-target;
@@ -113,22 +143,3 @@
   }
 }
 
-@include bp.mobile {
-  .avatarWrapper:not(.inviteAvatarWrapper) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-
-    .avatarBtnWrap,
-    .avatarBtn {
-      width: 72px;
-      height: 72px;
-    }
-
-    .btnCh {
-      width: auto;
-      flex: 1;
-    }
-  }
-}

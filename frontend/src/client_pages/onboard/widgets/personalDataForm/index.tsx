@@ -30,7 +30,7 @@ const INVITE_GOOGLE_CONFIG = {
 
 export const PersonalDataForm = ({ variant }: Props) => {
   const invite = useInviteContext();
-  const { avatar, nickname, firstName, lastName, submit, submitError } =
+  const { avatar, nickname, firstName, lastName, terms, submit, submitError } =
     usePersonalData(variant);
 
   const screenConfig =
@@ -45,6 +45,7 @@ export const PersonalDataForm = ({ variant }: Props) => {
         nickname={nickname}
         firstName={firstName}
         lastName={lastName}
+        terms={terms}
         submit={submit}
         submitError={submitError}
         inviteLayout={Boolean(invite && variant === 'google')}
