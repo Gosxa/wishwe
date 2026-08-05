@@ -1,6 +1,7 @@
 'use client';
 
-import { AuthLayout, BackButton } from '@/shared';
+import { AuthLayout, BackButton, Spinner } from '@/shared';
+import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import {
   TrackProvider,
   InviteProvider,
@@ -23,10 +24,12 @@ const OnBoardShell = ({ invite }: Pick<Props, 'invite'>) => {
   const { isStarted } = useIntroContext();
   const { screenStack, pointer } = useTrackContext();
   const backAction = useActiveBackAction(screenStack[pointer]);
+  const isLoading = useLoadingStore(s => s.isLoading);
 
   return (
     <AuthLayout
       expanded={isStarted || pointer > 0}
+      contentOverlay={isLoading ? <Spinner compact /> : null}
       overlay={
         backAction && (
           <BackButton label={backAction.label} onClick={backAction.onBack} />

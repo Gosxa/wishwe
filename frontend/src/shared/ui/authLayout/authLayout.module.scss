@@ -26,6 +26,19 @@ $sheet-peek: 96px;
 
 .content {
   position: relative;
+  overflow: hidden;
+}
+
+.contentScroller {
+  position: relative;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+
+  @include sb.thin(4px);
 }
 
 .picture {
@@ -74,8 +87,6 @@ $sheet-peek: 96px;
     width: auto;
     height: auto;
     max-height: calc(100dvh - 2 * var(--sheet-inset));
-    padding: 48px 24px;
-    overflow-y: auto;
     border-radius: var(--sheet-radius);
     background: clr.$ns-50;
     box-shadow: var(--sheet-shadow);
@@ -86,8 +97,12 @@ $sheet-peek: 96px;
       min-height anim.$sheet-duration anim.$sheet-ease,
       border-radius anim.$sheet-duration anim.$sheet-ease,
       box-shadow anim.$sheet-duration anim.$sheet-ease;
+  }
 
-    @include sb.thin(4px);
+  .contentScroller {
+    height: auto;
+    max-height: inherit;
+    padding: 48px 24px;
   }
 
   .container[data-auth-expanded='false'] {
@@ -112,7 +127,7 @@ $sheet-peek: 96px;
     --sheet-radius: 28px 28px 0 0;
     --sheet-shadow: 0 -8px 32px rgb(26 28 30 / 18%);
 
-    .content {
+    .contentScroller {
       max-height: calc(100dvh - #{$sheet-peek});
       padding: 32px 24px max(32px, calc(24px + env(safe-area-inset-bottom)));
     }
@@ -120,7 +135,7 @@ $sheet-peek: 96px;
 }
 
 @media (max-width: bp.$mobile-max) and (max-height: 700px) {
-  .container[data-auth-expanded='true'] .content {
+  .container[data-auth-expanded='true'] .contentScroller {
     padding-top: 24px;
   }
 }
@@ -130,6 +145,9 @@ $sheet-peek: 96px;
   .content {
     width: min(520px, 100%);
     margin-inline: auto;
+  }
+
+  .contentScroller {
     padding: 48px 40px;
   }
 
@@ -141,7 +159,7 @@ $sheet-peek: 96px;
 
 
 @media (max-width: bp.$tablet-max) and (max-height: 600px) {
-  .content {
+  .contentScroller {
     padding: 24px;
   }
 }

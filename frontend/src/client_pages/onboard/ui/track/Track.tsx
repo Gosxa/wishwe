@@ -1,7 +1,5 @@
 'use client';
 
-import { Spinner } from '@/shared';
-import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { useTrackContext, SCREEN_ID } from '../../model';
 import s from './track.module.scss';
 import {
@@ -25,7 +23,6 @@ type Props = {
 
 export const Track = ({ invite }: Props) => {
   const { screenStack, pointer, setScreenStack } = useTrackContext();
-  const isLoading = useLoadingStore(s => s.isLoading);
   const trackRef = useRef<HTMLDivElement>(null);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const screens = {
@@ -88,7 +85,6 @@ export const Track = ({ invite }: Props) => {
           {screenStack.map(id => cloneElement(screens[id], { key: id }))}
         </div>
       </div>
-      {isLoading && <Spinner compact />}
     </div>
   );
 };

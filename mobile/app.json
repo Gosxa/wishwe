@@ -1,16 +1,18 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "WishWe",
+    "slug": "wishwe",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "wishwe",
     "userInterfaceStyle": "automatic",
     "ios": {
+      "bundleIdentifier": "online.wishwe.app",
       "icon": "./assets/expo.icon"
     },
     "android": {
+      "package": "online.wishwe.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -38,13 +40,21 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow WishWe to access your photos so you can choose a profile picture."
+          "photosPermission": "Allow WishWe to access your photos so you can choose a profile picture.",
+          "microphonePermission": false
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "e828532e-64fb-4878-a8b2-d934a05bbc83"
+      }
+    },
+    "owner": "mksys9"
   }
 }
