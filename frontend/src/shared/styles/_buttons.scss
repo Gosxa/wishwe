@@ -10,7 +10,6 @@
   }
 }
 
-// TODO: clear selected + leave logic
 @mixin button-base($gap, $width, $height) {
   display: flex;
   width: $width;
