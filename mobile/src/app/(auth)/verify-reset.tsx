@@ -1,21 +1,21 @@
 import { router } from 'expo-router';
 
 import { VerifyCodeScreen } from '@/components/auth';
-import { resendCode } from '@/lib/api/auth';
+import { requestPasswordReset } from '@/lib/api/auth';
 import { useAuthFlow } from '@/lib/auth/auth-flow';
 
-export default function VerifyRegisterScreen() {
+export default function VerifyResetScreen() {
   const { email, setVerificationToken } = useAuthFlow();
 
   return (
     <VerifyCodeScreen
       email={email}
-      backLabel="Change email"
+      backLabel="Go back"
       onBack={() => router.back()}
-      onResend={() => resendCode(email)}
+      onResend={() => requestPasswordReset(email)}
       onVerified={(token) => {
         setVerificationToken(token);
-        router.push('/create-password');
+        router.push('/reset-password');
       }}
     />
   );

@@ -1,4 +1,4 @@
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 import { Colors } from '@/constants/theme';
 
@@ -7,15 +7,15 @@ type Props = {
   color?: string;
 };
 
-export function PersonIcon({ size = 40, color = Colors.placeholder }: Props) {
+export function PersonIcon({ size = 38, color = Colors.placeholder }: Props) {
   return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Circle cx={12} cy={8} r={4} stroke={color} strokeWidth={1.6} />
+    <Svg width={size} height={size} viewBox="0 0 32 32" fill="none">
       <Path
-        d="M4 20c0-3.6 3.6-6 8-6s8 2.4 8 6"
+        d="M25.3332 28V25.3333C25.3332 23.9188 24.7713 22.5623 23.7711 21.5621C22.7709 20.5619 21.4143 20 19.9998 20H11.9998C10.5853 20 9.22879 20.5619 8.2286 21.5621C7.22841 22.5623 6.6665 23.9188 6.6665 25.3333V28M21.3332 9.33333C21.3332 12.2789 18.9454 14.6667 15.9998 14.6667C13.0543 14.6667 10.6665 12.2789 10.6665 9.33333C10.6665 6.38781 13.0543 4 15.9998 4C18.9454 4 21.3332 6.38781 21.3332 9.33333Z"
         stroke={color}
-        strokeWidth={1.6}
+        strokeWidth={2}
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </Svg>
   );

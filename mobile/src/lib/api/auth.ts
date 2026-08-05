@@ -32,6 +32,19 @@ export async function verifyCode(email: string, code: string): Promise<string> {
   return data.verification_token;
 }
 
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  await apiRequest('/api/user/auth/reset-password/', { method: 'POST', body: { email } });
+}
+
+
+export async function setNewPassword(token: string, newPassword: string): Promise<void> {
+  await apiRequest('/api/user/auth/set-new-password/', {
+    method: 'POST',
+    body: { token, new_password: newPassword, re_new_password: newPassword },
+  });
+}
+
 /** Reads the JWT pair out of the response cookies and stores it. */
 async function storeSessionFrom(response: Response): Promise<void> {
   const rawSetCookie = readSetCookieHeader(response);
