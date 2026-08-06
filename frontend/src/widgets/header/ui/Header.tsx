@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BellDot, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
+import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import { useEventModalStore } from '@/shared/store/useEventModalStore';
@@ -17,6 +18,7 @@ import s from '../header.module.scss';
 const settingsItems = [
   { label: 'Edit profile' },
   { label: 'Support' },
+  { label: 'Terms of Use' },
   { label: 'Log out', variant: 'danger' },
 ] as const;
 
@@ -56,6 +58,10 @@ export const Header = ({ search, showSearch = true }: Props) => {
     Support: () => {
       setOpenMenu(null);
       window.location.href = 'mailto:support@wishwe.online';
+    },
+    'Terms of Use': () => {
+      setOpenMenu(null);
+      window.open(TERMS_OF_USE_URL, '_blank', 'noopener,noreferrer');
     },
   };
 
