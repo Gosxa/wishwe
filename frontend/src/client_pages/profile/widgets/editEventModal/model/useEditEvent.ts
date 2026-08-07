@@ -16,6 +16,7 @@ import {
 import {
   isAllowedCoverImage,
   MAX_COVER_IMAGE_SIZE,
+  prepareCoverImage,
 } from '@/shared/lib/validation/imageUpload';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
 import type { FieldErrors } from './types';
@@ -90,6 +91,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPreparingCover, setIsPreparingCover] = useState(false);
 
   useEffect(() => {
     let isActive = true;
@@ -136,7 +138,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
     }));
   };
 
-  const onCoverSelect = (file: File) => {
+  const onCoverSelect = async (file: File) => {
     if (!isAllowedCoverImage(file)) {
       setErrors(prev => ({
         ...prev,
@@ -152,9 +154,31 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
       return;
     }
 
-    setCoverFile(file);
-    setCoverPreviewUrl(URL.createObjectURL(file));
-    clearError('cover');
+    setIsPreparingCover(true);
+
+    try {
+      const preparedFile = await prepareCoverImage(file);
+
+      if (preparedFile.size > MAX_COVER_IMAGE_SIZE) {
+        setErrors(prev => ({
+          ...prev,
+          cover: 'Converted image must be 5 MB or less',
+        }));
+
+        return;
+      }
+
+      setCoverFile(preparedFile);
+      setCoverPreviewUrl(URL.createObjectURL(preparedFile));
+      clearError('cover');
+    } catch {
+      setErrors(prev => ({
+        ...prev,
+        cover: 'Could not process this image',
+      }));
+    } finally {
+      setIsPreparingCover(false);
+    }
   };
 
   const validate = (): FieldErrors => {
@@ -357,6 +381,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
       previewUrl: coverPreviewUrl,
       onSelect: onCoverSelect,
       error: errors.cover,
+      isProcessing: isPreparingCover,
     },
     submit: {
       onSubmit,

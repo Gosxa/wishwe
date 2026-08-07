@@ -10,6 +10,7 @@ import s from './coverUpload.module.scss';
 type Props = {
   previewUrl: string | null;
   isUploading: boolean;
+  isProcessing: boolean;
   onSelect: (file: File) => void;
   error?: string;
 };
@@ -17,25 +18,27 @@ type Props = {
 export const CoverUpload = ({
   previewUrl,
   isUploading,
+  isProcessing,
   onSelect,
   error,
 }: Props) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const isBusy = isUploading || isProcessing;
 
   const openPicker = () => inputRef.current?.click();
 
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
-    if (!isUploading) setIsDragging(true);
+    if (!isBusy) setIsDragging(true);
   };
 
   const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(false);
 
-    if (isUploading) return;
+    if (isBusy) return;
 
     const file = e.dataTransfer.files?.[0];
 
@@ -63,10 +66,16 @@ export const CoverUpload = ({
               type="button"
               className={s.changeButton}
               onClick={openPicker}
-              disabled={isUploading}
+              disabled={isBusy}
             >
-              <span>{isUploading ? 'Uploading...' : 'Change photo'}</span>
-              {!isUploading && <Pencil />}
+              <span>
+                {isProcessing
+                  ? 'Processing...'
+                  : isUploading
+                    ? 'Uploading...'
+                    : 'Change photo'}
+              </span>
+              {!isBusy && <Pencil />}
             </button>
           </>
         ) : (
@@ -76,9 +85,9 @@ export const CoverUpload = ({
               type="button"
               className={s.browseButton}
               onClick={openPicker}
-              disabled={isUploading}
+              disabled={isBusy}
             >
-              <span>Browse</span>
+              <span>{isProcessing ? 'Processing...' : 'Browse'}</span>
             </button>
             <span className={s.dropHint}>or drop a file here</span>
           </div>
@@ -87,6 +96,7 @@ export const CoverUpload = ({
           ref={inputRef}
           type="file"
           accept={getCoverImageAcceptAttribute()}
+          disabled={isBusy}
           hidden
           onChange={e => {
             const file = e.target.files?.[0];

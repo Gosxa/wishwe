@@ -17,6 +17,7 @@ import {
 import {
   isAllowedCoverImage,
   MAX_COVER_IMAGE_SIZE,
+  prepareCoverImage,
 } from '@/shared/lib/validation/imageUpload';
 import type { EventVisibility, FieldErrors } from './types';
 
@@ -82,6 +83,7 @@ export const useCreateEvent = (
 
   const [errors, setErrors] = useState<FieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPreparingCover, setIsPreparingCover] = useState(false);
 
   const isPlan = type === 'plan';
 
@@ -133,7 +135,7 @@ export const useCreateEvent = (
     }));
   };
 
-  const onCoverSelect = (file: File) => {
+  const onCoverSelect = async (file: File) => {
     if (!isAllowedCoverImage(file)) {
       setErrors(prev => ({
         ...prev,
@@ -149,9 +151,31 @@ export const useCreateEvent = (
       return;
     }
 
-    setCoverFile(file);
-    setCoverPreviewUrl(URL.createObjectURL(file));
-    clearError('cover');
+    setIsPreparingCover(true);
+
+    try {
+      const preparedFile = await prepareCoverImage(file);
+
+      if (preparedFile.size > MAX_COVER_IMAGE_SIZE) {
+        setErrors(prev => ({
+          ...prev,
+          cover: 'Converted image must be 5 MB or less',
+        }));
+
+        return;
+      }
+
+      setCoverFile(preparedFile);
+      setCoverPreviewUrl(URL.createObjectURL(preparedFile));
+      clearError('cover');
+    } catch {
+      setErrors(prev => ({
+        ...prev,
+        cover: 'Could not process this image',
+      }));
+    } finally {
+      setIsPreparingCover(false);
+    }
   };
 
   const validate = (): FieldErrors => {
@@ -379,6 +403,7 @@ export const useCreateEvent = (
       previewUrl: coverPreviewUrl,
       onSelect: onCoverSelect,
       error: errors.cover,
+      isProcessing: isPreparingCover,
     },
     canShare,
     submit: {

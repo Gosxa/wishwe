@@ -110,6 +110,7 @@ export const CreateEventModal = ({
             <CoverUpload
               previewUrl={cover.previewUrl}
               isUploading={submit.isSubmitting}
+              isProcessing={cover.isProcessing}
               onSelect={cover.onSelect}
               error={cover.error}
             />
@@ -313,7 +314,7 @@ export const CreateEventModal = ({
             type="button"
             className={s.share}
             onClick={submit.onSubmit}
-            disabled={!canShare || submit.isSubmitting}
+            disabled={!canShare || submit.isSubmitting || cover.isProcessing}
           >
             <span>Share</span>
           </button>

@@ -93,6 +93,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
             <CoverUpload
               previewUrl={cover.previewUrl}
               isUploading={submit.isSubmitting}
+              isProcessing={cover.isProcessing}
               onSelect={cover.onSelect}
               error={cover.error}
             />
@@ -293,7 +294,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
             type="button"
             className={s.save}
             onClick={submit.onSubmit}
-            disabled={submit.isSubmitting}
+            disabled={submit.isSubmitting || cover.isProcessing}
           >
             <span>Save changes</span>
           </button>
