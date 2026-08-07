@@ -39,7 +39,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = (
             "id", "user", "user_id", "username", "first_name", "last_name",
             "bio", "date_of_birth", "city", "gender", "avatar",
-            "social_media_url", "is_private"
+            "social_media_url", "is_private", "has_seen_feed_tour"
         )
         read_only_fields = ("avatar",)
 

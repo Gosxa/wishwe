@@ -11,13 +11,17 @@ def validate_image_size(image):
 
 
 def validate_image_type(image):
-    allowed_types = [
+    allowed_types = {
         "image/jpeg",
         "image/png",
         "image/webp",
-    ]
+        "image/heic",
+        "image/heif",
+        "image/heic-sequence",
+        "image/heif-sequence",
+    }
 
     if image.content_type not in allowed_types:
         raise ValidationError(
-            "Only JPEG, PNG and WEBP images are allowed."
+            "Only JPEG, PNG, WEBP, HEIC and HEIF images are allowed."
         )

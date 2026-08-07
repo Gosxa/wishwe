@@ -130,6 +130,7 @@ class Profile(models.Model):
     )
     is_onboarded = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
+    has_seen_feed_tour = models.BooleanField(default=False)
 
     def __str__(self):
         return self.username
