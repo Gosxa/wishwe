@@ -563,6 +563,13 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(serializer.data)
 
+    @action(detail=False, methods=["post"], url_path="feed-tour-seen")
+    def feed_tour_seen(self, request):
+        request.user.profile.has_seen_feed_tour = True
+        request.user.profile.save(update_fields=["has_seen_feed_tour"])
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 class FriendshipViewSet(
     mixins.RetrieveModelMixin,
