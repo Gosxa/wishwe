@@ -14,7 +14,7 @@ import {
   getEventTimeInputMin,
 } from '@/shared/lib/validation/eventDate';
 import {
-  isAllowedCoverImageType,
+  isAllowedCoverImage,
   MAX_COVER_IMAGE_SIZE,
 } from '@/shared/lib/validation/imageUpload';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
@@ -137,7 +137,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
   };
 
   const onCoverSelect = (file: File) => {
-    if (!isAllowedCoverImageType(file.type)) {
+    if (!isAllowedCoverImage(file)) {
       setErrors(prev => ({
         ...prev,
         cover: 'Unsupported image format',

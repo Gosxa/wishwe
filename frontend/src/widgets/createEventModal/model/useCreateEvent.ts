@@ -15,7 +15,7 @@ import {
   getFutureEventDateTimeError,
 } from '@/shared/lib/validation/eventDate';
 import {
-  isAllowedCoverImageType,
+  isAllowedCoverImage,
   MAX_COVER_IMAGE_SIZE,
 } from '@/shared/lib/validation/imageUpload';
 import type { EventVisibility, FieldErrors } from './types';
@@ -134,7 +134,7 @@ export const useCreateEvent = (
   };
 
   const onCoverSelect = (file: File) => {
-    if (!isAllowedCoverImageType(file.type)) {
+    if (!isAllowedCoverImage(file)) {
       setErrors(prev => ({
         ...prev,
         cover: 'Unsupported image format',
