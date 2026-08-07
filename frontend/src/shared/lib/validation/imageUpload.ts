@@ -8,6 +8,8 @@ export const ALLOWED_COVER_IMAGE_TYPES = [
   'image/avif',
   'image/heic',
   'image/heif',
+  'image/heic-sequence',
+  'image/heif-sequence',
 ] as const;
 
 export const MAX_COVER_IMAGE_SIZE = 5 * 1024 * 1024;
