@@ -566,7 +566,7 @@ class EventViewSet(
     ],
 )
 class SharedEventPreviewView(APIView):
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get(self, request, token: UUID):
         event = EventShareService.get_shared_event(token)
