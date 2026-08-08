@@ -23,8 +23,7 @@ use your normal terminal.
 
 ## 2. Configure and start the backend
 
-Open the first terminal and prepare the Django environment. The `.env` file is
-private configuration: do not commit it or put production credentials in it.
+Open the first terminal and prepare the Django environment
 
 ```bash
 cd backend
@@ -43,10 +42,6 @@ DB_PASSWORD=your-database-password
 DB_PORT=5432
 DJANGO_SETTINGS_MODULE=wishwe_api.settings
 ```
-
-`DEBUG` in the environment file is currently ignored because the Django
-settings set it to `False`. This does not prevent the local server from
-starting.
 
 Create the virtual environment and install the backend dependencies.
 
