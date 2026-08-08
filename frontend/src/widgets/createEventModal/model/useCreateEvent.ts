@@ -184,7 +184,7 @@ export const useCreateEvent = (
     if (!categoryId) next.category = 'Category is required';
 
     if (!title.trim()) next.title = 'Title is required';
-    else if (title.length > 50) next.title = 'Up to 50 characters';
+    else if (title.trim().length > 50) next.title = 'Up to 50 characters';
 
     if (!location.trim()) next.location = 'Location is required';
 
