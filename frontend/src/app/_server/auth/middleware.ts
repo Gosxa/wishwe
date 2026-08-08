@@ -136,8 +136,6 @@ export async function authMiddleware(request: NextRequest) {
       ? NextResponse.redirect(new URL('/feed', request.url))
       : forward(request, options);
 
-  if (!refreshToken) return rejectRequest();
-
   const cookieHeader = request.headers.get('cookie') ?? '';
 
   if (accessToken) {
@@ -147,6 +145,8 @@ export async function authMiddleware(request: NextRequest) {
       return acceptRequest({ userId: await sessionIdFrom(meRes) });
     }
   }
+
+  if (!refreshToken) return rejectRequest();
 
   const refreshRes = await attempt(() => beApi.auth.refreshToken(cookieHeader));
 
