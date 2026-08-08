@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Spinner } from '@/shared';
 import type {
   FriendshipStatus,
@@ -8,11 +8,8 @@ import type {
 } from '@/shared/client_api/user/types';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
+import { useProfileToolbar } from '@client_pages/profile/model/useProfileToolbar';
 import { ProfileFeedToolbar } from '@client_pages/profile/widgets/feed/ui/ProfileFeedToolbar';
-import type {
-  ProfileSort,
-  ProfileTab,
-} from '@client_pages/profile/model/types';
 import s from '@client_pages/profile/widgets/feed/ui/profileFeed.module.scss';
 import { UserProfileEmptyState } from './UserProfileEmptyState';
 import { FriendsOnlyState } from './FriendsOnlyState';
@@ -23,8 +20,7 @@ type Props = {
 };
 
 export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
-  const [tab, setTab] = useState<ProfileTab>('plans');
-  const [sort, setSort] = useState<ProfileSort>('recent');
+  const { tab, sort, setTab, setSort } = useProfileToolbar();
 
   const canSeeEvents =
     friendshipStatus === 'friends' || friendshipStatus === 'self';

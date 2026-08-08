@@ -14,11 +14,8 @@ import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { EditEventModal } from '@client_pages/profile/widgets/editEventModal';
 import { PlanItModal } from '@client_pages/profile/widgets/planItModal';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
+import { useProfileToolbar } from '@client_pages/profile/model/useProfileToolbar';
 import { SEARCH_PARAM } from '@client_pages/profile/model/useProfileSearch';
-import type {
-  ProfileSort,
-  ProfileTab,
-} from '@client_pages/profile/model/types';
 import { ProfileFeedToolbar } from './ProfileFeedToolbar';
 import { ProfileFeedEmptyState } from './ProfileFeedEmptyState';
 import s from './profileFeed.module.scss';
@@ -29,8 +26,7 @@ type Props = {
 };
 
 export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
-  const [tab, setTab] = useState<ProfileTab>('plans');
-  const [sort, setSort] = useState<ProfileSort>('recent');
+  const { tab, sort, setTab, setSort } = useProfileToolbar();
 
   const user = useUserStore(state => state.user) ?? initialUser;
 
@@ -77,8 +73,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const handlePlanItConverted = useCallback(() => {
     setPlanningEvent(null);
     setTab('plans');
-    setRefreshKey(key => key + 1);
-  }, []);
+  }, [setTab]);
 
   const handleEventCancelled = useCallback(() => {
     setRefreshKey(key => key + 1);
