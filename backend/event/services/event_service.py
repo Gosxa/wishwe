@@ -510,6 +510,9 @@ class EventService:
 
     @staticmethod
     def can_view(user, event) -> bool:
+        if not user.is_authenticated:
+            return False
+
         if event.creator_id == user.id:
             return True
 
