@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { authUser } from '@/app/_server/auth/getMe';
 import { getSharedEvent } from '@/app/_server/event/getSharedEvent';
 import { getUserByUsername } from '@/app/_server/user/getUserByUsername';
 import { SharedEventPage } from '@/client_pages';
@@ -23,22 +24,28 @@ type Props = {
 
 export default async function Page({ params }: Props) {
   const { token } = await params;
-  const shared = await getSharedEvent(token);
+  const user = await authUser();
+  const returnPath = `/share/${encodeURIComponent(token)}`;
+  const loginHref = `/onboard?${NEXT_PARAM}=${encodeURIComponent(returnPath)}`;
+  const shared = await getSharedEvent(token, {
+    includeCredentials: Boolean(user),
+  });
 
   if (shared.status === 'unauthorized') {
-    redirect(`/onboard?${NEXT_PARAM}=${encodeURIComponent(`/share/${token}`)}`);
+    redirect(loginHref);
   }
 
   const data = shared.status === 'ok' ? shared.data : null;
   const creatorUsername = data?.preview?.creator.username;
 
-  const creatorProfile = creatorUsername
-    ? await getUserByUsername(creatorUsername)
-    : null;
+  const creatorProfile =
+    user && creatorUsername ? await getUserByUsername(creatorUsername) : null;
 
   return (
     <SharedEventPage
-      shared={data}
+      shared={shared}
+      isAuthenticated={Boolean(user)}
+      loginHref={loginHref}
       creatorFriendshipStatus={creatorProfile?.friendship_status ?? null}
     />
   );

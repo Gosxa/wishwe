@@ -6,9 +6,10 @@ import s from './shareErrorModal.module.scss';
 
 type Props = {
   onClose: () => void;
+  actionLabel: string;
 };
 
-export const ShareErrorModal = ({ onClose }: Props) => {
+export const ShareErrorModal = ({ onClose, actionLabel }: Props) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -50,7 +51,7 @@ export const ShareErrorModal = ({ onClose }: Props) => {
         </p>
 
         <button type="button" className={s.action} onClick={onClose}>
-          <span>Go to feed</span>
+          <span>{actionLabel}</span>
         </button>
       </div>
     </div>

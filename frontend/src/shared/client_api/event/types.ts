@@ -6,7 +6,6 @@ type MutualFriend = {
   id: number;
   username: string;
 };
-
 type ParticipantPreview = {
   username: string | null;
   avatar: string | null;
@@ -58,7 +57,6 @@ type EventPreview = {
   cover_image: string | null;
   creator: EventPreviewCreator;
 };
-
 
 type SharedEventResponse =
   | { has_access: true; event: BackendEvent; preview: null }

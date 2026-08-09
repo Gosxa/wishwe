@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Avatar,
   CalendarClock,
@@ -25,6 +26,8 @@ import s from './eventPreviewModal.module.scss';
 
 type Props = {
   preview: EventPreview;
+  isAuthenticated: boolean;
+  loginHref: string;
   friendshipStatus: FriendshipStatus | null;
   onClose: () => void;
 };
@@ -35,6 +38,8 @@ const ALREADY_LINKED = /already/i;
 
 export const EventPreviewModal = ({
   preview,
+  isAuthenticated,
+  loginHref,
   friendshipStatus,
   onClose,
 }: Props) => {
@@ -109,7 +114,7 @@ export const EventPreviewModal = ({
               <img src={cover} alt={title} />
               <span className={s.privacyPill}>
                 <Lock width={14} height={14} />
-                <span>Friends only</span>
+                <span>Private event</span>
               </span>
             </div>
 
@@ -123,15 +128,23 @@ export const EventPreviewModal = ({
                 )}
               </span>
               <div className={s.hostText}>
-                <ProfileLink username={username} className={s.hostName}>
-                  {username}
-                </ProfileLink>
+                {isAuthenticated ? (
+                  <ProfileLink username={username} className={s.hostName}>
+                    {username}
+                  </ProfileLink>
+                ) : (
+                  <span className={s.hostName}>{username}</span>
+                )}
                 <span className={s.hostSub}>shared this event with you</span>
               </div>
             </div>
 
             <div className={s.actions}>
-              {isSent ? (
+              {!isAuthenticated ? (
+                <Link href={loginHref} className={s.addFriend}>
+                  <span>Login to your account</span>
+                </Link>
+              ) : isSent ? (
                 <span className={s.requested}>
                   <Check />
                   <span>Requested</span>
@@ -148,19 +161,23 @@ export const EventPreviewModal = ({
                 </button>
               )}
 
-              <ProfileLink username={username} className={s.profileLink}>
-                See {username}&apos;s profile
-              </ProfileLink>
+              {isAuthenticated && (
+                <ProfileLink username={username} className={s.profileLink}>
+                  See {username}&apos;s profile
+                </ProfileLink>
+              )}
 
-              {request === 'failed' ? (
+              {isAuthenticated && request === 'failed' ? (
                 <p className={s.error} role="alert">
                   Couldn&apos;t send the friend request. Please try again.
                 </p>
               ) : (
                 <p className={s.status}>
-                  {isSent
-                    ? `Request sent. We’ll open the full event here as soon as it’s accepted.`
-                    : `We’ll open the full event here the moment ${username} accepts.`}
+                  {!isAuthenticated
+                    ? 'Log in or create an account to request access.'
+                    : isSent
+                      ? 'Request sent. The full event will open here as soon as you get access.'
+                      : 'Connect with the host to request access to the full event.'}
                 </p>
               )}
             </div>
@@ -188,9 +205,11 @@ export const EventPreviewModal = ({
               <div className={s.lockedHeader}>
                 <Lock />
                 <span>
-                  {isSent
-                    ? `Still hidden — waiting on ${username}`
-                    : `Hidden until ${username} adds you back`}
+                  {!isAuthenticated
+                    ? 'Log in to check your access'
+                    : isSent
+                      ? 'Still hidden — waiting for access'
+                      : 'Hidden until you connect with the host'}
                 </span>
               </div>
 

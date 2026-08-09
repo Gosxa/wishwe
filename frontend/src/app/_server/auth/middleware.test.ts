@@ -116,6 +116,21 @@ describe('authMiddleware', () => {
       expect(forwardedHeader(response, 'x-pathname')).toBe('/');
       expect(forwardedHeader(response, 'x-user-id')).toBeNull();
     });
+
+    it('allows a shared event preview and preserves its return path', async () => {
+      const response = await authMiddleware(
+        makeRequest('/share/89d16b0f-6f08-47db-8bc2-76cc45cd505b'),
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('x-middleware-next')).toBe('1');
+      expect(forwardedHeader(response, 'x-pathname')).toBe(
+        '/share/89d16b0f-6f08-47db-8bc2-76cc45cd505b',
+      );
+      expect(forwardedHeader(response, 'x-user-id')).toBeNull();
+      expect(backendMocks.me).not.toHaveBeenCalled();
+      expect(backendMocks.refreshToken).not.toHaveBeenCalled();
+    });
   });
 
   describe('with a valid access token', () => {
@@ -186,6 +201,22 @@ describe('authMiddleware', () => {
       expect(response.status).toBe(307);
       expect(response.headers.get('location')).toBe(`${ORIGIN}/feed`);
       expect(backendMocks.refreshToken).not.toHaveBeenCalled();
+    });
+
+    it('keeps an authenticated user on a shared event', async () => {
+      backendMocks.me.mockResolvedValue(jsonResponse({ user_id: 7 }));
+
+      const response = await authMiddleware(
+        makeRequest('/share/event-token', {
+          cookie: 'access_token=valid; refresh_token=valid',
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(forwardedHeader(response, 'x-user-id')).toBe('7');
+      expect(forwardedHeader(response, 'x-pathname')).toBe(
+        '/share/event-token',
+      );
     });
   });
 
@@ -304,6 +335,24 @@ describe('authMiddleware', () => {
         `${ORIGIN}/onboard?next=%2Ffeed`,
       );
       expect(backendMocks.me).toHaveBeenCalledOnce();
+    });
+
+    it('falls back to an anonymous shared preview when refresh fails', async () => {
+      backendMocks.me.mockResolvedValue(jsonResponse({}, 401));
+      backendMocks.refreshToken.mockResolvedValue(refreshResponse([], 401));
+
+      const response = await authMiddleware(
+        makeRequest('/share/event-token', {
+          cookie: 'access_token=expired; refresh_token=invalid',
+        }),
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('x-middleware-next')).toBe('1');
+      expect(forwardedHeader(response, 'x-user-id')).toBeNull();
+      expect(forwardedHeader(response, 'x-pathname')).toBe(
+        '/share/event-token',
+      );
     });
 
     it.each([

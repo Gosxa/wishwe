@@ -218,9 +218,9 @@ export const beApi = {
         cache: 'no-store',
       }),
 
-    shared: (token: string, cookieHeader: string) =>
+    shared: (token: string, cookieHeader?: string) =>
       fetch(`${BACKEND}/api/event/share/${encodeURIComponent(token)}/`, {
-        headers: { cookie: cookieHeader },
+        headers: cookieHeader ? { cookie: cookieHeader } : undefined,
         cache: 'no-store',
       }),
 

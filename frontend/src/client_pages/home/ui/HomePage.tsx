@@ -8,15 +8,19 @@ import { useFeedSearch } from '@client_pages/home/model/useFeedSearch';
 import { Feed } from '../widgets/feed';
 import s from './homePage.module.scss';
 
-export default function HomePage() {
+type Props = {
+  showTour?: boolean;
+};
+
+export default function HomePage({ showTour = true }: Props) {
   return (
     <Suspense fallback={null}>
-      <HomePageContent />
+      <HomePageContent showTour={showTour} />
     </Suspense>
   );
 }
 
-function HomePageContent() {
+function HomePageContent({ showTour }: Required<Props>) {
   const search = useFeedSearch();
   const [searchDisabled, setSearchDisabled] = useState(false);
 
@@ -36,7 +40,7 @@ function HomePageContent() {
           <Feed onSearchDisabledChange={setSearchDisabled} />
         </main>
       </div>
-      <FeedTour />
+      {showTour && <FeedTour />}
     </div>
   );
 }

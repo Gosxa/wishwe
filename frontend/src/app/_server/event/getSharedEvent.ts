@@ -1,4 +1,4 @@
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 
 import { beApi } from '@/app/_server/api/backend';
 import type { SharedEventResponse } from '@/shared/client_api/event';
@@ -8,13 +8,23 @@ export type SharedEventResult =
   | { status: 'not-found' }
   | { status: 'unauthorized' };
 
+type GetSharedEventOptions = {
+  includeCredentials: boolean;
+};
 
 export const getSharedEvent = async (
   token: string,
+  { includeCredentials }: GetSharedEventOptions,
 ): Promise<SharedEventResult> => {
-  const cookieStore = await cookies();
+  let cookieHeader: string | undefined;
 
-  const res = await beApi.event.shared(token, cookieStore.toString());
+  if (includeCredentials) {
+    const forwardedCookieHeader = (await headers()).get('cookie');
+
+    cookieHeader = forwardedCookieHeader ?? (await cookies()).toString();
+  }
+
+  const res = await beApi.event.shared(token, cookieHeader);
 
   if (res.status === 401) return { status: 'unauthorized' };
 

@@ -125,8 +125,10 @@ export async function authMiddleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refresh_token')?.value;
 
   const isPublicRoot = request.nextUrl.pathname === '/';
+  const isPublicShare = request.nextUrl.pathname.startsWith('/share/');
+  const isPublicPage = isPublicRoot || isPublicShare;
   const rejectRequest = () =>
-    isPublicRoot ? forward(request) : redirectToOnboard(request);
+    isPublicPage ? forward(request) : redirectToOnboard(request);
 
   const acceptRequest = (options?: {
     cookieHeader?: string;

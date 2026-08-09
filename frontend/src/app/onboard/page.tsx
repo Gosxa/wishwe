@@ -6,9 +6,6 @@ import {
 } from '@/shared/lib/metadata';
 import { NEXT_PARAM, safeNextPath } from '@/shared/lib/nextPath';
 
-// Messenger crawlers carry no cookies, so the auth middleware redirects them
-// here from every protected link — including shared events. This is the page
-// whose tags end up in the preview card.
 export const metadata = buildMetadata({
   title: 'Join WishWe',
   description: 'Create your WishWe account and start planning with friends.',

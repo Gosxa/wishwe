@@ -8,7 +8,6 @@ import {
   EventListParams,
   Paginated,
 } from './types';
-
 const PAGE_SIZE = 5;
 
 const postAction = async (
@@ -114,7 +113,6 @@ export const listCategories = async (): Promise<Category[]> => {
 
   return (await res.json()) as Category[];
 };
-
 
 export const createShareLink = async (id: string): Promise<string> => {
   const res = await fetch(`/next_api/event/${id}/share`, { method: 'POST' });

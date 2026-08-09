@@ -8,11 +8,13 @@ type Props = {
 };
 
 export const DoneScreenContent = ({ variant, feedHref }: Props) => {
+  const primaryLabel = feedHref === '/feed' ? 'To feed' : 'Continue';
+
   if (variant === 'reset') {
     return (
       <div className={s.wrapper}>
         <a href={feedHref} className={s.primary}>
-          <span>To feed</span>
+          <span>{primaryLabel}</span>
         </a>
       </div>
     );
@@ -21,7 +23,7 @@ export const DoneScreenContent = ({ variant, feedHref }: Props) => {
   return (
     <div className={s.wrapper}>
       <a href={feedHref} className={s.primary}>
-        <span>To feed</span>
+        <span>{primaryLabel}</span>
       </a>
       <a href="/friends" className={s.secondary}>
         <span>Find friends</span>
