@@ -1,16 +1,19 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  min-width: 0;
 }
 
 .filters {
   display: flex;
   gap: 8px;
+  min-width: 0;
 }
 
 .filter {
@@ -47,6 +50,7 @@
   display: flex;
   align-items: center;
   gap: 24px;
+  min-width: 0;
 }
 
 .control {
@@ -110,4 +114,30 @@
 .menuItemActive {
   color: clr.$ns-900;
   font-weight: 700;
+}
+
+@include bp.mobile {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filters {
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .filter {
+    flex-shrink: 0;
+  }
+
+  .controls {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
 }

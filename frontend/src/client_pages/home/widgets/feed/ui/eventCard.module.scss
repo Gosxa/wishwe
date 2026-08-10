@@ -387,7 +387,7 @@
 
 @media (max-width: 900px) {
   .surface {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     row-gap: 16px;
   }
 
@@ -399,7 +399,7 @@
 
 @media (max-width: 640px) {
   .body {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     row-gap: 16px;
   }
 

@@ -1,4 +1,5 @@
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/breakpoints' as bp;
 
 .shell {
   display: flex;
@@ -14,6 +15,11 @@
   column-gap: 16px;
   padding-right: var(--page-margin);
   min-width: 0;
+
+  @include bp.mobile {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    padding-right: 0;
+  }
 }
 
 .content {
