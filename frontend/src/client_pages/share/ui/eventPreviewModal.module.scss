@@ -38,7 +38,7 @@ $shell-inset: 12px;
 .modal {
   position: relative;
   display: flex;
-  width: 100%;
+  width: min(920px, calc(100dvw - 48px));
   max-width: 920px;
   min-width: 0;
   max-height: 100%;
@@ -47,6 +47,10 @@ $shell-inset: 12px;
   background: clr.$ns-50;
   overflow: hidden;
   @include anim.modal-enter;
+
+  @include bp.mobile {
+    width: calc(100dvw - 32px);
+  }
 }
 
 .body {
@@ -57,15 +61,18 @@ $shell-inset: 12px;
   flex: 1;
   gap: 40px;
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   min-height: 0;
   padding: (40px - $shell-inset) 40px;
+  overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
   @include scroll.thin;
 
   @include bp.compact {
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
     gap: 24px;
     padding: (72px - $shell-inset) 24px (24px - $shell-inset);
   }
@@ -106,6 +113,8 @@ $shell-inset: 12px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -215,16 +224,22 @@ $shell-inset: 12px;
   align-items: center;
   gap: 12px;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .addFriend {
   @include btn.primary(8px, 100%, 40px);
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .requested {
   @include btn.secondary(8px, 100%, 40px);
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   cursor: default;
 
   &,
@@ -241,10 +256,16 @@ $shell-inset: 12px;
   align-items: center;
   justify-content: center;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 40px;
+  padding: 0 12px;
   border-radius: 8px;
   color: clr.$prm;
   text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
   @include tp.text-button;
 
   &:hover {
@@ -255,16 +276,20 @@ $shell-inset: 12px;
 
 .status {
   @include tp.text-caption;
+  width: 100%;
   margin: 0;
   color: clr.$ns-500;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .error {
   @include tp.text-caption;
+  width: 100%;
   margin: 0;
   color: clr.$err;
   text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .right {
@@ -272,6 +297,8 @@ $shell-inset: 12px;
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 
