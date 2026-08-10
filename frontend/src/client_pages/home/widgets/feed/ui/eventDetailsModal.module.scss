@@ -3,6 +3,7 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/animations' as anim;
 @use '@shared/styles/scrollbars' as scroll;
+@use '@shared/styles/breakpoints' as bp;
 
 .overlay {
   position: fixed;
@@ -10,11 +11,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100dvh;
+  min-width: 0;
   padding: 24px;
+  padding: max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
+  overflow-x: hidden;
   z-index: 100;
   @include anim.modal-overlay-enter;
+
+  @include bp.mobile {
+    align-items: flex-start;
+    padding: 16px;
+    padding: max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
 }
 
 .modal {
@@ -24,13 +40,25 @@
   align-items: start;
   gap: 48px;
   width: min(1200px, 100%);
-  max-height: calc(100vh - 48px);
+  min-width: 0;
+  max-height: 100%;
   padding: 72px 56px 56px;
   border-radius: 16px;
   background: clr.$ns-50;
   overflow-y: auto;
   @include scroll.thin;
   @include anim.modal-enter;
+
+  @include bp.compact {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 72px 24px 24px;
+  }
+
+  @include bp.mobile {
+    gap: 20px;
+    padding: 60px 16px 16px;
+  }
 }
 
 .close {
@@ -51,6 +79,11 @@
   > svg {
     width: 40px;
     height: 40px;
+  }
+
+  @include bp.mobile {
+    top: 12px;
+    right: 12px;
   }
 }
 
@@ -247,6 +280,10 @@
   display: flex;
   gap: 8px;
   width: 100%;
+
+  @include bp.mobile {
+    flex-direction: column;
+  }
 }
 
 .action {
