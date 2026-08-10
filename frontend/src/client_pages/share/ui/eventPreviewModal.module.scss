@@ -11,14 +11,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100dvh;
+  min-width: 0;
   padding: 24px;
+  padding: max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(8px);
+  overflow-x: hidden;
   z-index: 100;
   @include anim.modal-overlay-enter;
 
   @include bp.mobile {
     padding: 16px;
+    padding: max(16px, env(safe-area-inset-top))
+      max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
     align-items: flex-start;
   }
 }
@@ -28,17 +38,15 @@ $shell-inset: 12px;
 .modal {
   position: relative;
   display: flex;
-  width: min(920px, 100%);
-  max-height: calc(100vh - 48px);
+  width: 100%;
+  max-width: 920px;
+  min-width: 0;
+  max-height: 100%;
   padding: $shell-inset 0;
   border-radius: 16px;
   background: clr.$ns-50;
   overflow: hidden;
   @include anim.modal-enter;
-
-  @include bp.mobile {
-    max-height: calc(100vh - 32px);
-  }
 }
 
 .body {
@@ -48,7 +56,9 @@ $shell-inset: 12px;
   align-items: stretch;
   flex: 1;
   gap: 40px;
+  width: 100%;
   min-width: 0;
+  min-height: 0;
   padding: (40px - $shell-inset) 40px;
   overflow-y: auto;
   overscroll-behavior: contain;
