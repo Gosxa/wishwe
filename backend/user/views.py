@@ -383,6 +383,7 @@ class CookieTokenRefreshView(TokenRefreshView):
             httponly=True,
             secure=not settings.DEBUG,
             samesite="Lax",
+            max_age=60 * 60 * 24,
         )
 
         return response
