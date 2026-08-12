@@ -38,12 +38,14 @@ export const useProfileEvents = ({
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
 
-  const selection = `${tab}|${sort}|${search}|${refreshKey}|${refreshToken}`;
+  const active = userId != null && enabled;
+  const selection = `${userId}|${active}|${tab}|${sort}|${search}|${refreshKey}|${refreshToken}`;
   const [loadingSelection, setLoadingSelection] = useState(selection);
 
   if (selection !== loadingSelection) {
     setLoadingSelection(selection);
-    setIsLoading(true);
+    setIsLoadingMore(false);
+    if (active) setIsLoading(true);
   }
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export const useProfileEvents = ({
     const requestId = ++requestIdRef.current;
 
     pageRef.current = 1;
-    loadingRef.current = false;
+    loadingRef.current = true;
 
     listUserEvents(userId, {
       ...toProfileEventListParams(tab, sort, search),
@@ -75,8 +77,15 @@ export const useProfileEvents = ({
       .finally(() => {
         if (requestId !== requestIdRef.current) return;
 
+        loadingRef.current = false;
         setIsLoading(false);
       });
+
+    return () => {
+      if (requestId === requestIdRef.current) {
+        requestIdRef.current += 1;
+      }
+    };
   }, [userId, tab, sort, search, refreshKey, refreshToken, enabled]);
 
   const loadMore = useCallback(() => {
@@ -101,17 +110,19 @@ export const useProfileEvents = ({
       })
       .catch(() => {})
       .finally(() => {
+        if (requestId !== requestIdRef.current) return;
+
         loadingRef.current = false;
         setIsLoadingMore(false);
       });
   }, [userId, tab, sort, search, hasMore, enabled]);
 
   return {
-    events: enabled ? events : [],
-    isLoading: enabled ? isLoading : false,
-    isLoadingMore,
-    hasMore: enabled ? hasMore : false,
+    events: active ? events : [],
+    isLoading: active ? isLoading : false,
+    isLoadingMore: active ? isLoadingMore : false,
+    hasMore: active ? hasMore : false,
     loadMore,
-    error,
+    error: active ? error : null,
   };
 };

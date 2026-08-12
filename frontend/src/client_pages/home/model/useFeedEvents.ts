@@ -34,11 +34,19 @@ export const useFeedEvents = () => {
     setIsLoading(true);
   }
 
+  const requestKey = `${selection}|${refreshToken}`;
+  const [pagingKey, setPagingKey] = useState(requestKey);
+
+  if (requestKey !== pagingKey) {
+    setPagingKey(requestKey);
+    setIsLoadingMore(false);
+  }
+
   useEffect(() => {
     const requestId = ++requestIdRef.current;
 
     pageRef.current = 1;
-    loadingRef.current = false;
+    loadingRef.current = true;
 
     listEvents({ ...toEventListParams(filter, reach, sort, search), page: 1 })
       .then(data => {
@@ -58,8 +66,15 @@ export const useFeedEvents = () => {
       .finally(() => {
         if (requestId !== requestIdRef.current) return;
 
+        loadingRef.current = false;
         setIsLoading(false);
       });
+
+    return () => {
+      if (requestId === requestIdRef.current) {
+        requestIdRef.current += 1;
+      }
+    };
   }, [filter, reach, sort, search, refreshToken]);
 
   const loadMore = useCallback(() => {
@@ -84,6 +99,8 @@ export const useFeedEvents = () => {
       })
       .catch(() => {})
       .finally(() => {
+        if (requestId !== requestIdRef.current) return;
+
         loadingRef.current = false;
         setIsLoadingMore(false);
       });
