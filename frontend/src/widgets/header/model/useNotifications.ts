@@ -214,7 +214,15 @@ export const useNotifications = (isOpen: boolean) => {
         nextNotifications.some(notification => !notification.is_read);
 
       if (shouldMarkAllRead) {
-        await readAllNotifications(controller.signal);
+        try {
+          await readAllNotifications(controller.signal);
+        } catch (markError) {
+          if (!isAbortError(markError)) {
+            setError("We couldn't mark notifications as read.");
+          }
+
+          return;
+        }
 
         if (controller.signal.aborted) return;
 
