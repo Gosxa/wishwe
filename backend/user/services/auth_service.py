@@ -166,7 +166,7 @@ class AuthService:
             httponly=True,
             secure=not settings.DEBUG,
             samesite="Lax",
-            max_age=60 * 60,
+            max_age=60 * 60 * 24,
         )
 
         response.set_cookie(
@@ -175,6 +175,7 @@ class AuthService:
             httponly=True,
             secure=not settings.DEBUG,
             samesite="Lax",
+            max_age=60 * 60 * 24 * 30,
         )
 
         return response
