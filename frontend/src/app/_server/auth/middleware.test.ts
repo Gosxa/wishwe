@@ -53,12 +53,12 @@ describe('authMiddleware', () => {
   describe('without a refresh token', () => {
     it('redirects a protected page to onboarding with the complete return path', async () => {
       const response = await authMiddleware(
-        makeRequest('/profile/alice?filter=wishes&sort=soonest'),
+        makeRequest('/user/alice?filter=wishes&sort=soonest'),
       );
 
       expect(response.status).toBe(307);
       expect(response.headers.get('location')).toBe(
-        `${ORIGIN}/onboard?next=%2Fprofile%2Falice%3Ffilter%3Dwishes%26sort%3Dsoonest`,
+        `${ORIGIN}/onboard?next=%2Fuser%2Falice%3Ffilter%3Dwishes%26sort%3Dsoonest`,
       );
       expect(backendMocks.me).not.toHaveBeenCalled();
       expect(backendMocks.refreshToken).not.toHaveBeenCalled();
@@ -239,7 +239,7 @@ describe('authMiddleware', () => {
       );
 
       const response = await authMiddleware(
-        makeRequest('/profile/bob?filter=archive', { cookie: originalCookie }),
+        makeRequest('/user/bob?filter=archive', { cookie: originalCookie }),
       );
 
       expect(backendMocks.me).toHaveBeenNthCalledWith(1, originalCookie);
@@ -248,7 +248,7 @@ describe('authMiddleware', () => {
       expect(backendMocks.me).toHaveBeenNthCalledWith(2, updatedCookie);
       expect(forwardedHeader(response, 'cookie')).toBe(updatedCookie);
       expect(forwardedHeader(response, 'x-pathname')).toBe(
-        '/profile/bob?filter=archive',
+        '/user/bob?filter=archive',
       );
       expect(forwardedHeader(response, 'x-user-id')).toBe('84');
       expect(response.headers.getSetCookie()).toEqual([

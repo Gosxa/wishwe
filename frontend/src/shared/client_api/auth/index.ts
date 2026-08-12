@@ -24,7 +24,9 @@ export const verifyCode = async (
   const res = await post('/next_api/auth/verify-code', { email, code });
 
   if (!res.ok) {
-    const { error } = await res.json();
+    const { error } = (await res.json().catch(() => ({}))) as {
+      error?: string;
+    };
 
     throw new Error(error ?? 'Invalid code');
   }

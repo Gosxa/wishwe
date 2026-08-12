@@ -98,17 +98,25 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
   const onRemoveAvatar = () => setAvatarUrl(null);
 
   const onSubmit = async () => {
-    if (!termsAccepted) return;
+    if (!termsAccepted || !check(nickname)) return;
 
-    const { available } = await checkUsername(nickname);
-
-    if (!check(nickname) || !available) return;
     setLoading(true);
     setSubmitError('');
 
     try {
+      const { available } = await checkUsername(nickname);
+
+      if (!available) {
+        setIsUnique(false);
+        set.error('Nickname is already taken. Please, choose another one');
+
+        return;
+      }
+
       if (variant === 'email') {
         if (!verificationToken) return;
+
+        setIsUnique(true);
 
         const user = await register({
           token: verificationToken,
@@ -126,6 +134,8 @@ export const usePersonalData = (variant: PersonalDataVariant) => {
           setUser(user);
         }
       } else {
+        setIsUnique(true);
+
         await onBoard(nickname, firstName, lastName);
 
         if (avatarChanged && avatarUrl) await changeAvatar(avatarUrl);
