@@ -9,18 +9,9 @@ const authMocks = vi.hoisted(() => ({
   resetPassword: vi.fn(),
 }));
 
-const userApiMocks = vi.hoisted(() => {
-  class AcceptInviteError extends Error {
-    constructor(public body: Record<string, unknown>) {
-      super('Failed to accept invite');
-    }
-  }
-
-  return {
-    acceptInvite: vi.fn(),
-    AcceptInviteError,
-  };
-});
+const userApiMocks = vi.hoisted(() => ({
+  acceptInvite: vi.fn(),
+}));
 
 const modelMocks = vi.hoisted(() => ({
   next: vi.fn(),
@@ -37,10 +28,12 @@ vi.mock('@/shared/client_api/auth', () => ({
   resetPassword: authMocks.resetPassword,
 }));
 
-vi.mock('@/shared/client_api/user', () => ({
-  acceptInvite: userApiMocks.acceptInvite,
-  AcceptInviteError: userApiMocks.AcceptInviteError,
-}));
+vi.mock('@/shared/client_api/user', async importOriginal => {
+  const actual =
+    await importOriginal<typeof import('@/shared/client_api/user')>();
+
+  return { ...actual, acceptInvite: userApiMocks.acceptInvite };
+});
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: routerMocks.push }),
@@ -60,6 +53,7 @@ vi.mock('@/client_pages/onboard/model', async importOriginal => {
 
 import { SCREEN_ID, useOnboardDataStore } from '@/client_pages/onboard/model';
 import type { Profile } from '@/shared/client_api/auth/types';
+import { AcceptInviteError } from '@/shared/client_api/user';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoginPassword } from './useLoginPassword';
@@ -146,7 +140,7 @@ describe('useLoginPassword', () => {
   it('shows the invite-specific error and clears loading', async () => {
     modelMocks.invite = { token: 'used-token' };
     userApiMocks.acceptInvite.mockRejectedValueOnce(
-      new userApiMocks.AcceptInviteError({ detail: 'used' }),
+      new AcceptInviteError({ detail: 'used' }),
     );
     const { result } = renderHook(() => useLoginPassword());
 
