@@ -7,16 +7,6 @@ const authMocks = vi.hoisted(() => ({
   loginWithGoogle: vi.fn(),
 }));
 
-const userApiMocks = vi.hoisted(() => {
-  class AcceptInviteError extends Error {
-    constructor(public body: Record<string, unknown>) {
-      super('Failed to accept invite');
-    }
-  }
-
-  return { AcceptInviteError };
-});
-
 const modelMocks = vi.hoisted(() => ({
   next: vi.fn(),
   invite: null as { token: string } | null,
@@ -30,10 +20,6 @@ const routerMocks = vi.hoisted(() => ({
 
 vi.mock('@/shared/client_api/auth', () => ({
   loginWithGoogle: authMocks.loginWithGoogle,
-}));
-
-vi.mock('@/shared/client_api/user', () => ({
-  AcceptInviteError: userApiMocks.AcceptInviteError,
 }));
 
 vi.mock('next/navigation', () => ({
@@ -55,6 +41,7 @@ vi.mock('@/client_pages/onboard/model', async importOriginal => {
 
 import { SCREEN_ID, useOnboardDataStore } from '@/client_pages/onboard/model';
 import type { Profile } from '@/shared/client_api/auth/types';
+import { AcceptInviteError } from '@/shared/client_api/user';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useLoginScreen } from './useLoginScreen';
@@ -274,7 +261,7 @@ describe('useLoginScreen', () => {
 
   it('shows the invite-specific error from post-auth processing', async () => {
     modelMocks.handleGooglePostAuth.mockRejectedValueOnce(
-      new userApiMocks.AcceptInviteError({ detail: 'used' }),
+      new AcceptInviteError({ detail: 'used' }),
     );
     const { result } = renderHook(() => useLoginScreen());
     const promise = startGoogle(result);

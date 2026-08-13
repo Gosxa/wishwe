@@ -3,33 +3,26 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const eventApiMocks = vi.hoisted(() => {
-  class CreateEventError extends Error {
-    body: Record<string, unknown>;
-
-    constructor(body: Record<string, unknown>) {
-      super('Failed to create event');
-      this.body = body;
-    }
-  }
-
-  return {
-    createEvent: vi.fn(),
-    listCategories: vi.fn(),
-    CreateEventError,
-  };
-});
+const eventApiMocks = vi.hoisted(() => ({
+  createEvent: vi.fn(),
+  listCategories: vi.fn(),
+}));
 
 const imageMocks = vi.hoisted(() => ({
   isAllowedCoverImage: vi.fn(),
   prepareCoverImage: vi.fn(),
 }));
 
-vi.mock('@/shared/client_api/event', () => ({
-  createEvent: eventApiMocks.createEvent,
-  listCategories: eventApiMocks.listCategories,
-  CreateEventError: eventApiMocks.CreateEventError,
-}));
+vi.mock('@/shared/client_api/event', async importOriginal => {
+  const actual =
+    await importOriginal<typeof import('@/shared/client_api/event')>();
+
+  return {
+    ...actual,
+    createEvent: eventApiMocks.createEvent,
+    listCategories: eventApiMocks.listCategories,
+  };
+});
 
 vi.mock('@/shared/lib/validation/imageUpload', () => ({
   isAllowedCoverImage: imageMocks.isAllowedCoverImage,
@@ -37,6 +30,7 @@ vi.mock('@/shared/lib/validation/imageUpload', () => ({
   prepareCoverImage: imageMocks.prepareCoverImage,
 }));
 
+import { CreateEventError } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { useCreateEvent } from './useCreateEvent';
 
@@ -221,7 +215,7 @@ describe('useCreateEvent', () => {
 
   it('maps nested backend field errors and always clears loading state', async () => {
     eventApiMocks.createEvent.mockRejectedValue(
-      new eventApiMocks.CreateEventError({
+      new CreateEventError({
         error: {
           title: ['This title already exists.'],
           external_link: ['Only HTTPS links are allowed.'],

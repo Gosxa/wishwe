@@ -3,28 +3,21 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const eventApiMocks = vi.hoisted(() => {
-  class ConvertEventError extends Error {
-    body: Record<string, unknown>;
-
-    constructor(body: Record<string, unknown>) {
-      super('Failed to convert wish to plan');
-      this.body = body;
-    }
-  }
-
-  return {
-    convertToPlan: vi.fn(),
-    ConvertEventError,
-  };
-});
-
-vi.mock('@/shared/client_api/event', () => ({
-  convertToPlan: eventApiMocks.convertToPlan,
-  ConvertEventError: eventApiMocks.ConvertEventError,
+const eventApiMocks = vi.hoisted(() => ({
+  convertToPlan: vi.fn(),
 }));
 
-import type { BackendEvent } from '@/shared/client_api/event';
+vi.mock('@/shared/client_api/event', async importOriginal => {
+  const actual =
+    await importOriginal<typeof import('@/shared/client_api/event')>();
+
+  return { ...actual, convertToPlan: eventApiMocks.convertToPlan };
+});
+
+import {
+  type BackendEvent,
+  ConvertEventError,
+} from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { usePlanIt } from './usePlanIt';
 
@@ -259,7 +252,7 @@ describe('usePlanIt', () => {
 
   it('maps nested DRF field and form errors and always ends loading', async () => {
     eventApiMocks.convertToPlan.mockRejectedValue(
-      new eventApiMocks.ConvertEventError({
+      new ConvertEventError({
         error: {
           event_date: ['Choose a later date.'],
           event_time: ['That time is unavailable.'],
@@ -287,7 +280,7 @@ describe('usePlanIt', () => {
 
   it('supports flat DRF errors and uses detail as the submit message', async () => {
     eventApiMocks.convertToPlan.mockRejectedValue(
-      new eventApiMocks.ConvertEventError({
+      new ConvertEventError({
         event_time: ['The plan must start later.'],
         detail: 'Conversion rejected.',
       }),
@@ -321,7 +314,7 @@ describe('usePlanIt', () => {
 
   it('clears server errors when the corresponding values are changed', async () => {
     eventApiMocks.convertToPlan.mockRejectedValue(
-      new eventApiMocks.ConvertEventError({
+      new ConvertEventError({
         error: {
           event_date: ['Choose another date.'],
           max_participants: ['Choose another maximum.'],

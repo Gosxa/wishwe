@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from '@shared/ui/icons';
 import { getEvent, GetEventError } from '@/shared/client_api/event';
@@ -25,6 +25,21 @@ const FORBIDDEN_MESSAGE =
 export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   const [event, setEvent] = useState<FeedEvent | null>(null);
   const [error, setError] = useState<LoadError | null>(null);
+  const hasClosed = useRef(false);
+  const dismissTimeout = useRef<number | null>(null);
+
+  const closeOnce = useCallback(() => {
+    if (hasClosed.current) return;
+
+    hasClosed.current = true;
+
+    if (dismissTimeout.current !== null) {
+      window.clearTimeout(dismissTimeout.current);
+      dismissTimeout.current = null;
+    }
+
+    onClose();
+  }, [onClose]);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,21 +67,24 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
     if (!error) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') closeOnce();
     };
 
     const timeout = window.setTimeout(
-      onClose,
+      closeOnce,
       error === 'forbidden' ? FORBIDDEN_DISMISS_MS : NOTICE_DISMISS_MS,
     );
+
+    dismissTimeout.current = timeout;
 
     document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.clearTimeout(timeout);
+      if (dismissTimeout.current === timeout) dismissTimeout.current = null;
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [error, onClose]);
+  }, [closeOnce, error]);
 
   if (error === 'forbidden') {
     return createPortal(
@@ -79,7 +97,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
 
   if (error === 'unavailable') {
     return (
-      <div className={s.overlay} onClick={onClose}>
+      <div className={s.overlay} onClick={closeOnce}>
         <div
           className={s.notice}
           role="alert"
@@ -89,7 +107,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
           <button
             type="button"
             className={s.close}
-            onClick={onClose}
+            onClick={closeOnce}
             aria-label="Dismiss"
           >
             <X />
@@ -107,7 +125,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
       enableDetails
       autoOpenDetails
       detailsOnly
-      onDetailsClose={onClose}
+      onDetailsClose={closeOnce}
     />
   );
 };

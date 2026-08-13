@@ -3,33 +3,26 @@
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-const eventApiMocks = vi.hoisted(() => {
-  class UpdateEventError extends Error {
-    body: Record<string, unknown>;
-
-    constructor(body: Record<string, unknown>) {
-      super('Failed to update event');
-      this.body = body;
-    }
-  }
-
-  return {
-    listCategories: vi.fn(),
-    updateEvent: vi.fn(),
-    UpdateEventError,
-  };
-});
+const eventApiMocks = vi.hoisted(() => ({
+  listCategories: vi.fn(),
+  updateEvent: vi.fn(),
+}));
 
 const imageMocks = vi.hoisted(() => ({
   isAllowedCoverImage: vi.fn(),
   prepareCoverImage: vi.fn(),
 }));
 
-vi.mock('@/shared/client_api/event', () => ({
-  listCategories: eventApiMocks.listCategories,
-  updateEvent: eventApiMocks.updateEvent,
-  UpdateEventError: eventApiMocks.UpdateEventError,
-}));
+vi.mock('@/shared/client_api/event', async importOriginal => {
+  const actual =
+    await importOriginal<typeof import('@/shared/client_api/event')>();
+
+  return {
+    ...actual,
+    listCategories: eventApiMocks.listCategories,
+    updateEvent: eventApiMocks.updateEvent,
+  };
+});
 
 vi.mock('@/shared/lib/validation/imageUpload', () => ({
   isAllowedCoverImage: imageMocks.isAllowedCoverImage,
@@ -37,7 +30,7 @@ vi.mock('@/shared/lib/validation/imageUpload', () => ({
   prepareCoverImage: imageMocks.prepareCoverImage,
 }));
 
-import type { BackendEvent } from '@/shared/client_api/event';
+import { type BackendEvent, UpdateEventError } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { useEditEvent } from './useEditEvent';
 
@@ -254,7 +247,7 @@ describe('useEditEvent', () => {
 
   it('maps backend errors and keeps the original event unsaved', async () => {
     eventApiMocks.updateEvent.mockRejectedValue(
-      new eventApiMocks.UpdateEventError({
+      new UpdateEventError({
         error: {
           event_date: ['Choose a later date.'],
           cover_image: ['The image could not be stored.'],
