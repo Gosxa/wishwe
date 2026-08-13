@@ -58,7 +58,11 @@ export const useFeedSearch = () => {
     [clearTimer, commit],
   );
 
-  useEffect(() => clearTimer, [clearTimer]);
+  useEffect(() => {
+    clearTimer();
+
+    return clearTimer;
+  }, [clearTimer, committed]);
 
   return { value, onChange, onSearch };
 };
