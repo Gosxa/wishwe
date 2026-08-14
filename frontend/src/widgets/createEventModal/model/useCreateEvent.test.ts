@@ -31,6 +31,7 @@ vi.mock('@/shared/lib/validation/imageUpload', () => ({
 }));
 
 import { CreateEventError } from '@/shared/client_api/event';
+import { MAX_COVER_IMAGE_SIZE } from '@/shared/lib/validation/imageUpload';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
 import { useCreateEvent } from './useCreateEvent';
 
@@ -210,6 +211,70 @@ describe('useCreateEvent', () => {
 
     expect(result.current.cover.error).toBe('Unsupported image format');
     expect(imageMocks.prepareCoverImage).not.toHaveBeenCalled();
+    expect(result.current.cover.isProcessing).toBe(false);
+  });
+
+  it('accepts the size limit and rejects a file one byte over it', async () => {
+    const { result } = renderCreateHook();
+    const oversizedCover = new File(
+      [new Uint8Array(MAX_COVER_IMAGE_SIZE + 1)],
+      'oversized.png',
+      { type: 'image/png' },
+    );
+
+    await act(async () => result.current.cover.onSelect(oversizedCover));
+
+    expect(result.current.cover.error).toBe('Image must be 5 MB or less');
+    expect(imageMocks.prepareCoverImage).not.toHaveBeenCalled();
+
+    const boundaryCover = new File(
+      [new Uint8Array(MAX_COVER_IMAGE_SIZE)],
+      'at-limit.png',
+      { type: 'image/png' },
+    );
+
+    await act(async () => result.current.cover.onSelect(boundaryCover));
+
+    expect(imageMocks.prepareCoverImage).toHaveBeenCalledWith(boundaryCover);
+    expect(result.current.cover.error).toBeUndefined();
+    expect(result.current.cover.previewUrl).toBe('blob:cover-preview');
+  });
+
+  it('rejects a converted image that exceeds the size limit', async () => {
+    const convertedCover = new File(
+      [new Uint8Array(MAX_COVER_IMAGE_SIZE + 1)],
+      'converted.jpg',
+      { type: 'image/jpeg' },
+    );
+
+    imageMocks.prepareCoverImage.mockResolvedValue(convertedCover);
+    const { result } = renderCreateHook();
+    const heicCover = new File(['heic'], 'cover.heic', {
+      type: 'image/heic',
+    });
+
+    await act(async () => result.current.cover.onSelect(heicCover));
+
+    expect(result.current.cover.error).toBe(
+      'Converted image must be 5 MB or less',
+    );
+    expect(result.current.cover.previewUrl).toBeNull();
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
+    expect(result.current.cover.isProcessing).toBe(false);
+  });
+
+  it('surfaces an image preparation failure and restores processing state', async () => {
+    imageMocks.prepareCoverImage.mockRejectedValue(new Error('decode failed'));
+    const { result } = renderCreateHook();
+    const heicCover = new File(['heic'], 'broken.heic', {
+      type: 'image/heic',
+    });
+
+    await act(async () => result.current.cover.onSelect(heicCover));
+
+    expect(result.current.cover.error).toBe('Could not process this image');
+    expect(result.current.cover.previewUrl).toBeNull();
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
     expect(result.current.cover.isProcessing).toBe(false);
   });
 
