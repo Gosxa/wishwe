@@ -63,6 +63,15 @@ const generatedImages = () => [
   { format: 'story', blob: new Blob(['story'], { type: 'image/png' }) },
 ];
 
+const deferred = <T,>() => {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>(promiseResolve => {
+    resolve = promiseResolve;
+  });
+
+  return { promise, resolve };
+};
+
 const renderModal = (isOwn = false) => {
   const returnFocusRef = createRef<HTMLButtonElement>();
 
@@ -177,6 +186,77 @@ describe('ShareEventModal', () => {
 
     expect(mocks.createShareLink).toHaveBeenCalledTimes(1);
     expect(mocks.createShareLink).toHaveBeenCalledWith('42');
+  });
+
+  it('does not expose the protected fallback while an owner link loads', async () => {
+    const shareLink = deferred<string>();
+
+    mocks.createShareLink.mockReturnValueOnce(shareLink.promise);
+    renderModal(true);
+
+    const destinations = ['Telegram', 'WhatsApp', 'X', 'Facebook'];
+
+    destinations.forEach(name => {
+      const link = screen.getByRole('link', { name });
+
+      expect(link.getAttribute('href')).toBe('#');
+      expect(link.getAttribute('aria-disabled')).toBe('true');
+    });
+
+    fireEvent.click(screen.getByRole('link', { name: 'Telegram' }));
+    expect(windowOpen).not.toHaveBeenCalled();
+
+    shareLink.resolve('https://api.example.test/share/public-token');
+
+    await waitFor(() => {
+      const telegram = new URL(
+        screen.getByRole('link', { name: 'Telegram' }).getAttribute('href')!,
+      );
+
+      expect(telegram.searchParams.get('url')).toBe(
+        `${window.location.origin}/share/public-token`,
+      );
+    });
+
+    destinations.forEach(name => {
+      expect(
+        screen.getByRole('link', { name }).getAttribute('aria-disabled'),
+      ).toBe('false');
+    });
+  });
+
+  it('does not reset focus when the close callback changes', () => {
+    const returnFocusRef = createRef<HTMLButtonElement>();
+    const firstOnClose = vi.fn();
+    const nextOnClose = vi.fn();
+    const view = render(
+      <ShareEventModal
+        event={event}
+        isOwn={false}
+        onClose={firstOnClose}
+        returnFocusRef={returnFocusRef}
+      />,
+    );
+    const nextFormat = screen.getByRole('button', {
+      name: 'Next share format',
+    });
+
+    nextFormat.focus();
+    view.rerender(
+      <ShareEventModal
+        event={event}
+        isOwn={false}
+        onClose={nextOnClose}
+        returnFocusRef={returnFocusRef}
+      />,
+    );
+
+    expect(document.activeElement).toBe(nextFormat);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(firstOnClose).not.toHaveBeenCalled();
+    expect(nextOnClose).toHaveBeenCalledTimes(1);
   });
 
   it('moves through formats with controls and the arrow keys', async () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { archiveEvent } from '@/shared/client_api/event';
@@ -51,6 +51,10 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
     setIsOpen(false);
     setIsShareOpen(true);
   };
+
+  const handleShareClose = useCallback(() => {
+    setIsShareOpen(false);
+  }, []);
 
   const handleCancelEvent = () => {
     setIsOpen(false);
@@ -125,7 +129,7 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
           <ShareEventModal
             event={event}
             isOwn={isOwn}
-            onClose={() => setIsShareOpen(false)}
+            onClose={handleShareClose}
             returnFocusRef={triggerRef}
           />,
           document.body,

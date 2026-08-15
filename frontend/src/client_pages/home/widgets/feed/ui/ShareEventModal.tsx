@@ -140,7 +140,9 @@ export const ShareEventModal = ({
 }: Props) => {
   const [activeFormat, setActiveFormat] =
     useState<ShareFormat>(readStoredFormat);
-  const [shareLink, setShareLink] = useState(() => fallbackShareLink(event.id));
+  const [shareLink, setShareLink] = useState<string | null>(() =>
+    isOwn ? null : fallbackShareLink(event.id),
+  );
   const [images, setImages] = useState<PreparedShareImage[] | null>(null);
   const [imageError, setImageError] = useState(false);
   const [imageClipboard, setImageClipboard] = useState(supportsImageClipboard);
@@ -149,11 +151,16 @@ export const ShareEventModal = ({
   const [showLinkToast, setShowLinkToast] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
   const linkPromiseRef = useRef<Promise<string> | null>(null);
   const imagesPromiseRef = useRef<Promise<GeneratedShareImage[]> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useBodyScrollLock();
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   const getShareLink = useCallback(() => {
     if (!linkPromiseRef.current) {
@@ -214,7 +221,7 @@ export const ShareEventModal = ({
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
       if (keyboardEvent.key === 'Escape') {
         keyboardEvent.preventDefault();
-        onClose();
+        onCloseRef.current();
 
         return;
       }
@@ -271,7 +278,7 @@ export const ShareEventModal = ({
       document.removeEventListener('keydown', handleKeyDown);
       returnFocus?.focus();
     };
-  }, [onClose, returnFocusRef]);
+  }, [returnFocusRef]);
 
   useEffect(() => {
     return () => {
@@ -357,22 +364,32 @@ export const ShareEventModal = ({
   const isImageReady = Boolean(activeImage && activeUrl);
   const activeSpec = SHARE_FORMATS.find(format => format.id === activeFormat)!;
   const socialUrls = useMemo(
-    () => ({
-      telegram: socialShareUrl('telegram', shareLink, event.title),
-      whatsapp: socialShareUrl('whatsapp', shareLink, event.title),
-      x: socialShareUrl('x', shareLink, event.title),
-      facebook: socialShareUrl('facebook', shareLink, event.title),
-    }),
+    () =>
+      shareLink
+        ? {
+            telegram: socialShareUrl('telegram', shareLink, event.title),
+            whatsapp: socialShareUrl('whatsapp', shareLink, event.title),
+            x: socialShareUrl('x', shareLink, event.title),
+            facebook: socialShareUrl('facebook', shareLink, event.title),
+          }
+        : null,
     [event.title, shareLink],
   );
 
   const handleTelegramClick = (clickEvent: MouseEvent<HTMLAnchorElement>) => {
     clickEvent.preventDefault();
+
+    if (!socialUrls) return;
+
     window.open(
       socialUrls.telegram,
       'wishwe-telegram-share',
       'popup,width=620,height=640,noopener,noreferrer',
     );
+  };
+
+  const handleSocialClick = (clickEvent: MouseEvent<HTMLAnchorElement>) => {
+    if (!socialUrls) clickEvent.preventDefault();
   };
 
   const handleStoriesClick = (clickEvent: MouseEvent<HTMLAnchorElement>) => {
@@ -387,27 +404,30 @@ export const ShareEventModal = ({
     {
       id: 'telegram',
       label: 'Telegram',
-      href: socialUrls.telegram,
+      href: socialUrls?.telegram,
       icon: '/icons/share/telegram.svg',
       onClick: handleTelegramClick,
     },
     {
       id: 'whatsapp',
       label: 'WhatsApp',
-      href: socialUrls.whatsapp,
+      href: socialUrls?.whatsapp,
       icon: '/icons/share/whatsapp.svg',
+      onClick: handleSocialClick,
     },
     {
       id: 'x',
       label: 'X',
-      href: socialUrls.x,
+      href: socialUrls?.x,
       icon: '/icons/share/x.svg',
+      onClick: handleSocialClick,
     },
     {
       id: 'facebook',
       label: 'Facebook',
-      href: socialUrls.facebook,
+      href: socialUrls?.facebook,
       icon: '/icons/share/facebook.svg',
+      onClick: handleSocialClick,
     },
   ];
 
@@ -539,9 +559,10 @@ export const ShareEventModal = ({
             <a
               key={item.id}
               className={s.networkItem}
-              href={item.href}
+              href={item.href ?? '#'}
               target="_blank"
               rel="noopener noreferrer"
+              aria-disabled={!item.href}
               onClick={item.onClick}
             >
               <span className={s.networkButton}>
