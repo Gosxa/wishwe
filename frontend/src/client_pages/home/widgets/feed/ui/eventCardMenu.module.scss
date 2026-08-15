@@ -51,6 +51,10 @@
   }
 }
 
+.share {
+  color: clr.$prm;
+}
+
 .divider {
   height: 1px;
   background: clr.$ns-200;
@@ -105,22 +109,6 @@
 
 .confirmConfirm {
   @include btn.primary(0, 100%, 52px);
-}
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 32px;
-  z-index: 200;
-  transform: translateX(-50%);
-  padding: 12px 24px;
-  border-radius: 12px;
-  background: clr.$ns-900;
-  color: clr.$ns-50;
-  box-shadow: 0 8px 24px rgba(clr.$ns-900, 0.24);
-  white-space: nowrap;
-
-  @include tp.text-body;
 }
 
 @media (max-width: 640px) {
