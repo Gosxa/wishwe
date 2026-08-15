@@ -1,61 +1,27 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
-import { archiveEvent, createShareLink } from '@/shared/client_api/event';
+import { archiveEvent } from '@/shared/client_api/event';
+import type { FeedEvent } from '@client_pages/home/model/types';
 import { DotsVertical } from '@shared/ui/icons';
+import { ShareEventModal } from './ShareEventModal';
 import s from './eventCardMenu.module.scss';
 
 type Props = {
-  eventId: string;
-  eventType: 'plan' | 'wish';
+  event: FeedEvent;
   isOwn?: boolean;
   onCancelled?: () => void;
 };
 
-const toCurrentOrigin = (shareUrl: string) => {
-  try {
-    return `${window.location.origin}${new URL(shareUrl).pathname}`;
-  } catch {
-    return shareUrl;
-  }
-};
-
-const shareLink = async (eventId: string, isOwn: boolean) => {
-  const fallback = `${window.location.origin}/feed?event=${eventId}`;
-
-  if (!isOwn) {
-    return fallback;
-  }
-
-  try {
-    return toCurrentOrigin(await createShareLink(eventId));
-  } catch {
-    return fallback;
-  }
-};
-
-export const EventCardMenu = ({
-  eventId,
-  eventType,
-  isOwn = false,
-  onCancelled,
-}: Props) => {
+export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
-  const [isLinkCopied, setIsLinkCopied] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
-      }
-    };
-  }, []);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -81,38 +47,14 @@ export const EventCardMenu = ({
     };
   }, [isOpen]);
 
-  const handleCopyLink = async () => {
-    const linkPromise = shareLink(eventId, isOwn);
-
-    try {
-      // Safari fix
-      if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
-        const item = new ClipboardItem({
-          'text/plain': linkPromise.then(
-            link => new Blob([link], { type: 'text/plain' }),
-          ),
-        });
-
-        await navigator.clipboard.write([item]);
-      } else {
-        await navigator.clipboard.writeText(await linkPromise);
-      }
-
-      setIsLinkCopied(true);
-
-      if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current);
-      }
-
-      copiedTimeoutRef.current = setTimeout(() => {
-        setIsLinkCopied(false);
-      }, 2000);
-    } catch {
-      // clipboard unavailable — ignore
-    } finally {
-      setIsOpen(false);
-    }
+  const handleShareEvent = () => {
+    setIsOpen(false);
+    setIsShareOpen(true);
   };
+
+  const handleShareClose = useCallback(() => {
+    setIsShareOpen(false);
+  }, []);
 
   const handleCancelEvent = () => {
     setIsOpen(false);
@@ -131,7 +73,7 @@ export const EventCardMenu = ({
     setIsCancelling(true);
 
     try {
-      await archiveEvent(eventId);
+      await archiveEvent(event.id);
       setIsConfirmOpen(false);
       onCancelled?.();
     } catch {
@@ -144,6 +86,7 @@ export const EventCardMenu = ({
   return (
     <div className={s.root} ref={rootRef}>
       <button
+        ref={triggerRef}
         type="button"
         className={s.trigger}
         aria-label="Event options"
@@ -158,14 +101,14 @@ export const EventCardMenu = ({
         <div className={s.menu} role="menu">
           <button
             type="button"
-            className={s.item}
+            className={clsx(s.item, s.share)}
             role="menuitem"
-            onClick={handleCopyLink}
+            onClick={handleShareEvent}
           >
-            Copy link
+            Share Event
           </button>
 
-          {isOwn && eventType === 'plan' && (
+          {isOwn && event.type === 'plan' && (
             <>
               <div className={s.divider} />
               <button
@@ -180,6 +123,17 @@ export const EventCardMenu = ({
           )}
         </div>
       )}
+
+      {isShareOpen &&
+        createPortal(
+          <ShareEventModal
+            event={event}
+            isOwn={isOwn}
+            onClose={handleShareClose}
+            returnFocusRef={triggerRef}
+          />,
+          document.body,
+        )}
 
       {isConfirmOpen &&
         createPortal(
@@ -215,14 +169,6 @@ export const EventCardMenu = ({
                 </button>
               </div>
             </div>
-          </div>,
-          document.body,
-        )}
-
-      {isLinkCopied &&
-        createPortal(
-          <div className={s.toast} role="status">
-            Link Copied!
           </div>,
           document.body,
         )}

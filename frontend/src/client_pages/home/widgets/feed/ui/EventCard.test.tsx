@@ -23,6 +23,10 @@ const apiMocks = vi.hoisted(() => ({
   listParticipants: vi.fn(),
 }));
 
+const shareImageMocks = vi.hoisted(() => ({
+  generateShareImages: vi.fn(),
+}));
+
 vi.mock('@/shared/client_api/event', () => ({
   archiveEvent: apiMocks.archiveEvent,
   createShareLink: apiMocks.createShareLink,
@@ -35,6 +39,18 @@ vi.mock('@/shared/client_api/event', () => ({
 vi.mock('@/features', () => ({
   useBodyScrollLock: vi.fn(),
 }));
+
+vi.mock('@client_pages/home/model/shareImage', async importOriginal => {
+  const actual =
+    await importOriginal<
+      typeof import('@client_pages/home/model/shareImage')
+    >();
+
+  return {
+    ...actual,
+    generateShareImages: shareImageMocks.generateShareImages,
+  };
+});
 
 import { EventCard } from './EventCard';
 
@@ -116,6 +132,8 @@ const readBlob = (blob: Blob) =>
 describe('EventCard', () => {
   let clipboardWrite: ReturnType<typeof vi.fn>;
   let clipboardWriteText: ReturnType<typeof vi.fn>;
+  let createObjectUrl: ReturnType<typeof vi.fn>;
+  let revokeObjectUrl: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     apiMocks.archiveEvent.mockReset();
@@ -124,6 +142,7 @@ describe('EventCard', () => {
     apiMocks.joinPlan.mockReset();
     apiMocks.leaveEvent.mockReset();
     apiMocks.listParticipants.mockReset();
+    shareImageMocks.generateShareImages.mockReset();
 
     apiMocks.archiveEvent.mockResolvedValue(undefined);
     apiMocks.createShareLink.mockResolvedValue(
@@ -144,6 +163,11 @@ describe('EventCard', () => {
     );
     apiMocks.leaveEvent.mockResolvedValue(backendEvent());
     apiMocks.listParticipants.mockResolvedValue([]);
+    shareImageMocks.generateShareImages.mockResolvedValue([
+      { format: 'poster', blob: new Blob(['poster'], { type: 'image/png' }) },
+      { format: 'card', blob: new Blob(['card'], { type: 'image/png' }) },
+      { format: 'story', blob: new Blob(['story'], { type: 'image/png' }) },
+    ]);
 
     clipboardWrite = vi.fn().mockResolvedValue(undefined);
     clipboardWriteText = vi.fn().mockResolvedValue(undefined);
@@ -156,6 +180,20 @@ describe('EventCard', () => {
       },
     });
     vi.stubGlobal('ClipboardItem', undefined);
+
+    createObjectUrl = vi
+      .fn()
+      .mockImplementation((blob: Blob) => `blob:${blob.size}`);
+    revokeObjectUrl = vi.fn();
+    Object.defineProperty(URL, 'createObjectURL', {
+      configurable: true,
+      value: createObjectUrl,
+    });
+    Object.defineProperty(URL, 'revokeObjectURL', {
+      configurable: true,
+      value: revokeObjectUrl,
+    });
+    window.sessionStorage.clear();
   });
 
   afterEach(() => {
@@ -402,11 +440,19 @@ describe('EventCard', () => {
     expect(onDetailsClose).toHaveBeenCalledTimes(2);
   });
 
-  it('copies the feed fallback for another user without creating a link', async () => {
+  it('opens sharing without copying, then copies the feed fallback', async () => {
     renderCard();
 
     fireEvent.click(screen.getByRole('button', { name: 'Event options' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy link' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share Event' }));
+
+    const dialog = screen.getByRole('dialog', { name: 'Share this plan' });
+
+    expect(within(dialog).getByText('Post it or send the link')).toBeTruthy();
+    expect(clipboardWriteText).not.toHaveBeenCalled();
+    expect(apiMocks.createShareLink).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Copy link' }));
 
     await waitFor(() =>
       expect(clipboardWriteText).toHaveBeenCalledWith(
@@ -416,8 +462,53 @@ describe('EventCard', () => {
 
     expect(apiMocks.createShareLink).not.toHaveBeenCalled();
     expect(clipboardWrite).not.toHaveBeenCalled();
-    expect(screen.queryByRole('menu')).toBeNull();
+    expect(
+      screen.getByRole('dialog', { name: 'Share this plan' }),
+    ).toBeTruthy();
     expect(screen.getByRole('status').textContent).toBe('Link Copied!');
+  });
+
+  it('closes sharing with Escape and returns focus to event options', async () => {
+    renderCard();
+
+    const trigger = screen.getByRole('button', { name: 'Event options' });
+
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share Event' }));
+
+    expect(
+      screen.getByRole('dialog', { name: 'Share this plan' }),
+    ).toBeTruthy();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('closes sharing from the backdrop without opening event details', async () => {
+    const onDetailsOpen = vi.fn();
+
+    renderCard({ enableDetails: true, onDetailsOpen });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Event options' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share Event' }));
+
+    const shareDialog = screen.getByRole('dialog', {
+      name: 'Share this plan',
+    });
+    const backdrop = shareDialog.parentElement as HTMLElement;
+
+    fireEvent.mouseDown(backdrop);
+    expect(
+      screen.getByRole('dialog', { name: 'Share this plan' }),
+    ).toBeTruthy();
+
+    fireEvent.mouseUp(backdrop);
+    fireEvent.click(backdrop);
+
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(onDetailsOpen).not.toHaveBeenCalled();
   });
 
   it('falls back to the feed link when owner link creation fails', async () => {
@@ -425,7 +516,12 @@ describe('EventCard', () => {
     renderCard({ isOwn: true });
 
     fireEvent.click(screen.getByRole('button', { name: 'Event options' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy link' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share Event' }));
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Copy link',
+      }),
+    );
 
     await waitFor(() =>
       expect(clipboardWriteText).toHaveBeenCalledWith(
@@ -449,7 +545,12 @@ describe('EventCard', () => {
     renderCard({ isOwn: true });
 
     fireEvent.click(screen.getByRole('button', { name: 'Event options' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Copy link' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Share Event' }));
+    fireEvent.click(
+      within(screen.getByRole('dialog')).getByRole('button', {
+        name: 'Copy link',
+      }),
+    );
 
     await waitFor(() => expect(clipboardWrite).toHaveBeenCalledTimes(1));
 

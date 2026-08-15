@@ -268,8 +268,7 @@ export const EventCard = ({
               </h2>
               {!isArchived && (
                 <EventCardMenu
-                  eventId={id}
-                  eventType={type}
+                  event={event}
                   isOwn={isOwn}
                   onCancelled={() => onCancel?.(id)}
                 />
