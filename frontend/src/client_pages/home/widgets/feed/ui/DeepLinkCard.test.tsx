@@ -151,18 +151,18 @@ describe('DeepLinkCard', () => {
     render(<DeepLinkCard eventId="missing" onClose={onClose} />);
     await flushPromises();
 
-    const notice = screen.getByRole('alert');
+    const notice = screen.getByRole('alertdialog');
 
     expect(notice.textContent).toContain('available right now');
 
-    fireEvent.click(notice);
+    fireEvent.click(notice.parentElement as HTMLElement);
     expect(onClose).not.toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('dismisses a generic error only once when Escape precedes the timeout', async () => {
+  it('keeps a generic error open on Escape and over time', async () => {
     const onClose = vi.fn();
 
     eventApiMocks.getEvent.mockRejectedValueOnce(new Error('offline'));
@@ -170,20 +170,18 @@ describe('DeepLinkCard', () => {
     render(<DeepLinkCard eventId="missing" onClose={onClose} />);
     await flushPromises();
 
-    await advance(3_999);
+    fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).not.toHaveBeenCalled();
 
-    fireEvent.keyDown(document, { key: 'Escape' });
-    expect(onClose).toHaveBeenCalledTimes(1);
-
-    await advance(1);
-    expect(onClose).toHaveBeenCalledTimes(1);
+    await advance(10_000);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByRole('alertdialog')).toBeTruthy();
   });
 
-  it('clears the dismiss timer when the card unmounts', async () => {
+  it('clears the privacy toast timer when the card unmounts', async () => {
     const onClose = vi.fn();
 
-    eventApiMocks.getEvent.mockRejectedValueOnce(new Error('offline'));
+    eventApiMocks.getEvent.mockRejectedValueOnce(new GetEventError(403));
 
     const { unmount } = render(
       <DeepLinkCard eventId="missing" onClose={onClose} />,
@@ -191,7 +189,7 @@ describe('DeepLinkCard', () => {
 
     await flushPromises();
     unmount();
-    await advance(4_000);
+    await advance(10_000);
 
     expect(onClose).not.toHaveBeenCalled();
   });

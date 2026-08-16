@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import clsx from 'clsx';
 import { Avatar, Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import type {
   FeedEvent,
   ParticipantAvatar,
@@ -52,20 +53,7 @@ export const EventDetailsModal = ({
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
 
   useBodyScrollLock();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isParticipantsOpen) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose, isParticipantsOpen]);
+  const pulseModal = useModalAttention();
 
   const handleCopy = async () => {
     if (!chatLink) return;
@@ -86,13 +74,13 @@ export const EventDetailsModal = ({
       : String(count);
 
   return (
-    <div className={s.overlay} onClick={onClose}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby="eventDetailsTitle"
-        onClick={e => e.stopPropagation()}
       >
         <button
           type="button"

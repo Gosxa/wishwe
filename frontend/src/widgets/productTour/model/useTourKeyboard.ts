@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import type { RefObject } from 'react';
-import type { TourEndReason } from './types';
 
 const CARD_KEYS = new Set([
   'ArrowRight',
@@ -48,21 +47,13 @@ const isSpaceOnFocusable = (event: KeyboardEvent) =>
 
 type Options = {
   cardRef: RefObject<HTMLElement | null>;
-  end: (reason: TourEndReason) => void;
   goBack: () => void;
   goNext: () => void;
 };
 
-export const useTourKeyboard = ({ cardRef, end, goBack, goNext }: Options) => {
+export const useTourKeyboard = ({ cardRef, goBack, goNext }: Options) => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        end('skipped');
-
-        return;
-      }
-
       if (event.key === 'Tab') {
         trapTabFocus(event, cardRef.current);
 
@@ -83,5 +74,5 @@ export const useTourKeyboard = ({ cardRef, end, goBack, goNext }: Options) => {
     document.addEventListener('keydown', handleKeyDown);
 
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [cardRef, end, goBack, goNext]);
+  }, [cardRef, goBack, goNext]);
 };

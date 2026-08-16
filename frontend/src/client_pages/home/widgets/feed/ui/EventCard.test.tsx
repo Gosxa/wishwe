@@ -370,7 +370,7 @@ describe('EventCard', () => {
     expect(screen.getByRole('button', { name: 'Edit' })).toBeTruthy();
   });
 
-  it('opens an archived recap and closes it with Escape', async () => {
+  it('keeps an archived recap open until its close control is used', async () => {
     renderCard({
       event: feedEvent({
         participantCount: 4,
@@ -396,10 +396,14 @@ describe('EventCard', () => {
 
     fireEvent.keyDown(document, { key: 'Escape' });
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(screen.getByRole('dialog', { name: 'Weekend trip' })).toBeTruthy();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('opens details from the card and closes by backdrop or Escape', async () => {
+  it('keeps details open on backdrop and Escape, then closes by X', () => {
     const onDetailsOpen = vi.fn();
     const onDetailsClose = vi.fn();
 
@@ -418,26 +422,25 @@ describe('EventCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Weekend trip' }));
 
-    let dialog = screen.getByRole('dialog', { name: 'Weekend trip' });
+    const dialog = screen.getByRole('dialog', { name: 'Weekend trip' });
 
     expect(onDetailsOpen).toHaveBeenCalledTimes(1);
     expect(within(dialog).getByText('2/10')).toBeTruthy();
 
     fireEvent.click(dialog.parentElement as HTMLElement);
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(onDetailsClose).toHaveBeenCalledTimes(1);
-
-    fireEvent.click(screen.getByText('Friday, August 14'));
-    dialog = screen.getByRole('dialog', { name: 'Weekend trip' });
-
-    expect(dialog).toBeTruthy();
-    expect(onDetailsOpen).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('dialog', { name: 'Weekend trip' })).toBeTruthy();
+    expect(onDetailsClose).not.toHaveBeenCalled();
 
     fireEvent.keyDown(document, { key: 'Escape' });
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    expect(onDetailsClose).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('dialog', { name: 'Weekend trip' })).toBeTruthy();
+    expect(onDetailsClose).not.toHaveBeenCalled();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(onDetailsClose).toHaveBeenCalledTimes(1);
   });
 
   it('opens sharing without copying, then copies the feed fallback', async () => {
@@ -468,7 +471,7 @@ describe('EventCard', () => {
     expect(screen.getByRole('status').textContent).toBe('Link Copied!');
   });
 
-  it('closes sharing with Escape and returns focus to event options', async () => {
+  it('keeps sharing open on Escape and closes by X', async () => {
     renderCard();
 
     const trigger = screen.getByRole('button', { name: 'Event options' });
@@ -482,11 +485,17 @@ describe('EventCard', () => {
 
     fireEvent.keyDown(document, { key: 'Escape' });
 
+    expect(
+      screen.getByRole('dialog', { name: 'Share this plan' }),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close share dialog' }));
+
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
     expect(document.activeElement).toBe(trigger);
   });
 
-  it('closes sharing from the backdrop without opening event details', async () => {
+  it('keeps sharing open and pulses from the backdrop', () => {
     const onDetailsOpen = vi.fn();
 
     renderCard({ enableDetails: true, onDetailsOpen });
@@ -507,7 +516,9 @@ describe('EventCard', () => {
     fireEvent.mouseUp(backdrop);
     fireEvent.click(backdrop);
 
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(
+      screen.getByRole('dialog', { name: 'Share this plan' }),
+    ).toBeTruthy();
     expect(onDetailsOpen).not.toHaveBeenCalled();
   });
 
@@ -579,6 +590,9 @@ describe('EventCard', () => {
     expect(apiMocks.archiveEvent).not.toHaveBeenCalled();
 
     fireEvent.click(dialog.parentElement as HTMLElement);
+    expect(screen.getByRole('dialog')).toBeTruthy();
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'No, thanks' }));
     expect(screen.queryByRole('dialog')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Event options' }));

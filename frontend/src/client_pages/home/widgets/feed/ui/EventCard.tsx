@@ -15,6 +15,7 @@ import {
   X,
 } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import {
@@ -62,6 +63,7 @@ export const EventCard = ({
   onDetailsClose,
   tourId,
 }: Props) => {
+  const pulseModal = useModalAttention();
   const {
     id,
     type,
@@ -193,9 +195,17 @@ export const EventCard = ({
       )}
 
       {isLeaveDialogOpen && (
-        <div className={s.leaveOverlay}>
-          <div className={s.leaveDialog} role="dialog">
-            <h2 className={s.leaveDialogTitle}>Leave this event?</h2>
+        <div className={s.leaveOverlay} onClick={pulseModal}>
+          <div
+            data-modal-content
+            className={s.leaveDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="leaveEventTitle"
+          >
+            <h2 id="leaveEventTitle" className={s.leaveDialogTitle}>
+              Leave this event?
+            </h2>
             <div className={s.leaveDialogActions}>
               <button
                 type="button"

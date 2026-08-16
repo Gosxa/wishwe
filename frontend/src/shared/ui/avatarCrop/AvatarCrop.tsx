@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { cropImage } from './cropImage';
 import s from './avatarCrop.module.scss';
 
@@ -17,6 +18,7 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const pulseModal = useModalAttention();
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
@@ -32,8 +34,14 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={s.overlay}>
-      <div className={s.modal}>
+    <div className={s.overlay} onClick={pulseModal}>
+      <div
+        data-modal-content
+        className={s.modal}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Crop profile photo"
+      >
         <div className={s.cropArea}>
           <Cropper
             image={imageSrc}

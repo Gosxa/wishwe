@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { X } from '@shared/ui/icons';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import s from './shareErrorModal.module.scss';
 
 type Props = {
@@ -10,28 +10,16 @@ type Props = {
 };
 
 export const ShareErrorModal = ({ onClose, actionLabel }: Props) => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay} onClick={onClose}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="shareErrorTitle"
-        onClick={e => e.stopPropagation()}
       >
         <button
           type="button"

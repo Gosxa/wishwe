@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Avatar, X } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import s from './recapModal.module.scss';
 
@@ -26,27 +26,15 @@ export const RecapModal = ({ event, onClose }: Props) => {
   } = event;
 
   useBodyScrollLock();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  const pulseModal = useModalAttention();
 
   const shownParticipants = participants.slice(0, MAX_VISIBLE_AVATARS);
   const extraCount = Math.max(0, participantCount - shownParticipants.length);
 
   return (
-    <div className={s.overlay}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Avatar, X } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { listParticipants } from '@/shared/client_api/event';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import { handle } from '@client_pages/home/model/feedMapper';
@@ -30,6 +31,7 @@ export const ParticipantsModal = ({
   onClose,
 }: Props) => {
   useBodyScrollLock();
+  const pulseModal = useModalAttention();
 
   const [participants, setParticipants] =
     useState<ParticipantAvatar[]>(initialParticipants);
@@ -62,36 +64,16 @@ export const ParticipantsModal = ({
     };
   }, [eventId]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
-
   const isEmpty = !isLoading && !error && participants.length === 0;
 
   return (
-    <div
-      className={s.overlay}
-      onClick={e => {
-        e.stopPropagation();
-        onClose();
-      }}
-    >
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby="participantsTitle"
-        onClick={e => e.stopPropagation()}
       >
         <div className={s.header}>
           <div className={s.headerRow}>

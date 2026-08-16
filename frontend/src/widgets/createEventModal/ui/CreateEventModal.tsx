@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import clsx from 'clsx';
 import { Asterisk, BadgeInfo, CalendarClock, Clock, X } from '@shared/ui/icons';
 import { TextInput } from '@shared/ui/textInput/TextInput';
@@ -12,6 +11,7 @@ import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
 import type { BackendEventType } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useCreateEvent } from '../model/useCreateEvent';
 import { PrivacyPicker } from './PrivacyPicker';
 import s from './createEventModal.module.scss';
@@ -46,24 +46,12 @@ export const CreateEventModal = ({
   } = useCreateEvent(onCreated, defaultType);
 
   useBodyScrollLock();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !submit.isSubmitting) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose, submit.isSubmitting]);
+  const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"

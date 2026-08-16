@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
 import { PasswordInput } from '@shared/ui/passwordInput/PasswordInput';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { X } from '@shared/ui/icons';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useChangePassword } from '../model/useChangePassword';
 import s from './changePasswordModal.module.scss';
 
@@ -14,24 +14,12 @@ type Props = {
 export const ChangePasswordModal = ({ onClose }: Props) => {
   const { currentInput, newInput, confirmInput, submit } =
     useChangePassword(onClose);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"

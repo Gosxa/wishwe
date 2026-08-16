@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import {
   Avatar,
@@ -14,6 +14,7 @@ import {
 } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import type { EventPreview } from '@/shared/client_api/event';
 import {
@@ -50,20 +51,7 @@ export const EventPreviewModal = ({
   );
 
   useBodyScrollLock();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose]);
+  const pulseModal = useModalAttention();
 
   const username = handle(creator.username);
   const avatar = toAbsoluteMediaUrl(creator.avatar);
@@ -90,13 +78,13 @@ export const EventPreviewModal = ({
   };
 
   return (
-    <div className={s.overlay} onClick={onClose}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"
         aria-labelledby="sharedEventPreviewTitle"
-        onClick={e => e.stopPropagation()}
       >
         <div className={s.body}>
           <button

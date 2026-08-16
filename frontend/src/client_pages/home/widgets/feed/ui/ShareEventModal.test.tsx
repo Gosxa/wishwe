@@ -225,7 +225,7 @@ describe('ShareEventModal', () => {
     });
   });
 
-  it('does not reset focus when the close callback changes', () => {
+  it('keeps focus and uses the latest close callback', () => {
     const returnFocusRef = createRef<HTMLButtonElement>();
     const firstOnClose = vi.fn();
     const nextOnClose = vi.fn();
@@ -256,6 +256,10 @@ describe('ShareEventModal', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(firstOnClose).not.toHaveBeenCalled();
+    expect(nextOnClose).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close share dialog' }));
+
     expect(nextOnClose).toHaveBeenCalledTimes(1);
   });
 

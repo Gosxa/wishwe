@@ -12,6 +12,7 @@ import {
 } from 'react';
 import clsx from 'clsx';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { createShareLink } from '@/shared/client_api/event';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import {
@@ -151,16 +152,12 @@ export const ShareEventModal = ({
   const [showLinkToast, setShowLinkToast] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
-  const onCloseRef = useRef(onClose);
   const linkPromiseRef = useRef<Promise<string> | null>(null);
   const imagesPromiseRef = useRef<Promise<GeneratedShareImage[]> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useBodyScrollLock();
-
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
+  const pulseModal = useModalAttention();
 
   const getShareLink = useCallback(() => {
     if (!linkPromiseRef.current) {
@@ -219,13 +216,6 @@ export const ShareEventModal = ({
     closeRef.current?.focus();
 
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
-      if (keyboardEvent.key === 'Escape') {
-        keyboardEvent.preventDefault();
-        onCloseRef.current();
-
-        return;
-      }
-
       if (keyboardEvent.key === 'ArrowLeft') {
         keyboardEvent.preventDefault();
         setActiveFormat(current => {
@@ -432,15 +422,9 @@ export const ShareEventModal = ({
   ];
 
   return (
-    <div
-      className={s.overlay}
-      onClick={clickEvent => {
-        clickEvent.stopPropagation();
-
-        if (clickEvent.target === clickEvent.currentTarget) onClose();
-      }}
-    >
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         ref={dialogRef}
         className={s.modal}
         role="dialog"

@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import clsx from 'clsx';
 import { Asterisk, BadgeInfo, CalendarClock, Clock, X } from '@shared/ui/icons';
 import { TextInput } from '@shared/ui/textInput/TextInput';
@@ -9,6 +8,7 @@ import { HelperText } from '@shared/ui/helperText/HelperText';
 import { Toggle } from '@shared/ui/toggle/Toggle';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
 import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
@@ -38,24 +38,12 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
   } = useEditEvent(event, onSaved);
 
   useBodyScrollLock();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !submit.isSubmitting) {
-        onClose();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onClose, submit.isSubmitting]);
+  const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { archiveEvent } from '@/shared/client_api/event';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { DotsVertical } from '@shared/ui/icons';
 import { ShareEventModal } from './ShareEventModal';
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
+  const pulseModal = useModalAttention();
   const [isOpen, setIsOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -137,19 +139,18 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
 
       {isConfirmOpen &&
         createPortal(
-          <div
-            className={s.confirmOverlay}
-            onClick={event => {
-              event.stopPropagation();
-              handleConfirmClose();
-            }}
-          >
+          <div className={s.confirmOverlay} onClick={pulseModal}>
             <div
+              data-modal-content
               className={s.confirmDialog}
               role="dialog"
+              aria-modal="true"
+              aria-labelledby="cancelEventTitle"
               onClick={event => event.stopPropagation()}
             >
-              <h2 className={s.confirmTitle}>Cancel this event?</h2>
+              <h2 id="cancelEventTitle" className={s.confirmTitle}>
+                Cancel this event?
+              </h2>
               <div className={s.confirmActions}>
                 <button
                   type="button"

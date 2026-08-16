@@ -4,6 +4,7 @@ import { useEffect, useId, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useScrollLock } from '../model/useScrollLock';
 import { useTourKeyboard } from '../model/useTourKeyboard';
 import { useTourLayout } from '../model/useTourLayout';
@@ -26,6 +27,7 @@ const rectStyle = (rect: AnchorRect | null): CSSProperties => ({
 });
 
 export const ProductTour = ({ steps: tourSteps, onEnd }: Props) => {
+  const pulseModal = useModalAttention();
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
 
@@ -46,7 +48,7 @@ export const ProductTour = ({ steps: tourSteps, onEnd }: Props) => {
   const { rect, position } = useTourLayout(step, cardRef);
 
   useScrollLock(overlayRef);
-  useTourKeyboard({ cardRef, end, goBack, goNext });
+  useTourKeyboard({ cardRef, goBack, goNext });
 
   useEffect(() => {
     cardRef.current?.focus({ preventScroll: true });
@@ -59,6 +61,7 @@ export const ProductTour = ({ steps: tourSteps, onEnd }: Props) => {
       ref={overlayRef}
       className={clsx(s.overlay, isExiting && s.overlayExiting)}
       role="presentation"
+      onClick={pulseModal}
     >
       <div className={s.spotlight} style={rectStyle(rect)} />
 

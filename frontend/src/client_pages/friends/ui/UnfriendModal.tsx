@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useBodyScrollLock } from '@/features';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import s from './unfriendModal.module.scss';
 
 type Props = {
@@ -12,22 +12,12 @@ type Props = {
 
 export const UnfriendModal = ({ username, onCancel, onConfirm }: Props) => {
   useBodyScrollLock();
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onCancel();
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [onCancel]);
+  const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay}>
+    <div className={s.overlay} onClick={pulseModal}>
       <div
+        data-modal-content
         className={s.modal}
         role="dialog"
         aria-modal="true"

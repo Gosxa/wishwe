@@ -50,6 +50,7 @@ export const TourCard = ({
 
   return (
     <section
+      data-modal-content
       ref={cardRef}
       tabIndex={-1}
       role="dialog"

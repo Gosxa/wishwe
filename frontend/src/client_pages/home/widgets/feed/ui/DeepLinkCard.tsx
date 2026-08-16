@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from '@shared/ui/icons';
+import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { getEvent, GetEventError } from '@/shared/client_api/event';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
@@ -16,7 +17,6 @@ type Props = {
 
 type LoadError = 'forbidden' | 'unavailable';
 
-const NOTICE_DISMISS_MS = 4000;
 const FORBIDDEN_DISMISS_MS = 10000;
 
 const FORBIDDEN_MESSAGE =
@@ -27,6 +27,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   const [error, setError] = useState<LoadError | null>(null);
   const hasClosed = useRef(false);
   const dismissTimeout = useRef<number | null>(null);
+  const pulseModal = useModalAttention();
 
   const closeOnce = useCallback(() => {
     if (hasClosed.current) return;
@@ -64,25 +65,15 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   }, [eventId]);
 
   useEffect(() => {
-    if (!error) return;
+    if (error !== 'forbidden') return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeOnce();
-    };
-
-    const timeout = window.setTimeout(
-      closeOnce,
-      error === 'forbidden' ? FORBIDDEN_DISMISS_MS : NOTICE_DISMISS_MS,
-    );
+    const timeout = window.setTimeout(closeOnce, FORBIDDEN_DISMISS_MS);
 
     dismissTimeout.current = timeout;
-
-    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.clearTimeout(timeout);
       if (dismissTimeout.current === timeout) dismissTimeout.current = null;
-      document.removeEventListener('keydown', handleKeyDown);
     };
   }, [closeOnce, error]);
 
@@ -97,13 +88,17 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
 
   if (error === 'unavailable') {
     return (
-      <div className={s.overlay} onClick={closeOnce}>
+      <div className={s.overlay} onClick={pulseModal}>
         <div
+          data-modal-content
           className={s.notice}
-          role="alert"
-          onClick={e => e.stopPropagation()}
+          role="alertdialog"
+          aria-modal="true"
+          aria-describedby="unavailableEventMessage"
         >
-          <p className={s.message}>This event isn’t available right now.</p>
+          <p id="unavailableEventMessage" className={s.message}>
+            This event isn’t available right now.
+          </p>
           <button
             type="button"
             className={s.close}
