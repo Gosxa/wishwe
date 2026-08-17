@@ -4,6 +4,7 @@ import { Avatar, X } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import s from './recapModal.module.scss';
 
@@ -15,6 +16,7 @@ type Props = {
 const MAX_VISIBLE_AVATARS = 6;
 
 export const RecapModal = ({ event, onClose }: Props) => {
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
   const {
     image,
     title,
@@ -32,7 +34,7 @@ export const RecapModal = ({ event, onClose }: Props) => {
   const extraCount = Math.max(0, participantCount - shownParticipants.length);
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -43,7 +45,7 @@ export const RecapModal = ({ event, onClose }: Props) => {
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />
@@ -116,7 +118,11 @@ export const RecapModal = ({ event, onClose }: Props) => {
               </div>
             </div>
 
-            <button type="button" className={s.backButton} onClick={onClose}>
+            <button
+              type="button"
+              className={s.backButton}
+              onClick={requestClose}
+            >
               <span>Back to profile</span>
             </button>
           </div>

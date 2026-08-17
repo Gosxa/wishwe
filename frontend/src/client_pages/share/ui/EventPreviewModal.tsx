@@ -15,6 +15,7 @@ import {
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import type { EventPreview } from '@/shared/client_api/event';
 import {
@@ -44,6 +45,7 @@ export const EventPreviewModal = ({
   friendshipStatus,
   onClose,
 }: Props) => {
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
   const { title, description, creator } = preview;
 
   const [request, setRequest] = useState<RequestState>(
@@ -78,7 +80,7 @@ export const EventPreviewModal = ({
   };
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -90,7 +92,7 @@ export const EventPreviewModal = ({
           <button
             type="button"
             className={s.close}
-            onClick={onClose}
+            onClick={requestClose}
             aria-label="Close"
           >
             <X />

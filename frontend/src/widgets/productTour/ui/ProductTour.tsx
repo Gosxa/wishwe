@@ -5,6 +5,7 @@ import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { useScrollLock } from '../model/useScrollLock';
 import { useTourKeyboard } from '../model/useTourKeyboard';
 import { useTourLayout } from '../model/useTourLayout';
@@ -28,15 +29,16 @@ const rectStyle = (rect: AnchorRect | null): CSSProperties => ({
 
 export const ProductTour = ({ steps: tourSteps, onEnd }: Props) => {
   const pulseModal = useModalAttention();
-  const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
+  const { requestCloseWith, overlayRef, modalTransitionProps } =
+    useModalTransition();
 
   const titleId = useId();
   const bodyId = useId();
 
-  const { index, isLast, isExiting, end, goBack, goNext } = useTourNavigation(
+  const { index, isLast, end, goBack, goNext } = useTourNavigation(
     tourSteps.length,
-    onEnd,
+    reason => requestCloseWith(() => onEnd(reason)),
   );
 
   const step = tourSteps[index];
@@ -58,8 +60,8 @@ export const ProductTour = ({ steps: tourSteps, onEnd }: Props) => {
 
   return createPortal(
     <div
-      ref={overlayRef}
-      className={clsx(s.overlay, isExiting && s.overlayExiting)}
+      {...modalTransitionProps}
+      className={s.overlay}
       role="presentation"
       onClick={pulseModal}
     >

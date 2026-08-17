@@ -1,28 +1,7 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/buttons' as btn;
-
-@keyframes share-overlay-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes share-modal-in {
-  from {
-    opacity: 0;
-    transform: scale(0.98);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+@use '@shared/styles/animations' as anim;
 
 @keyframes share-slide-in {
   from {
@@ -60,7 +39,7 @@
   background: rgba(clr.$ns-900, 0.42);
   backdrop-filter: blur(8px);
   overflow-y: auto;
-  animation: share-overlay-in 160ms ease-out;
+  @include anim.modal-overlay-enter;
 }
 
 .modal {
@@ -78,7 +57,7 @@
     inset 0 0 0 2px rgba(clr.$prm, 0.62),
     0 18px 56px rgba(clr.$ns-900, 0.24);
   overflow-y: auto;
-  animation: share-modal-in 180ms ease-out;
+  @include anim.modal-enter;
 }
 
 .header {
@@ -523,6 +502,123 @@
   }
 }
 
+.confirmOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(clr.$ns-900, 0.45);
+  backdrop-filter: blur(4px);
+  border-radius: 16px;
+  @include anim.modal-overlay-enter;
+}
+
+.confirmModal {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  row-gap: 16px;
+  width: 100%;
+  max-width: 440px;
+  padding: 28px 24px;
+  border: 1px solid clr.$ns-200;
+  border-radius: 16px;
+  background: clr.$ns-50;
+  box-shadow: 0 12px 36px rgba(clr.$ns-900, 0.28);
+  @include anim.modal-enter;
+}
+
+.confirmIcon {
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: clr.$ns-900;
+
+  > span {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-color: clr.$ns-50;
+    mask-image: var(--share-icon);
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+    -webkit-mask-image: var(--share-icon);
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    -webkit-mask-size: contain;
+  }
+}
+
+.confirmTitle {
+  grid-column: 2;
+  justify-self: center;
+  margin: 0;
+  color: clr.$ns-900;
+  text-align: center;
+  @include tp.h2;
+}
+
+.confirmDescription {
+  grid-column: 1 / -1;
+  justify-self: center;
+  margin: -8px 0 0;
+  color: clr.$ns-700;
+  text-align: center;
+  @include tp.text-body;
+}
+
+.confirmCheckbox {
+  grid-column: 2;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  color: clr.$ns-700;
+  cursor: pointer;
+  user-select: none;
+  @include tp.text-body;
+
+  > input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: clr.$prm;
+    cursor: pointer;
+  }
+}
+
+.confirmActions {
+  grid-column: 1 / -1;
+  justify-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.confirmCancel {
+  @include btn.secondary(0, auto, 40px);
+  padding: 0 16px;
+  cursor: pointer;
+}
+
+.confirmProceed {
+  @include btn.primary(0, auto, 40px);
+  padding: 0 20px;
+  cursor: pointer;
+}
+
 .toast {
   position: fixed;
   bottom: 32px;
@@ -553,6 +649,8 @@
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   .modal,
+  .confirmOverlay,
+  .confirmModal,
   .preview,
   .skeleton {
     animation: none;

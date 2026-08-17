@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { archiveEvent } from '@/shared/client_api/event';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { DotsVertical } from '@shared/ui/icons';
 import { ShareEventModal } from './ShareEventModal';
@@ -24,6 +25,11 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
   const [isCancelling, setIsCancelling] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const {
+    requestClose: requestConfirmClose,
+    requestCloseWith: requestConfirmCloseWith,
+    modalTransitionProps: confirmTransitionProps,
+  } = useModalTransition(() => setIsConfirmOpen(false));
 
   useEffect(() => {
     if (!isOpen) return;
@@ -65,7 +71,7 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
 
   const handleConfirmClose = () => {
     if (!isCancelling) {
-      setIsConfirmOpen(false);
+      requestConfirmClose();
     }
   };
 
@@ -76,8 +82,10 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
 
     try {
       await archiveEvent(event.id);
-      setIsConfirmOpen(false);
-      onCancelled?.();
+      requestConfirmCloseWith(() => {
+        setIsConfirmOpen(false);
+        onCancelled?.();
+      });
     } catch {
       // network failure — keep the dialog open
     } finally {
@@ -139,7 +147,11 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
 
       {isConfirmOpen &&
         createPortal(
-          <div className={s.confirmOverlay} onClick={pulseModal}>
+          <div
+            {...confirmTransitionProps}
+            className={s.confirmOverlay}
+            onClick={pulseModal}
+          >
             <div
               data-modal-content
               className={s.confirmDialog}

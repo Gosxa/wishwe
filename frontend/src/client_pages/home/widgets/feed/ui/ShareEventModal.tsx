@@ -13,6 +13,7 @@ import {
 import clsx from 'clsx';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { createShareLink } from '@/shared/client_api/event';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import {
@@ -187,6 +188,15 @@ export const ShareEventModal = ({
   useBodyScrollLock();
   const pulseModal = useModalAttention();
   const pulseInstagramNotice = useModalAttention();
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
+  const {
+    requestClose: requestInstagramNoticeClose,
+    requestCloseWith: requestInstagramNoticeCloseWith,
+    modalTransitionProps: instagramNoticeTransitionProps,
+  } = useModalTransition(() => {
+    setShowInstagramNotice(false);
+    storiesLinkRef.current?.focus();
+  });
 
   const getShareLink = useCallback(() => {
     if (!linkPromiseRef.current) {
@@ -258,8 +268,7 @@ export const ShareEventModal = ({
       if (keyboardEvent.key === 'Escape') {
         if (showInstagramNoticeRef.current) {
           keyboardEvent.preventDefault();
-          setShowInstagramNotice(false);
-          storiesLinkRef.current?.focus();
+          requestInstagramNoticeClose();
 
           return;
         }
@@ -326,7 +335,7 @@ export const ShareEventModal = ({
       document.removeEventListener('keydown', handleKeyDown);
       returnFocus?.focus();
     };
-  }, [returnFocusRef]);
+  }, [requestInstagramNoticeClose, returnFocusRef]);
 
   useEffect(() => {
     return () => {
@@ -447,13 +456,14 @@ export const ShareEventModal = ({
       saveSkipInstagramNotice(true);
     }
 
-    setShowInstagramNotice(false);
-    triggerStoryDownloadAndRedirect();
+    requestInstagramNoticeCloseWith(() => {
+      setShowInstagramNotice(false);
+      triggerStoryDownloadAndRedirect();
+    });
   };
 
   const handleCancelInstagramNotice = () => {
-    setShowInstagramNotice(false);
-    storiesLinkRef.current?.focus();
+    requestInstagramNoticeClose();
   };
 
   const activeImage = findImage(images, activeFormat);
@@ -523,7 +533,7 @@ export const ShareEventModal = ({
   ];
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         ref={dialogRef}
@@ -542,7 +552,7 @@ export const ShareEventModal = ({
           ref={closeRef}
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close share dialog"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -804,6 +814,7 @@ export const ShareEventModal = ({
 
         {showInstagramNotice && (
           <div
+            {...instagramNoticeTransitionProps}
             className={s.confirmOverlay}
             role="presentation"
             onClick={pulseInstagramNotice}

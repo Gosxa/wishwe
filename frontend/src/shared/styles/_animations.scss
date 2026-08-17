@@ -1,5 +1,7 @@
 $sheet-duration: 0.5s;
 $sheet-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$modal-duration: 0.24s;
+$modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
 
 @keyframes sheet-reveal {
   from {
@@ -29,6 +31,15 @@ $sheet-ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
+@keyframes modal-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes modal-in {
   from {
     opacity: 0;
@@ -40,8 +51,24 @@ $sheet-ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
+@keyframes modal-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+}
+
 @mixin modal-overlay-enter {
-  animation: modal-overlay-in 0.2s ease-out;
+  animation: modal-overlay-in $modal-duration $modal-ease both;
+
+  &[data-modal-state='closing'] {
+    pointer-events: none;
+    animation-name: modal-overlay-out;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -49,7 +76,11 @@ $sheet-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @mixin modal-enter {
-  animation: modal-in 0.25s ease-out;
+  animation: modal-in $modal-duration $modal-ease both;
+
+  [data-modal-state='closing'] & {
+    animation-name: modal-out;
+  }
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;

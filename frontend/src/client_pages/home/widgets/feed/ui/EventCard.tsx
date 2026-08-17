@@ -16,6 +16,7 @@ import {
 } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import {
@@ -87,6 +88,10 @@ export const EventCard = ({
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isRecapOpen, setIsRecapOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(autoOpenDetails);
+  const {
+    requestClose: requestLeaveDialogClose,
+    modalTransitionProps: leaveDialogTransitionProps,
+  } = useModalTransition(() => setIsLeaveDialogOpen(false));
 
   const canOpenDetails = enableDetails && !isArchived;
   const isParticipating = status !== null;
@@ -144,7 +149,7 @@ export const EventCard = ({
       const resp = await leaveEvent(id);
 
       applyResponse(toFeedEvents([resp])[0]);
-      setIsLeaveDialogOpen(false);
+      requestLeaveDialogClose();
     } catch {
       // silent revert
     } finally {
@@ -154,7 +159,7 @@ export const EventCard = ({
 
   const handleLeaveDialogClose = () => {
     if (!isPending) {
-      setIsLeaveDialogOpen(false);
+      requestLeaveDialogClose();
     }
   };
 
@@ -195,7 +200,11 @@ export const EventCard = ({
       )}
 
       {isLeaveDialogOpen && (
-        <div className={s.leaveOverlay} onClick={pulseModal}>
+        <div
+          {...leaveDialogTransitionProps}
+          className={s.leaveOverlay}
+          onClick={pulseModal}
+        >
           <div
             data-modal-content
             className={s.leaveDialog}

@@ -77,10 +77,7 @@ export const FriendsList = ({ friends, query, isLoading, onRemove }: Props) => {
         <UnfriendModal
           username={pending.username}
           onCancel={() => setPending(null)}
-          onConfirm={() => {
-            onRemove(pending.friendshipId);
-            setPending(null);
-          }}
+          onConfirm={() => onRemove(pending.friendshipId)}
         />
       )}
     </>

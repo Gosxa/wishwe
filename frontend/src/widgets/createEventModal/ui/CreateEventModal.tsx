@@ -12,6 +12,7 @@ import { Stepper } from '@shared/ui/stepper/Stepper';
 import type { BackendEventType } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { useCreateEvent } from '../model/useCreateEvent';
 import { PrivacyPicker } from './PrivacyPicker';
 import s from './createEventModal.module.scss';
@@ -27,6 +28,8 @@ export const CreateEventModal = ({
   onCreated,
   defaultType,
 }: Props) => {
+  const { requestClose, requestCloseWith, modalTransitionProps } =
+    useModalTransition(onClose);
   const {
     isPlan,
     onTypeChange,
@@ -43,13 +46,13 @@ export const CreateEventModal = ({
     cover,
     canShare,
     submit,
-  } = useCreateEvent(onCreated, defaultType);
+  } = useCreateEvent(() => requestCloseWith(onCreated), defaultType);
 
   useBodyScrollLock();
   const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -60,7 +63,7 @@ export const CreateEventModal = ({
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />

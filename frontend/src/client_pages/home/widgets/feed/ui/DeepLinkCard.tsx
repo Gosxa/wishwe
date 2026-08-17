@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from '@shared/ui/icons';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { getEvent, GetEventError } from '@/shared/client_api/event';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
@@ -41,6 +42,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
 
     onClose();
   }, [onClose]);
+  const { requestClose, modalTransitionProps } = useModalTransition(closeOnce);
 
   useEffect(() => {
     let cancelled = false;
@@ -88,7 +90,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
 
   if (error === 'unavailable') {
     return (
-      <div className={s.overlay} onClick={pulseModal}>
+      <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
         <div
           data-modal-content
           className={s.notice}
@@ -102,7 +104,7 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
           <button
             type="button"
             className={s.close}
-            onClick={closeOnce}
+            onClick={requestClose}
             aria-label="Dismiss"
           >
             <X />

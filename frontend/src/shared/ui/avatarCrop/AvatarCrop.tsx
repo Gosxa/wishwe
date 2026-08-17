@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { cropImage } from './cropImage';
 import s from './avatarCrop.module.scss';
 
@@ -19,6 +20,8 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const pulseModal = useModalAttention();
+  const { requestClose, requestCloseWith, modalTransitionProps } =
+    useModalTransition(onCancel);
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);
@@ -28,13 +31,13 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
     if (!croppedAreaPixels) return;
     const url = await cropImage(imageSrc, croppedAreaPixels);
 
-    onConfirm(url);
+    requestCloseWith(() => onConfirm(url));
   };
 
   if (typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -56,7 +59,7 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
           />
         </div>
         <div className={s.actions}>
-          <button className={s.cancel} onClick={onCancel}>
+          <button className={s.cancel} onClick={requestClose}>
             <span>Cancel</span>
           </button>
           <button className={s.confirm} onClick={handleConfirm}>

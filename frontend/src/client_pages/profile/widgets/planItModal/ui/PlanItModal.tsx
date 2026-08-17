@@ -7,6 +7,7 @@ import { Toggle } from '@shared/ui/toggle/Toggle';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
 import { Stepper } from '@shared/ui/stepper/Stepper';
 import { usePlanIt } from '../model/usePlanIt';
@@ -21,7 +22,11 @@ type Props = {
 const FALLBACK_COVER = '/bg-gradient-noise.webp';
 
 export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
-  const { when, participants, submit } = usePlanIt(event, onConverted);
+  const { requestClose, requestCloseWith, modalTransitionProps } =
+    useModalTransition(onClose);
+  const { when, participants, submit } = usePlanIt(event, () =>
+    requestCloseWith(onConverted),
+  );
 
   const coverPreviewUrl =
     toAbsoluteMediaUrl(event.cover_image) ?? FALLBACK_COVER;
@@ -30,7 +35,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
   const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -41,7 +46,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />

@@ -4,6 +4,7 @@ import { PasswordInput } from '@shared/ui/passwordInput/PasswordInput';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { X } from '@shared/ui/icons';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { useChangePassword } from '../model/useChangePassword';
 import s from './changePasswordModal.module.scss';
 
@@ -12,12 +13,13 @@ type Props = {
 };
 
 export const ChangePasswordModal = ({ onClose }: Props) => {
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
   const { currentInput, newInput, confirmInput, submit } =
-    useChangePassword(onClose);
+    useChangePassword(requestClose);
   const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -28,7 +30,7 @@ export const ChangePasswordModal = ({ onClose }: Props) => {
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />
@@ -67,7 +69,7 @@ export const ChangePasswordModal = ({ onClose }: Props) => {
           )}
 
           <div className={s.actions}>
-            <button type="button" className={s.cancel} onClick={onClose}>
+            <button type="button" className={s.cancel} onClick={requestClose}>
               <span>Cancel</span>
             </button>
             <button

@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Avatar, Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import type {
   FeedEvent,
   ParticipantAvatar,
@@ -39,6 +40,7 @@ export const EventDetailsModal = ({
   onAction,
   onClose,
 }: Props) => {
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
   const {
     image,
     title,
@@ -74,7 +76,7 @@ export const EventDetailsModal = ({
       : String(count);
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -85,7 +87,7 @@ export const EventDetailsModal = ({
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />

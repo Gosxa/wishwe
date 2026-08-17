@@ -91,8 +91,6 @@ export const UserProfileFriendButton = ({
 
       await removeFriend(match.friendship_id);
     }, 'none');
-
-    setShowUnfriend(false);
   };
 
   if (status === 'self') {

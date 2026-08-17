@@ -2,6 +2,7 @@
 
 import { X } from '@shared/ui/icons';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import s from './shareErrorModal.module.scss';
 
 type Props = {
@@ -11,9 +12,10 @@ type Props = {
 
 export const ShareErrorModal = ({ onClose, actionLabel }: Props) => {
   const pulseModal = useModalAttention();
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -24,7 +26,7 @@ export const ShareErrorModal = ({ onClose, actionLabel }: Props) => {
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />
@@ -38,7 +40,7 @@ export const ShareErrorModal = ({ onClose, actionLabel }: Props) => {
           fresh one.
         </p>
 
-        <button type="button" className={s.action} onClick={onClose}>
+        <button type="button" className={s.action} onClick={requestClose}>
           <span>{actionLabel}</span>
         </button>
       </div>

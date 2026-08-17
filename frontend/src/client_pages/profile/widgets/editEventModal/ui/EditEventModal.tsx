@@ -9,6 +9,7 @@ import { Toggle } from '@shared/ui/toggle/Toggle';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { CategoryPicker } from '@shared/ui/categoryPicker/CategoryPicker';
 import { CoverUpload } from '@shared/ui/coverUpload/CoverUpload';
 import { Stepper } from '@shared/ui/stepper/Stepper';
@@ -22,6 +23,8 @@ type Props = {
 };
 
 export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
+  const { requestClose, requestCloseWith, modalTransitionProps } =
+    useModalTransition(onClose);
   const {
     isPlan,
     category,
@@ -35,13 +38,13 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
     chatLinkInput,
     cover,
     submit,
-  } = useEditEvent(event, onSaved);
+  } = useEditEvent(event, () => requestCloseWith(onSaved));
 
   useBodyScrollLock();
   const pulseModal = useModalAttention();
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -52,7 +55,7 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
         <button
           type="button"
           className={s.close}
-          onClick={onClose}
+          onClick={requestClose}
           aria-label="Close"
         >
           <X />

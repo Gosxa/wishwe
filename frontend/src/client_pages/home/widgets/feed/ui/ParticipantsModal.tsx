@@ -5,6 +5,7 @@ import { Avatar, X } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
+import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { listParticipants } from '@/shared/client_api/event';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import { handle } from '@client_pages/home/model/feedMapper';
@@ -32,6 +33,7 @@ export const ParticipantsModal = ({
 }: Props) => {
   useBodyScrollLock();
   const pulseModal = useModalAttention();
+  const { requestClose, modalTransitionProps } = useModalTransition(onClose);
 
   const [participants, setParticipants] =
     useState<ParticipantAvatar[]>(initialParticipants);
@@ -67,7 +69,7 @@ export const ParticipantsModal = ({
   const isEmpty = !isLoading && !error && participants.length === 0;
 
   return (
-    <div className={s.overlay} onClick={pulseModal}>
+    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
         className={s.modal}
@@ -83,7 +85,7 @@ export const ParticipantsModal = ({
             <button
               type="button"
               className={s.close}
-              onClick={onClose}
+              onClick={requestClose}
               aria-label="Close"
             >
               <X />

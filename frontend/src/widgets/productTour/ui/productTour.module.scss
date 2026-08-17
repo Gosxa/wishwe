@@ -1,31 +1,12 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/animations' as anim;
 
 $ease: cubic-bezier(0.22, 1, 0.36, 1);
 $travel: 0.42s;
 $dim: rgba(clr.$ns-900, 0.62);
 $ring: clr.$acc-purple;
-
-@keyframes tour-overlay-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes tour-overlay-out {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
 
 @keyframes tour-content-in {
   from {
@@ -54,13 +35,8 @@ $ring: clr.$acc-purple;
   position: fixed;
   inset: 0;
   z-index: 1000;
-  animation: tour-overlay-in 0.34s ease-out both;
+  @include anim.modal-overlay-enter;
 }
-
-.overlayExiting {
-  animation: tour-overlay-out 0.26s ease-in both;
-}
-
 
 .spotlight {
   position: fixed;
@@ -107,6 +83,7 @@ $ring: clr.$acc-purple;
   transition:
     top $travel $ease,
     left $travel $ease;
+  @include anim.modal-enter;
 }
 
 .cardMeasuring {
@@ -343,7 +320,6 @@ $ring: clr.$acc-purple;
 
 @media (prefers-reduced-motion: reduce) {
   .overlay,
-  .overlayExiting,
   .content {
     animation: none;
   }
