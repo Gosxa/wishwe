@@ -95,7 +95,7 @@
   }
 
   > p {
-    color: clr.$ns-500;
+    color: clr.$ns-700;
     @include tp.text-body;
   }
 }
@@ -296,7 +296,7 @@
 
 .caption {
   width: 100%;
-  color: clr.$ns-500;
+  color: clr.$ns-700;
   text-align: center;
   white-space: nowrap;
   @include tp.text-caption;
@@ -315,7 +315,7 @@
   }
 
   > p {
-    color: clr.$ns-500;
+    color: clr.$ns-700;
     font-family: var(--font-sk-modernist);
     font-size: 12px;
     font-weight: 700;
@@ -513,7 +513,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
-  color: clr.$ns-500;
+  color: clr.$ns-700;
   @include tp.text-caption;
 
   > img {

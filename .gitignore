@@ -197,6 +197,8 @@ output.txt
 crash.log
 crash.*.log
 
+backend/.e2e/
+
 # Override files (local developer overrides)
 override.tf
 override.tf.json

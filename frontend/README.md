@@ -1,5 +1,22 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## End-to-end tests
+
+The Playwright suite runs a production Next.js build against an isolated Django
+SQLite database. It never reads or clears the normal development database.
+
+Install the browser binaries once, then run the suite:
+
+```bash
+python -m pip install -r ../backend/requirements.txt
+npm run test:e2e:install
+npm run test:e2e
+```
+
+Failed runs keep screenshots, video, and traces under `test-results/`; the HTML
+report is available with `npm run test:e2e:report`. Authentication state is
+generated for every run under `e2e/.auth/` and is intentionally gitignored.
+
 ## Getting Started
 
 First, run the development server:

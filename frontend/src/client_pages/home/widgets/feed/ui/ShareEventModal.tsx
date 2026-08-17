@@ -473,6 +473,7 @@ export const ShareEventModal = ({
                   s.skeleton,
                   activeFormat === 'story' && s.skeletonStory,
                 )}
+                role="status"
                 aria-label={
                   imageError
                     ? 'Share image could not be prepared'
