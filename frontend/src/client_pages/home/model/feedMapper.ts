@@ -5,10 +5,10 @@ import type { FeedEvent } from './types';
 
 export { toAbsoluteMediaUrl };
 
-const fallbackCover = '/bg-gradient-noise.webp';
+export const FALLBACK_COVER = '/bg-gradient-noise.webp';
 
 const eventImage = (coverImage: string | null) =>
-  toAbsoluteMediaUrl(coverImage) ?? fallbackCover;
+  toAbsoluteMediaUrl(coverImage) ?? FALLBACK_COVER;
 
 export { eventImage };
 

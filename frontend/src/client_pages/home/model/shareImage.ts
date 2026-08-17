@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 
 import type { FeedEvent } from './types';
+import { FALLBACK_COVER } from './feedMapper';
 
 export const SHARE_FORMATS = [
   {
@@ -565,6 +566,9 @@ const getWhereLabel = (location: string) => {
 const eventTypeLabel = (event: FeedEvent) =>
   event.type === 'plan' ? 'Plan' : 'Wish';
 
+const watermarkColor = (event: FeedEvent) =>
+  event.image === FALLBACK_COVER ? COLORS.primary : COLORS.neutral50;
+
 const drawPoster = (
   context: CanvasRenderingContext2D,
   event: FeedEvent,
@@ -629,12 +633,13 @@ const drawPoster = (
 
   context.textAlign = 'right';
   context.textBaseline = 'top';
-  context.fillStyle = COLORS.neutral50;
+  context.fillStyle = watermarkColor(event);
   context.font = font(700, watermark.fontSize, fonts.sans);
   context.fillText('WishWe', watermark.x, watermark.y);
 
   context.textAlign = 'left';
   context.textBaseline = 'top';
+  context.fillStyle = COLORS.neutral50;
   context.font = font(700, title.fontSize, fonts.sans);
   const titleLines = wrapText(
     context,
@@ -831,13 +836,14 @@ const drawStory = (
     );
   }
 
-  context.fillStyle = COLORS.neutral50;
+  context.fillStyle = watermarkColor(event);
   context.textAlign = 'right';
   context.textBaseline = 'top';
   context.font = font(700, watermark.fontSize, fonts.sans);
   context.fillText('WishWe', watermark.x, watermark.y);
 
   context.textAlign = 'left';
+  context.fillStyle = COLORS.neutral50;
   context.font = font(700, title.fontSize, fonts.sans);
   const titleLines = wrapText(
     context,

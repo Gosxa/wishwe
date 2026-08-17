@@ -1,12 +1,105 @@
 // @vitest-environment jsdom
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { FeedEvent } from './types';
 import {
   SHARE_FORMATS,
   generateShareImages,
   getShareDateParts,
   shareImageFilename,
 } from './shareImage';
+
+const makeEvent = (overrides: Partial<FeedEvent> = {}): FeedEvent => ({
+  id: '10',
+  type: 'plan',
+  hashtag: '#comedy',
+  image: '/cover.jpg',
+  title: 'Standup comedy night',
+  host: { username: '@judy', avatar: null },
+  date: 'Wednesday, July 8 @ 20:30',
+  startsAt: 0,
+  createdAt: 0,
+  location: 'Comedy club, Warsaw',
+  description: '',
+  chatLink: null,
+  participantCount: 0,
+  maxParticipants: 10,
+  participants: [],
+  userParticipationStatus: null,
+  ...overrides,
+});
+
+const installCanvasMock = (
+  measureText: (text: string) => number = () => 100,
+) => {
+  class MockImage {
+    width = 100;
+    height = 100;
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    set src(_: string) {
+      setTimeout(() => this.onload?.(), 0);
+    }
+  }
+
+  vi.stubGlobal('Image', MockImage);
+
+  const fillText = vi.fn<(text: string, x: number, y: number) => void>();
+  const context = {
+    save: vi.fn(),
+    restore: vi.fn(),
+    beginPath: vi.fn(),
+    closePath: vi.fn(),
+    arc: vi.fn(),
+    clip: vi.fn(),
+    fillRect: vi.fn(),
+    fill: vi.fn(),
+    stroke: vi.fn(),
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
+    bezierCurveTo: vi.fn(),
+    quadraticCurveTo: vi.fn(),
+    translate: vi.fn(),
+    scale: vi.fn(),
+    measureText: vi.fn((text: string) => ({ width: measureText(text) })),
+    fillText,
+    setLineDash: vi.fn(),
+    createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+    drawImage: vi.fn(),
+    strokeStyle: '',
+    fillStyle: '',
+    lineWidth: 0,
+    lineCap: '',
+    lineJoin: '',
+    font: '',
+    textAlign: '',
+    textBaseline: '',
+    globalAlpha: 1,
+  };
+  const originalCreateElement = document.createElement.bind(document);
+
+  vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+    if (tagName !== 'canvas') return originalCreateElement(tagName);
+
+    const canvas = originalCreateElement('canvas');
+
+    Object.defineProperty(canvas, 'getContext', {
+      value: vi.fn(() => context),
+    });
+    canvas.toBlob = vi.fn(callback =>
+      callback(new Blob(['png-data'], { type: 'image/png' })),
+    );
+
+    return canvas;
+  });
+
+  return context;
+};
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe('share image metadata', () => {
   it('keeps the three Figma export sizes in carousel order', () => {
@@ -40,194 +133,36 @@ describe('share image metadata', () => {
   });
 
   it('generates share images for events where the host has no avatar', async () => {
-    class MockImage {
-      width = 100;
-      height = 100;
-      onload: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      set src(_: string) {
-        setTimeout(() => this.onload?.(), 0);
-      }
-    }
-
-    vi.stubGlobal('Image', MockImage);
-
-    const mockBlob = new Blob(['png-data'], { type: 'image/png' });
-    const originalCreateElement = document.createElement.bind(document);
-
-    const strokeSpy = vi.fn();
-    const contextMock = {
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      arc: vi.fn(),
-      clip: vi.fn(),
-      fillRect: vi.fn(),
-      fill: vi.fn(),
-      stroke: strokeSpy,
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      bezierCurveTo: vi.fn(),
-      quadraticCurveTo: vi.fn(),
-      translate: vi.fn(),
-      scale: vi.fn(),
-      measureText: vi.fn(() => ({ width: 100 })),
-      fillText: vi.fn(),
-      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      drawImage: vi.fn(),
-      strokeStyle: '',
-      fillStyle: '',
-      lineWidth: 0,
-      lineCap: '',
-      lineJoin: '',
-      font: '',
-      textAlign: '',
-      textBaseline: '',
-      globalAlpha: 1,
-    };
-
-    const createElementSpy = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
-        if (tagName === 'canvas') {
-          const canvas = originalCreateElement('canvas');
-
-          canvas.getContext = vi.fn(
-            () => contextMock as unknown as CanvasRenderingContext2D,
-          ) as unknown as typeof canvas.getContext;
-          canvas.toBlob = vi.fn(callback => callback(mockBlob));
-
-          return canvas;
-        }
-
-        return originalCreateElement(tagName);
-      });
-
-    const result = await generateShareImages({
-      id: '10',
-      type: 'plan',
-      hashtag: '#comedy',
-      image: '/cover.jpg',
-      title: 'Standup comedy night',
-      host: { username: '@judy', avatar: null },
-      date: 'Wed, 8 Jul · 20:30',
-      startsAt: 0,
-      createdAt: 0,
-      location: 'Comedy club, Warsaw',
-      description: '',
-      chatLink: null,
-      participantCount: 0,
-      maxParticipants: 10,
-      participants: [],
-      userParticipationStatus: null,
-    });
+    const context = installCanvasMock();
+    const result = await generateShareImages(makeEvent());
 
     expect(result).toHaveLength(3);
     expect(result.map(r => r.format)).toEqual(['poster', 'card', 'story']);
-    expect(strokeSpy).toHaveBeenCalled();
-
-    createElementSpy.mockRestore();
-    vi.unstubAllGlobals();
+    expect(context.stroke).toHaveBeenCalled();
   });
 
   it('renders multi-line titles on poster and story while keeping card single-line', async () => {
-    class MockImage {
-      width = 100;
-      height = 100;
-      onload: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      set src(_: string) {
-        setTimeout(() => this.onload?.(), 0);
-      }
-    }
+    const context = installCanvasMock(text => text.length * 20);
 
-    vi.stubGlobal('Image', MockImage);
+    await generateShareImages(
+      makeEvent({
+        id: '11',
+        hashtag: '#tech',
+        title:
+          'Weekend Hackathon & Startup Pitch Competition in Berlin Tech Hub Very Long Title That Needs Wrapping Across Lines',
+        host: { username: '@ivan_tech', avatar: null },
+        date: 'Saturday, August 29 @ 10:00',
+        location: 'HubHub Coworking Lounge',
+      }),
+    );
 
-    const mockBlob = new Blob(['png-data'], { type: 'image/png' });
-    const originalCreateElement = document.createElement.bind(document);
-    const fillTextSpy = vi.fn();
-
-    const contextMock = {
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      arc: vi.fn(),
-      clip: vi.fn(),
-      fillRect: vi.fn(),
-      fill: vi.fn(),
-      stroke: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      bezierCurveTo: vi.fn(),
-      quadraticCurveTo: vi.fn(),
-      translate: vi.fn(),
-      scale: vi.fn(),
-      measureText: vi.fn((text: string) => ({
-        width: text.length * 20,
-      })),
-      fillText: fillTextSpy,
-      setLineDash: vi.fn(),
-      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      drawImage: vi.fn(),
-      strokeStyle: '',
-      fillStyle: '',
-      lineWidth: 0,
-      lineCap: '',
-      lineJoin: '',
-      font: '',
-      textAlign: '',
-      textBaseline: '',
-      globalAlpha: 1,
-    };
-
-    const createElementSpy = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
-        if (tagName === 'canvas') {
-          const canvas = originalCreateElement('canvas');
-
-          canvas.getContext = vi.fn(
-            () => contextMock as unknown as CanvasRenderingContext2D,
-          ) as unknown as typeof canvas.getContext;
-          canvas.toBlob = vi.fn(callback => callback(mockBlob));
-
-          return canvas;
-        }
-
-        return originalCreateElement(tagName);
-      });
-
-    await generateShareImages({
-      id: '11',
-      type: 'plan',
-      hashtag: '#tech',
-      image: '/cover.jpg',
-      title:
-        'Weekend Hackathon & Startup Pitch Competition in Berlin Tech Hub Very Long Title That Needs Wrapping Across Lines',
-      host: { username: '@ivan_tech', avatar: null },
-      date: 'Sat, 29 Aug · 10:00',
-      startsAt: 0,
-      createdAt: 0,
-      location: 'HubHub Coworking Lounge',
-      description: '',
-      chatLink: null,
-      participantCount: 0,
-      maxParticipants: 10,
-      participants: [],
-      userParticipationStatus: null,
-    });
-
-    const fillTextCalls = fillTextSpy.mock.calls;
+    const fillTextCalls = context.fillText.mock.calls;
 
     const cardTitleCall = fillTextCalls.find(
       call => call[1] === 196 && call[2] === 214,
     );
 
-    expect(cardTitleCall).toBeDefined();
-    expect(cardTitleCall![0]).toContain('…');
-
+    expect(cardTitleCall?.[0]).toContain('…');
     const posterLine1Call = fillTextCalls.find(
       call => call[1] === 48 && call[2] === 310,
     );
@@ -236,105 +171,44 @@ describe('share image metadata', () => {
     );
 
     expect(posterLine1Call).toBeDefined();
-    expect(posterLine2Call).toBeDefined();
-    expect(posterLine2Call![0]).toContain('…');
+    expect(posterLine2Call?.[0]).toContain('…');
+  });
 
-    createElementSpy.mockRestore();
-    vi.unstubAllGlobals();
+  it('keeps fallback-cover branding legible without darkening titles', async () => {
+    const context = installCanvasMock();
+    const colors: Record<string, string[]> = { WishWe: [], Title: [] };
+
+    context.fillText.mockImplementation(text => {
+      if (text in colors) colors[text].push(context.fillStyle);
+    });
+
+    await generateShareImages(
+      makeEvent({ image: '/bg-gradient-noise.webp', title: 'Title' }),
+    );
+
+    expect(colors.WishWe).toEqual(['#474b24', '#474b24', '#474b24']);
+    expect(colors.Title).toEqual(['#f7f3e3', '#1a1c1e', '#f7f3e3']);
   });
 
   it('renders wish event badges with dashed outlines', async () => {
-    class MockImage {
-      width = 100;
-      height = 100;
-      onload: (() => void) | null = null;
-      onerror: (() => void) | null = null;
-      set src(_: string) {
-        setTimeout(() => this.onload?.(), 0);
-      }
-    }
+    const context = installCanvasMock();
 
-    vi.stubGlobal('Image', MockImage);
-
-    const mockBlob = new Blob(['png-data'], { type: 'image/png' });
-    const originalCreateElement = document.createElement.bind(document);
-    const setLineDashSpy = vi.fn();
-
-    const contextMock = {
-      save: vi.fn(),
-      restore: vi.fn(),
-      beginPath: vi.fn(),
-      closePath: vi.fn(),
-      arc: vi.fn(),
-      clip: vi.fn(),
-      fillRect: vi.fn(),
-      fill: vi.fn(),
-      stroke: vi.fn(),
-      moveTo: vi.fn(),
-      lineTo: vi.fn(),
-      bezierCurveTo: vi.fn(),
-      quadraticCurveTo: vi.fn(),
-      translate: vi.fn(),
-      scale: vi.fn(),
-      measureText: vi.fn(() => ({ width: 100 })),
-      fillText: vi.fn(),
-      setLineDash: setLineDashSpy,
-      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
-      drawImage: vi.fn(),
-      strokeStyle: '',
-      fillStyle: '',
-      lineWidth: 0,
-      lineCap: '',
-      lineJoin: '',
-      font: '',
-      textAlign: '',
-      textBaseline: '',
-      globalAlpha: 1,
-    };
-
-    const createElementSpy = vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tagName: string) => {
-        if (tagName === 'canvas') {
-          const canvas = originalCreateElement('canvas');
-
-          canvas.getContext = vi.fn(
-            () => contextMock as unknown as CanvasRenderingContext2D,
-          ) as unknown as typeof canvas.getContext;
-          canvas.toBlob = vi.fn(callback => callback(mockBlob));
-
-          return canvas;
-        }
-
-        return originalCreateElement(tagName);
-      });
-
-    await generateShareImages({
-      id: '12',
-      type: 'wish',
-      hashtag: '#travel',
-      image: '/cover.jpg',
-      title: 'Trip to Tokyo',
-      host: { username: '@alex', avatar: null },
-      date: 'Sat, 15 Aug · 12:00',
-      startsAt: 0,
-      createdAt: 0,
-      location: 'Tokyo, Japan',
-      description: '',
-      chatLink: null,
-      participantCount: 0,
-      maxParticipants: 10,
-      participants: [],
-      userParticipationStatus: null,
-    });
+    await generateShareImages(
+      makeEvent({
+        id: '12',
+        type: 'wish',
+        hashtag: '#travel',
+        title: 'Trip to Tokyo',
+        host: { username: '@alex', avatar: null },
+        date: 'One day this winter',
+        location: 'Tokyo, Japan',
+      }),
+    );
 
     expect(
-      setLineDashSpy.mock.calls.some(
+      context.setLineDash.mock.calls.some(
         ([pattern]) => Array.isArray(pattern) && pattern.length > 0,
       ),
     ).toBe(true);
-
-    createElementSpy.mockRestore();
-    vi.unstubAllGlobals();
   });
 });
