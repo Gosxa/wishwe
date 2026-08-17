@@ -559,212 +559,149 @@ export const ShareEventModal = ({
           <img src="/icons/share/close.svg" alt="" />
         </button>
 
-        <div className={s.carousel}>
-          <div
-            id="share-preview"
-            className={s.stage}
-            role="tabpanel"
-            aria-labelledby={`share-format-${activeFormat}`}
-            aria-label={`${activeSpec.label} preview`}
-          >
-            {activeUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={activeFormat}
-                className={clsx(
-                  s.preview,
-                  activeFormat === 'story' && s.previewStory,
-                )}
-                src={activeUrl}
-                alt={`${activeSpec.label} share image for ${event.title}`}
-              />
-            ) : (
-              <div
-                className={clsx(
-                  s.skeleton,
-                  activeFormat === 'story' && s.skeletonStory,
-                )}
-                role="status"
-                aria-label={
-                  imageError
-                    ? 'Share image could not be prepared'
-                    : 'Preparing share image'
-                }
-              >
-                <span className={s.skeletonPill} />
-                <span className={s.skeletonTitle} />
-                <span className={s.skeletonLine} />
-                <span className={s.skeletonLineShort} />
-              </div>
-            )}
-
-            <button
-              type="button"
-              className={clsx(s.arrow, s.arrowPrevious)}
-              onClick={() => moveSlide(-1)}
-              aria-label="Previous share format"
+        <div className={s.body}>
+          <div className={s.carousel}>
+            <div
+              id="share-preview"
+              className={s.stage}
+              role="tabpanel"
+              aria-labelledby={`share-format-${activeFormat}`}
+              aria-label={`${activeSpec.label} preview`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icons/share/arrow-prev.svg" alt="" />
-            </button>
-            <button
-              type="button"
-              className={clsx(s.arrow, s.arrowNext)}
-              onClick={() => moveSlide(1)}
-              aria-label="Next share format"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icons/share/arrow-next.svg" alt="" />
-            </button>
-          </div>
+              {activeUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={activeFormat}
+                  className={clsx(
+                    s.preview,
+                    activeFormat === 'story' && s.previewStory,
+                  )}
+                  src={activeUrl}
+                  alt={`${activeSpec.label} share image for ${event.title}`}
+                />
+              ) : (
+                <div
+                  className={clsx(
+                    s.skeleton,
+                    activeFormat === 'story' && s.skeletonStory,
+                  )}
+                  role="status"
+                  aria-label={
+                    imageError
+                      ? 'Share image could not be prepared'
+                      : 'Preparing share image'
+                  }
+                >
+                  <span className={s.skeletonPill} />
+                  <span className={s.skeletonTitle} />
+                  <span className={s.skeletonLine} />
+                  <span className={s.skeletonLineShort} />
+                </div>
+              )}
 
-          <div className={s.dots} role="tablist" aria-label="Share formats">
-            {SHARE_FORMATS.map(format => (
               <button
-                key={format.id}
-                id={`share-format-${format.id}`}
                 type="button"
-                className={clsx(
-                  s.dot,
-                  activeFormat === format.id && s.dotActive,
-                )}
-                role="tab"
-                aria-label={format.label}
-                aria-selected={activeFormat === format.id}
-                aria-controls="share-preview"
-                onClick={() => selectFormat(format.id)}
-              />
-            ))}
+                className={clsx(s.arrow, s.arrowPrevious)}
+                onClick={() => moveSlide(-1)}
+                aria-label="Previous share format"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icons/share/arrow-prev.svg" alt="" />
+              </button>
+              <button
+                type="button"
+                className={clsx(s.arrow, s.arrowNext)}
+                onClick={() => moveSlide(1)}
+                aria-label="Next share format"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icons/share/arrow-next.svg" alt="" />
+              </button>
+            </div>
+
+            <div className={s.dots} role="tablist" aria-label="Share formats">
+              {SHARE_FORMATS.map(format => (
+                <button
+                  key={format.id}
+                  id={`share-format-${format.id}`}
+                  type="button"
+                  className={clsx(
+                    s.dot,
+                    activeFormat === format.id && s.dotActive,
+                  )}
+                  role="tab"
+                  aria-label={format.label}
+                  aria-selected={activeFormat === format.id}
+                  aria-controls="share-preview"
+                  onClick={() => selectFormat(format.id)}
+                />
+              ))}
+            </div>
+
+            <p className={s.caption}>
+              {imageError
+                ? "Couldn't prepare the image. Link sharing is still available."
+                : `${activeSpec.label}  ·  ${activeSpec.width} × ${activeSpec.height}  ·  ${activeSpec.description}`}
+            </p>
           </div>
 
-          <p className={s.caption}>
-            {imageError
-              ? "Couldn't prepare the image. Link sharing is still available."
-              : `${activeSpec.label}  ·  ${activeSpec.width} × ${activeSpec.height}  ·  ${activeSpec.description}`}
-          </p>
-        </div>
+          <div className={s.sectionLabel}>
+            <span />
+            <p>POST TO</p>
+            <span />
+          </div>
 
-        <div className={s.sectionLabel}>
-          <span />
-          <p>POST TO</p>
-          <span />
-        </div>
+          <div className={s.networks}>
+            {networkItems.map(item => (
+              <a
+                key={item.id}
+                className={s.networkItem}
+                href={item.href ?? '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-disabled={!item.href}
+                onClick={item.onClick}
+              >
+                <span className={s.networkButton}>
+                  <span
+                    className={s.networkGlyph}
+                    style={iconStyle(item.icon)}
+                  />
+                </span>
+                <span>{item.label}</span>
+              </a>
+            ))}
 
-        <div className={s.networks}>
-          {networkItems.map(item => (
             <a
-              key={item.id}
-              className={s.networkItem}
-              href={item.href ?? '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-disabled={!item.href}
-              onClick={item.onClick}
+              ref={storiesLinkRef}
+              className={clsx(
+                s.networkItem,
+                s.stories,
+                activeFormat === 'story' && s.networkActive,
+              )}
+              href={storyUrl ?? '#'}
+              download={
+                storyImage ? shareImageFilename(event, 'story') : undefined
+              }
+              aria-disabled={!storyImage || !storyUrl}
+              data-tooltip="Saves the 9:16 image — post it in the app"
+              onClick={handleStoriesClick}
             >
               <span className={s.networkButton}>
-                <span className={s.networkGlyph} style={iconStyle(item.icon)} />
+                <span
+                  className={s.networkGlyph}
+                  style={iconStyle('/icons/share/stories.svg')}
+                />
               </span>
-              <span>{item.label}</span>
+              <span>Stories</span>
             </a>
-          ))}
-
-          <a
-            ref={storiesLinkRef}
-            className={clsx(
-              s.networkItem,
-              s.stories,
-              activeFormat === 'story' && s.networkActive,
-            )}
-            href={storyUrl ?? '#'}
-            download={
-              storyImage ? shareImageFilename(event, 'story') : undefined
-            }
-            aria-disabled={!storyImage || !storyUrl}
-            data-tooltip="Saves the 9:16 image — post it in the app"
-            onClick={handleStoriesClick}
-          >
-            <span className={s.networkButton}>
-              <span
-                className={s.networkGlyph}
-                style={iconStyle('/icons/share/stories.svg')}
-              />
-            </span>
-            <span>Stories</span>
-          </a>
-        </div>
-
-        {imageClipboard ? (
-          <div className={s.actions}>
-            <button
-              type="button"
-              className={clsx(s.copyLink, feedback === 'link' && s.confirmed)}
-              onClick={handleCopyLink}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={
-                  feedback === 'link'
-                    ? '/icons/share/check.svg'
-                    : '/icons/share/link.svg'
-                }
-                alt=""
-              />
-              <span>{feedback === 'link' ? 'Link copied!' : 'Copy link'}</span>
-            </button>
-            <button
-              type="button"
-              className={clsx(
-                s.copyImage,
-                feedback === 'link' && s.copyImageMuted,
-              )}
-              onClick={handleCopyImage}
-              disabled={!isImageReady}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={
-                  feedback === 'image'
-                    ? '/icons/share/check.svg'
-                    : '/icons/share/image.svg'
-                }
-                alt=""
-              />
-              <span>
-                {feedback === 'image' ? 'Image copied!' : 'Copy image'}
-              </span>
-            </button>
-            {activeImage && activeUrl ? (
-              <a
-                className={s.download}
-                href={activeUrl}
-                download={shareImageFilename(event, activeFormat)}
-                aria-label={`Download ${activeSpec.label} image`}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icons/share/download.svg" alt="" />
-              </a>
-            ) : (
-              <button
-                type="button"
-                className={s.download}
-                aria-label="Download image"
-                disabled
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/icons/share/download.svg" alt="" />
-              </button>
-            )}
           </div>
-        ) : (
-          <div className={s.fallbackActions}>
+
+          {imageClipboard ? (
             <div className={s.actions}>
               <button
                 type="button"
-                className={clsx(
-                  s.copyLink,
-                  s.fallbackAction,
-                  feedback === 'link' && s.confirmed,
-                )}
+                className={clsx(s.copyLink, feedback === 'link' && s.confirmed)}
                 onClick={handleCopyLink}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -780,37 +717,107 @@ export const ShareEventModal = ({
                   {feedback === 'link' ? 'Link copied!' : 'Copy link'}
                 </span>
               </button>
+              <button
+                type="button"
+                className={clsx(
+                  s.copyImage,
+                  feedback === 'link' && s.copyImageMuted,
+                )}
+                onClick={handleCopyImage}
+                disabled={!isImageReady}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={
+                    feedback === 'image'
+                      ? '/icons/share/check.svg'
+                      : '/icons/share/image.svg'
+                  }
+                  alt=""
+                />
+                <span>
+                  {feedback === 'image' ? 'Image copied!' : 'Copy image'}
+                </span>
+              </button>
               {activeImage && activeUrl ? (
                 <a
-                  className={clsx(s.downloadFallback, s.fallbackAction)}
+                  className={s.download}
                   href={activeUrl}
                   download={shareImageFilename(event, activeFormat)}
+                  aria-label={`Download ${activeSpec.label} image`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icons/share/download-white.svg" alt="" />
-                  <span>Download image</span>
+                  <img src="/icons/share/download.svg" alt="" />
                 </a>
               ) : (
                 <button
                   type="button"
-                  className={clsx(s.downloadFallback, s.fallbackAction)}
+                  className={s.download}
+                  aria-label="Download image"
                   disabled
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/icons/share/download-white.svg" alt="" />
-                  <span>Download image</span>
+                  <img src="/icons/share/download.svg" alt="" />
                 </button>
               )}
             </div>
-            <p className={s.fallbackNote}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/icons/share/info.svg" alt="" />
-              <span>
-                This browser can’t copy images — the PNG downloads instead.
-              </span>
-            </p>
-          </div>
-        )}
+          ) : (
+            <div className={s.fallbackActions}>
+              <div className={s.actions}>
+                <button
+                  type="button"
+                  className={clsx(
+                    s.copyLink,
+                    s.fallbackAction,
+                    feedback === 'link' && s.confirmed,
+                  )}
+                  onClick={handleCopyLink}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={
+                      feedback === 'link'
+                        ? '/icons/share/check.svg'
+                        : '/icons/share/link.svg'
+                    }
+                    alt=""
+                  />
+                  <span>
+                    {feedback === 'link' ? 'Link copied!' : 'Copy link'}
+                  </span>
+                </button>
+                {activeImage && activeUrl ? (
+                  <a
+                    className={clsx(s.downloadFallback, s.fallbackAction)}
+                    href={activeUrl}
+                    download={shareImageFilename(event, activeFormat)}
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/share/download-white.svg" alt="" />
+                    <span>Download image</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    className={clsx(s.downloadFallback, s.fallbackAction)}
+                    disabled
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/icons/share/download-white.svg" alt="" />
+                    <span>Download image</span>
+                  </button>
+                )}
+              </div>
+              <p className={s.fallbackNote}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/icons/share/info.svg" alt="" />
+                <span>
+                  This browser can’t copy images — the PNG downloads instead.
+                </span>
+              </p>
+            </div>
+          )}
+        </div>
 
         {showInstagramNotice && (
           <div

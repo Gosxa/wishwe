@@ -382,7 +382,14 @@ test.describe('Share Event modal', () => {
       { width: 1200, height: 630 },
     );
     await expect
-      .poll(() => dialog.evaluate(node => node.getAnimations().length))
+      .poll(() =>
+        dialog.evaluate(
+          node =>
+            node
+              .getAnimations()
+              .filter(animation => animation.playState === 'running').length,
+        ),
+      )
       .toBe(0);
 
     const backdrop = dialog.locator('..');
@@ -390,7 +397,14 @@ test.describe('Share Event modal', () => {
     await backdrop.click({ position: { x: 2, y: 2 } });
     await expect(dialog).toBeVisible();
     await expect
-      .poll(() => dialog.evaluate(node => node.getAnimations().length))
+      .poll(() =>
+        dialog.evaluate(
+          node =>
+            node
+              .getAnimations()
+              .filter(animation => animation.playState === 'running').length,
+        ),
+      )
       .toBeGreaterThan(0);
 
     await page.keyboard.press('Escape');
