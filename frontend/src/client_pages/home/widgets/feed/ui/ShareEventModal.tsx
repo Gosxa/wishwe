@@ -36,6 +36,7 @@ type Network = 'telegram' | 'whatsapp' | 'x' | 'facebook';
 type PreparedShareImage = GeneratedShareImage & { url: string };
 
 const FORMAT_STORAGE_KEY = 'wishwe-share-format';
+const SKIP_INSTAGRAM_NOTICE_KEY = 'wishwe-skip-instagram-notice';
 const FEEDBACK_DURATION_MS = 2000;
 
 const iconStyle = (path: string) =>
@@ -70,6 +71,28 @@ const readStoredFormat = (): ShareFormat => {
   } catch {
     return 'poster';
   }
+};
+
+const readSkipInstagramNotice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    return window.localStorage.getItem(SKIP_INSTAGRAM_NOTICE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const saveSkipInstagramNotice = (skip: boolean) => {
+  if (typeof window === 'undefined') return;
+
+  try {
+    if (skip) {
+      window.localStorage.setItem(SKIP_INSTAGRAM_NOTICE_KEY, 'true');
+    } else {
+      window.localStorage.removeItem(SKIP_INSTAGRAM_NOTICE_KEY);
+    }
+  } catch {}
 };
 
 const supportsImageClipboard = () => {
@@ -150,14 +173,20 @@ export const ShareEventModal = ({
   const [feedback, setFeedback] = useState<Feedback>('idle');
   const [announcement, setAnnouncement] = useState('');
   const [showLinkToast, setShowLinkToast] = useState(false);
+  const [showInstagramNotice, setShowInstagramNotice] = useState(false);
+  const [dontShowAgain, setDontShowAgain] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const storiesLinkRef = useRef<HTMLAnchorElement>(null);
+  const instagramNoticeProceedRef = useRef<HTMLButtonElement>(null);
+  const instagramNoticeModalRef = useRef<HTMLDivElement>(null);
   const linkPromiseRef = useRef<Promise<string> | null>(null);
   const imagesPromiseRef = useRef<Promise<GeneratedShareImage[]> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useBodyScrollLock();
   const pulseModal = useModalAttention();
+  const pulseInstagramNotice = useModalAttention();
 
   const getShareLink = useCallback(() => {
     if (!linkPromiseRef.current) {
@@ -208,6 +237,16 @@ export const ShareEventModal = ({
     };
   }, [getShareImages, getShareLink]);
 
+  const showInstagramNoticeRef = useRef(showInstagramNotice);
+
+  useEffect(() => {
+    showInstagramNoticeRef.current = showInstagramNotice;
+
+    if (showInstagramNotice) {
+      instagramNoticeProceedRef.current?.focus();
+    }
+  }, [showInstagramNotice]);
+
   useEffect(() => {
     const previousActive = document.activeElement as HTMLElement | null;
     const returnFocus = returnFocusRef.current ?? previousActive;
@@ -216,7 +255,19 @@ export const ShareEventModal = ({
     closeRef.current?.focus();
 
     const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
+      if (keyboardEvent.key === 'Escape') {
+        if (showInstagramNoticeRef.current) {
+          keyboardEvent.preventDefault();
+          setShowInstagramNotice(false);
+          storiesLinkRef.current?.focus();
+
+          return;
+        }
+      }
+
       if (keyboardEvent.key === 'ArrowLeft') {
+        if (showInstagramNoticeRef.current) return;
+
         keyboardEvent.preventDefault();
         setActiveFormat(current => {
           const index = SHARE_FORMATS.findIndex(item => item.id === current);
@@ -230,6 +281,8 @@ export const ShareEventModal = ({
       }
 
       if (keyboardEvent.key === 'ArrowRight') {
+        if (showInstagramNoticeRef.current) return;
+
         keyboardEvent.preventDefault();
         setActiveFormat(current => {
           const index = SHARE_FORMATS.findIndex(item => item.id === current);
@@ -242,9 +295,14 @@ export const ShareEventModal = ({
 
       if (keyboardEvent.key !== 'Tab' || !dialog) return;
 
+      const currentContainer =
+        showInstagramNoticeRef.current && instagramNoticeModalRef.current
+          ? instagramNoticeModalRef.current
+          : dialog;
+
       const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href]:not([aria-disabled="true"]), button:not(:disabled)',
+        currentContainer.querySelectorAll<HTMLElement>(
+          'a[href]:not([aria-disabled="true"]), button:not(:disabled), input:not(:disabled)',
         ),
       );
 
@@ -347,6 +405,57 @@ export const ShareEventModal = ({
     }
   };
 
+  const triggerStoryDownloadAndRedirect = () => {
+    if (!storyImage || !storyUrl) return;
+
+    const downloadLink = document.createElement('a');
+
+    downloadLink.href = storyUrl;
+    downloadLink.download = shareImageFilename(event, 'story');
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+    window.open('https://www.instagram.com/', '_blank', 'noopener,noreferrer');
+  };
+
+  const handleStoriesClick = (clickEvent: MouseEvent<HTMLAnchorElement>) => {
+    selectFormat('story');
+
+    if (!storyImage || !storyUrl) {
+      clickEvent.preventDefault();
+
+      return;
+    }
+
+    if (readSkipInstagramNotice()) {
+      window.open(
+        'https://www.instagram.com/',
+        '_blank',
+        'noopener,noreferrer',
+      );
+
+      return;
+    }
+
+    clickEvent.preventDefault();
+    setShowInstagramNotice(true);
+  };
+
+  const handleProceedInstagramNotice = () => {
+    if (dontShowAgain) {
+      saveSkipInstagramNotice(true);
+    }
+
+    setShowInstagramNotice(false);
+    triggerStoryDownloadAndRedirect();
+  };
+
+  const handleCancelInstagramNotice = () => {
+    setShowInstagramNotice(false);
+    storiesLinkRef.current?.focus();
+  };
+
   const activeImage = findImage(images, activeFormat);
   const activeUrl = activeImage?.url;
   const storyImage = findImage(images, 'story');
@@ -380,14 +489,6 @@ export const ShareEventModal = ({
 
   const handleSocialClick = (clickEvent: MouseEvent<HTMLAnchorElement>) => {
     if (!socialUrls) clickEvent.preventDefault();
-  };
-
-  const handleStoriesClick = (clickEvent: MouseEvent<HTMLAnchorElement>) => {
-    selectFormat('story');
-
-    if (!storyImage || !storyUrl) {
-      clickEvent.preventDefault();
-    }
   };
 
   const networkItems = [
@@ -558,6 +659,7 @@ export const ShareEventModal = ({
           ))}
 
           <a
+            ref={storiesLinkRef}
             className={clsx(
               s.networkItem,
               s.stories,
@@ -697,6 +799,66 @@ export const ShareEventModal = ({
                 This browser can’t copy images — the PNG downloads instead.
               </span>
             </p>
+          </div>
+        )}
+
+        {showInstagramNotice && (
+          <div
+            className={s.confirmOverlay}
+            role="presentation"
+            onClick={pulseInstagramNotice}
+          >
+            <div
+              data-modal-content
+              ref={instagramNoticeModalRef}
+              className={s.confirmModal}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="instagramNoticeTitle"
+              aria-describedby="instagramNoticeDesc"
+              onClick={clickEvent => clickEvent.stopPropagation()}
+            >
+              <div className={s.confirmIcon} aria-hidden="true">
+                <span style={iconStyle('/icons/share/stories.svg')} />
+              </div>
+
+              <h3 id="instagramNoticeTitle" className={s.confirmTitle}>
+                Post to Instagram Stories
+              </h3>
+              <p id="instagramNoticeDesc" className={s.confirmDescription}>
+                We will save the 9:16 story image to your device and open
+                Instagram so you can add it to your Stories.
+              </p>
+
+              <label className={s.confirmCheckbox}>
+                <input
+                  type="checkbox"
+                  checked={dontShowAgain}
+                  onChange={checkboxEvent =>
+                    setDontShowAgain(checkboxEvent.target.checked)
+                  }
+                />
+                <span>Don’t show this again</span>
+              </label>
+
+              <div className={s.confirmActions}>
+                <button
+                  type="button"
+                  className={s.confirmCancel}
+                  onClick={handleCancelInstagramNotice}
+                >
+                  <span>Cancel</span>
+                </button>
+                <button
+                  ref={instagramNoticeProceedRef}
+                  type="button"
+                  className={s.confirmProceed}
+                  onClick={handleProceedInstagramNotice}
+                >
+                  <span>Continue to Instagram</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

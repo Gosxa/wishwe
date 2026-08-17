@@ -123,6 +123,24 @@ describe('ShareEventModal', () => {
     windowOpen = vi.fn();
     vi.stubGlobal('open', windowOpen);
     window.sessionStorage.clear();
+
+    const localStore = new Map<string, string>();
+
+    Object.defineProperty(window, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (key: string) => localStore.get(key) ?? null,
+        setItem: (key: string, value: string) => {
+          localStore.set(key, String(value));
+        },
+        removeItem: (key: string) => {
+          localStore.delete(key);
+        },
+        clear: () => {
+          localStore.clear();
+        },
+      },
+    });
   });
 
   afterEach(() => {
@@ -130,7 +148,7 @@ describe('ShareEventModal', () => {
     vi.unstubAllGlobals();
   });
 
-  it('builds social destinations and downloads the Story format', async () => {
+  it('builds social destinations and handles the Instagram Story notice workflow', async () => {
     renderModal();
 
     await screen.findByRole('img', {
@@ -160,15 +178,86 @@ describe('ShareEventModal', () => {
     expect(stories.getAttribute('download')).toBe(
       'wishwe-weekend-trip-story.png',
     );
-    stories.addEventListener('click', clickEvent =>
-      clickEvent.preventDefault(),
-    );
     fireEvent.click(stories);
 
     expect(
       screen.getByRole('tab', { name: 'Story' }).getAttribute('aria-selected'),
     ).toBe('true');
     expect(window.sessionStorage.getItem('wishwe-share-format')).toBe('story');
+
+    const noticeDialog = screen.getByRole('dialog', {
+      name: 'Post to Instagram Stories',
+    });
+
+    expect(noticeDialog).toBeTruthy();
+    expect(windowOpen).not.toHaveBeenCalled();
+
+    fireEvent.click(noticeDialog.parentElement as HTMLElement);
+    expect(
+      screen.getByRole('dialog', { name: 'Post to Instagram Stories' }),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(
+      screen.queryByRole('dialog', { name: 'Post to Instagram Stories' }),
+    ).toBeNull();
+    expect(windowOpen).not.toHaveBeenCalled();
+
+    fireEvent.click(stories);
+    const checkbox = screen.getByRole('checkbox', {
+      name: 'Don’t show this again',
+    });
+
+    fireEvent.click(checkbox);
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Continue to Instagram' }),
+    );
+
+    expect(windowOpen).toHaveBeenCalledWith(
+      'https://www.instagram.com/',
+      '_blank',
+      'noopener,noreferrer',
+    );
+    expect(window.localStorage.getItem('wishwe-skip-instagram-notice')).toBe(
+      'true',
+    );
+
+    windowOpen.mockClear();
+    stories.addEventListener('click', clickEvent =>
+      clickEvent.preventDefault(),
+    );
+    fireEvent.click(stories);
+
+    expect(
+      screen.queryByRole('dialog', { name: 'Post to Instagram Stories' }),
+    ).toBeNull();
+    expect(windowOpen).toHaveBeenCalledWith(
+      'https://www.instagram.com/',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  });
+
+  it('closes the Instagram notice with Escape and returns focus to Stories', async () => {
+    renderModal();
+
+    await screen.findByRole('img', {
+      name: 'Poster share image for Weekend trip',
+    });
+
+    const stories = screen.getByRole('link', { name: 'Stories' });
+
+    fireEvent.click(stories);
+    expect(
+      screen.getByRole('dialog', { name: 'Post to Instagram Stories' }),
+    ).toBeTruthy();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    expect(
+      screen.queryByRole('dialog', { name: 'Post to Instagram Stories' }),
+    ).toBeNull();
+    expect(document.activeElement).toBe(stories);
   });
 
   it('uses the existing owner share link for every destination', async () => {
