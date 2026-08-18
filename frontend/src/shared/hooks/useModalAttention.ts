@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { MouseEvent } from 'react';
+import type { MouseEvent, RefObject } from 'react';
 
 const MODAL_CONTENT_SELECTOR = '[data-modal-content]';
 
@@ -16,7 +16,7 @@ const pulseOptions: KeyframeAnimationOptions = {
   easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 };
 
-export const useModalAttention = () => {
+export const useModalAttention = (modalRef?: RefObject<HTMLElement | null>) => {
   const animationRef = useRef<Animation | null>(null);
 
   useEffect(
@@ -26,25 +26,28 @@ export const useModalAttention = () => {
     [],
   );
 
-  return useCallback((event: MouseEvent<HTMLElement>) => {
-    if (event.target !== event.currentTarget) return;
+  return useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      if (event.target !== event.currentTarget) return;
 
-    event.stopPropagation();
+      event.stopPropagation();
 
-    if (
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      return;
-    }
+      if (
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      ) {
+        return;
+      }
 
-    const modal = event.currentTarget.querySelector<HTMLElement>(
-      MODAL_CONTENT_SELECTOR,
-    );
+      const modal =
+        modalRef?.current ??
+        event.currentTarget.querySelector<HTMLElement>(MODAL_CONTENT_SELECTOR);
 
-    if (!modal || typeof modal.animate !== 'function') return;
+      if (!modal || typeof modal.animate !== 'function') return;
 
-    animationRef.current?.cancel();
-    animationRef.current = modal.animate(pulseKeyframes, pulseOptions);
-  }, []);
+      animationRef.current?.cancel();
+      animationRef.current = modal.animate(pulseKeyframes, pulseOptions);
+    },
+    [modalRef],
+  );
 };

@@ -3,6 +3,7 @@
 import { PasswordInput } from '@shared/ui/passwordInput/PasswordInput';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { X } from '@shared/ui/icons';
+import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { useChangePassword } from '../model/useChangePassword';
@@ -17,6 +18,8 @@ export const ChangePasswordModal = ({ onClose }: Props) => {
   const { currentInput, newInput, confirmInput, submit } =
     useChangePassword(requestClose);
   const pulseModal = useModalAttention();
+
+  useBodyScrollLock();
 
   return (
     <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>

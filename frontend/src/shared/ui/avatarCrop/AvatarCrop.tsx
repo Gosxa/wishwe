@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import Cropper from 'react-easy-crop';
 import type { Area } from 'react-easy-crop';
+import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { cropImage } from './cropImage';
@@ -22,6 +23,8 @@ export const AvatarCrop = ({ imageSrc, onConfirm, onCancel }: Props) => {
   const pulseModal = useModalAttention();
   const { requestClose, requestCloseWith, modalTransitionProps } =
     useModalTransition(onCancel);
+
+  useBodyScrollLock();
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedAreaPixels(pixels);

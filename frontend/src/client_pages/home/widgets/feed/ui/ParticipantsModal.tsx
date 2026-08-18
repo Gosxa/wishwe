@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { RefObject } from 'react';
 import { Avatar, X } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
@@ -15,6 +16,7 @@ import s from './participantsModal.module.scss';
 type Props = {
   eventId: string;
   initialParticipants: ParticipantAvatar[];
+  returnFocusRef: RefObject<HTMLButtonElement | null>;
   onClose: () => void;
 };
 
@@ -29,16 +31,26 @@ const toParticipant = (participant: {
 export const ParticipantsModal = ({
   eventId,
   initialParticipants,
+  returnFocusRef,
   onClose,
 }: Props) => {
   useBodyScrollLock();
   const pulseModal = useModalAttention();
   const { requestClose, modalTransitionProps } = useModalTransition(onClose);
+  const closeRef = useRef<HTMLButtonElement>(null);
 
   const [participants, setParticipants] =
     useState<ParticipantAvatar[]>(initialParticipants);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const returnFocus = returnFocusRef.current;
+
+    closeRef.current?.focus();
+
+    return () => returnFocus?.focus();
+  }, [returnFocusRef]);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +95,7 @@ export const ParticipantsModal = ({
               Who&apos;s going
             </h2>
             <button
+              ref={closeRef}
               type="button"
               className={s.close}
               onClick={requestClose}

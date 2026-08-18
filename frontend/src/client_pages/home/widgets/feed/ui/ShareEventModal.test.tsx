@@ -260,6 +260,43 @@ describe('ShareEventModal', () => {
     expect(document.activeElement).toBe(stories);
   });
 
+  it('pulses the Instagram notice when the outer backdrop is clicked', async () => {
+    renderModal();
+
+    await screen.findByRole('img', {
+      name: 'Poster share image for Weekend trip',
+    });
+
+    fireEvent.click(screen.getByRole('link', { name: 'Stories' }));
+
+    const shareDialog = screen.getByRole('dialog', {
+      name: 'Share this plan',
+    });
+    const noticeDialog = screen.getByRole('dialog', {
+      name: 'Post to Instagram Stories',
+    });
+    const shareAnimate = vi.fn(
+      () => ({ cancel: vi.fn() }) as unknown as Animation,
+    );
+    const noticeAnimate = vi.fn(
+      () => ({ cancel: vi.fn() }) as unknown as Animation,
+    );
+
+    Object.defineProperty(shareDialog, 'animate', {
+      configurable: true,
+      value: shareAnimate,
+    });
+    Object.defineProperty(noticeDialog, 'animate', {
+      configurable: true,
+      value: noticeAnimate,
+    });
+
+    fireEvent.click(shareDialog.parentElement as HTMLElement);
+
+    expect(noticeAnimate).toHaveBeenCalledTimes(1);
+    expect(shareAnimate).not.toHaveBeenCalled();
+  });
+
   it('uses the existing owner share link for every destination', async () => {
     renderModal(true);
 

@@ -1,6 +1,7 @@
 'use client';
 
 import { X } from '@shared/ui/icons';
+import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import s from './shareErrorModal.module.scss';
@@ -13,6 +14,8 @@ type Props = {
 export const ShareErrorModal = ({ onClose, actionLabel }: Props) => {
   const pulseModal = useModalAttention();
   const { requestClose, modalTransitionProps } = useModalTransition(onClose);
+
+  useBodyScrollLock();
 
   return (
     <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>

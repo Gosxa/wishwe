@@ -443,6 +443,92 @@ describe('EventCard', () => {
     expect(onDetailsClose).toHaveBeenCalledTimes(1);
   });
 
+  it('deactivates event details while participants are open', () => {
+    renderCard({
+      event: feedEvent({
+        participantCount: 2,
+        participants: [
+          { username: '@alice', avatar: '/alice.jpg' },
+          { username: '@bob', avatar: null },
+        ],
+      }),
+      enableDetails: true,
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Weekend trip' }));
+
+    const detailsDialog = screen.getByRole('dialog', {
+      name: 'Weekend trip',
+    });
+    const participantsTrigger = within(detailsDialog).getByRole('button', {
+      name: '2/10',
+    });
+
+    participantsTrigger.focus();
+    fireEvent.click(participantsTrigger);
+
+    const participantsDialog = screen.getByRole('dialog', {
+      name: "Who's going",
+    });
+    const participantsClose = within(participantsDialog).getByRole('button', {
+      name: 'Close',
+    });
+
+    expect(detailsDialog.getAttribute('aria-hidden')).toBe('true');
+    expect(detailsDialog.getAttribute('aria-modal')).toBeNull();
+    expect(detailsDialog.hasAttribute('inert')).toBe(true);
+    expect(document.activeElement).toBe(participantsClose);
+
+    fireEvent.click(participantsClose);
+
+    expect(screen.queryByRole('dialog', { name: "Who's going" })).toBeNull();
+    expect(detailsDialog.getAttribute('aria-hidden')).toBeNull();
+    expect(detailsDialog.getAttribute('aria-modal')).toBe('true');
+    expect(detailsDialog.hasAttribute('inert')).toBe(false);
+    expect(document.activeElement).toBe(participantsTrigger);
+  });
+
+  it('deactivates event details while nested leave confirmation is open', () => {
+    renderCard({
+      event: feedEvent({ userParticipationStatus: 'joined' }),
+      enableDetails: true,
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Weekend trip' }));
+
+    const detailsDialog = screen.getByRole('dialog', {
+      name: 'Weekend trip',
+    });
+    const leaveTrigger = within(detailsDialog).getByRole('button', {
+      name: /joined.*leave/i,
+    });
+
+    leaveTrigger.focus();
+    fireEvent.click(leaveTrigger);
+
+    const leaveDialog = screen.getByRole('dialog', {
+      name: 'Leave this event?',
+    });
+    const leaveCancel = within(leaveDialog).getByRole('button', {
+      name: 'No, thanks',
+    });
+
+    expect(detailsDialog.getAttribute('aria-hidden')).toBe('true');
+    expect(detailsDialog.getAttribute('aria-modal')).toBeNull();
+    expect(detailsDialog.hasAttribute('inert')).toBe(true);
+    expect(document.activeElement).toBe(leaveCancel);
+
+    fireEvent.click(leaveCancel);
+
+    expect(
+      screen.queryByRole('dialog', { name: 'Leave this event?' }),
+    ).toBeNull();
+    expect(detailsDialog.getAttribute('aria-hidden')).toBeNull();
+    expect(detailsDialog.getAttribute('aria-modal')).toBe('true');
+    expect(detailsDialog.hasAttribute('inert')).toBe(false);
+    expect(document.activeElement).toBe(leaveTrigger);
+  });
+
   it('opens sharing without copying, then copies the feed fallback', async () => {
     renderCard();
 

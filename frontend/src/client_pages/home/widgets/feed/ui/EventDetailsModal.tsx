@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import clsx from 'clsx';
 import { Avatar, Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
 import { useBodyScrollLock } from '@/features';
@@ -21,6 +21,7 @@ type Props = {
   isPending: boolean;
   actionLabel: string;
   selectedLabel: string;
+  isInactive?: boolean;
   onAction: () => void;
   onClose: () => void;
 };
@@ -37,6 +38,7 @@ export const EventDetailsModal = ({
   isPending,
   actionLabel,
   selectedLabel,
+  isInactive = false,
   onAction,
   onClose,
 }: Props) => {
@@ -53,6 +55,8 @@ export const EventDetailsModal = ({
 
   const [copied, setCopied] = useState(false);
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);
+  const participantsTriggerRef = useRef<HTMLButtonElement>(null);
+  const isObscured = isInactive || isParticipantsOpen;
 
   useBodyScrollLock();
   const pulseModal = useModalAttention();
@@ -76,13 +80,19 @@ export const EventDetailsModal = ({
       : String(count);
 
   return (
-    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
+    <div
+      {...modalTransitionProps}
+      className={s.overlay}
+      onClick={isObscured ? undefined : pulseModal}
+    >
       <div
         data-modal-content
         className={s.modal}
         role="dialog"
-        aria-modal="true"
+        aria-modal={isObscured ? undefined : 'true'}
+        aria-hidden={isObscured ? 'true' : undefined}
         aria-labelledby="eventDetailsTitle"
+        inert={isObscured ? true : undefined}
       >
         <button
           type="button"
@@ -178,6 +188,7 @@ export const EventDetailsModal = ({
                       ))}
                     </div>
                     <button
+                      ref={participantsTriggerRef}
                       type="button"
                       className={s.counter}
                       onClick={() => setIsParticipantsOpen(true)}
@@ -234,6 +245,7 @@ export const EventDetailsModal = ({
         <ParticipantsModal
           eventId={event.id}
           initialParticipants={participants}
+          returnFocusRef={participantsTriggerRef}
           onClose={() => setIsParticipantsOpen(false)}
         />
       )}

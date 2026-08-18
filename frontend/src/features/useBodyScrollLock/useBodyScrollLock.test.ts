@@ -50,4 +50,23 @@ describe('useBodyScrollLock', () => {
 
     expect(document.body.style.overflow).toBe('');
   });
+
+  it('locks scrolling only while enabled', () => {
+    document.body.style.overflow = 'scroll';
+    const { rerender, unmount } = renderHook(
+      ({ enabled }) => useBodyScrollLock(enabled),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(document.body.style.overflow).toBe('scroll');
+
+    rerender({ enabled: true });
+    expect(document.body.style.overflow).toBe('hidden');
+
+    rerender({ enabled: false });
+    expect(document.body.style.overflow).toBe('scroll');
+
+    unmount();
+    expect(document.body.style.overflow).toBe('scroll');
+  });
 });

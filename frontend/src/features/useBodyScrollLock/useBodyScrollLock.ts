@@ -5,8 +5,10 @@ import { useEffect } from 'react';
 let lockCount = 0;
 let restoreOverflow = '';
 
-export const useBodyScrollLock = () => {
+export const useBodyScrollLock = (enabled = true) => {
   useEffect(() => {
+    if (!enabled) return;
+
     if (lockCount === 0) {
       restoreOverflow = document.body.style.overflow;
 
@@ -22,5 +24,5 @@ export const useBodyScrollLock = () => {
         document.body.style.overflow = restoreOverflow;
       }
     };
-  }, []);
+  }, [enabled]);
 };

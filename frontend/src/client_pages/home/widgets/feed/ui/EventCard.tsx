@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import {
   Avatar,
@@ -17,6 +17,7 @@ import {
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
+import { useBodyScrollLock } from '@/features';
 import { toFeedEvents } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import {
@@ -88,10 +89,25 @@ export const EventCard = ({
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isRecapOpen, setIsRecapOpen] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(autoOpenDetails);
+  const leaveReturnFocusRef = useRef<HTMLElement | null>(null);
+  const leaveCancelRef = useRef<HTMLButtonElement>(null);
   const {
     requestClose: requestLeaveDialogClose,
     modalTransitionProps: leaveDialogTransitionProps,
   } = useModalTransition(() => setIsLeaveDialogOpen(false));
+
+  useBodyScrollLock(isLeaveDialogOpen);
+
+  useEffect(() => {
+    if (!isLeaveDialogOpen) return;
+
+    leaveCancelRef.current?.focus();
+
+    return () => {
+      leaveReturnFocusRef.current?.focus();
+      leaveReturnFocusRef.current = null;
+    };
+  }, [isLeaveDialogOpen]);
 
   const canOpenDetails = enableDetails && !isArchived;
   const isParticipating = status !== null;
@@ -123,6 +139,10 @@ export const EventCard = ({
 
   const handleActionClick = async () => {
     if (isParticipating) {
+      leaveReturnFocusRef.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
       setIsLeaveDialogOpen(true);
 
       return;
@@ -191,6 +211,7 @@ export const EventCard = ({
           isPending={isPending}
           actionLabel={actionLabel}
           selectedLabel={selectedLabel}
+          isInactive={isLeaveDialogOpen}
           onAction={handleActionClick}
           onClose={() => {
             setIsDetailsOpen(false);
@@ -202,7 +223,10 @@ export const EventCard = ({
       {isLeaveDialogOpen && (
         <div
           {...leaveDialogTransitionProps}
-          className={s.leaveOverlay}
+          className={clsx(
+            s.leaveOverlay,
+            isDetailsOpen && s.leaveOverlayNested,
+          )}
           onClick={pulseModal}
         >
           <div
@@ -217,6 +241,7 @@ export const EventCard = ({
             </h2>
             <div className={s.leaveDialogActions}>
               <button
+                ref={leaveCancelRef}
                 type="button"
                 className={s.noThanksButton}
                 onClick={handleLeaveDialogClose}

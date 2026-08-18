@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from '@shared/ui/icons';
+import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { getEvent, GetEventError } from '@/shared/client_api/event';
@@ -29,6 +30,8 @@ export const DeepLinkCard = ({ eventId, onClose }: Props) => {
   const hasClosed = useRef(false);
   const dismissTimeout = useRef<number | null>(null);
   const pulseModal = useModalAttention();
+
+  useBodyScrollLock(error === 'unavailable');
 
   const closeOnce = useCallback(() => {
     if (hasClosed.current) return;

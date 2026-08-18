@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { archiveEvent } from '@/shared/client_api/event';
+import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import type { FeedEvent } from '@client_pages/home/model/types';
@@ -30,6 +31,8 @@ export const EventCardMenu = ({ event, isOwn = false, onCancelled }: Props) => {
     requestCloseWith: requestConfirmCloseWith,
     modalTransitionProps: confirmTransitionProps,
   } = useModalTransition(() => setIsConfirmOpen(false));
+
+  useBodyScrollLock(isConfirmOpen);
 
   useEffect(() => {
     if (!isOpen) return;

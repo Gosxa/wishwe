@@ -1,6 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
+import { createPortal } from 'react-dom';
 import { Asterisk, BadgeInfo, CalendarClock, Clock, X } from '@shared/ui/icons';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { TextArea } from '@shared/ui/textArea/TextArea';
@@ -51,7 +52,7 @@ export const CreateEventModal = ({
   useBodyScrollLock();
   const pulseModal = useModalAttention();
 
-  return (
+  return createPortal(
     <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
       <div
         data-modal-content
@@ -311,6 +312,7 @@ export const CreateEventModal = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };

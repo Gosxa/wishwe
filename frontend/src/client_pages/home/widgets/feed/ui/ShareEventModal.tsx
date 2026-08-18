@@ -187,7 +187,7 @@ export const ShareEventModal = ({
 
   useBodyScrollLock();
   const pulseModal = useModalAttention();
-  const pulseInstagramNotice = useModalAttention();
+  const pulseInstagramNotice = useModalAttention(instagramNoticeModalRef);
   const { requestClose, modalTransitionProps } = useModalTransition(onClose);
   const {
     requestClose: requestInstagramNoticeClose,
@@ -533,7 +533,11 @@ export const ShareEventModal = ({
   ];
 
   return (
-    <div {...modalTransitionProps} className={s.overlay} onClick={pulseModal}>
+    <div
+      {...modalTransitionProps}
+      className={s.overlay}
+      onClick={showInstagramNotice ? pulseInstagramNotice : pulseModal}
+    >
       <div
         data-modal-content
         ref={dialogRef}
