@@ -1,3 +1,11 @@
+.feed,
+.toolbarSlot,
+.list,
+.emptySlot,
+.statusSlot {
+  min-width: 0;
+}
+
 .feed {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -32,10 +40,10 @@
   height: 1px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1023px) {
   .feed {
     grid-template-columns: minmax(0, 1fr);
-    padding-inline: 16px;
+    padding: 24px 24px 48px;
   }
 
   .toolbarSlot,
@@ -43,5 +51,26 @@
   .emptySlot,
   .statusSlot {
     grid-column: 1;
+    justify-self: center;
+    width: 100%;
+    max-width: 760px;
+  }
+
+  .list {
+    margin-top: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .feed {
+    padding-top: 8px;
+    padding-inline: 16px;
+  }
+
+  .toolbarSlot,
+  .list,
+  .emptySlot,
+  .statusSlot {
+    max-width: 560px;
   }
 }

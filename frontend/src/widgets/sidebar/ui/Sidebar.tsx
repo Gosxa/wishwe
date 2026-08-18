@@ -7,13 +7,18 @@ import s from '../sidebar.module.scss';
 
 type Props = {
   activeKey?: string;
+  mobileFeedLayout?: boolean;
 };
 
-export const Sidebar = ({ activeKey }: Props) => {
+export const Sidebar = ({ activeKey, mobileFeedLayout = false }: Props) => {
   const avatar = useUserStore(state => state.user?.avatar) ?? null;
 
   return (
-    <nav className={s.sidebar}>
+    <nav
+      className={
+        mobileFeedLayout ? `${s.sidebar} ${s.mobileFeedLayout}` : s.sidebar
+      }
+    >
       {navConfig.map(item => (
         <NavItem
           key={item.key}

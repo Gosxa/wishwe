@@ -118,12 +118,12 @@
 
 @include bp.mobile {
   .toolbar {
-    flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 12px;
   }
 
   .filters {
+    flex: 1 1 auto;
     overflow-x: auto;
     scrollbar-width: none;
 
@@ -134,10 +134,35 @@
 
   .filter {
     flex-shrink: 0;
+    padding-inline: 16px;
+    font-size: 14px;
+  }
+
+  .active {
+    font-size: 16px;
   }
 
   .controls {
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    flex: 0 0 auto;
+    gap: 0;
+
+    .dropdown:first-child {
+      display: none;
+    }
+
+    .dropdown:last-child .controlValue {
+      display: none;
+    }
+  }
+
+  .control {
+    gap: 8px;
+    color: clr.$ns-700;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .controlLabel {
+    color: clr.$ns-700;
   }
 }

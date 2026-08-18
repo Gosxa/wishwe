@@ -27,15 +27,17 @@ function HomePageContent({ showTour }: Required<Props>) {
   return (
     <div className={s.shell}>
       <Header
+        mobileFeedLayout
         search={{
           ...search,
+          placeholder: 'Search',
           disabled: searchDisabled,
           disabledHint:
             'Search is available once there are events in your feed. Add friends or create an event to get started.',
         }}
       />
       <div className={s.body}>
-        <Sidebar activeKey="home" />
+        <Sidebar activeKey="home" mobileFeedLayout />
         <main className={s.content}>
           <Feed onSearchDisabledChange={setSearchDisabled} />
         </main>

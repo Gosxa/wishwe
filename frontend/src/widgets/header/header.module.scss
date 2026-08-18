@@ -2,6 +2,7 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/scrollbars' as scroll;
+@use '@shared/styles/breakpoints' as bp;
 
 .header {
   position: sticky;
@@ -341,4 +342,102 @@
 
 .danger {
   color: clr.$err;
+}
+
+@include bp.tablet {
+  .mobileFeedLayout {
+    grid-template-columns:
+      var(--sidebar-width) minmax(0, 1fr) minmax(104px, 128px)
+      auto;
+    padding-right: 24px;
+
+    .logoSlot {
+      grid-column: 1;
+    }
+
+    .searchBarWrap {
+      grid-column: 2;
+    }
+
+    .createBtn {
+      grid-column: 3;
+    }
+
+    .actions {
+      grid-column: 4;
+    }
+  }
+}
+
+@include bp.mobile {
+  .mobileFeedLayout {
+    z-index: 101;
+    display: block;
+    height: 72px;
+    padding: 16px;
+    border-bottom: 0;
+
+    .logoSlot {
+      display: none;
+    }
+
+    .searchBarWrap {
+      width: 100%;
+    }
+
+    .searchBar {
+      height: 40px;
+    }
+
+    .searchBar:not(.searchBarDisabled) {
+      color: clr.$ns-500;
+    }
+
+    .searchInput:not(:disabled)::placeholder {
+      color: clr.$ns-500;
+    }
+
+    .createBtn {
+      position: fixed;
+      left: 50%;
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      z-index: 102;
+      width: 48px;
+      height: 40px;
+      padding: 0;
+      transform: translateX(-50%);
+
+      > span {
+        display: none;
+      }
+    }
+
+    .actions {
+      position: fixed;
+      left: calc(75% - 20px);
+      bottom: calc(16px + env(safe-area-inset-bottom));
+      z-index: 102;
+      display: block;
+      width: 48px;
+      height: 40px;
+      transform: translateX(-50%);
+    }
+
+    .notifications,
+    .iconBtn {
+      width: 48px;
+      height: 40px;
+    }
+
+    .settings {
+      display: none;
+    }
+
+    .notificationsMenu {
+      position: fixed;
+      top: auto;
+      right: 16px;
+      bottom: calc(72px + env(safe-area-inset-bottom));
+    }
+  }
 }

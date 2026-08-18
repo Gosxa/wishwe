@@ -25,9 +25,14 @@ const settingsItems = [
 type Props = {
   search?: SearchBarProps;
   showSearch?: boolean;
+  mobileFeedLayout?: boolean;
 };
 
-export const Header = ({ search, showSearch = true }: Props) => {
+export const Header = ({
+  search,
+  showSearch = true,
+  mobileFeedLayout = false,
+}: Props) => {
   const router = useRouter();
   const requestRefresh = useEventsRefreshStore(state => state.requestRefresh);
   const isCreateOpen = useCreateEventStore(state => state.isOpen);
@@ -90,7 +95,11 @@ export const Header = ({ search, showSearch = true }: Props) => {
   }, [openMenu]);
 
   return (
-    <header className={s.header}>
+    <header
+      className={
+        mobileFeedLayout ? `${s.header} ${s.mobileFeedLayout}` : s.header
+      }
+    >
       <div className={s.logoSlot}>
         <Logo height={36} />
       </div>

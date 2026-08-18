@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 .sidebar {
   position: sticky;
@@ -49,4 +50,55 @@
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+@include bp.mobile {
+  .mobileFeedLayout {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    display: grid;
+    grid-template-columns: repeat(5, 48px);
+    grid-template-rows: 40px;
+    justify-content: space-between;
+    width: 100%;
+    height: calc(64px + env(safe-area-inset-bottom));
+    padding: 8px 16px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid clr.$ns-100;
+    border-right: 0;
+    background: clr.$ns-50;
+
+    .navItem {
+      grid-row: 1;
+      justify-content: center;
+      width: 48px;
+      height: 40px;
+      padding: 8px 12px;
+      gap: 0;
+      border-radius: 8px;
+    }
+
+    .navItem:nth-child(1) {
+      grid-column: 1;
+    }
+
+    .navItem:nth-child(2) {
+      grid-column: 2;
+    }
+
+    .navItem:nth-child(3) {
+      grid-column: 5;
+    }
+
+    .active {
+      background: rgba(clr.$prm-light, 0.1);
+    }
+
+    .label {
+      display: none;
+    }
+  }
 }
