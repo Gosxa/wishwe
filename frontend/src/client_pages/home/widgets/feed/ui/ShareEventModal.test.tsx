@@ -90,6 +90,8 @@ describe('ShareEventModal', () => {
   let clipboardWriteText: ReturnType<typeof vi.fn>;
   let windowOpen: ReturnType<typeof vi.fn>;
   let objectUrlIndex: number;
+  let anchorClick: ReturnType<typeof vi.spyOn>;
+  let downloads: { href: string; download: string }[];
 
   beforeEach(() => {
     mocks.createShareLink.mockReset();
@@ -122,6 +124,13 @@ describe('ShareEventModal', () => {
 
     windowOpen = vi.fn();
     vi.stubGlobal('open', windowOpen);
+
+    downloads = [];
+    anchorClick = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        downloads.push({ href: this.href, download: this.download });
+      });
     window.sessionStorage.clear();
 
     const localStore = new Map<string, string>();
@@ -146,6 +155,7 @@ describe('ShareEventModal', () => {
   afterEach(() => {
     cleanup();
     vi.unstubAllGlobals();
+    anchorClick.mockRestore();
   });
 
   it('builds social destinations and handles the Instagram Story notice workflow', async () => {
@@ -218,6 +228,9 @@ describe('ShareEventModal', () => {
       '_blank',
       'noopener,noreferrer',
     );
+    expect(downloads).toEqual([
+      { href: 'blob:share-3', download: 'wishwe-weekend-trip-story.png' },
+    ]);
     expect(window.localStorage.getItem('wishwe-skip-instagram-notice')).toBe(
       'true',
     );
@@ -295,6 +308,9 @@ describe('ShareEventModal', () => {
       '_blank',
       'noopener,noreferrer',
     );
+    expect(downloads).toEqual([
+      { href: 'blob:share-3', download: 'wishwe-weekend-trip-story.png' },
+    ]);
     expect(
       screen.getByRole('dialog', { name: 'Post to Instagram Stories' }),
     ).toBeTruthy();
