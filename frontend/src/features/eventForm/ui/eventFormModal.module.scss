@@ -31,6 +31,11 @@
   @include anim.modal-enter;
 }
 
+.modalCompact {
+  height: auto;
+  max-height: min(880px, 100%);
+}
+
 .close {
   position: absolute;
   top: 24px;
@@ -113,6 +118,20 @@
   margin: auto 0;
 }
 
+.coverPreviewSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: auto 0;
+}
+
+.coverPreview {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
 .right {
   display: flex;
   flex-direction: column;
@@ -156,6 +175,15 @@
     height: 16px;
     color: clr.$err;
   }
+}
+
+.readOnlyValue {
+  margin: 0;
+  @include tp.text-body;
+  font-size: 20px;
+  color: clr.$ns-900;
+  font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .whenRow {

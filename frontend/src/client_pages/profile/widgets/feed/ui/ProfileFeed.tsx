@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Spinner } from '@/shared';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { getEvent } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
+import { EventFeedLayout } from '@widgets/eventFeed';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useUserStore } from '@/shared/store/useUserStore';
@@ -18,7 +18,6 @@ import { useProfileToolbar } from '@client_pages/profile/model/useProfileToolbar
 import { SEARCH_PARAM } from '@client_pages/profile/model/useProfileSearch';
 import { ProfileFeedToolbar } from './ProfileFeedToolbar';
 import { ProfileFeedEmptyState } from './ProfileFeedEmptyState';
-import s from './profileFeed.module.scss';
 
 type Props = {
   initialUser: Profile | null;
@@ -49,8 +48,6 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
     useEventDeepLink(events, isLoading);
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
   const handleEditOpen = useCallback(async (id: string) => {
     try {
       setEditingEvent(await getEvent(id));
@@ -79,77 +76,50 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
     setRefreshKey(key => key + 1);
   }, []);
 
-  useEffect(() => {
-    const node = sentinelRef.current;
-
-    if (!node || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      { rootMargin: '200px' },
-    );
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [hasMore, loadMore]);
-
   return (
-    <div className={s.feed}>
-      {showDeepLinkCard && openEventId && (
-        <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
-      )}
-
-      <div className={s.toolbarSlot}>
-        <ProfileFeedToolbar
-          activeTab={tab}
-          onTabChange={setTab}
-          activeSort={sort}
-          onSortChange={setSort}
-        />
-      </div>
-
-      {isLoading ? (
-        <div className={s.statusSlot}>
-          <Spinner />
-        </div>
-      ) : events.length === 0 ? (
-        <div className={s.emptySlot}>
-          <ProfileFeedEmptyState tab={tab} />
-        </div>
-      ) : (
-        <div className={s.list}>
-          {events.map(event => (
-            <EventCard
-              key={event.id}
-              event={event}
-              isOwn={
-                currentHandle != null && event.host.username === currentHandle
-              }
-              isArchived={isArchive}
-              enableDetails={!isArchive}
-              autoOpenDetails={!isArchive && event.id === openEventId}
-              showEventType={false}
-              showChat
-              onEdit={handleEditOpen}
-              onPlanIt={handlePlanItOpen}
-              onCancel={handleEventCancelled}
-              onDetailsOpen={() => setEventParam(event.id)}
-              onDetailsClose={clearEventParam}
-            />
-          ))}
-          {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
-          {isLoadingMore && (
-            <div className={s.statusSlot}>
-              <Spinner inline />
-            </div>
-          )}
-        </div>
-      )}
+    <>
+      <EventFeedLayout
+        variant="profile"
+        before={
+          showDeepLinkCard && openEventId ? (
+            <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
+          ) : null
+        }
+        toolbar={
+          <ProfileFeedToolbar
+            activeTab={tab}
+            onTabChange={setTab}
+            activeSort={sort}
+            onSortChange={setSort}
+          />
+        }
+        isLoading={isLoading}
+        isEmpty={events.length === 0}
+        emptyState={<ProfileFeedEmptyState tab={tab} />}
+        isLoadingMore={isLoadingMore}
+        hasMore={hasMore}
+        loadMore={loadMore}
+      >
+        {events.map(event => (
+          <EventCard
+            key={event.id}
+            event={event}
+            isOwn={
+              currentHandle != null && event.host.username === currentHandle
+            }
+            isArchived={isArchive}
+            enableDetails={!isArchive}
+            autoOpenDetails={!isArchive && event.id === openEventId}
+            showEventType={false}
+            showChat
+            onEdit={handleEditOpen}
+            onPlanIt={handlePlanItOpen}
+            onCancel={handleEventCancelled}
+            onDetailsOpen={() => setEventParam(event.id)}
+            onDetailsClose={clearEventParam}
+          />
+        ))}
+      </EventFeedLayout>
 
       {editingEvent && (
         <EditEventModal
@@ -166,6 +136,6 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
           onConverted={handlePlanItConverted}
         />
       )}
-    </div>
+    </>
   );
 };

@@ -1,16 +1,14 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import { Spinner } from '@/shared';
 import type {
   FriendshipStatus,
   PublicProfile,
 } from '@/shared/client_api/user/types';
+import { EventFeedLayout } from '@widgets/eventFeed';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
 import { useProfileToolbar } from '@client_pages/profile/model/useProfileToolbar';
 import { ProfileFeedToolbar } from '@client_pages/profile/widgets/feed/ui/ProfileFeedToolbar';
-import s from '@client_pages/profile/widgets/feed/ui/profileFeed.module.scss';
 import { UserProfileEmptyState } from './UserProfileEmptyState';
 import { FriendsOnlyState } from './FriendsOnlyState';
 
@@ -35,71 +33,41 @@ export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
 
   const isArchive = tab === 'archive';
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const node = sentinelRef.current;
-
-    if (!node || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      { rootMargin: '200px' },
-    );
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [hasMore, loadMore]);
-
   return (
-    <div className={s.feed}>
-      <div className={s.toolbarSlot}>
+    <EventFeedLayout
+      variant="profile"
+      toolbar={
         <ProfileFeedToolbar
           activeTab={tab}
           onTabChange={setTab}
           activeSort={sort}
           onSortChange={setSort}
         />
-      </div>
-
-      {!canSeeEvents ? (
-        <div className={s.emptySlot}>
+      }
+      isLoading={canSeeEvents && isLoading}
+      isEmpty={!canSeeEvents || events.length === 0}
+      emptyState={
+        !canSeeEvents ? (
           <FriendsOnlyState username={profile.username ?? ''} />
-        </div>
-      ) : isLoading ? (
-        <div className={s.statusSlot}>
-          <Spinner />
-        </div>
-      ) : events.length === 0 ? (
-        <div className={s.emptySlot}>
+        ) : (
           <UserProfileEmptyState tab={tab} />
-        </div>
-      ) : (
-        <div className={s.list}>
-          {events.map(event => (
-            <EventCard
-              key={event.id}
-              event={event}
-              isOwn={false}
-              isArchived={isArchive}
-              enableDetails={!isArchive}
-              showEventType={false}
-              showChat
-            />
-          ))}
-          {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
-          {isLoadingMore && (
-            <div className={s.statusSlot}>
-              <Spinner inline />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+        )
+      }
+      isLoadingMore={isLoadingMore}
+      hasMore={hasMore}
+      loadMore={loadMore}
+    >
+      {events.map(event => (
+        <EventCard
+          key={event.id}
+          event={event}
+          isOwn={false}
+          isArchived={isArchive}
+          enableDetails={!isArchive}
+          showEventType={false}
+          showChat
+        />
+      ))}
+    </EventFeedLayout>
   );
 };

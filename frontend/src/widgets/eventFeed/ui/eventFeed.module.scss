@@ -1,16 +1,16 @@
-.feed,
-.toolbarSlot,
-.list,
-.emptySlot,
-.statusSlot {
-  min-width: 0;
-}
-
 .feed {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: 16px;
   padding: 24px 0 48px;
+}
+
+.home,
+.home .toolbarSlot,
+.home .list,
+.home .emptySlot,
+.home .statusSlot {
+  min-width: 0;
 }
 
 .toolbarSlot {
@@ -41,36 +41,50 @@
 }
 
 @media (max-width: 1023px) {
-  .feed {
+  .home {
     grid-template-columns: minmax(0, 1fr);
     padding: 24px 24px 48px;
-  }
 
-  .toolbarSlot,
-  .list,
-  .emptySlot,
-  .statusSlot {
-    grid-column: 1;
-    justify-self: center;
-    width: 100%;
-    max-width: 760px;
-  }
+    .toolbarSlot,
+    .list,
+    .emptySlot,
+    .statusSlot {
+      grid-column: 1;
+      justify-self: center;
+      width: 100%;
+      max-width: 760px;
+    }
 
-  .list {
-    margin-top: 24px;
+    .list {
+      margin-top: 24px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .profile {
+    grid-template-columns: 1fr;
+    padding-inline: 16px;
+
+    .toolbarSlot,
+    .list,
+    .emptySlot,
+    .statusSlot {
+      grid-column: 1;
+    }
   }
 }
 
 @media (max-width: 767px) {
-  .feed {
+  .home {
     padding-top: 8px;
     padding-inline: 16px;
-  }
 
-  .toolbarSlot,
-  .list,
-  .emptySlot,
-  .statusSlot {
-    max-width: 560px;
+    .toolbarSlot,
+    .list,
+    .emptySlot,
+    .statusSlot {
+      max-width: 560px;
+    }
   }
 }

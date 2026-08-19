@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Spinner } from '@/shared';
+import { EventFeedLayout } from '@widgets/eventFeed';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
@@ -12,7 +11,6 @@ import { DeepLinkCard } from './DeepLinkCard';
 import { EventCard } from './EventCard';
 import { FeedEmptyState } from './FeedEmptyState';
 import { FeedToolbar } from './FeedToolbar';
-import s from './feed.module.scss';
 
 type Props = {
   onSearchDisabledChange?: (disabled: boolean) => void;
@@ -32,34 +30,15 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
   const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
     useEventDeepLink(events, isLoading);
 
-  const sentinelRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const node = sentinelRef.current;
-
-    if (!node || !hasMore) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0]?.isIntersecting) {
-          loadMore();
-        }
-      },
-      { rootMargin: '200px' },
-    );
-
-    observer.observe(node);
-
-    return () => observer.disconnect();
-  }, [hasMore, loadMore]);
-
   return (
-    <div className={s.feed}>
-      {showDeepLinkCard && openEventId && (
-        <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
-      )}
-
-      <div className={s.toolbarSlot}>
+    <EventFeedLayout
+      variant="home"
+      before={
+        showDeepLinkCard && openEventId ? (
+          <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
+        ) : null
+      }
+      toolbar={
         <FeedToolbar
           activeFilter={filter}
           onFilterChange={setFilter}
@@ -68,37 +47,25 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
           activeSort={sort}
           onSortChange={setSort}
         />
-      </div>
-
-      {isLoading ? (
-        <div className={s.statusSlot}>
-          <Spinner />
-        </div>
-      ) : events.length === 0 ? (
-        <div className={s.emptySlot}>
-          <FeedEmptyState filter={filter} />
-        </div>
-      ) : (
-        <div className={s.list}>
-          {events.map((event, position) => (
-            <EventCard
-              key={event.id}
-              event={event}
-              tourId={position === 0 ? 'feed-card' : undefined}
-              enableDetails
-              autoOpenDetails={event.id === openEventId}
-              onDetailsOpen={() => setEventParam(event.id)}
-              onDetailsClose={clearEventParam}
-            />
-          ))}
-          {hasMore && <div ref={sentinelRef} className={s.sentinel} />}
-          {isLoadingMore && (
-            <div className={s.statusSlot}>
-              <Spinner inline />
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+      }
+      isLoading={isLoading}
+      isEmpty={events.length === 0}
+      emptyState={<FeedEmptyState filter={filter} />}
+      isLoadingMore={isLoadingMore}
+      hasMore={hasMore}
+      loadMore={loadMore}
+    >
+      {events.map((event, position) => (
+        <EventCard
+          key={event.id}
+          event={event}
+          tourId={position === 0 ? 'feed-card' : undefined}
+          enableDetails
+          autoOpenDetails={event.id === openEventId}
+          onDetailsOpen={() => setEventParam(event.id)}
+          onDetailsClose={clearEventParam}
+        />
+      ))}
+    </EventFeedLayout>
   );
 };

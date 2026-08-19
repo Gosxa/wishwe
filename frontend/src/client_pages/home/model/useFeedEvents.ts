@@ -1,14 +1,14 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { listEvents } from '@/shared/client_api/event';
+import { usePaginatedList } from '@shared/hooks/usePaginatedList';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { toEventListParams } from './feedQuery';
 import { toFeedEvents } from './feedMapper';
 import { SEARCH_PARAM } from './useFeedSearch';
 import { useFeedToolbar } from './useFeedToolbar';
-import type { FeedEvent } from './types';
 
 export const useFeedEvents = () => {
   const { filter, reach, sort } = useFeedToolbar();
@@ -16,95 +16,21 @@ export const useFeedEvents = () => {
 
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
-  const [events, setEvents] = useState<FeedEvent[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const requestIdRef = useRef(0);
-  const pageRef = useRef(1);
-  const loadingRef = useRef(false);
-
   const selection = `${filter}|${reach}|${sort}|${search}`;
-  const [loadingSelection, setLoadingSelection] = useState(selection);
-
-  if (selection !== loadingSelection) {
-    setLoadingSelection(selection);
-    setIsLoading(true);
-  }
-
   const requestKey = `${selection}|${refreshToken}`;
-  const [pagingKey, setPagingKey] = useState(requestKey);
+  const fetchPage = useCallback(
+    (page: number) =>
+      listEvents({ ...toEventListParams(filter, reach, sort, search), page }),
+    [filter, reach, search, sort],
+  );
+  const pagination = usePaginatedList({
+    requestKey,
+    loadingKey: selection,
+    fetchPage,
+    mapItems: toFeedEvents,
+    errorMessage: 'Failed to load events',
+  });
+  const { items: events, ...state } = pagination;
 
-  if (requestKey !== pagingKey) {
-    setPagingKey(requestKey);
-    setIsLoadingMore(false);
-  }
-
-  useEffect(() => {
-    const requestId = ++requestIdRef.current;
-
-    pageRef.current = 1;
-    loadingRef.current = true;
-
-    listEvents({ ...toEventListParams(filter, reach, sort, search), page: 1 })
-      .then(data => {
-        if (requestId !== requestIdRef.current) return;
-
-        setEvents(toFeedEvents(data.results));
-        setHasMore(Boolean(data.next));
-        setError(null);
-      })
-      .catch(() => {
-        if (requestId !== requestIdRef.current) return;
-
-        setEvents([]);
-        setHasMore(false);
-        setError('Failed to load events');
-      })
-      .finally(() => {
-        if (requestId !== requestIdRef.current) return;
-
-        loadingRef.current = false;
-        setIsLoading(false);
-      });
-
-    return () => {
-      if (requestId === requestIdRef.current) {
-        requestIdRef.current += 1;
-      }
-    };
-  }, [filter, reach, sort, search, refreshToken]);
-
-  const loadMore = useCallback(() => {
-    if (loadingRef.current || !hasMore) return;
-
-    loadingRef.current = true;
-    const requestId = requestIdRef.current;
-    const nextPage = pageRef.current + 1;
-
-    setIsLoadingMore(true);
-
-    listEvents({
-      ...toEventListParams(filter, reach, sort, search),
-      page: nextPage,
-    })
-      .then(data => {
-        if (requestId !== requestIdRef.current) return;
-
-        pageRef.current = nextPage;
-        setEvents(prev => [...prev, ...toFeedEvents(data.results)]);
-        setHasMore(Boolean(data.next));
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (requestId !== requestIdRef.current) return;
-
-        loadingRef.current = false;
-        setIsLoadingMore(false);
-      });
-  }, [filter, reach, sort, search, hasMore]);
-
-  return { events, isLoading, isLoadingMore, hasMore, loadMore, error };
+  return { ...state, events };
 };
