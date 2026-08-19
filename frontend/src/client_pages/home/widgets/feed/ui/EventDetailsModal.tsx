@@ -6,21 +6,14 @@ import { Avatar, Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
-import type {
-  FeedEvent,
-  ParticipantAvatar,
-} from '@client_pages/home/model/types';
+import type { FeedEvent } from '@client_pages/home/model/types';
+import type { EventParticipation } from '../model/useEventParticipation';
 import { ParticipantsModal } from './ParticipantsModal';
 import s from './eventDetailsModal.module.scss';
 
 type Props = {
   event: FeedEvent;
-  count: number;
-  participants: ParticipantAvatar[];
-  isParticipating: boolean;
-  isPending: boolean;
-  actionLabel: string;
-  selectedLabel: string;
+  participation: EventParticipation;
   isInactive?: boolean;
   onAction: () => void;
   onClose: () => void;
@@ -32,12 +25,7 @@ const UNLIMITED_MAX = 3000;
 
 export const EventDetailsModal = ({
   event,
-  count,
-  participants,
-  isParticipating,
-  isPending,
-  actionLabel,
-  selectedLabel,
+  participation,
   isInactive = false,
   onAction,
   onClose,
@@ -52,6 +40,14 @@ export const EventDetailsModal = ({
     chatLink,
     maxParticipants,
   } = event;
+  const {
+    count,
+    participants,
+    isParticipating,
+    isPending,
+    actionLabel,
+    selectedLabel,
+  } = participation;
 
   const [copied, setCopied] = useState(false);
   const [isParticipantsOpen, setIsParticipantsOpen] = useState(false);

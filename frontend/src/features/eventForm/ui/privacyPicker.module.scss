@@ -13,6 +13,7 @@
   gap: 8px;
 
   @include tp.text-body;
+
   color: clr.$ns-900;
 
   > svg {
@@ -78,5 +79,6 @@
 
 .optionLabel {
   @include tp.text-body;
+
   color: clr.$ns-900;
 }

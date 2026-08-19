@@ -104,6 +104,21 @@ describe('useCreateEvent', () => {
     expect(setLoading).not.toHaveBeenCalled();
   });
 
+  it('reports a category loading failure', async () => {
+    eventApiMocks.listCategories.mockRejectedValueOnce(
+      new Error('categories unavailable'),
+    );
+
+    const { result } = renderCreateHook();
+
+    await waitFor(() =>
+      expect(result.current.category.error).toBe(
+        'Failed to load categories. Please try again.',
+      ),
+    );
+    expect(result.current.category.options).toEqual([]);
+  });
+
   it('submits a trimmed plan payload and restores loading state', async () => {
     const { result } = renderCreateHook();
 
@@ -212,6 +227,29 @@ describe('useCreateEvent', () => {
     expect(result.current.cover.error).toBe('Unsupported image format');
     expect(imageMocks.prepareCoverImage).not.toHaveBeenCalled();
     expect(result.current.cover.isProcessing).toBe(false);
+  });
+
+  it('clears a previously selected cover when the next selection is rejected', async () => {
+    const { result } = renderCreateHook();
+
+    await waitFor(() =>
+      expect(result.current.category.options).toHaveLength(2),
+    );
+    fillValidPlan(result);
+
+    const validCover = new File(['image'], 'cover.png', { type: 'image/png' });
+    const invalidCover = new File(['image'], 'cover.gif', {
+      type: 'image/gif',
+    });
+
+    await act(async () => result.current.cover.onSelect(validCover));
+    imageMocks.isAllowedCoverImage.mockReturnValue(false);
+    await act(async () => result.current.cover.onSelect(invalidCover));
+    await act(async () => result.current.submit.onSubmit());
+
+    expect(eventApiMocks.createEvent.mock.calls[0][1]).not.toBeInstanceOf(
+      FormData,
+    );
   });
 
   it('accepts the size limit and rejects a file one byte over it', async () => {

@@ -79,9 +79,12 @@
   box-shadow: inset 0 0 0 1px clr.$ns-100;
   background: transparent;
   color: clr.$ns-700;
-  cursor: pointer;
 
   @include tp.text-body;
+}
+
+.typePillEditable {
+  cursor: pointer;
 }
 
 .typePillActive {
@@ -252,7 +255,7 @@
   height: 40px;
 }
 
-.share {
+.submit {
   @include btn.primary(8px, 100%, 40px);
   flex-shrink: 0;
 }

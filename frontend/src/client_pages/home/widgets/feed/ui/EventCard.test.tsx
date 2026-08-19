@@ -297,7 +297,7 @@ describe('EventCard', () => {
     expect(screen.queryByRole('img', { name: '@alice' })).toBeNull();
   });
 
-  it('keeps the join state unchanged when joining fails', async () => {
+  it('keeps the join state unchanged and reports when joining fails', async () => {
     apiMocks.joinPlan.mockRejectedValueOnce(new Error('join failed'));
     renderCard();
 
@@ -312,9 +312,12 @@ describe('EventCard', () => {
     expect(apiMocks.joinPlan).toHaveBeenCalledWith('42');
     expect(screen.getByRole('button', { name: 'Join' })).toBeTruthy();
     expect(screen.getByText('Be the first to join')).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toBe(
+      'Could not join this event. Please try again.',
+    );
   });
 
-  it('keeps the leave dialog and participation state when leaving fails', async () => {
+  it('keeps the leave dialog, reports failure, and preserves participation', async () => {
     apiMocks.leaveEvent.mockRejectedValueOnce(new Error('leave failed'));
     renderCard({
       event: feedEvent({
@@ -338,6 +341,60 @@ describe('EventCard', () => {
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(screen.getByRole('button', { name: /joined.*leave/i })).toBeTruthy();
     expect(screen.getByRole('img', { name: '@alice' })).toBeTruthy();
+    expect(screen.getByRole('alert').textContent).toBe(
+      'Could not leave this event. Please try again.',
+    );
+  });
+
+  it('refreshes participation from a same-id event replacement', async () => {
+    const view = renderCard();
+
+    view.rerender(
+      <EventCard
+        event={feedEvent({
+          participantCount: 1,
+          participants: [{ username: '@alice', avatar: '/alice.jpg' }],
+          userParticipationStatus: 'joined',
+        })}
+      />,
+    );
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: /joined.*leave/i }),
+      ).toBeTruthy(),
+    );
+    expect(screen.getByRole('img', { name: '@alice' })).toBeTruthy();
+  });
+
+  it('traps focus in the leave dialog and closes it with Escape', () => {
+    renderCard({
+      event: feedEvent({ userParticipationStatus: 'joined' }),
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /joined.*leave/i }));
+
+    const dialog = screen.getByRole('dialog', { name: 'Leave this event?' });
+    const cancel = within(dialog).getByRole('button', { name: 'No, thanks' });
+    const confirm = within(dialog).getByRole('button', { name: 'Leave' });
+
+    expect(document.activeElement).toBe(cancel);
+
+    fireEvent.keyDown(cancel, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(confirm);
+
+    fireEvent.keyDown(confirm, { key: 'Tab' });
+    expect(document.activeElement).toBe(cancel);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(
+      screen.getByRole('dialog', { name: 'Leave this event?' }),
+    ).toBeTruthy();
+
+    fireEvent.keyDown(cancel, { key: 'Escape' });
+    expect(
+      screen.queryByRole('dialog', { name: 'Leave this event?' }),
+    ).toBeNull();
   });
 
   it('shows owner edit and plan-it controls with the event id', () => {

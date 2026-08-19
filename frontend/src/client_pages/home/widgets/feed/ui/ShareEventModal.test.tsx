@@ -260,6 +260,46 @@ describe('ShareEventModal', () => {
     expect(document.activeElement).toBe(stories);
   });
 
+  it('opens Instagram before the notice closing transition completes', async () => {
+    renderModal();
+
+    await screen.findByRole('img', {
+      name: 'Poster share image for Weekend trip',
+    });
+    fireEvent.click(screen.getByRole('link', { name: 'Stories' }));
+
+    const noticeDialog = screen.getByRole('dialog', {
+      name: 'Post to Instagram Stories',
+    });
+    const noticeOverlay = noticeDialog.parentElement;
+    const originalGetComputedStyle = window.getComputedStyle;
+
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(element => {
+      if (element === noticeOverlay) {
+        return {
+          animationName: 'modal-exit',
+          animationDuration: '1s',
+          animationDelay: '0s',
+        } as CSSStyleDeclaration;
+      }
+
+      return originalGetComputedStyle(element);
+    });
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Continue to Instagram' }),
+    );
+
+    expect(windowOpen).toHaveBeenCalledWith(
+      'https://www.instagram.com/',
+      '_blank',
+      'noopener,noreferrer',
+    );
+    expect(
+      screen.getByRole('dialog', { name: 'Post to Instagram Stories' }),
+    ).toBeTruthy();
+  });
+
   it('pulses the Instagram notice when the outer backdrop is clicked', async () => {
     renderModal();
 
@@ -450,7 +490,9 @@ describe('ShareEventModal', () => {
     }
 
     vi.stubGlobal('ClipboardItem', TestClipboardItem);
-    clipboardWrite.mockRejectedValueOnce(new Error('permission denied'));
+    clipboardWrite.mockRejectedValueOnce(
+      new DOMException('PNG is unsupported', 'NotSupportedError'),
+    );
     renderModal();
 
     const copyImage = await screen.findByRole('button', {
@@ -468,6 +510,38 @@ describe('ShareEventModal', () => {
       ),
     ).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Download image' })).toBeTruthy();
+  });
+
+  it('keeps image copying enabled after a transient clipboard rejection', async () => {
+    class TestClipboardItem {
+      static supports = () => true;
+
+      constructor(readonly data: Record<string, Blob | Promise<Blob>>) {}
+    }
+
+    vi.stubGlobal('ClipboardItem', TestClipboardItem);
+    clipboardWrite.mockRejectedValueOnce(
+      new DOMException('Document is not focused', 'NotAllowedError'),
+    );
+    renderModal();
+
+    const copyImage = await screen.findByRole('button', {
+      name: 'Copy image',
+    });
+
+    await waitFor(() =>
+      expect((copyImage as HTMLButtonElement).disabled).toBe(false),
+    );
+    fireEvent.click(copyImage);
+
+    await waitFor(() => expect(clipboardWrite).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole('button', { name: 'Copy image' })).toBeTruthy();
+    expect(screen.queryByRole('link', { name: 'Download image' })).toBeNull();
+    expect(
+      screen.getByText(
+        "This browser can't copy images. You can download the PNG instead.",
+      ),
+    ).toBeTruthy();
   });
 
   it('opens Telegram in the specified popup without requiring an account', () => {

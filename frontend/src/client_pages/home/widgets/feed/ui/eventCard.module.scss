@@ -393,6 +393,23 @@
   @include btn.primary(0, 100%, 52px);
 }
 
+.participationToast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  z-index: 300;
+  max-width: min(480px, calc(100% - 48px));
+  padding: 12px 24px;
+  transform: translateX(-50%);
+  border-radius: 12px;
+  background: clr.$ns-900;
+  color: clr.$ns-50;
+  box-shadow: 0 8px 24px rgba(clr.$ns-900, 0.24);
+  text-align: center;
+
+  @include tp.text-body;
+}
+
 @media (min-width: 1024px) {
   .media {
     align-self: stretch;

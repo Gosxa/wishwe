@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { ConvertEventError, convertToPlan } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import { mapApiFormErrors } from '@/shared/lib/api/formErrors';
 import {
   getDateInputValue,
   getEventDateTimeErrors,
@@ -12,14 +13,6 @@ import {
 import type { FieldErrors } from './types';
 
 const UNLIMITED_MAX = 3000;
-
-const fieldError = (value: unknown): string | undefined =>
-  Array.isArray(value) && value.length > 0 ? String(value[0]) : undefined;
-
-const errorBody = (body: Record<string, unknown>): Record<string, unknown> =>
-  typeof body.error === 'object' && body.error !== null
-    ? (body.error as Record<string, unknown>)
-    : body;
 
 const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   event_date: 'eventDate',
@@ -98,23 +91,9 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
       });
       onConverted();
     } catch (e) {
-      const body = e instanceof ConvertEventError ? errorBody(e.body) : {};
-      const next: FieldErrors = {};
+      const body = e instanceof ConvertEventError ? e.body : {};
 
-      Object.entries(DRF_FIELD_MAP).forEach(([drfKey, formKey]) => {
-        const message = fieldError(body[drfKey]);
-
-        if (message) next[formKey] = message;
-      });
-
-      next.submit =
-        fieldError(body.non_field_errors) ??
-        (typeof body.detail === 'string' ? body.detail : undefined) ??
-        (Object.values(next).some(Boolean)
-          ? undefined
-          : 'Something went wrong. Please try again.');
-
-      setErrors(next);
+      setErrors(mapApiFormErrors(body, DRF_FIELD_MAP));
     } finally {
       setIsSubmitting(false);
       setLoading(false);
