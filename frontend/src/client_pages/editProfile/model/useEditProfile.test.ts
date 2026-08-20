@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, renderHook } from '@testing-library/react';
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import type { ChangeEvent } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -62,6 +62,11 @@ const textareaChange = (value: string) =>
 
 const selectChange = (value: string) =>
   ({ target: { value } }) as ChangeEvent<HTMLSelectElement>;
+
+const fileChange = (file?: File) =>
+  ({
+    target: { files: file ? [file] : [] },
+  }) as unknown as ChangeEvent<HTMLInputElement>;
 
 describe('useEditProfile', () => {
   const setLoading = vi.fn();
@@ -272,5 +277,239 @@ describe('useEditProfile', () => {
     expect(setUser).not.toHaveBeenCalled();
     expect(navigationMocks.push).not.toHaveBeenCalled();
     expect(setLoading.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('prefers the store profile over the server-rendered one', () => {
+    useUserStore.setState({
+      user: { ...profile, username: 'amy.updated', bio: 'Fresh bio' },
+      setUser,
+    });
+
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    expect(result.current.nickname.value).toBe('amy.updated');
+    expect(result.current.bio.value).toBe('Fresh bio');
+    expect(result.current.isDirty).toBe(false);
+  });
+
+  it('falls back to empty fields when there is no profile at all', () => {
+    const { result } = renderHook(() => useEditProfile(null));
+
+    expect(result.current.nickname.value).toBe('');
+    expect(result.current.bio.value).toBe('');
+    expect(result.current.avatar.url).toBeNull();
+    expect(result.current.privacy.checked).toBe(true);
+    expect(result.current.isDirty).toBe(false);
+  });
+
+  it('does not call the API when there is no profile to save', async () => {
+    const { result } = renderHook(() => useEditProfile(null));
+
+    act(() => result.current.bio.onChange(textareaChange('Anything')));
+    await act(async () => result.current.onSubmit());
+
+    expect(userApiMocks.checkUsername).not.toHaveBeenCalled();
+    expect(userApiMocks.updateProfile).not.toHaveBeenCalled();
+    expect(setLoading).not.toHaveBeenCalled();
+    expect(setUser).not.toHaveBeenCalled();
+  });
+
+  it('confirms a free nickname and drops the confirmation on the next keystroke', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() => result.current.nickname.onChange(inputChange('amy.travels')));
+    await act(async () => result.current.nickname.onBlur());
+
+    expect(result.current.nickname.helperText).toBe('The nickname is unique');
+    expect(result.current.nickname.error).toBeUndefined();
+    expect(result.current.nickname.isSuccess).toBe(true);
+
+    act(() => result.current.nickname.onChange(inputChange('amy.travel')));
+
+    expect(result.current.nickname.helperText).toBeUndefined();
+    expect(result.current.nickname.isSuccess).toBe(false);
+  });
+
+  it('skips the availability check while the nickname is unchanged', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    await act(async () => result.current.nickname.onBlur());
+
+    expect(userApiMocks.checkUsername).not.toHaveBeenCalled();
+    expect(result.current.nickname.helperText).toBeUndefined();
+  });
+
+  it('refuses to save a malformed nickname', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() => result.current.nickname.onChange(inputChange('.hidden')));
+    await act(async () => result.current.onSubmit());
+
+    expect(result.current.nickname.error).toBe(
+      'Cannot start with underscore or dot',
+    );
+    expect(userApiMocks.checkUsername).not.toHaveBeenCalled();
+    expect(userApiMocks.updateProfile).not.toHaveBeenCalled();
+    expect(setLoading).not.toHaveBeenCalled();
+  });
+
+  it('refuses to save a nickname that was taken since the last check', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() => result.current.nickname.onChange(inputChange('amy.travels')));
+    await act(async () => result.current.nickname.onBlur());
+
+    expect(result.current.nickname.helperText).toBe('The nickname is unique');
+
+    userApiMocks.checkUsername.mockResolvedValueOnce({ available: false });
+    await act(async () => result.current.onSubmit());
+
+    expect(result.current.nickname.error).toBe(
+      'Nickname is already taken. Please, choose another one',
+    );
+    expect(userApiMocks.updateProfile).not.toHaveBeenCalled();
+    expect(navigationMocks.push).not.toHaveBeenCalled();
+    expect(setLoading).not.toHaveBeenCalled();
+  });
+
+  it('reads a picked avatar file and offers it to the cropper', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    expect(result.current.avatar.url).toBe(profile.avatar);
+    expect(result.current.avatar.rawImageUrl).toBeNull();
+
+    await act(async () => {
+      result.current.avatar.onChange(
+        fileChange(new File(['binary'], 'avatar.png', { type: 'image/png' })),
+      );
+    });
+
+    await waitFor(() =>
+      expect(result.current.avatar.rawImageUrl).toMatch(/^data:image\/png/),
+    );
+    expect(result.current.avatar.url).toBe(profile.avatar);
+    expect(result.current.isDirty).toBe(false);
+  });
+
+  it('ignores an avatar input that was cleared without a file', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    await act(async () => result.current.avatar.onChange(fileChange()));
+
+    expect(result.current.avatar.rawImageUrl).toBeNull();
+  });
+
+  it('discards the picked file when cropping is cancelled', async () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    await act(async () => {
+      result.current.avatar.onChange(
+        fileChange(new File(['binary'], 'avatar.png', { type: 'image/png' })),
+      );
+    });
+    await waitFor(() =>
+      expect(result.current.avatar.rawImageUrl).not.toBeNull(),
+    );
+
+    act(() => result.current.avatar.onCropCancel());
+
+    expect(result.current.avatar.rawImageUrl).toBeNull();
+    expect(result.current.avatar.url).toBe(profile.avatar);
+    expect(result.current.isDirty).toBe(false);
+  });
+
+  it('replaces the preview and clears the cropper once a crop is confirmed', () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() =>
+      result.current.avatar.onCropConfirm('data:image/png;base64,cropped'),
+    );
+
+    expect(result.current.avatar.url).toBe('data:image/png;base64,cropped');
+    expect(result.current.avatar.rawImageUrl).toBeNull();
+  });
+
+  it('explains both privacy states', () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    expect(result.current.privacy.checked).toBe(true);
+    expect(result.current.privacy.helperText).toBe(
+      'Your profile can be found by other users via search.',
+    );
+
+    act(() => result.current.privacy.onChange(false));
+
+    expect(result.current.privacy.helperText).toBe(
+      'If disabled, your profile is hidden from search and can only be seen by your direct friends.',
+    );
+  });
+
+  it('starts a private profile with the public toggle off', () => {
+    const { result } = renderHook(() =>
+      useEditProfile({ ...profile, is_private: true }),
+    );
+
+    expect(result.current.privacy.checked).toBe(false);
+    expect(result.current.isDirty).toBe(false);
+
+    act(() => result.current.privacy.onChange(true));
+    expect(result.current.isDirty).toBe(true);
+  });
+
+  it('surfaces a plain-string username error from the server', async () => {
+    userApiMocks.updateProfile.mockRejectedValueOnce(
+      new UpdateProfileError({ username: 'Reserved nickname.' }),
+    );
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() => result.current.bio.onChange(textareaChange('Changed bio')));
+    await act(async () => result.current.onSubmit());
+
+    expect(result.current.nickname.error).toBe('Reserved nickname.');
+    expect(result.current.formError).toBeUndefined();
+  });
+
+  it('clears a previous form error when the next save starts', async () => {
+    userApiMocks.updateProfile.mockRejectedValueOnce(new Error('offline'));
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() => result.current.lastName.onChange(inputChange('Stone')));
+    await act(async () => result.current.onSubmit());
+
+    expect(result.current.formError).toBe(
+      'Something went wrong. Please try again.',
+    );
+
+    await act(async () => result.current.onSubmit());
+
+    expect(result.current.formError).toBeUndefined();
+    expect(navigationMocks.push).toHaveBeenCalledWith('/profile');
+  });
+
+  it('reports an avatar upload failure without losing the form', async () => {
+    userApiMocks.changeAvatar.mockRejectedValueOnce(new Error('too large'));
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() =>
+      result.current.avatar.onCropConfirm('data:image/png;base64,cropped'),
+    );
+    await act(async () => result.current.onSubmit());
+
+    expect(result.current.formError).toBe(
+      'Something went wrong. Please try again.',
+    );
+    expect(setUser).not.toHaveBeenCalled();
+    expect(navigationMocks.push).not.toHaveBeenCalled();
+    expect(setLoading.mock.calls).toEqual([[true], [false]]);
+  });
+
+  it('leaves the form for the profile page on cancel', () => {
+    const { result } = renderHook(() => useEditProfile(profile));
+
+    act(() => result.current.bio.onChange(textareaChange('Unsaved bio')));
+    act(() => result.current.onCancel());
+
+    expect(navigationMocks.push).toHaveBeenCalledWith('/profile');
+    expect(userApiMocks.updateProfile).not.toHaveBeenCalled();
   });
 });
