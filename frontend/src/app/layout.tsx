@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { Instrument_Serif, Poppins } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import { GlobalLoader } from '@/shared/ui/globalLoader/GlobalLoader';
 import { buildMetadata, SITE_URL } from '@/shared/lib/metadata';
 import './globals.scss';
@@ -59,6 +60,7 @@ export default function RootLayout({
       <body>
         <GlobalLoader />
         {children}
+        <Analytics />
       </body>
     </html>
   );
