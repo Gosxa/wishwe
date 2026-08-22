@@ -96,5 +96,15 @@ export default defineConfig({
         storageState: AUTH_FILE,
       },
     },
+    {
+      name: 'mobile-chrome',
+      testMatch: /.*\.spec\.ts/,
+      grep: /@mobile/,
+      dependencies: ['setup'],
+      use: {
+        ...devices['Pixel 7'],
+        storageState: AUTH_FILE,
+      },
+    },
   ],
 });

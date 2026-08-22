@@ -57,11 +57,12 @@ export default function EditProfilePage({ initialUser }: Props) {
                   <Avatar width={160} height={160} />
                 )}
               </span>
-              <label className={s.avatarEdit} aria-label="Change photo">
+              <label className={s.avatarEdit}>
                 <Pencil />
                 <input
                   type="file"
                   accept="image/*"
+                  aria-label="Change photo"
                   onChange={avatar.onChange}
                   hidden
                 />

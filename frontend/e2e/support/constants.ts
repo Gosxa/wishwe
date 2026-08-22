@@ -10,3 +10,11 @@ export const E2E_OWNER = {
 
 export const E2E_EVENT_TITLE =
   process.env.WISHWE_E2E_EVENT_TITLE ?? 'E2E Share Flow Plan';
+
+export const MAILBOX_DIR =
+  process.env.WISHWE_E2E_MAILBOX ??
+  path.resolve(process.cwd(), '..', 'backend', '.e2e', 'mail');
+
+export const DISPOSABLE_EMAIL_DOMAIN = 'disposable.e2e.test';
+
+export const DISPOSABLE_PASSWORD = 'DisposablePass123!';

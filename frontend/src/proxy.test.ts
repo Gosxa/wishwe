@@ -48,6 +48,8 @@ describe('proxy', () => {
   it.each([
     ['static chunks', '/_next/static/chunks/main.js'],
     ['optimized images', '/_next/image'],
+    ['the analytics script', '/_vercel/insights/script.js'],
+    ['the analytics beacon', '/_vercel/insights/event'],
     ['the favicon', '/favicon.ico'],
     ['local fonts', '/fonts/Sk-Modernist-Regular.otf'],
     ['onboarding', '/onboard'],

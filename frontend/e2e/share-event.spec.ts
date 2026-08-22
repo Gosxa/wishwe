@@ -1,30 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import AxeBuilder from '@axe-core/playwright';
-import {
-  expect,
-  test as base,
-  type Locator,
-  type Page,
-} from '@playwright/test';
+import type { APIRequestContext, Locator, Page } from '@playwright/test';
+import { expect, test } from './support/test';
+import { registerDisposableAccount } from './support/accounts';
 import { E2E_EVENT_TITLE } from './support/constants';
-
-type AutoFixtures = {
-  browserErrors: void;
-};
-
-const test = base.extend<AutoFixtures>({
-  browserErrors: [
-    async ({ page }, use) => {
-      const errors: string[] = [];
-
-      page.on('pageerror', error => errors.push(error.message));
-      await use();
-
-      expect(errors, 'uncaught errors were emitted by the page').toEqual([]);
-    },
-    { auto: true },
-  ],
-});
 
 const shareEndpoint = '**/next_api/event/*/share';
 const socialNames = ['Telegram', 'WhatsApp', 'X', 'Facebook'] as const;
@@ -100,6 +79,29 @@ const expectGeneratedImage = async (
       })),
     )
     .toEqual(dimensions);
+};
+
+const seededShareLink = async (owner: APIRequestContext, origin: string) => {
+  const listed = await owner.get('/api/event/events?page=1&page_size=20');
+
+  expect(listed.status()).toBe(200);
+
+  const { results } = (await listed.json()) as {
+    results: { id: number; title: string }[];
+  };
+  const seeded = results.find(event => event.title === E2E_EVENT_TITLE);
+
+  expect(seeded, `seed_e2e should provide "${E2E_EVENT_TITLE}"`).toBeDefined();
+
+  const shared = await owner.post(`/next_api/event/${seeded!.id}/share`);
+
+  expect(shared.status()).toBe(200);
+
+  const { share_url: shareUrl } = (await shared.json()) as {
+    share_url: string;
+  };
+
+  return `${origin}${new URL(shareUrl).pathname}`;
 };
 
 const captureWindowOpen = async (page: Page) => {
@@ -483,7 +485,7 @@ test.describe('Share Event modal', () => {
       Object.defineProperty(navigator.clipboard, 'write', {
         configurable: true,
         value: () =>
-          Promise.reject(new DOMException('Denied', 'NotAllowedError')),
+          Promise.reject(new DOMException('Unsupported', 'NotSupportedError')),
       });
     });
 
@@ -518,5 +520,124 @@ test.describe('Share Event modal', () => {
     );
     expect(filePath).not.toBeNull();
     expect(await pngSize(filePath!)).toEqual({ width: 1200, height: 630 });
+  });
+
+  test('announces a refused clipboard write but keeps the copy button', async ({
+    browserName,
+    page,
+  }) => {
+    test.skip(
+      browserName !== 'chromium',
+      'ClipboardItem support is browser-specific',
+    );
+
+    await page.addInitScript(() => {
+      if (!navigator.clipboard) return;
+
+      Object.defineProperty(navigator.clipboard, 'write', {
+        configurable: true,
+        value: () =>
+          Promise.reject(new DOMException('Denied', 'NotAllowedError')),
+      });
+    });
+
+    const card = await openOwnerProfile(page);
+    const { dialog } = await openShareDialog(page, card);
+    const copyImage = dialog.getByRole('button', { name: 'Copy image' });
+
+    await expectGeneratedImage(
+      dialog.getByRole('img', {
+        name: `Poster share image for ${E2E_EVENT_TITLE}`,
+      }),
+      { width: 1200, height: 630 },
+    );
+    await copyImage.click();
+
+    await expect(
+      dialog.getByText(
+        "This browser can't copy images. You can download the PNG instead.",
+      ),
+    ).toBeAttached();
+    await expect(copyImage).toBeEnabled();
+    await expect(
+      dialog.getByRole('link', { name: 'Download Poster image' }),
+    ).toBeVisible();
+  });
+});
+
+test.describe('Shared event page', () => {
+  test('offers a signed-in stranger a way to reach the host', async ({
+    baseURL,
+    browser,
+    request,
+  }) => {
+    const shareLink = await seededShareLink(request, baseURL!);
+    const visitor = await registerDisposableAccount(baseURL!, 'sharevisitor');
+    const context = await browser.newContext({
+      storageState: visitor.storageState,
+    });
+
+    try {
+      const page = await context.newPage();
+
+      await page.goto(shareLink);
+
+      const preview = page.getByRole('dialog').filter({
+        has: page.getByText('shared this event with you'),
+      });
+
+      await expect(preview).toBeVisible();
+      await expect(preview.getByText('Private event')).toBeVisible();
+      await expect(
+        preview.getByRole('link', { name: 'Login to your account' }),
+      ).toHaveCount(0);
+
+      await preview.getByRole('button', { name: 'Add friend' }).click();
+
+      await expect(preview.getByText('Requested')).toBeVisible();
+      await expect(preview.getByText(/Request sent\./)).toBeVisible();
+
+      const incoming = await request.get('/api/user/friendship/incoming');
+
+      expect(incoming.status()).toBe(200);
+
+      const requests = (await incoming.json()) as { sender: string }[];
+
+      expect(requests.map(entry => entry.sender)).toContain(visitor.username);
+    } finally {
+      await context.close();
+      await visitor.api.dispose();
+    }
+  });
+
+  test('closes the preview back onto the visitor’s own feed', async ({
+    baseURL,
+    browser,
+    request,
+  }) => {
+    const shareLink = await seededShareLink(request, baseURL!);
+    const visitor = await registerDisposableAccount(baseURL!, 'sharecloser');
+    const context = await browser.newContext({
+      storageState: visitor.storageState,
+    });
+
+    try {
+      const page = await context.newPage();
+
+      await page.goto(shareLink);
+
+      const preview = page.getByRole('dialog').filter({
+        has: page.getByText('shared this event with you'),
+      });
+
+      await expect(preview).toBeVisible();
+      await preview.getByRole('button', { name: 'Close' }).click();
+
+      await expect(preview).toBeHidden();
+      await expect(page).toHaveURL(/\/feed$/);
+    } finally {
+      await context.close();
+      await visitor.api.dispose();
+    }
   });
 });

@@ -35,7 +35,15 @@ DATABASES = {
 }
 
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
-EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = str(E2E_ROOT / "mail")
+DEFAULT_FROM_EMAIL = "e2e@wishwe.test"
+
+
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.dummy.DummyCache"}
+}
 
 AWS_STORAGE_BUCKET_NAME = None
 AWS_S3_CUSTOM_DOMAIN = None

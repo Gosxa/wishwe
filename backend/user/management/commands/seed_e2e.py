@@ -1,5 +1,6 @@
 import datetime
 import os
+import shutil
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -14,10 +15,12 @@ from event.models import (
     EventType,
     EventVisibility,
 )
-from user.models import Profile
+from user.models import EmailVerification, Profile
 
 
 User = get_user_model()
+
+DISPOSABLE_EMAIL_DOMAIN = "disposable.e2e.test"
 
 
 class Command(BaseCommand):
@@ -26,6 +29,9 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if not getattr(settings, "IS_E2E", False):
             raise CommandError("seed_e2e is restricted to the E2E settings module")
+
+        self._reset_mailbox()
+        self._purge_disposable_accounts()
 
         email = os.getenv("WISHWE_E2E_EMAIL", "owner.e2e@wishwe.test")
         password = os.getenv("WISHWE_E2E_PASSWORD", "PlaywrightPass123!")
@@ -80,3 +86,30 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(self.style.SUCCESS("Playwright E2E data is ready."))
+
+    def _reset_mailbox(self):
+        """Drop verification emails from earlier runs.
+
+        Specs poll this directory for the six-digit code, so a stale message
+        for a recycled address would hand back an expired code.
+        """
+        mailbox = getattr(settings, "EMAIL_FILE_PATH", None)
+
+        if not mailbox:
+            return
+
+        shutil.rmtree(mailbox, ignore_errors=True)
+        os.makedirs(mailbox, exist_ok=True)
+
+    def _purge_disposable_accounts(self):
+        """Remove the throwaway accounts specs register for themselves.
+
+        Every spec signs up under ``@{DISPOSABLE_EMAIL_DOMAIN}`` so it owns its
+        own data; without this the E2E database would grow on every run.
+        """
+        User.objects.filter(
+            email__endswith=f"@{DISPOSABLE_EMAIL_DOMAIN}"
+        ).delete()
+        EmailVerification.objects.filter(
+            email__endswith=f"@{DISPOSABLE_EMAIL_DOMAIN}"
+        ).delete()
