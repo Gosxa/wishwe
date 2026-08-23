@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/buttons' as btn;
 
 .list {
   margin: 40px 0 0;
@@ -60,4 +61,23 @@
     width: 24px;
     height: 24px;
   }
+}
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.errorText {
+  margin: 0;
+  color: clr.$err;
+
+  @include tp.text-body;
+}
+
+.retry {
+  @include btn.secondary(8px, 140px, 40px);
 }

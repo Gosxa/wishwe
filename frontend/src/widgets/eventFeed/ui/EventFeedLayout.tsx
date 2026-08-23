@@ -12,6 +12,8 @@ type Props = {
   isLoading: boolean;
   isEmpty: boolean;
   emptyState: ReactNode;
+  error?: string | null;
+  onRetry?: () => void;
   isLoadingMore: boolean;
   hasMore: boolean;
   loadMore: () => void;
@@ -25,6 +27,8 @@ export const EventFeedLayout = ({
   isLoading,
   isEmpty,
   emptyState,
+  error = null,
+  onRetry,
   isLoadingMore,
   hasMore,
   loadMore,
@@ -35,7 +39,7 @@ export const EventFeedLayout = ({
   useEffect(() => {
     const node = sentinelRef.current;
 
-    if (!node || !hasMore || isLoading || isEmpty) return;
+    if (!node || !hasMore || isLoading || isEmpty || error) return;
 
     const observer = new IntersectionObserver(
       entries => {
@@ -49,7 +53,7 @@ export const EventFeedLayout = ({
     observer.observe(node);
 
     return () => observer.disconnect();
-  }, [hasMore, isEmpty, isLoading, loadMore]);
+  }, [error, hasMore, isEmpty, isLoading, loadMore]);
 
   return (
     <div className={clsx(s.feed, variant === 'home' ? s.home : s.profile)}>
@@ -60,6 +64,15 @@ export const EventFeedLayout = ({
       {isLoading ? (
         <div className={s.statusSlot}>
           <Spinner />
+        </div>
+      ) : error ? (
+        <div className={s.errorSlot} role="alert">
+          <p className={s.errorMessage}>{error}</p>
+          {onRetry && (
+            <button type="button" className={s.retry} onClick={onRetry}>
+              <span>Try again</span>
+            </button>
+          )}
         </div>
       ) : isEmpty ? (
         <div className={s.emptySlot}>{emptyState}</div>

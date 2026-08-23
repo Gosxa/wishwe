@@ -143,6 +143,52 @@ describe('useFriends', () => {
     expect(result.current.error).toBe('Failed to load friends');
   });
 
+  it('reloads friends and requests on retry and clears the error', async () => {
+    apiMocks.listFriends.mockRejectedValueOnce(new Error('network error'));
+
+    const { result } = renderHook(() => useFriends());
+
+    await settleInitialLoad(result);
+    expect(result.current.error).toBe('Failed to load friends');
+
+    apiMocks.listFriends.mockResolvedValueOnce(page([friend(1)]));
+    apiMocks.listIncomingRequests.mockResolvedValueOnce([
+      request(7, 'requester'),
+    ]);
+
+    act(() => result.current.retry());
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(true);
+
+    await settleInitialLoad(result);
+
+    expect(result.current.friends).toEqual([
+      { id: 1, username: 'friend-1', avatar: null, friendshipId: 101 },
+    ]);
+    expect(result.current.requests).toEqual([
+      { id: 7, username: 'requester', avatar: null },
+    ]);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('keeps reporting the error when a retry also fails', async () => {
+    apiMocks.listFriends
+      .mockRejectedValueOnce(new Error('network error'))
+      .mockRejectedValueOnce(new Error('still broken'));
+
+    const { result } = renderHook(() => useFriends());
+
+    await settleInitialLoad(result);
+
+    act(() => result.current.retry());
+    await settleInitialLoad(result);
+
+    expect(result.current.error).toBe('Failed to load friends');
+    expect(result.current.friends).toEqual([]);
+    expect(apiMocks.listFriends).toHaveBeenCalledTimes(2);
+  });
+
   it('removes a friend optimistically and keeps the removal on success', async () => {
     const removal = deferred<void>();
 

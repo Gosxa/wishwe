@@ -23,7 +23,7 @@ export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
   const canSeeEvents =
     friendshipStatus === 'friends' || friendshipStatus === 'self';
 
-  const { events, isLoading, isLoadingMore, hasMore, loadMore } =
+  const { events, isLoading, isLoadingMore, hasMore, loadMore, error, retry } =
     useProfileEvents({
       userId: profile.user_id,
       tab,
@@ -46,6 +46,8 @@ export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
       }
       isLoading={canSeeEvents && isLoading}
       isEmpty={!canSeeEvents || events.length === 0}
+      error={error}
+      onRetry={retry}
       emptyState={
         !canSeeEvents ? (
           <FriendsOnlyState username={profile.username ?? ''} />

@@ -6,6 +6,8 @@ import type { FeedEvent } from '@client_pages/home/model/types';
 
 const mocks = vi.hoisted(() => ({
   clearEventParam: vi.fn(),
+  error: null as string | null,
+  retry: vi.fn(),
   copyInvite: vi.fn(),
   events: [] as FeedEvent[],
   filter: 'all' as 'all' | 'plans' | 'wishes',
@@ -45,11 +47,13 @@ vi.mock('@client_pages/home/model/useFeedToolbar', () => ({
 
 vi.mock('@client_pages/home/model/useFeedEvents', () => ({
   useFeedEvents: () => ({
+    error: mocks.error,
     events: mocks.events,
     hasMore: mocks.hasMore,
     isLoading: mocks.isLoading,
     isLoadingMore: mocks.isLoadingMore,
     loadMore: mocks.loadMore,
+    retry: mocks.retry,
   }),
 }));
 
@@ -133,6 +137,7 @@ const event = {
 describe('Feed', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.error = null;
     mocks.events = [];
     mocks.filter = 'all';
     mocks.hasMore = false;
@@ -190,6 +195,23 @@ describe('Feed', () => {
     fireEvent.click(screen.getByRole('button', { name: /Sort:/ }));
     fireEvent.click(screen.getByRole('button', { name: 'social heat' }));
     expect(mocks.setSort).toHaveBeenCalledWith('heat');
+  });
+
+  it('surfaces a failed load instead of the empty state and retries on demand', () => {
+    mocks.error = 'Failed to load events';
+
+    render(<Feed />);
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      'Failed to load events',
+    );
+    expect(
+      screen.queryByRole('heading', { name: 'Waiting for adventures?' }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(mocks.retry).toHaveBeenCalledTimes(1);
   });
 
   it('connects event cards and a URL deep link to their navigation callbacks', () => {

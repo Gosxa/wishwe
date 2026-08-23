@@ -34,6 +34,7 @@ export const useFriends = () => {
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -56,6 +57,12 @@ export const useFriends = () => {
     return () => {
       active = false;
     };
+  }, [attempt]);
+
+  const retry = useCallback(() => {
+    setError(null);
+    setIsLoading(true);
+    setAttempt(current => current + 1);
   }, []);
 
   const removeFriend = useCallback(async (friendshipId: number) => {
@@ -112,6 +119,7 @@ export const useFriends = () => {
     requests,
     isLoading,
     error,
+    retry,
     removeFriend,
     acceptRequest,
     declineRequest,

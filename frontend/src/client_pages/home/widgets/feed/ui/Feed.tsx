@@ -20,7 +20,7 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
   const { filter, reach, sort, setFilter, setReach, setSort } =
     useFeedToolbar();
 
-  const { events, isLoading, isLoadingMore, hasMore, loadMore } =
+  const { events, isLoading, isLoadingMore, hasMore, loadMore, error, retry } =
     useFeedEvents();
 
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
@@ -51,6 +51,8 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
       isLoading={isLoading}
       isEmpty={events.length === 0}
       emptyState={<FeedEmptyState filter={filter} />}
+      error={error}
+      onRetry={retry}
       isLoadingMore={isLoadingMore}
       hasMore={hasMore}
       loadMore={loadMore}

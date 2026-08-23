@@ -13,6 +13,7 @@ import type { SearchResult } from '../model/types';
 
 const hookMocks = vi.hoisted(() => ({
   acceptRequest: vi.fn(),
+  retryFriends: vi.fn(),
   copyInvite: vi.fn(),
   declineRequest: vi.fn(),
   removeFriend: vi.fn(),
@@ -86,6 +87,7 @@ describe('FriendsPage search results', () => {
     hookMocks.copyInvite.mockReset();
     hookMocks.declineRequest.mockReset();
     hookMocks.removeFriend.mockReset();
+    hookMocks.retryFriends.mockReset();
     hookMocks.useFriends.mockReset();
     hookMocks.useUserSearch.mockReset();
 
@@ -94,6 +96,7 @@ describe('FriendsPage search results', () => {
       requests: [{ id: 2, username: 'Bob', avatar: null }],
       isLoading: false,
       error: null,
+      retry: hookMocks.retryFriends,
       removeFriend: hookMocks.removeFriend,
       acceptRequest: hookMocks.acceptRequest,
       declineRequest: hookMocks.declineRequest,
@@ -158,5 +161,58 @@ describe('FriendsPage search results', () => {
       expect(hookMocks.removeFriend).toHaveBeenCalledWith(11);
       expect(screen.queryByRole('dialog')).toBeNull();
     });
+  });
+
+  it('replaces both card bodies with a retryable error after a failed load', () => {
+    hookMocks.useFriends.mockReturnValue({
+      friends: [],
+      requests: [],
+      isLoading: false,
+      error: 'Failed to load friends',
+      retry: hookMocks.retryFriends,
+      removeFriend: hookMocks.removeFriend,
+      acceptRequest: hookMocks.acceptRequest,
+      declineRequest: hookMocks.declineRequest,
+    });
+
+    render(<FriendsPage />);
+
+    const alerts = screen.getAllByRole('alert');
+
+    expect(alerts).toHaveLength(2);
+    for (const alert of alerts) {
+      expect(alert.textContent).toContain('Failed to load friends');
+    }
+
+    expect(
+      screen.queryByText(/Your friend list is currently empty/),
+    ).toBeNull();
+    expect(screen.queryByText(/don.t have any new friend requests/)).toBeNull();
+
+    const retries = screen.getAllByRole('button', { name: 'Try again' });
+
+    expect(retries).toHaveLength(2);
+    fireEvent.click(retries[0]);
+    fireEvent.click(retries[1]);
+
+    expect(hookMocks.retryFriends).toHaveBeenCalledTimes(2);
+  });
+
+  it('prefers the loading state over the error while a retry runs', () => {
+    hookMocks.useFriends.mockReturnValue({
+      friends: [],
+      requests: [],
+      isLoading: true,
+      error: 'Failed to load friends',
+      retry: hookMocks.retryFriends,
+      removeFriend: hookMocks.removeFriend,
+      acceptRequest: hookMocks.acceptRequest,
+      declineRequest: hookMocks.declineRequest,
+    });
+
+    render(<FriendsPage />);
+
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
   });
 });

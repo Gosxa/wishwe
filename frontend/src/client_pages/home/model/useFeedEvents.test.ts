@@ -238,6 +238,56 @@ describe('useFeedEvents', () => {
     expect(result.current.error).toBe('Failed to load events');
   });
 
+  it('refetches the first page on retry and clears the error', async () => {
+    apiMocks.listEvents.mockRejectedValueOnce(new Error('network error'));
+
+    const { result } = renderHook(() => useFeedEvents());
+
+    await waitFor(() =>
+      expect(result.current.error).toBe('Failed to load events'),
+    );
+
+    const retryRequest = deferred<Paginated<BackendEvent>>();
+
+    apiMocks.listEvents.mockReturnValueOnce(retryRequest.promise);
+
+    act(() => result.current.retry());
+
+    expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(true);
+    expect(apiMocks.listEvents).toHaveBeenLastCalledWith({
+      sort: 'recent',
+      page: 1,
+    });
+
+    await resolveRequest(retryRequest, page([1, 2], '/next'));
+
+    expect(result.current.events.map(item => item.id)).toEqual(['1', '2']);
+    expect(result.current.hasMore).toBe(true);
+    expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('reports the error again when a retry also fails', async () => {
+    apiMocks.listEvents
+      .mockRejectedValueOnce(new Error('network error'))
+      .mockRejectedValueOnce(new Error('still broken'));
+
+    const { result } = renderHook(() => useFeedEvents());
+
+    await waitFor(() =>
+      expect(result.current.error).toBe('Failed to load events'),
+    );
+
+    act(() => result.current.retry());
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    expect(result.current.error).toBe('Failed to load events');
+    expect(result.current.events).toEqual([]);
+    expect(apiMocks.listEvents).toHaveBeenCalledTimes(2);
+  });
+
   it('appends pages and blocks duplicate loadMore requests', async () => {
     const initialRequest = deferred<Paginated<BackendEvent>>();
     const nextRequest = deferred<Paginated<BackendEvent>>();

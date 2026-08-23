@@ -12,10 +12,19 @@ type Props = {
   friends: Friend[];
   query: string;
   isLoading: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onRemove: (friendshipId: number) => void;
 };
 
-export const FriendsList = ({ friends, query, isLoading, onRemove }: Props) => {
+export const FriendsList = ({
+  friends,
+  query,
+  isLoading,
+  error = null,
+  onRetry,
+  onRemove,
+}: Props) => {
   const [pending, setPending] = useState<Friend | null>(null);
 
   const filtered = useMemo(() => {
@@ -32,6 +41,17 @@ export const FriendsList = ({ friends, query, isLoading, onRemove }: Props) => {
     body = (
       <div className={s.status}>
         <Spinner />
+      </div>
+    );
+  } else if (error) {
+    body = (
+      <div className={s.error} role="alert">
+        <p className={s.errorText}>{error}</p>
+        {onRetry && (
+          <button type="button" className={s.retry} onClick={onRetry}>
+            <span>Try again</span>
+          </button>
+        )}
       </div>
     );
   } else if (friends.length === 0 && !query.trim()) {

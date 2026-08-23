@@ -30,6 +30,8 @@ export const usePaginatedList = <Source, Item>({
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [attempt, setAttempt] = useState(0);
+
   const requestIdRef = useRef(0);
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
@@ -90,7 +92,15 @@ export const usePaginatedList = <Source, Item>({
         requestIdRef.current += 1;
       }
     };
-  }, [enabled, errorMessage, fetchPage, mapItems, requestKey]);
+  }, [attempt, enabled, errorMessage, fetchPage, mapItems, requestKey]);
+
+  const retry = useCallback(() => {
+    if (!enabled) return;
+
+    setError(null);
+    setIsLoading(true);
+    setAttempt(current => current + 1);
+  }, [enabled]);
 
   const loadMore = useCallback(() => {
     if (!enabled || loadingRef.current || !hasMore) return;
@@ -125,5 +135,6 @@ export const usePaginatedList = <Source, Item>({
     hasMore: enabled ? hasMore : false,
     error: enabled ? error : null,
     loadMore,
+    retry,
   };
 };

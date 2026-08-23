@@ -1,3 +1,7 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
 .feed {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -9,6 +13,7 @@
 .home .toolbarSlot,
 .home .list,
 .home .emptySlot,
+.home .errorSlot,
 .home .statusSlot {
   min-width: 0;
 }
@@ -48,6 +53,7 @@
     .toolbarSlot,
     .list,
     .emptySlot,
+    .errorSlot,
     .statusSlot {
       grid-column: 1;
       justify-self: center;
@@ -69,6 +75,7 @@
     .toolbarSlot,
     .list,
     .emptySlot,
+    .errorSlot,
     .statusSlot {
       grid-column: 1;
     }
@@ -83,8 +90,30 @@
     .toolbarSlot,
     .list,
     .emptySlot,
+    .errorSlot,
     .statusSlot {
       max-width: 560px;
     }
   }
+}
+
+.errorSlot {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 48px 0;
+  text-align: center;
+}
+
+.errorMessage {
+  margin: 0;
+  color: clr.$err;
+
+  @include tp.text-body;
+}
+
+.retry {
+  @include btn.secondary(8px, 160px, 48px);
 }

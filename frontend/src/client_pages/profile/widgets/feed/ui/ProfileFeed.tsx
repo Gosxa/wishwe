@@ -36,7 +36,7 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const [planningEvent, setPlanningEvent] = useState<BackendEvent | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const { events, isLoading, isLoadingMore, hasMore, loadMore } =
+  const { events, isLoading, isLoadingMore, hasMore, loadMore, error, retry } =
     useProfileEvents({ userId: user?.user_id ?? null, tab, sort, refreshKey });
 
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
@@ -96,6 +96,8 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
         isLoading={isLoading}
         isEmpty={events.length === 0}
         emptyState={<ProfileFeedEmptyState tab={tab} />}
+        error={error}
+        onRetry={retry}
         isLoadingMore={isLoadingMore}
         hasMore={hasMore}
         loadMore={loadMore}

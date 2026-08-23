@@ -52,3 +52,22 @@
     background: #d2cfc5;
   }
 }
+
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.errorText {
+  margin: 0;
+  color: clr.$err;
+
+  @include tp.text-body;
+}
+
+.retry {
+  @include btn.secondary(8px, 140px, 40px);
+}

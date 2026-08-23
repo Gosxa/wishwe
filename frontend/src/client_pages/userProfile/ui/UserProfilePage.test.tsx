@@ -7,7 +7,9 @@ import type { FeedEvent } from '@client_pages/home/model/types';
 import type { PublicProfile } from '@/shared/client_api/user/types';
 
 const mocks = vi.hoisted(() => ({
+  error: null as string | null,
   events: [] as FeedEvent[],
+  retry: vi.fn(),
   setSort: vi.fn(),
   setTab: vi.fn(),
   sort: 'recent' as 'recent' | 'soonest',
@@ -108,16 +110,19 @@ const profile = (overrides: Partial<PublicProfile> = {}): PublicProfile => ({
 describe('UserProfilePage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.error = null;
     mocks.events = [];
     mocks.sort = 'recent';
     mocks.tab = 'plans';
     mocks.useProfileEvents.mockImplementation(
       ({ enabled }: { enabled: boolean }) => ({
+        error: enabled ? mocks.error : null,
         events: enabled ? mocks.events : [],
         hasMore: false,
         isLoading: false,
         isLoadingMore: false,
         loadMore: vi.fn(),
+        retry: mocks.retry,
       }),
     );
   });
@@ -156,6 +161,34 @@ describe('UserProfilePage', () => {
     expect(screen.getByRole('heading', { name: 'No wishes yet' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Archive' }));
     expect(mocks.setTab).toHaveBeenCalledWith('archive');
+  });
+
+  it('shows a retryable error instead of the empty state for a friend feed', () => {
+    mocks.error = 'Failed to load events';
+
+    render(
+      <UserProfilePage profile={profile({ friendship_status: 'friends' })} />,
+    );
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      'Failed to load events',
+    );
+    expect(screen.queryByRole('heading', { name: 'No plans yet' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(mocks.retry).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the friends-only state when the feed is disabled', () => {
+    mocks.error = 'Failed to load events';
+
+    render(<UserProfilePage profile={profile()} />);
+
+    expect(
+      screen.getByRole('heading', { name: 'Friends-only profile' }),
+    ).toBeTruthy();
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 
   it('updates friendship status and feed when profile prop changes', () => {

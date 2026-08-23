@@ -17,6 +17,8 @@ export default function FriendsPage() {
     friends,
     requests,
     isLoading,
+    error,
+    retry,
     removeFriend,
     acceptRequest,
     declineRequest,
@@ -64,6 +66,8 @@ export default function FriendsPage() {
                 friends={friends}
                 query={query}
                 isLoading={isLoading}
+                error={error}
+                onRetry={retry}
                 onRemove={removeFriend}
               />
               {isSearchActive && (
@@ -80,6 +84,8 @@ export default function FriendsPage() {
               <Requests
                 requests={requests}
                 isLoading={isLoading}
+                error={error}
+                onRetry={retry}
                 onAccept={acceptRequest}
                 onDecline={declineRequest}
               />

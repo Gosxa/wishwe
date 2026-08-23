@@ -7,6 +7,8 @@ import s from './requests.module.scss';
 type Props = {
   requests: FriendRequest[];
   isLoading: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   onAccept: (id: number) => void;
   onDecline: (id: number) => void;
 };
@@ -14,6 +16,8 @@ type Props = {
 export const Requests = ({
   requests,
   isLoading,
+  error = null,
+  onRetry,
   onAccept,
   onDecline,
 }: Props) => {
@@ -23,6 +27,17 @@ export const Requests = ({
     body = (
       <div className={s.status}>
         <Spinner />
+      </div>
+    );
+  } else if (error) {
+    body = (
+      <div className={s.error} role="alert">
+        <p className={s.errorText}>{error}</p>
+        {onRetry && (
+          <button type="button" className={s.retry} onClick={onRetry}>
+            <span>Try again</span>
+          </button>
+        )}
       </div>
     );
   } else if (requests.length === 0) {

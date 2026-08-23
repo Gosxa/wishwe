@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EventFeedLayout } from './EventFeedLayout';
 
@@ -66,6 +72,73 @@ describe('EventFeedLayout', () => {
     });
 
     expect(props.loadMore).toHaveBeenCalledOnce();
+  });
+
+  it('replaces the empty state with a retryable error after a failed load', () => {
+    const onRetry = vi.fn();
+
+    renderLayout({
+      isEmpty: true,
+      error: 'Failed to load events',
+      onRetry,
+      children: null,
+    });
+
+    const alert = screen.getByRole('alert');
+
+    expect(alert.textContent).toContain('Failed to load events');
+    expect(screen.queryByText('Empty')).toBeNull();
+    expect(screen.queryByText('Event')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+
+    expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it('prefers the spinner over the error while a retry is running', () => {
+    renderLayout({
+      isLoading: true,
+      isEmpty: true,
+      error: 'Failed to load events',
+      onRetry: vi.fn(),
+    });
+
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.queryByText('Empty')).toBeNull();
+  });
+
+  it('omits the retry button when no handler is supplied', () => {
+    renderLayout({ isEmpty: true, error: 'Failed to load events' });
+
+    expect(screen.getByRole('alert').textContent).toContain(
+      'Failed to load events',
+    );
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+  });
+
+  it('does not observe the sentinel while an error is showing', () => {
+    renderLayout({ error: 'Failed to load events', onRetry: vi.fn() });
+
+    expect(observe).not.toHaveBeenCalled();
+    expect(screen.queryByText('Event')).toBeNull();
+  });
+
+  it('shows the list again once a retry clears the error', () => {
+    const view = renderLayout({
+      isEmpty: true,
+      error: 'Failed to load events',
+      onRetry: vi.fn(),
+    });
+
+    expect(screen.getByRole('alert')).toBeTruthy();
+
+    view.rerender(
+      <EventFeedLayout {...view.props} isEmpty={false} error={null} />,
+    );
+
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(screen.getByText('Event')).toBeTruthy();
+    expect(observe).toHaveBeenCalledOnce();
   });
 
   it('starts observing after a reload makes the list visible again', () => {
