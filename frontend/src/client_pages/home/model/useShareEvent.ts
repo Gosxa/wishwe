@@ -123,6 +123,7 @@ export const useShareEvent = (event: FeedEvent, isOwn: boolean) => {
 
     feedbackTimeoutRef.current = setTimeout(() => {
       setFeedback('idle');
+      setAnnouncement('');
       setShowLinkToast(false);
     }, FEEDBACK_DURATION_MS);
   };

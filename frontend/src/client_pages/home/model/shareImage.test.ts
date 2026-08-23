@@ -31,6 +31,7 @@ const makeEvent = (overrides: Partial<FeedEvent> = {}): FeedEvent => ({
 
 const installCanvasMock = (
   measureText: (text: string) => number = () => 100,
+  options: { contextAvailable?: boolean; blob?: Blob | null } = {},
 ) => {
   class MockImage {
     width = 100;
@@ -84,10 +85,14 @@ const installCanvasMock = (
     const canvas = originalCreateElement('canvas');
 
     Object.defineProperty(canvas, 'getContext', {
-      value: vi.fn(() => context),
+      value: vi.fn(() => (options.contextAvailable === false ? null : context)),
     });
     canvas.toBlob = vi.fn(callback =>
-      callback(new Blob(['png-data'], { type: 'image/png' })),
+      callback(
+        options.blob === undefined
+          ? new Blob(['png-data'], { type: 'image/png' })
+          : options.blob,
+      ),
     );
 
     return canvas;
@@ -139,6 +144,22 @@ describe('share image metadata', () => {
     expect(result).toHaveLength(3);
     expect(result.map(r => r.format)).toEqual(['poster', 'card', 'story']);
     expect(context.stroke).toHaveBeenCalled();
+  });
+
+  it('rejects image generation when a 2D canvas context is unavailable', async () => {
+    installCanvasMock(undefined, { contextAvailable: false });
+
+    await expect(generateShareImages(makeEvent())).rejects.toThrow(
+      'Canvas rendering is not supported.',
+    );
+  });
+
+  it('rejects image generation when the canvas produces no PNG blob', async () => {
+    installCanvasMock(undefined, { blob: null });
+
+    await expect(generateShareImages(makeEvent())).rejects.toThrow(
+      'Could not render the share image.',
+    );
   });
 
   it('renders multi-line titles on poster and story while keeping card single-line', async () => {

@@ -566,6 +566,25 @@ test.describe('Share Event modal', () => {
 });
 
 test.describe('Shared event page', () => {
+  test('shows a recoverable error for an invalid share token', async ({
+    page,
+  }) => {
+    await page.goto('/share/00000000-0000-0000-0000-000000000000');
+
+    const errorDialog = page.getByRole('alertdialog', {
+      name: "This link doesn't work anymore",
+    });
+
+    await expect(errorDialog).toBeVisible();
+    await expect(errorDialog).toContainText(
+      'The event was removed, or the host turned the link off.',
+    );
+    await errorDialog.getByRole('button', { name: 'Go to feed' }).click();
+
+    await expect(errorDialog).toBeHidden();
+    await expect(page).toHaveURL(/\/feed$/);
+  });
+
   test('offers a signed-in stranger a way to reach the host', async ({
     baseURL,
     browser,

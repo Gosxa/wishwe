@@ -190,6 +190,66 @@ test.describe('event lifecycle', () => {
     }
   });
 
+  test('keeps an edited draft and shows server feedback when saving fails', async ({
+    browser,
+    baseURL,
+  }) => {
+    const owner = await signedInOwner(browser, baseURL!, 'editfailure');
+    const { page, account } = owner;
+    const originalTitle = 'Quiet reading evening';
+    const editedTitle = 'Quiet reading weekend';
+
+    try {
+      const event = await createWish(account.api, { title: originalTitle });
+
+      await page.goto('/profile');
+      await page.getByRole('button', { name: 'Wishes', exact: true }).click();
+      await eventCard(page, originalTitle)
+        .getByRole('button', { name: 'Edit' })
+        .click();
+
+      const dialog = page.getByRole('dialog').filter({
+        has: page.getByRole('heading', { name: 'Edit a wish' }),
+      });
+      const updateEndpoint = `**/next_api/event/${event.id}`;
+
+      await expect(dialog).toBeVisible();
+      await dialog.locator('#eventTitle').fill(editedTitle);
+      await page.route(updateEndpoint, route =>
+        route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            detail: 'Saving is temporarily unavailable.',
+          }),
+        }),
+      );
+
+      await dialog
+        .getByRole('button', { name: 'Save changes', exact: true })
+        .click();
+
+      await expect(dialog).toBeVisible();
+      await expect(
+        dialog.getByText('Saving is temporarily unavailable.'),
+      ).toBeVisible();
+      await expect(dialog.locator('#eventTitle')).toHaveValue(editedTitle);
+      await expect(eventCard(page, originalTitle)).toBeVisible();
+      await expect(eventCard(page, editedTitle)).toHaveCount(0);
+
+      await page.unroute(updateEndpoint);
+      await dialog
+        .getByRole('button', { name: 'Save changes', exact: true })
+        .click();
+
+      await expect(dialog).toBeHidden();
+      await expect(eventCard(page, editedTitle)).toBeVisible();
+      await expect(eventCard(page, originalTitle)).toHaveCount(0);
+    } finally {
+      await owner.close();
+    }
+  });
+
   test('converts a wish into a scheduled plan', async ({
     browser,
     baseURL,

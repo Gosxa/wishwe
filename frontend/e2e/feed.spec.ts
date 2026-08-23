@@ -172,6 +172,135 @@ test.describe('feed contents', () => {
     }
   });
 
+  test('round-trips event details through the URL and nested participant actions', async ({
+    browser,
+    baseURL,
+  }) => {
+    const reader = await readerWithFriend(browser, baseURL!, 'details');
+    const title = 'Moonlight paddle';
+
+    try {
+      const event = await createPlan(reader.friend.api, { title });
+
+      await reader.page.goto('/feed');
+
+      const card = eventCard(reader.page, title);
+
+      await expect(card).toBeVisible();
+      await card.getByRole('button', { name: title, exact: true }).click();
+
+      await expect(reader.page).toHaveURL(`/feed?event=${event.id}`);
+
+      let details = reader.page.getByRole('dialog', { name: title });
+
+      await expect(details).toBeVisible();
+      await details.getByRole('button', { name: '1/8' }).click();
+
+      let participants = reader.page.getByRole('dialog', {
+        name: "Who's going",
+      });
+
+      await expect(participants).toBeVisible();
+      await expect(
+        participants.getByRole('link', {
+          name: `@${reader.friend.username}`,
+        }),
+      ).toBeVisible();
+      await participants.getByRole('button', { name: 'Close' }).click();
+
+      await expect(participants).toBeHidden();
+      await expect(details).toBeVisible();
+
+      await details.getByRole('button', { name: 'Join', exact: true }).click();
+      await expect(
+        details.getByRole('button', { name: /Joined/ }),
+      ).toBeVisible();
+      await expect(details.getByRole('button', { name: '2/8' })).toBeVisible();
+
+      await details.getByRole('button', { name: '2/8' }).click();
+      participants = reader.page.getByRole('dialog', { name: "Who's going" });
+
+      await expect(
+        participants.getByRole('link', { name: `@${reader.account.username}` }),
+      ).toBeVisible();
+      await participants.getByRole('button', { name: 'Close' }).click();
+
+      await reader.page.reload();
+
+      details = reader.page.getByRole('dialog', { name: title });
+      await expect(details).toBeVisible();
+      await expect(reader.page).toHaveURL(`/feed?event=${event.id}`);
+      await expect(
+        details.getByRole('button', { name: /Joined/ }),
+      ).toBeVisible();
+
+      await details.getByRole('button', { name: /Joined/ }).click();
+
+      const leaveDialog = reader.page.getByRole('dialog', {
+        name: 'Leave this event?',
+      });
+
+      await leaveDialog
+        .getByRole('button', { name: 'Leave', exact: true })
+        .click();
+
+      await expect(leaveDialog).toBeHidden();
+      await expect(
+        details.getByRole('button', { name: 'Join', exact: true }),
+      ).toBeVisible();
+      await expect(details.getByRole('button', { name: '1/8' })).toBeVisible();
+
+      await details.getByRole('button', { name: 'Close' }).click();
+
+      await expect(details).toBeHidden();
+      await expect(reader.page).toHaveURL('/feed');
+    } finally {
+      await reader.close();
+    }
+  });
+
+  test('preserves participation state and shows feedback when joining fails', async ({
+    browser,
+    baseURL,
+  }) => {
+    const reader = await readerWithFriend(browser, baseURL!, 'joinfail');
+    const title = 'Stormy picnic';
+
+    try {
+      const event = await createPlan(reader.friend.api, { title });
+      const joinEndpoint = `**/api/event/events/${event.id}/join_plan/`;
+
+      await reader.page.route(joinEndpoint, route =>
+        route.fulfill({
+          status: 503,
+          contentType: 'application/json',
+          body: JSON.stringify({ detail: 'Temporarily unavailable.' }),
+        }),
+      );
+      await reader.page.goto('/feed');
+
+      const card = eventCard(reader.page, title);
+
+      await card.getByRole('button', { name: 'Join', exact: true }).click();
+
+      await expect(
+        reader.page.getByRole('alert').filter({
+          hasText: 'Could not join this event. Please try again.',
+        }),
+      ).toBeVisible();
+      await expect(
+        card.getByRole('button', { name: 'Join', exact: true }),
+      ).toBeEnabled();
+
+      await reader.page.unroute(joinEndpoint);
+      await card.getByRole('button', { name: 'Join', exact: true }).click();
+
+      await expect(card.getByRole('button', { name: /Joined/ })).toBeVisible();
+    } finally {
+      await reader.close();
+    }
+  });
+
   test('marks a friend’s wish as interesting', async ({ browser, baseURL }) => {
     const reader = await readerWithFriend(browser, baseURL!, 'curious');
     const title = 'Someday hot air balloon';
@@ -265,6 +394,66 @@ test.describe('feed contents', () => {
       await expect(
         reader.page.getByRole('heading', { name: title, exact: true }),
       ).toBeVisible();
+    } finally {
+      await reader.close();
+    }
+  });
+
+  test('explains a forbidden deep link without exposing the event', async ({
+    browser,
+    baseURL,
+  }) => {
+    const viewer = await registerDisposableAccount(baseURL!, 'privateviewer');
+    const host = await registerDisposableAccount(baseURL!, 'privatehost');
+    const context = await browser.newContext({
+      storageState: viewer.storageState,
+    });
+
+    try {
+      const event = await createPlan(host.api, {
+        title: 'Friends only dinner',
+        visibility: 'friends-only',
+      });
+      const page = await context.newPage();
+
+      await page.goto(`/feed?event=${event.id}`);
+
+      await expect(
+        page.getByRole('status').filter({
+          hasText: 'This event is only visible to the host’s friends.',
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('heading', {
+          name: 'Friends only dinner',
+          exact: true,
+        }),
+      ).toHaveCount(0);
+    } finally {
+      await context.close();
+      await viewer.api.dispose();
+      await host.api.dispose();
+    }
+  });
+
+  test('dismisses a missing deep link and removes it from the URL', async ({
+    browser,
+    baseURL,
+  }) => {
+    const reader = await readerWithFriend(browser, baseURL!, 'missinglink');
+
+    try {
+      await reader.page.goto('/feed?event=999999999');
+
+      const unavailable = reader.page.getByRole('alertdialog');
+
+      await expect(unavailable).toContainText(
+        'This event isn’t available right now.',
+      );
+      await unavailable.getByRole('button', { name: 'Dismiss' }).click();
+
+      await expect(unavailable).toBeHidden();
+      await expect(reader.page).toHaveURL('/feed');
     } finally {
       await reader.close();
     }
