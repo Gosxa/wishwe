@@ -10,17 +10,11 @@ const CARD = { width: 300, height: 150 };
 describe('useTourLayout', () => {
   let frames: Array<[number, FrameRequestCallback]>;
   let frameId: number;
-  let observed: Element[];
-  let disconnect: ReturnType<typeof vi.fn>;
-  let notifyResize: () => void;
   let card: HTMLDivElement;
 
   beforeEach(() => {
     frames = [];
     frameId = 0;
-    observed = [];
-    disconnect = vi.fn();
-    notifyResize = () => {};
 
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
       frameId += 1;
@@ -31,20 +25,6 @@ describe('useTourLayout', () => {
     vi.stubGlobal('cancelAnimationFrame', (id: number) => {
       frames = frames.filter(([pending]) => pending !== id);
     });
-
-    class ResizeObserverMock {
-      constructor(callback: ResizeObserverCallback) {
-        notifyResize = () => callback([], this as unknown as ResizeObserver);
-      }
-
-      observe = (target: Element) => {
-        observed.push(target);
-      };
-      unobserve = vi.fn();
-      disconnect = disconnect;
-    }
-
-    vi.stubGlobal('ResizeObserver', ResizeObserverMock);
 
     card = document.createElement('div');
     card.getBoundingClientRect = () => rectOf(0, 0, CARD.width, CARD.height);
@@ -203,7 +183,7 @@ describe('useTourLayout', () => {
     expect(result.current.rect?.top).toBe(400);
   });
 
-  it('re-measures after the window resizes', () => {
+  it('tracks the anchor as it moves, without any event firing', () => {
     const anchor = mountAnchor('feed-card', {
       top: 100,
       left: 100,
@@ -217,83 +197,55 @@ describe('useTourLayout', () => {
     expect(result.current.rect?.top).toBe(100);
 
     anchor.getBoundingClientRect = () => rectOf(240, 100, 200, 50);
-    act(() => {
-      window.dispatchEvent(new Event('resize'));
-    });
     flushFrames();
 
     expect(result.current.rect?.top).toBe(240);
   });
 
-  it('re-measures when the page scrolls under the anchor', () => {
-    const anchor = mountAnchor('feed-card', {
-      top: 300,
-      left: 100,
-      width: 200,
-      height: 50,
-    });
+  it('picks up an anchor that appears after the first frame', () => {
+    const { result } = setup(step({ anchor: 'feed-card', padding: 0 }));
+
+    flushFrames();
+    expect(result.current.hasAnchor).toBe(false);
+
+    mountAnchor('feed-card', { top: 60, left: 40, width: 120, height: 40 });
+    flushFrames();
+
+    expect(result.current.hasAnchor).toBe(true);
+    expect(result.current.rect?.top).toBe(60);
+  });
+
+  it('keeps the same rect and position references while nothing moves', () => {
+    mountAnchor('feed-card', { top: 100, left: 100, width: 200, height: 50 });
 
     const { result } = setup(step({ anchor: 'feed-card', padding: 0 }));
 
     flushFrames();
 
-    anchor.getBoundingClientRect = () => rectOf(120, 100, 200, 50);
-    act(() => {
-      document.body.dispatchEvent(new Event('scroll', { bubbles: true }));
-    });
+    const { rect, position } = result.current;
+
+    flushFrames();
     flushFrames();
 
-    expect(result.current.rect?.top).toBe(120);
+    expect(result.current.rect).toBe(rect);
+    expect(result.current.position).toBe(position);
   });
 
-  it('re-measures when the observed layout resizes', () => {
-    const anchor = mountAnchor('feed-card', {
-      top: 100,
-      left: 100,
-      width: 200,
-      height: 50,
-    });
-
-    const { result } = setup(step({ anchor: 'feed-card', padding: 0 }));
-
-    flushFrames();
-
-    anchor.getBoundingClientRect = () => rectOf(180, 100, 200, 50);
-    act(() => notifyResize());
-    flushFrames();
-
-    expect(result.current.rect?.top).toBe(180);
-  });
-
-  it('observes the document body for layout shifts', () => {
+  it('keeps exactly one frame scheduled at a time', () => {
     setup(step({ anchor: 'feed-card' }));
 
-    expect(observed).toEqual([document.body]);
-  });
+    expect(frames).toHaveLength(1);
 
-  it('coalesces a burst of events into a single frame', () => {
-    setup(step({ anchor: 'feed-card' }));
-
-    act(() => {
-      window.dispatchEvent(new Event('resize'));
-      window.dispatchEvent(new Event('resize'));
-      window.dispatchEvent(new Event('resize'));
-    });
+    flushFrames();
 
     expect(frames).toHaveLength(1);
   });
 
-  it('stops listening and disconnects the observer on unmount', () => {
+  it('cancels the polling loop on unmount', () => {
     const { unmount } = setup(step({ anchor: 'feed-card' }));
 
+    flushFrames();
     unmount();
-
-    expect(disconnect).toHaveBeenCalledOnce();
-    expect(frames).toHaveLength(0);
-
-    act(() => {
-      window.dispatchEvent(new Event('resize'));
-    });
 
     expect(frames).toHaveLength(0);
   });

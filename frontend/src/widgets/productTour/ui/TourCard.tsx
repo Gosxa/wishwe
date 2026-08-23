@@ -7,6 +7,7 @@ import {
   Sparkles,
   X,
 } from '@shared/ui/icons';
+import { isPassthrough } from '../model/types';
 import type { CardPosition, TourStep } from '../model/types';
 import s from './productTour.module.scss';
 
@@ -19,7 +20,6 @@ const PLACEMENT_CLASS = {
 
 type TourCardProps = {
   step: TourStep;
-  index: number;
   isLast: boolean;
   position: CardPosition | null;
   anchoredSteps: TourStep[];
@@ -27,14 +27,15 @@ type TourCardProps = {
   titleId: string;
   bodyId: string;
   cardRef: RefObject<HTMLElement | null>;
-  onBack: () => void;
+  nextDisabled: boolean;
+  onBack?: () => void;
   onNext: () => void;
+  onQuickFill?: (step: TourStep) => void;
   onSkip: () => void;
 };
 
 export const TourCard = ({
   step,
-  index,
   isLast,
   position,
   anchoredSteps,
@@ -42,8 +43,10 @@ export const TourCard = ({
   titleId,
   bodyId,
   cardRef,
+  nextDisabled,
   onBack,
   onNext,
+  onQuickFill,
   onSkip,
 }: TourCardProps) => {
   const isAnchored = Boolean(step.anchor);
@@ -51,10 +54,11 @@ export const TourCard = ({
   return (
     <section
       data-modal-content
+      data-tour-step={step.id}
       ref={cardRef}
       tabIndex={-1}
       role="dialog"
-      aria-modal="true"
+      aria-modal={isPassthrough(step) ? undefined : 'true'}
       aria-labelledby={titleId}
       aria-describedby={bodyId}
       className={clsx(
@@ -83,6 +87,12 @@ export const TourCard = ({
           {step.body}
         </p>
 
+        {step.hint && <p className={s.hint}>{step.hint}</p>}
+
+        {step.quickFill && (
+          <QuickFill step={step} onUse={() => onQuickFill?.(step)} />
+        )}
+
         <div className={s.footer}>
           {isAnchored ? (
             <ProgressDots
@@ -95,8 +105,8 @@ export const TourCard = ({
 
           <CardActions
             step={step}
-            index={index}
             isLast={isLast}
+            nextDisabled={nextDisabled}
             onBack={onBack}
             onNext={onNext}
             onSkip={onSkip}
@@ -176,39 +186,71 @@ const ProgressDots = ({
   </div>
 );
 
+const QuickFill = ({ step, onUse }: { step: TourStep; onUse: () => void }) => {
+  const quickFill = step.quickFill;
+
+  if (!quickFill) return null;
+
+  return (
+    <button type="button" className={s.quickFill} onClick={onUse}>
+      <span className={s.quickFillValue}>“{quickFill.value}”</span>
+      <span className={s.quickFillLabel}>
+        <Sparkles />
+        {quickFill.label}
+      </span>
+    </button>
+  );
+};
+
 type CardActionsProps = {
   step: TourStep;
-  index: number;
   isLast: boolean;
-  onBack: () => void;
+  nextDisabled: boolean;
+  onBack?: () => void;
   onNext: () => void;
   onSkip: () => void;
 };
 
 const CardActions = ({
   step,
-  index,
   isLast,
+  nextDisabled,
   onBack,
   onNext,
   onSkip,
 }: CardActionsProps) => {
+  if (step.awaitAction) {
+    return (
+      <div className={s.actions}>
+        <span className={s.waiting}>
+          <span className={s.waitingDot} aria-hidden />
+          Your turn
+        </span>
+      </div>
+    );
+  }
+
   const primaryLabel = step.primaryLabel ?? (isLast ? 'Got it' : 'Next');
 
   return (
     <div className={s.actions}>
-      {index > 0 && (
+      {onBack && (
         <button type="button" className={s.back} onClick={onBack}>
           <ChevronLeft />
           <span>{step.secondaryLabel ?? 'Back'}</span>
         </button>
       )}
-      {index === 0 && (
+      {!onBack && step.secondaryLabel && (
         <button type="button" className={s.skip} onClick={onSkip}>
-          <span>{step.secondaryLabel ?? 'Skip for now'}</span>
+          <span>{step.secondaryLabel}</span>
         </button>
       )}
-      <button type="button" className={s.next} onClick={onNext}>
+      <button
+        type="button"
+        className={s.next}
+        disabled={nextDisabled}
+        onClick={onNext}
+      >
         <span>{primaryLabel}</span>
         {!isLast && <ChevronRight />}
       </button>

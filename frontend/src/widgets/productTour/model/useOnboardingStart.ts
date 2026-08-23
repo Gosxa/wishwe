@@ -1,10 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { buildFeedTourSteps } from './feedTourSteps';
+import { useEffect, useRef } from 'react';
+import { useOnboardingStore } from '@/shared/store/useOnboardingStore';
 import { hasSeenLocally } from './feedTourStorage';
-import { isStepAvailable } from './geometry';
-import type { TourStep } from './types';
 import { waitForFeed } from './waitForFeed';
 
 const DESKTOP_QUERY = '(min-width: 1024px)';
@@ -16,12 +14,11 @@ const shouldStartTour = (profileId: number | null, isFirstVisit: boolean) => {
   return !hasSeenLocally(profileId);
 };
 
-export const useFeedTourSteps = (
+export const useOnboardingStart = (
   profileId: number | null,
   isFirstVisit: boolean,
-  name?: string | null,
 ) => {
-  const [steps, setSteps] = useState<TourStep[] | null>(null);
+  const begin = useOnboardingStore(state => state.begin);
   const startedRef = useRef(false);
 
   useEffect(() => {
@@ -31,9 +28,7 @@ export const useFeedTourSteps = (
 
     return waitForFeed(() => {
       startedRef.current = true;
-      setSteps(buildFeedTourSteps(name).filter(isStepAvailable));
+      begin();
     });
-  }, [isFirstVisit, name, profileId]);
-
-  return { steps, close: () => setSteps(null) };
+  }, [begin, isFirstVisit, profileId]);
 };

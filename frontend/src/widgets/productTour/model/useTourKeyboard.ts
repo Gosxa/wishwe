@@ -49,10 +49,18 @@ type Options = {
   cardRef: RefObject<HTMLElement | null>;
   goBack: () => void;
   goNext: () => void;
+  enabled?: boolean;
 };
 
-export const useTourKeyboard = ({ cardRef, goBack, goNext }: Options) => {
+export const useTourKeyboard = ({
+  cardRef,
+  goBack,
+  goNext,
+  enabled = true,
+}: Options) => {
   useEffect(() => {
+    if (!enabled) return;
+
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Tab') {
         trapTabFocus(event, cardRef.current);
@@ -74,5 +82,5 @@ export const useTourKeyboard = ({ cardRef, goBack, goNext }: Options) => {
     document.addEventListener('keydown', handleKeyDown);
 
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [cardRef, goBack, goNext]);
+  }, [cardRef, enabled, goBack, goNext]);
 };

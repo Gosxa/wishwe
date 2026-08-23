@@ -30,54 +30,63 @@ const measureCardPosition = (
   };
 };
 
+const sameRect = (a: AnchorRect, b: AnchorRect) =>
+  a.top === b.top &&
+  a.left === b.left &&
+  a.width === b.width &&
+  a.height === b.height &&
+  a.radius === b.radius;
+
+const samePosition = (a: CardPosition, b: CardPosition) =>
+  a.top === b.top &&
+  a.left === b.left &&
+  a.placement === b.placement &&
+  a.arrow === b.arrow;
+
 export const useTourLayout = (
   step: TourStep | undefined,
   cardRef: RefObject<HTMLElement | null>,
 ) => {
   const [rect, setRect] = useState<AnchorRect | null>(null);
   const [position, setPosition] = useState<CardPosition | null>(null);
+  const [hasAnchor, setHasAnchor] = useState(false);
 
   const sync = useCallback(() => {
     if (!step) return;
 
     const elements = findAnchors(step.anchor);
+
+    setHasAnchor(elements.length > 0);
+
     const nextRect = elements.length
       ? measureAnchors(elements, step)
       : centerRect();
 
-    setRect(nextRect);
+    setRect(prev => (prev && sameRect(prev, nextRect) ? prev : nextRect));
 
     const card = cardRef.current;
 
     if (!card) return;
 
-    setPosition(measureCardPosition(step, nextRect, card));
+    const nextPosition = measureCardPosition(step, nextRect, card);
+
+    setPosition(prev =>
+      prev && samePosition(prev, nextPosition) ? prev : nextPosition,
+    );
   }, [step, cardRef]);
 
   useEffect(() => {
     let frame = 0;
 
-    const schedule = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(sync);
+    const loop = () => {
+      sync();
+      frame = requestAnimationFrame(loop);
     };
 
-    schedule();
+    frame = requestAnimationFrame(loop);
 
-    window.addEventListener('resize', schedule);
-    window.addEventListener('scroll', schedule, true);
-
-    const observer = new ResizeObserver(schedule);
-
-    observer.observe(document.body);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener('resize', schedule);
-      window.removeEventListener('scroll', schedule, true);
-      observer.disconnect();
-    };
+    return () => cancelAnimationFrame(frame);
   }, [sync]);
 
-  return { rect, position };
+  return { rect, position, hasAnchor };
 };
