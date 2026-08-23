@@ -3,32 +3,19 @@ import {
   disposableCredentials,
   registerDisposableAccount,
 } from './support/accounts';
-import { waitForVerificationCode } from './support/mailbox';
-import { openSettingsMenu } from './support/app';
+import {
+  countVerificationCodes,
+  waitForVerificationCode,
+  waitForVerificationCodeAfter,
+} from './support/mailbox';
+import {
+  ONBOARDING as onboarding,
+  fillCode,
+  onboardScreen,
+  openSettingsMenu,
+  startEmailOnboarding,
+} from './support/app';
 import { E2E_OWNER } from './support/constants';
-
-const onboarding = {
-  continueWithEmail: 'Continue with email',
-  submitEmail: 'Continue',
-  submitCode: 'Verify code',
-  submitPassword: 'Set password',
-  finish: "Let's go",
-  toFeed: 'To feed',
-  logIn: 'Log in',
-} as const;
-
-const fillCode = async (
-  page: import('@playwright/test').Page,
-  code: string,
-) => {
-  const cells = page.locator('input[inputmode="numeric"]');
-
-  await expect(cells).toHaveCount(6);
-
-  for (const [index, digit] of [...code].entries()) {
-    await cells.nth(index).fill(digit);
-  }
-};
 
 test.describe('anonymous visitors', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
@@ -39,18 +26,7 @@ test.describe('anonymous visitors', () => {
     const { email, username } = disposableCredentials('signup');
 
     await page.goto('/onboard');
-
-    await page
-      .getByRole('button', { name: onboarding.continueWithEmail })
-      .click();
-
-    const emailField = page.locator('#email');
-
-    await expect(emailField).toBeVisible();
-    await emailField.fill(email);
-    await page
-      .getByRole('button', { name: onboarding.submitEmail, exact: true })
-      .click();
+    await startEmailOnboarding(page, email);
 
     await expect(
       page.getByRole('heading', { name: 'Check your email' }),
@@ -98,14 +74,7 @@ test.describe('anonymous visitors', () => {
     await account.api.dispose();
 
     await page.goto('/onboard');
-    await page
-      .getByRole('button', { name: onboarding.continueWithEmail })
-      .click();
-
-    await page.locator('#email').fill(account.email);
-    await page
-      .getByRole('button', { name: onboarding.submitEmail, exact: true })
-      .click();
+    await startEmailOnboarding(page, account.email);
 
     await expect(
       page.getByRole('heading', { name: 'Enter your password' }),
@@ -145,6 +114,104 @@ test.describe('anonymous visitors', () => {
   }) => {
     await page.goto('/onboard');
     await expectNoA11yViolations(page);
+  });
+});
+
+test.describe('password recovery', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  test('recovers a forgotten password and trades it for a working session', async ({
+    page,
+    baseURL,
+  }) => {
+    test.slow();
+
+    const account = await registerDisposableAccount(baseURL!, 'recover');
+
+    await account.api.dispose();
+
+    const newPassword = 'RecoveredPass456!';
+    const mailedBefore = await countVerificationCodes(account.email);
+
+    await page.goto('/onboard');
+    await startEmailOnboarding(page, account.email);
+
+    await expect(
+      page.getByRole('heading', { name: 'Enter your password' }),
+    ).toBeVisible();
+
+    await page.getByRole('button', { name: onboarding.forgotPassword }).click();
+
+    await expect(
+      page.getByRole('heading', { name: 'Check your email' }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(`Enter the 6-digit code we sent to ${account.email}`),
+    ).toBeVisible();
+
+    const code = await waitForVerificationCodeAfter(
+      account.email,
+      mailedBefore,
+    );
+
+    await fillCode(page, code === '000000' ? '111111' : '000000');
+    await page.getByRole('button', { name: onboarding.submitCode }).click();
+
+    await expect(page.getByText('Invalid code')).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Create new password' }),
+    ).toHaveCount(0);
+
+    await fillCode(page, code);
+    await page.getByRole('button', { name: onboarding.submitCode }).click();
+
+    const reset = onboardScreen(page, 'Create new password');
+
+    await expect(reset).toBeVisible();
+    await reset.locator('#password').fill(newPassword);
+    await reset.locator('#password').blur();
+    await reset.locator('#confirm-password').fill(newPassword);
+    await reset.locator('#confirm-password').blur();
+    await page.getByRole('button', { name: onboarding.updatePassword }).click();
+
+    await expect(page.getByRole('heading', { name: 'Congrats' })).toBeVisible();
+    await expect(page.getByText('Password updated successfully')).toBeVisible();
+
+    await page.getByRole('link', { name: onboarding.toFeed }).click();
+
+    await expect(page).toHaveURL(/\/feed$/);
+    await expect(
+      page.getByRole('button', { name: /^Notifications/ }),
+    ).toBeVisible();
+
+    await page.reload();
+    await expect(page).toHaveURL(/\/feed$/);
+
+    const settings = await openSettingsMenu(page);
+
+    await settings.getByRole('button', { name: 'Log out' }).click();
+    await expect(page).toHaveURL(/\/onboard/);
+
+    await startEmailOnboarding(page, account.email);
+
+    await expect(
+      page.getByRole('heading', { name: 'Enter your password' }),
+    ).toBeVisible();
+
+    await page.locator('#password').fill(account.password);
+    await page
+      .getByRole('button', { name: onboarding.logIn, exact: true })
+      .click();
+
+    await expect(page.getByText('Login failed')).toBeVisible();
+    await expect(page).toHaveURL(/\/onboard/);
+
+    await page.locator('#password').fill(newPassword);
+    await page
+      .getByRole('button', { name: onboarding.logIn, exact: true })
+      .click();
+
+    await expect(page).toHaveURL(/\/feed$/);
   });
 });
 

@@ -1,38 +1,11 @@
-import type { Browser, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { expect, test, expectNoA11yViolations } from './support/test';
 import {
   registerDisposableAccount,
-  type DisposableAccount,
+  signInDisposableAccount as signIn,
 } from './support/accounts';
 import { befriend, createPlan } from './support/fixtures';
 import { eventCard, fillStable, movePointerAway } from './support/app';
-
-type SignedIn = {
-  account: DisposableAccount;
-  page: Page;
-  close: () => Promise<void>;
-};
-
-const signIn = async (
-  browser: Browser,
-  baseURL: string,
-  slug: string,
-): Promise<SignedIn> => {
-  const account = await registerDisposableAccount(baseURL, slug);
-  const context = await browser.newContext({
-    storageState: account.storageState,
-  });
-  const page = await context.newPage();
-
-  return {
-    account,
-    page,
-    close: async () => {
-      await context.close();
-      await account.api.dispose();
-    },
-  };
-};
 
 const friendsCard = (page: Page, title: string) =>
   page.locator('section').filter({

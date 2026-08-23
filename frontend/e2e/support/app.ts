@@ -5,6 +5,46 @@ export const eventCard = (page: Page, title: string): Locator =>
     has: page.getByRole('heading', { name: title, exact: true }),
   });
 
+export const ONBOARDING = {
+  continueWithEmail: 'Continue with email',
+  submitEmail: 'Continue',
+  submitCode: 'Verify code',
+  submitPassword: 'Set password',
+  updatePassword: 'Update password',
+  forgotPassword: 'Forgot Password?',
+  finish: "Let's go",
+  toFeed: 'To feed',
+  logIn: 'Log in',
+  logInAndJoin: 'Log in & join',
+} as const;
+
+export const onboardScreen = (page: Page, heading: string): Locator =>
+  page.getByRole('heading', { name: heading, exact: true }).locator('..');
+
+export const fillCode = async (page: Page, code: string) => {
+  const cells = page.locator('input[inputmode="numeric"]');
+
+  await expect(cells).toHaveCount(6);
+
+  for (const [index, digit] of [...code].entries()) {
+    await cells.nth(index).fill(digit);
+  }
+};
+
+export const startEmailOnboarding = async (page: Page, email: string) => {
+  await page
+    .getByRole('button', { name: ONBOARDING.continueWithEmail })
+    .click();
+
+  const emailField = page.locator('#email');
+
+  await expect(emailField).toBeVisible();
+  await emailField.fill(email);
+  await page
+    .getByRole('button', { name: ONBOARDING.submitEmail, exact: true })
+    .click();
+};
+
 export const openSettingsMenu = async (page: Page) => {
   await page.getByRole('button', { name: /^Notifications/ }).waitFor();
   await page.locator('header').getByRole('button').last().click();

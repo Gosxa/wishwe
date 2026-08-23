@@ -4,6 +4,8 @@ import {
   expect,
   request as playwrightRequest,
   type APIRequestContext,
+  type Browser,
+  type Page,
 } from '@playwright/test';
 import { DISPOSABLE_EMAIL_DOMAIN, DISPOSABLE_PASSWORD } from './constants';
 import { waitForVerificationCode } from './mailbox';
@@ -106,6 +108,33 @@ export const registerDisposableAccount = async (
     profileId: profile.id,
     api,
     storageState,
+  };
+};
+
+export type SignedInAccount = {
+  account: DisposableAccount;
+  page: Page;
+  close: () => Promise<void>;
+};
+
+export const signInDisposableAccount = async (
+  browser: Browser,
+  baseURL: string,
+  slug: string,
+): Promise<SignedInAccount> => {
+  const account = await registerDisposableAccount(baseURL, slug);
+  const context = await browser.newContext({
+    storageState: account.storageState,
+  });
+  const page = await context.newPage();
+
+  return {
+    account,
+    page,
+    close: async () => {
+      await context.close();
+      await account.api.dispose();
+    },
   };
 };
 

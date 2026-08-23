@@ -99,6 +99,18 @@ export const createWish = async (
   return { id: String(event.id), title: options.title };
 };
 
+export const createInvite = async (api: APIRequestContext) => {
+  const res = await api.post('/next_api/user/invite');
+
+  expect(res.status(), 'failed to create an invite link').toBe(201);
+
+  const { token } = (await res.json()) as { token: string };
+
+  expect(token, 'the invite response should carry a token').toBeTruthy();
+
+  return token;
+};
+
 type FriendRequest = { id: number; sender: string; receiver: string };
 
 export const befriend = async (

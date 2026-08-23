@@ -42,20 +42,21 @@ const readMailbox = async () => {
   return files.sort((a, b) => a.mtimeMs - b.mtimeMs);
 };
 
-const findVerificationCode = async (email: string) => {
+const verificationCodesFor = async (email: string) => {
   const files = await readMailbox();
+  const codes: string[] = [];
 
-  for (const file of [...files].reverse()) {
-    for (const message of messagesIn(file.raw).reverse()) {
+  for (const file of files) {
+    for (const message of messagesIn(file.raw)) {
       if (!isAddressedTo(message, email)) continue;
 
       const code = codeIn(message);
 
-      if (code) return code;
+      if (code) codes.push(code);
     }
   }
 
-  return null;
+  return codes;
 };
 
 export const waitForVerificationCode = async (email: string) => {
@@ -64,11 +65,40 @@ export const waitForVerificationCode = async (email: string) => {
   await expect
     .poll(
       async () => {
-        code = await findVerificationCode(email);
+        const codes = await verificationCodesFor(email);
+
+        code = codes.at(-1) ?? null;
 
         return code;
       },
       { message: `no verification email arrived for ${email}` },
+    )
+    .not.toBeNull();
+
+  return code as unknown as string;
+};
+
+export const countVerificationCodes = async (email: string) =>
+  (await verificationCodesFor(email)).length;
+
+export const waitForVerificationCodeAfter = async (
+  email: string,
+  seen: number,
+) => {
+  let code: string | null = null;
+
+  await expect
+    .poll(
+      async () => {
+        const codes = await verificationCodesFor(email);
+
+        code = codes.length > seen ? (codes.at(-1) ?? null) : null;
+
+        return code;
+      },
+      {
+        message: `no verification email followed the first ${seen} sent to ${email}`,
+      },
     )
     .not.toBeNull();
 
