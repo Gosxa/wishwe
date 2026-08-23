@@ -4,7 +4,6 @@ import {
   registerDisposableAccount,
   type DisposableAccount,
 } from './support/accounts';
-import { befriend, createPlan } from './support/fixtures';
 
 type Newcomer = {
   account: DisposableAccount;
@@ -16,20 +15,10 @@ const newcomer = async (
   browser: Browser,
   baseURL: string,
   slug: string,
-  options: { withFeedContent?: boolean } = {},
 ): Promise<Newcomer> => {
   const account = await registerDisposableAccount(baseURL, slug, {
     skipFeedTour: false,
   });
-
-  if (options.withFeedContent) {
-    const friend = await registerDisposableAccount(baseURL, `${slug}pal`);
-
-    await befriend(friend, account);
-    await createPlan(friend.api, { title: `${slug} tour subject` });
-    await friend.api.dispose();
-  }
-
   const context = await browser.newContext({
     storageState: account.storageState,
   });
@@ -44,12 +33,46 @@ const newcomer = async (
   };
 };
 
-const welcomeCard = (page: Page) =>
+const tourCard = (page: Page, heading: string | RegExp) =>
   page.getByRole('dialog').filter({
-    has: page.getByRole('heading', { name: /^Welcome, / }),
+    has: page.getByRole('heading', { name: heading }),
   });
 
-test.describe('feed product tour', () => {
+const welcomeCard = (page: Page) => tourCard(page, /^Welcome, /);
+
+const createButton = (page: Page) => page.locator('[data-tour="create-event"]');
+
+const runOnboarding = async (page: Page) => {
+  await page.goto('/feed');
+  await expect(welcomeCard(page)).toBeVisible();
+  await page.getByRole('button', { name: 'Show me how' }).click();
+
+  await expect(tourCard(page, 'Great! Tap the +')).toBeVisible();
+  await createButton(page).click();
+
+  await expect(tourCard(page, 'Plan or wish? 🤔')).toBeVisible();
+  await page.getByRole('button', { name: 'Wish', exact: true }).click();
+
+  const categoryStep = tourCard(page, /Let’s keep it simple/);
+
+  await expect(categoryStep).toBeVisible();
+  await page.locator('[data-tour^="category-"][aria-pressed]').first().click();
+
+  for (const heading of [
+    'Name it 📝',
+    'Roughly where? 📍',
+    'Add a little colour 💬',
+    'When, roughly? ⏰',
+  ]) {
+    await expect(tourCard(page, heading)).toBeVisible();
+    await page.getByRole('button', { name: 'Use this' }).click();
+  }
+
+  await expect(tourCard(page, 'That’s everything 🎉')).toBeVisible();
+  await page.getByRole('button', { name: 'Share', exact: true }).click();
+};
+
+test.describe('feed onboarding tour', () => {
   test('greets a brand-new account on its first visit to the feed', async ({
     browser,
     baseURL,
@@ -61,7 +84,7 @@ test.describe('feed product tour', () => {
 
       await expect(welcomeCard(visitor.page)).toBeVisible();
       await expect(
-        visitor.page.getByRole('button', { name: 'Show me around' }),
+        visitor.page.getByRole('button', { name: 'Show me how' }),
       ).toBeVisible();
       await expect(
         visitor.page.getByRole('button', { name: 'Skip for now' }),
@@ -93,60 +116,119 @@ test.describe('feed product tour', () => {
     }
   });
 
-  test('steps forward and back with the arrow keys', async ({
+  test('waits for the user instead of offering a next button', async ({
     browser,
     baseURL,
   }) => {
-    const visitor = await newcomer(browser, baseURL!, 'tourkeys', {
-      withFeedContent: true,
-    });
+    const visitor = await newcomer(browser, baseURL!, 'tourwait');
     const { page } = visitor;
 
     try {
       await page.goto('/feed');
-      await expect(welcomeCard(page)).toBeVisible();
+      await page.getByRole('button', { name: 'Show me how' }).click();
 
-      await page.keyboard.press('ArrowRight');
+      const createStep = tourCard(page, 'Great! Tap the +');
 
-      const counter = page.getByText(/^\d+ of \d+$/);
+      await expect(createStep).toBeVisible();
+      await expect(createStep.getByText('Your turn')).toBeVisible();
+      await expect(
+        createStep.getByRole('button', { name: 'Next' }),
+      ).toHaveCount(0);
 
-      await expect(counter).toHaveText('1 of 7');
-
-      await page.keyboard.press('ArrowRight');
-      await expect(counter).toHaveText('2 of 7');
-
-      await page.keyboard.press('ArrowLeft');
-      await expect(counter).toHaveText('1 of 7');
-
-      await page.keyboard.press('ArrowLeft');
-      await expect(welcomeCard(page)).toBeVisible();
+      await createButton(page).click();
+      await expect(tourCard(page, 'Plan or wish? 🤔')).toBeVisible();
     } finally {
       await visitor.close();
     }
   });
 
-  test('keeps keyboard focus inside the tour card', async ({
+  test('walks back a step when the create modal is closed', async ({
     browser,
     baseURL,
   }) => {
-    const visitor = await newcomer(browser, baseURL!, 'tourtrap');
+    const visitor = await newcomer(browser, baseURL!, 'tourback');
     const { page } = visitor;
 
     try {
       await page.goto('/feed');
+      await page.getByRole('button', { name: 'Show me how' }).click();
+      await createButton(page).click();
 
-      const card = welcomeCard(page);
+      await expect(tourCard(page, 'Plan or wish? 🤔')).toBeVisible();
 
-      await expect(card).toBeVisible();
+      await page.getByRole('button', { name: 'Close', exact: true }).click();
 
-      for (let press = 0; press < 6; press += 1) {
-        await page.keyboard.press('Tab');
-        await expect
-          .poll(() =>
-            card.evaluate(node => node.contains(document.activeElement)),
-          )
-          .toBe(true);
-      }
+      await expect(tourCard(page, 'Great! Tap the +')).toBeVisible();
+    } finally {
+      await visitor.close();
+    }
+  });
+
+  test('keeps next locked until the field it points at has content', async ({
+    browser,
+    baseURL,
+  }) => {
+    const visitor = await newcomer(browser, baseURL!, 'tourlock');
+    const { page } = visitor;
+
+    try {
+      await page.goto('/feed');
+      await page.getByRole('button', { name: 'Show me how' }).click();
+      await createButton(page).click();
+      await page.getByRole('button', { name: 'Wish', exact: true }).click();
+      await page
+        .locator('[data-tour^="category-"][aria-pressed]')
+        .first()
+        .click();
+
+      const titleStep = tourCard(page, 'Name it 📝');
+
+      await expect(titleStep).toBeVisible();
+      await expect(
+        titleStep.getByRole('button', { name: 'Next' }),
+      ).toBeDisabled();
+
+      await page.locator('#eventTitle').fill('Coffee?');
+
+      await expect(
+        titleStep.getByRole('button', { name: 'Next' }),
+      ).toBeEnabled();
+    } finally {
+      await visitor.close();
+    }
+  });
+
+  test('quick-fills the form and ends on the share sheet', async ({
+    browser,
+    baseURL,
+  }) => {
+    const visitor = await newcomer(browser, baseURL!, 'tourfill');
+    const { page } = visitor;
+
+    try {
+      await runOnboarding(page);
+
+      await expect(tourCard(page, /Now bring your people/)).toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Copy link' }),
+      ).toBeVisible();
+
+      await page.getByRole('button', { name: 'Got it' }).click();
+
+      await expect(tourCard(page, 'You’re all set! ✅')).toBeVisible();
+
+      await page.getByRole('button', { name: 'Finish' }).click();
+
+      await expect(tourCard(page, 'You’re all set! ✅')).toBeHidden();
+      await expect(
+        page.getByRole('heading', { name: 'Share this wish' }),
+      ).toBeVisible();
+
+      await page.getByRole('button', { name: 'Close share dialog' }).click();
+      await page.reload();
+      await page.getByRole('button', { name: /^Notifications/ }).waitFor();
+
+      await expect(welcomeCard(page)).toHaveCount(0);
     } finally {
       await visitor.close();
     }
@@ -186,38 +268,6 @@ test.describe('feed product tour', () => {
       } finally {
         await clean.close();
       }
-    } finally {
-      await visitor.close();
-    }
-  });
-
-  test('runs to the end and closes on the final card', async ({
-    browser,
-    baseURL,
-  }) => {
-    const visitor = await newcomer(browser, baseURL!, 'tourend', {
-      withFeedContent: true,
-    });
-    const { page } = visitor;
-
-    try {
-      await page.goto('/feed');
-      await expect(welcomeCard(page)).toBeVisible();
-
-      await page.getByRole('button', { name: 'Show me around' }).click();
-
-      for (let step = 0; step < 7; step += 1) {
-        await page.getByRole('button', { name: 'Next' }).click();
-      }
-
-      await expect(
-        page.getByRole('heading', { name: 'That’s the tour' }),
-      ).toBeVisible();
-
-      await page.getByRole('button', { name: 'Got it' }).click();
-      await expect(
-        page.getByRole('heading', { name: 'That’s the tour' }),
-      ).toBeHidden();
     } finally {
       await visitor.close();
     }
