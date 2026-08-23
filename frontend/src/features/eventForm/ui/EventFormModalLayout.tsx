@@ -65,6 +65,7 @@ export const EventFormModalLayout = ({
 
           <button
             type="button"
+            data-tour="event-submit"
             className={s.submit}
             onClick={onSubmit}
             disabled={submitDisabled}

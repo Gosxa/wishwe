@@ -18,6 +18,7 @@ type Props = {
   isSuccess?: boolean;
   maxLength?: number;
   showCounter?: boolean;
+  tourId?: string;
 };
 
 export const TextInput = ({
@@ -34,12 +35,13 @@ export const TextInput = ({
   isSuccess = false,
   maxLength,
   showCounter = false,
+  tourId,
 }: Props) => {
   const helperContent = error ?? helperText;
   const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
 
   return (
-    <div className={s.wrapper}>
+    <div className={s.wrapper} data-tour={tourId}>
       {(label || required) && (
         <label htmlFor={id}>
           {label}

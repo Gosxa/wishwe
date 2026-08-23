@@ -5,7 +5,10 @@ import clsx from 'clsx';
 import { Asterisk, ChevronLeft, ChevronRight } from '@shared/ui/icons';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import type { Category } from '@/shared/client_api/event';
-import { formatCategoryDisplayName } from '@/shared/lib/formatCategoryName';
+import {
+  categoryTourId,
+  formatCategoryDisplayName,
+} from '@/shared/lib/formatCategoryName';
 import s from './categoryPicker.module.scss';
 
 type Props = {
@@ -83,11 +86,13 @@ export const CategoryPicker = ({
             <ChevronLeft />
           </button>
         )}
-        <div ref={chipsRef} className={s.chips}>
+        <div ref={chipsRef} className={s.chips} data-tour="category-picker">
           {categories.map(category => (
             <button
               key={category.id}
               type="button"
+              data-tour={categoryTourId(category.name)}
+              aria-pressed={selected === category.id}
               className={clsx(s.chip, selected === category.id && s.selected)}
               onClick={() =>
                 onChange(selected === category.id ? null : category.id)

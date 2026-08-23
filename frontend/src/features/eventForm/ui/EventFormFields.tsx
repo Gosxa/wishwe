@@ -38,6 +38,7 @@ export const EventFormFields = ({ mode, form }: Props) => {
 
       <TextInput
         id="eventTitle"
+        tourId="field-title"
         label={isPlan ? "What's the plan?" : "What's your wish?"}
         placeholder={content.titlePlaceholder[eventType]}
         required
@@ -51,6 +52,7 @@ export const EventFormFields = ({ mode, form }: Props) => {
 
       <TextInput
         id="eventLocation"
+        tourId="field-location"
         label="Where?"
         placeholder={content.locationPlaceholder[eventType]}
         required
@@ -61,6 +63,7 @@ export const EventFormFields = ({ mode, form }: Props) => {
 
       <TextArea
         id="eventDescription"
+        tourId="field-description"
         label="Description"
         placeholder={content.descriptionPlaceholder[eventType]}
         value={descriptionInput.value}

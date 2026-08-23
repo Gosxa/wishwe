@@ -1,11 +1,11 @@
 'use client';
 
 import { createEvent, CreateEventError } from '@/shared/client_api/event';
-import type { BackendEventType } from '@/shared/client_api/event';
+import type { BackendEvent, BackendEventType } from '@/shared/client_api/event';
 import { useEventForm } from '@/features/eventForm';
 
 export const useCreateEvent = (
-  onCreated: () => void,
+  onCreated: (event: BackendEvent) => void,
   defaultType: BackendEventType = 'plan',
 ) =>
   useEventForm({
@@ -29,5 +29,5 @@ export const useCreateEvent = (
     submitEvent: createEvent,
     submitErrorBody: error =>
       error instanceof CreateEventError ? error.body : {},
-    onSuccess: onCreated,
+    onSuccess: created => onCreated(created as BackendEvent),
   });

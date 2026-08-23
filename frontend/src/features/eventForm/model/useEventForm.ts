@@ -39,7 +39,7 @@ type Options = {
     payload: FormData | Record<string, unknown>,
   ) => Promise<unknown>;
   submitErrorBody: (error: unknown) => Record<string, unknown>;
-  onSuccess: () => void;
+  onSuccess: (created: unknown) => void;
 };
 
 export const useEventForm = ({
@@ -201,8 +201,9 @@ export const useEventForm = ({
       const fields = buildEventFields(values, mode);
       const payload = buildEventPayload(fields, coverFile);
 
-      await submitEvent(values.type, payload);
-      onSuccess();
+      const created = await submitEvent(values.type, payload);
+
+      onSuccess(created);
     } catch (error) {
       setErrors(mapEventFormErrors(submitErrorBody(error)));
     } finally {

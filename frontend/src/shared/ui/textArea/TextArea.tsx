@@ -17,6 +17,7 @@ type Props = {
   isSuccess?: boolean;
   maxLength?: number;
   showCounter?: boolean;
+  tourId?: string;
   rows?: number;
 };
 
@@ -33,13 +34,14 @@ export const TextArea = ({
   isSuccess = false,
   maxLength,
   showCounter = false,
+  tourId,
   rows = 3,
 }: Props) => {
   const helperContent = error ?? helperText;
   const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
 
   return (
-    <div className={s.wrapper}>
+    <div className={s.wrapper} data-tour={tourId}>
       {(label || required) && (
         <label htmlFor={id}>
           {label}

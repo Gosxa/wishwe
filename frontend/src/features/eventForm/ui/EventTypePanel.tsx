@@ -20,6 +20,7 @@ export const EventTypePanel = ({ mode, form }: Props) => {
             <>
               <button
                 type="button"
+                data-tour="event-type-plan"
                 className={clsx(
                   s.typePill,
                   s.typePillEditable,
@@ -32,6 +33,7 @@ export const EventTypePanel = ({ mode, form }: Props) => {
               </button>
               <button
                 type="button"
+                data-tour="event-type-wish"
                 className={clsx(
                   s.typePill,
                   s.typePillEditable,

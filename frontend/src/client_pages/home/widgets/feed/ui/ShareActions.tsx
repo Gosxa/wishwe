@@ -68,7 +68,7 @@ export const ShareActions = ({
 
   if (!imageClipboard) {
     return (
-      <div className={s.fallbackActions}>
+      <div className={s.fallbackActions} data-tour="share-actions">
         <div className={s.actions}>
           <CopyLinkButton feedback={feedback} fallback onClick={onCopyLink} />
           {activeImage && activeUrl ? (
@@ -105,7 +105,7 @@ export const ShareActions = ({
   }
 
   return (
-    <div className={s.actions}>
+    <div className={s.actions} data-tour="share-actions">
       <CopyLinkButton feedback={feedback} onClick={onCopyLink} />
       <button
         type="button"
