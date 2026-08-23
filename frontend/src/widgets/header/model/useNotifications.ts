@@ -27,6 +27,12 @@ const latestNotifications = (notifications: NotificationItem[]) =>
     )
     .slice(0, MAX_NOTIFICATIONS);
 
+const createTimeout = (callback: () => void, delay: number) => {
+  const timer = setTimeout(callback, delay);
+
+  return () => clearTimeout(timer);
+};
+
 export const useNotifications = (isOpen: boolean) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
@@ -44,7 +50,7 @@ export const useNotifications = (isOpen: boolean) => {
   }, [isOpen]);
 
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let cancelTimer: (() => void) | null = null;
     let controller: AbortController | null = null;
     let disposed = false;
     let inFlight = false;
@@ -56,15 +62,13 @@ export const useNotifications = (isOpen: boolean) => {
       document.visibilityState === 'visible' && navigator.onLine;
 
     const clearTimer = () => {
-      if (timer !== undefined) {
-        clearTimeout(timer);
-        timer = undefined;
-      }
+      cancelTimer?.();
+      cancelTimer = null;
     };
 
     const schedule = (delay: number) => {
       clearTimer();
-      timer = setTimeout(() => {
+      cancelTimer = createTimeout(() => {
         void poll();
       }, delay);
     };
@@ -177,7 +181,8 @@ export const useNotifications = (isOpen: boolean) => {
 
     return () => {
       disposed = true;
-      clearTimer();
+      cancelTimer?.();
+      cancelTimer = null;
       controller?.abort();
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', refreshImmediately);

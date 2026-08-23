@@ -115,8 +115,8 @@ export const ParticipantsModal = ({
           <p className={s.status}>No one has joined yet.</p>
         ) : (
           <ul className={s.list}>
-            {participants.map((participant, index) => (
-              <li key={index} className={s.row}>
+            {participants.map(participant => (
+              <li key={participant.username} className={s.row}>
                 <span className={s.avatar}>
                   {participant.avatar ? (
                     // eslint-disable-next-line @next/next/no-img-element

@@ -48,12 +48,21 @@ const inputParams = {
   maxLength: 1,
 } as const;
 
+const cellKeys = [
+  'verification-code-1',
+  'verification-code-2',
+  'verification-code-3',
+  'verification-code-4',
+  'verification-code-5',
+  'verification-code-6',
+] as const;
+
 export const VerifyEmailContent = ({ cells, submit, back, resend }: Props) => (
   <div className={s.wrapper}>
     <div className={s.cells}>
       {cells.values.map((val, i) => (
         <input
-          key={i}
+          key={cellKeys[i]}
           ref={el => {
             // eslint-disable-next-line no-param-reassign
             cells.inputRefs.current[i] = el;

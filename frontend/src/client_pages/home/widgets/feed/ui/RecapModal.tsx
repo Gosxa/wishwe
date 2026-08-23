@@ -89,9 +89,9 @@ export const RecapModal = ({ event, onClose }: Props) => {
                 {shownParticipants.length > 0 ? (
                   <div className={s.attendees}>
                     <div className={s.avatars}>
-                      {shownParticipants.map((participant, index) => (
+                      {shownParticipants.map(participant => (
                         <ProfileLink
-                          key={index}
+                          key={participant.username}
                           username={participant.username}
                           className={s.stackAvatar}
                         >

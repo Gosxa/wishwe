@@ -157,4 +157,20 @@ describe('UserProfilePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Archive' }));
     expect(mocks.setTab).toHaveBeenCalledWith('archive');
   });
+
+  it('updates friendship status and feed when profile prop changes', () => {
+    mocks.events = [event];
+    const { rerender } = render(<UserProfilePage profile={profile()} />);
+
+    expect(
+      screen.getByRole('heading', { name: 'Friends-only profile' }),
+    ).toBeTruthy();
+
+    rerender(
+      <UserProfilePage profile={profile({ friendship_status: 'friends' })} />,
+    );
+
+    expect(screen.queryByText('Friends-only profile')).toBeNull();
+    expect(screen.getByRole('article').textContent).toBe('Board games');
+  });
 });

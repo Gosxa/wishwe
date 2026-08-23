@@ -168,8 +168,11 @@ export const EventDetailsModal = ({
                 {count > 0 ? (
                   <div className={s.attendees}>
                     <div className={s.avatars}>
-                      {shownParticipants.map((participant, index) => (
-                        <span key={index} className={s.stackAvatar}>
+                      {shownParticipants.map(participant => (
+                        <span
+                          key={participant.username}
+                          className={s.stackAvatar}
+                        >
                           {participant.avatar ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img

@@ -19,16 +19,17 @@ type Props = {
 export default function UserProfilePage({ profile }: Props) {
   return (
     <Suspense fallback={null}>
-      <UserProfilePageContent profile={profile} />
+      <UserProfilePageContent key={profile.user_id} profile={profile} />
     </Suspense>
   );
 }
 
 function UserProfilePageContent({ profile }: Props) {
   const search = useProfileSearch();
-  const [friendshipStatus, setFriendshipStatus] = useState<FriendshipStatus>(
-    profile.friendship_status,
+  const [overrideStatus, setOverrideStatus] = useState<FriendshipStatus | null>(
+    null,
   );
+  const friendshipStatus = overrideStatus ?? profile.friendship_status;
 
   return (
     <div className={s.shell}>
@@ -39,7 +40,7 @@ function UserProfilePageContent({ profile }: Props) {
           <UserProfileHeader
             profile={profile}
             friendshipStatus={friendshipStatus}
-            onFriendshipStatusChange={setFriendshipStatus}
+            onFriendshipStatusChange={setOverrideStatus}
           />
           <UserProfileFeed
             profile={profile}

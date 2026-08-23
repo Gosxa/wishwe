@@ -23,8 +23,7 @@ type Props = {
 };
 
 export default async function Page({ params }: Props) {
-  const { token } = await params;
-  const user = await authUser();
+  const [{ token }, user] = await Promise.all([params, authUser()]);
   const returnPath = `/share/${encodeURIComponent(token)}`;
   const loginHref = `/onboard?${NEXT_PARAM}=${encodeURIComponent(returnPath)}`;
   const shared = await getSharedEvent(token, {
