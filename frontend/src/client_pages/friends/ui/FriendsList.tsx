@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import Image from 'next/image';
 import { Spinner } from '@/shared';
 import { UserX } from '@shared/ui/icons';
 import { Card } from './Card';
@@ -40,8 +41,16 @@ export const FriendsList = ({ friends, query, isLoading, onRemove }: Props) => {
           Your friend list is currently empty. Share your profile link or search
           for people you know to get started.
         </p>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/friends-empty.png" alt="" className={s.illustration} />
+        <Image
+          src="/friends-empty.png"
+          alt=""
+          aria-hidden
+          className={s.illustration}
+          width={376}
+          height={170}
+          loading="eager"
+          sizes="(max-width: 440px) 100vw, 376px"
+        />
       </div>
     );
   } else if (filtered.length === 0) {
