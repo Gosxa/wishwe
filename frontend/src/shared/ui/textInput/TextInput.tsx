@@ -1,7 +1,11 @@
+'use client';
+
 import clsx from 'clsx';
 import { type ChangeEvent } from 'react';
+import { useQuickFillWords } from '@/shared/store/useQuickFillStore';
 import { Asterisk } from '../icons';
 import { HelperText } from '../helperText/HelperText';
+import { QuickFillOverlay } from '../quickFillOverlay/QuickFillOverlay';
 import s from './textInput.module.scss';
 
 type Props = {
@@ -39,6 +43,7 @@ export const TextInput = ({
 }: Props) => {
   const helperContent = error ?? helperText;
   const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
+  const quickFillWords = useQuickFillWords(tourId);
 
   return (
     <div className={s.wrapper} data-tour={tourId}>
@@ -62,8 +67,15 @@ export const TextInput = ({
             s.input,
             error && s.inputError,
             isSuccess && s.inputSuccess,
+            quickFillWords && s.inputQuickFilling,
           )}
         />
+        {quickFillWords && (
+          <QuickFillOverlay
+            words={quickFillWords}
+            className={s.quickFillOverlay}
+          />
+        )}
         {helperContent && <HelperText text={helperContent} type={helperType} />}
         {showCounter && maxLength != null && (
           <span
