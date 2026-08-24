@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
@@ -60,8 +60,20 @@ export const ProductTour = ({
   const anchoredSteps = steps.filter(item => item.anchor);
   const anchoredNumber = step?.anchor ? anchoredSteps.indexOf(step) + 1 : 0;
 
-  const { rect, position, hasAnchor } = useTourLayout(step, cardRef);
-  const isSettled = useAnchorSettled(step, hasAnchor);
+  const { rect, position, hasAnchor, isSteady } = useTourLayout(step, cardRef);
+  const isSettled = useAnchorSettled(step, hasAnchor, isSteady);
+  const [placedStepId, setPlacedStepId] = useState<string | null>(null);
+
+  const stepId = step?.id ?? null;
+  const canTravel = isSettled && placedStepId === stepId;
+
+  useEffect(() => {
+    if (!isSettled || placedStepId === stepId) return;
+
+    const frame = requestAnimationFrame(() => setPlacedStepId(stepId));
+
+    return () => cancelAnimationFrame(frame);
+  }, [isSettled, placedStepId, stepId]);
 
   const end = useCallback(
     (reason: TourEndReason) => {
@@ -99,14 +111,22 @@ export const ProductTour = ({
   return createPortal(
     <div
       {...modalTransitionProps}
-      className={clsx(s.overlay, passthrough && s.overlayPassthrough)}
+      className={clsx(
+        s.overlay,
+        passthrough && s.overlayPassthrough,
+        !canTravel && s.overlayStill,
+      )}
       role="presentation"
       onClick={passthrough ? undefined : pulseModal}
     >
       {passthrough && <TourClickShield rect={rect} onClick={pulseModal} />}
 
       <div
-        className={clsx(s.spotlight, passthrough && s.spotlightSoft)}
+        className={clsx(
+          s.spotlight,
+          passthrough && s.spotlightSoft,
+          !isSettled && s.spotlightHidden,
+        )}
         style={rectStyle(rect)}
       />
 

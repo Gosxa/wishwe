@@ -1,9 +1,17 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
 import { centerRect, findAnchors, measureAnchors, placeCard } from './geometry';
 import type { AnchorRect, CardPosition, TourStep } from './types';
+
+const STEADY_FRAMES = 2;
+
+type Measurement = {
+  stepId?: string;
+  rect: AnchorRect | null;
+  frames: number;
+};
 
 const measureCardPosition = (
   step: TourStep,
@@ -50,6 +58,17 @@ export const useTourLayout = (
   const [rect, setRect] = useState<AnchorRect | null>(null);
   const [position, setPosition] = useState<CardPosition | null>(null);
   const [hasAnchor, setHasAnchor] = useState(false);
+  const [isSteady, setIsSteady] = useState(false);
+  const [laidOutStepId, setLaidOutStepId] = useState(step?.id);
+  const measured = useRef<Measurement>({ rect: null, frames: 0 });
+
+  if (step?.id !== laidOutStepId) {
+    setLaidOutStepId(step?.id);
+    setRect(null);
+    setPosition(null);
+    setHasAnchor(false);
+    setIsSteady(false);
+  }
 
   const sync = useCallback(() => {
     if (!step) return;
@@ -61,6 +80,16 @@ export const useTourLayout = (
     const nextRect = elements.length
       ? measureAnchors(elements, step)
       : centerRect();
+
+    const previous = measured.current;
+    const held =
+      previous.stepId === step.id &&
+      previous.rect !== null &&
+      sameRect(previous.rect, nextRect);
+    const frames = held ? previous.frames + 1 : 0;
+
+    measured.current = { stepId: step.id, rect: nextRect, frames };
+    setIsSteady(frames >= STEADY_FRAMES);
 
     setRect(prev => (prev && sameRect(prev, nextRect) ? prev : nextRect));
 
@@ -88,5 +117,5 @@ export const useTourLayout = (
     return () => cancelAnimationFrame(frame);
   }, [sync]);
 
-  return { rect, position, hasAnchor };
+  return { rect, position, hasAnchor, isSteady };
 };

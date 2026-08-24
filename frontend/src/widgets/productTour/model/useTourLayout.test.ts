@@ -183,6 +183,61 @@ describe('useTourLayout', () => {
     expect(result.current.rect?.top).toBe(400);
   });
 
+  it('drops the previous anchor geometry as soon as the step changes', () => {
+    mountAnchor('first', { top: 100, left: 100, width: 200, height: 50 });
+    mountAnchor('second', { top: 400, left: 100, width: 200, height: 50 });
+
+    const { result, rerender } = renderHook(
+      ({ current }) => useTourLayout(current, { current: card }),
+      { initialProps: { current: step({ anchor: 'first', padding: 0 }) } },
+    );
+
+    flushFrames();
+    expect(result.current.rect?.top).toBe(100);
+
+    rerender({ current: step({ id: 'next', anchor: 'second', padding: 0 }) });
+
+    expect(result.current.rect).toBeNull();
+    expect(result.current.position).toBeNull();
+    expect(result.current.hasAnchor).toBe(false);
+    expect(result.current.isSteady).toBe(false);
+  });
+
+  it('reports a steady anchor only once its box stops moving', () => {
+    const anchor = mountAnchor('feed-card', {
+      top: 100,
+      left: 100,
+      width: 200,
+      height: 50,
+    });
+
+    const { result } = setup(step({ anchor: 'feed-card', padding: 0 }));
+
+    flushFrames();
+    expect(result.current.isSteady).toBe(false);
+
+    anchor.getBoundingClientRect = () => rectOf(120, 100, 200, 50);
+    flushFrames();
+    flushFrames();
+    flushFrames();
+    expect(result.current.isSteady).toBe(true);
+
+    anchor.getBoundingClientRect = () => rectOf(140, 100, 200, 50);
+    flushFrames();
+
+    expect(result.current.isSteady).toBe(false);
+  });
+
+  it('never calls a missing anchor steady', () => {
+    const { result } = setup(step({ anchor: 'not-rendered' }));
+
+    flushFrames();
+    flushFrames();
+    flushFrames();
+
+    expect(result.current.hasAnchor).toBe(false);
+  });
+
   it('tracks the anchor as it moves, without any event firing', () => {
     const anchor = mountAnchor('feed-card', {
       top: 100,

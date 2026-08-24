@@ -20,19 +20,6 @@ $ring: clr.$acc-purple;
   }
 }
 
-@keyframes tour-waiting-pulse {
-  0%,
-  100% {
-    opacity: 0.35;
-    transform: scale(0.8);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
 @keyframes tour-halo-glow {
   0%,
   100% {
@@ -75,7 +62,8 @@ $ring: clr.$acc-purple;
     left $travel $ease,
     width $travel $ease,
     height $travel $ease,
-    border-radius $travel $ease;
+    border-radius $travel $ease,
+    opacity 0.3s ease-out;
 }
 
 .halo {
@@ -97,14 +85,27 @@ $ring: clr.$acc-purple;
   box-shadow: 0 0 0 9999px rgba(clr.$ns-900, 0.34);
 }
 
-.haloHidden {
+.haloHidden,
+.spotlightHidden {
   opacity: 0;
+}
+
+.overlayStill {
+  .spotlight,
+  .halo,
+  .card {
+    transition: opacity 0.3s ease-out;
+  }
+  .spotlightHidden,
+  .haloHidden {
+    transition: none;
+  }
 }
 
 .card {
   position: fixed;
   z-index: 1;
-  width: 344px;
+  width: 360px;
   max-width: calc(100vw - 40px);
   padding: 18px 20px 20px;
   border: 1px solid clr.$prm;
@@ -311,24 +312,6 @@ $ring: clr.$acc-purple;
   }
 }
 
-.waiting {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 36px;
-  color: clr.$ns-500;
-
-  @include tp.text-caption;
-}
-
-.waitingDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: clr.$prm;
-  animation: tour-waiting-pulse 1.4s ease-in-out infinite;
-}
-
 .footer {
   display: flex;
   align-items: center;
@@ -441,13 +424,13 @@ $ring: clr.$acc-purple;
   .halo,
   .card,
   .quickFill,
-  .dot {
+  .dot,
+  .overlayStill .spotlight,
+  .overlayStill .halo,
+  .overlayStill .card,
+  .overlayStill .spotlightHidden,
+  .overlayStill .haloHidden {
     transition: none;
-  }
-
-  .waitingDot {
-    animation: none;
-    opacity: 1;
   }
 
   .halo {

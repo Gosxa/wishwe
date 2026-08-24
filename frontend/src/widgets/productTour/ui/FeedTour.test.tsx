@@ -201,14 +201,13 @@ describe('FeedTour', () => {
     expect(useUserStore.getState().user?.has_seen_feed_tour).toBe(true);
   });
 
-  it('points at the create button and waits, offering no next button', () => {
+  it('points at the create button and offers no next button', () => {
     anchor('create-event');
     startTour();
     fireEvent.click(screen.getByRole('button', { name: 'Show me how' }));
 
     expect(heading('Great! Tap the +')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Next/ })).toBeNull();
-    expect(screen.getByText('Your turn')).toBeTruthy();
   });
 
   it('walks from the opened modal to wish, then to the category', () => {

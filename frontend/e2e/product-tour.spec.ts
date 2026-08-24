@@ -116,7 +116,7 @@ test.describe('feed onboarding tour', () => {
     }
   });
 
-  test('waits for the user instead of offering a next button', async ({
+  test('offers no next button while waiting for the user', async ({
     browser,
     baseURL,
   }) => {
@@ -130,7 +130,6 @@ test.describe('feed onboarding tour', () => {
       const createStep = tourCard(page, 'Great! Tap the +');
 
       await expect(createStep).toBeVisible();
-      await expect(createStep.getByText('Your turn')).toBeVisible();
       await expect(
         createStep.getByRole('button', { name: 'Next' }),
       ).toHaveCount(0);

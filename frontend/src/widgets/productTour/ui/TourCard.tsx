@@ -93,25 +93,27 @@ export const TourCard = ({
           <QuickFill step={step} onUse={() => onQuickFill?.(step)} />
         )}
 
-        <div className={s.footer}>
-          {isAnchored ? (
-            <ProgressDots
-              steps={anchoredSteps}
-              activeIndex={anchoredNumber - 1}
-            />
-          ) : (
-            <span />
-          )}
+        {!step.awaitAction && (
+          <div className={s.footer}>
+            {isAnchored ? (
+              <ProgressDots
+                steps={anchoredSteps}
+                activeIndex={anchoredNumber - 1}
+              />
+            ) : (
+              <span />
+            )}
 
-          <CardActions
-            step={step}
-            isLast={isLast}
-            nextDisabled={nextDisabled}
-            onBack={onBack}
-            onNext={onNext}
-            onSkip={onSkip}
-          />
-        </div>
+            <CardActions
+              step={step}
+              isLast={isLast}
+              nextDisabled={nextDisabled}
+              onBack={onBack}
+              onNext={onNext}
+              onSkip={onSkip}
+            />
+          </div>
+        )}
       </div>
     </section>
   );
@@ -219,17 +221,6 @@ const CardActions = ({
   onNext,
   onSkip,
 }: CardActionsProps) => {
-  if (step.awaitAction) {
-    return (
-      <div className={s.actions}>
-        <span className={s.waiting}>
-          <span className={s.waitingDot} aria-hidden />
-          Your turn
-        </span>
-      </div>
-    );
-  }
-
   const primaryLabel = step.primaryLabel ?? (isLast ? 'Got it' : 'Next');
 
   return (

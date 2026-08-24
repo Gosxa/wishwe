@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { findAnchors } from './geometry';
 import type { TourStep } from './types';
 
-const GRACE_MS = 1200;
+const GRACE_MS = 1600;
 
 const SCROLL_INTO_VIEW: ScrollIntoViewOptions = {
   block: 'nearest',
@@ -15,6 +15,7 @@ const SCROLL_INTO_VIEW: ScrollIntoViewOptions = {
 export const useAnchorSettled = (
   step: TourStep | undefined,
   hasAnchor: boolean,
+  isSteady: boolean,
 ) => {
   const [isExpired, setIsExpired] = useState(false);
   const [timedStepId, setTimedStepId] = useState(step?.id);
@@ -36,5 +37,5 @@ export const useAnchorSettled = (
     findAnchors(step.anchor)[0]?.scrollIntoView(SCROLL_INTO_VIEW);
   }, [hasAnchor, step]);
 
-  return !step?.anchor || hasAnchor || isExpired;
+  return !step?.anchor || (hasAnchor && isSteady) || isExpired;
 };
