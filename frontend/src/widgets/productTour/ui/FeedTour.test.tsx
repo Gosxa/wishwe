@@ -22,8 +22,13 @@ import {
   type OnboardingFormBridge,
   type OnboardingStep,
 } from '@/shared/store/useOnboardingStore';
+import { useQuickFillStore } from '@/shared/store/useQuickFillStore';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { FeedTour } from './FeedTour';
+
+const TITLE_TEMPLATE = 'Catch up over coffee or matcha?';
+
+const CASCADE_MS = 495;
 
 const newcomer = {
   id: 7,
@@ -107,6 +112,7 @@ describe('FeedTour', () => {
     Element.prototype.scrollIntoView = vi.fn();
 
     useOnboardingStore.setState({ step: null, form: null, createdEvent: null });
+    useQuickFillStore.getState().stop();
     useUserStore.setState({ user: newcomer });
     anchor('feed-empty');
   });
@@ -240,17 +246,65 @@ describe('FeedTour', () => {
     ).toBe(false);
   });
 
-  it('fills the field from the template and moves on', () => {
+  it('fills the field up front, then moves on once the words land', () => {
     const fill = vi.fn();
 
     resumeAt('title', { isWish: true, selectedCategoryId: 2, fill });
 
     fireEvent.click(screen.getByRole('button', { name: /Use this/ }));
 
-    expect(fill).toHaveBeenCalledWith(
-      'title',
-      'Catch up over coffee or matcha?',
-    );
+    expect(fill).toHaveBeenCalledWith('title', TITLE_TEMPLATE);
+    expect(useQuickFillStore.getState().tourId).toBe('field-title');
+    expect(useOnboardingStore.getState().step).toBe('title');
+
+    act(() => {
+      vi.advanceTimersByTime(CASCADE_MS);
+    });
+
+    expect(useQuickFillStore.getState().tourId).toBeNull();
+    expect(useOnboardingStore.getState().step).toBe('location');
+  });
+
+  it('snaps to the end when the template is pressed again mid-cascade', () => {
+    const fill = vi.fn();
+
+    resumeAt('title', { isWish: true, selectedCategoryId: 2, fill });
+
+    const useThis = screen.getByRole('button', { name: /Use this/ });
+
+    fireEvent.click(useThis);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fireEvent.click(useThis);
+
+    expect(fill).toHaveBeenCalledTimes(1);
+    expect(useQuickFillStore.getState().tourId).toBeNull();
+    expect(useOnboardingStore.getState().step).toBe('location');
+  });
+
+  it('does not advance twice when next is pressed mid-cascade', () => {
+    resumeAt('title', {
+      isWish: true,
+      selectedCategoryId: 2,
+      values: {
+        title: 'Coffee?',
+        location: '',
+        description: '',
+        timeframe: '',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Use this/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Next/ }));
+
+    expect(useOnboardingStore.getState().step).toBe('location');
+    expect(useQuickFillStore.getState().tourId).toBeNull();
+
+    act(() => {
+      vi.advanceTimersByTime(CASCADE_MS);
+    });
+
     expect(useOnboardingStore.getState().step).toBe('location');
   });
 
