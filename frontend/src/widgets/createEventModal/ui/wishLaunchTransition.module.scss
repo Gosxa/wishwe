@@ -1,0 +1,592 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+@keyframes launch-curtain-in {
+  from {
+    opacity: 0;
+    clip-path: circle(0 at 76% 91%);
+  }
+
+  to {
+    opacity: 1;
+    clip-path: circle(150% at 76% 91%);
+  }
+}
+
+@keyframes ambient-drift {
+  to {
+    transform: rotate(1turn) scale(1.06);
+  }
+}
+
+@keyframes card-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(28px) rotate(-7deg) scale(0.88);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-2deg) scale(1);
+  }
+}
+
+@keyframes card-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+
+  50% {
+    transform: translateY(-9px) rotate(0.5deg);
+  }
+}
+
+@keyframes card-success {
+  0% {
+    transform: translateY(-4px) rotate(-1deg) scale(1);
+  }
+
+  42% {
+    transform: translateY(-15px) rotate(1deg) scale(1.045);
+  }
+
+  72% {
+    transform: translateY(2px) rotate(-0.5deg) scale(0.992);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}
+
+@keyframes orbit-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@keyframes shimmer-pass {
+  0%,
+  18% {
+    transform: translateX(-180%) skewX(-18deg);
+  }
+
+  62%,
+  100% {
+    transform: translateX(360%) skewX(-18deg);
+  }
+}
+
+@keyframes badge-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(7deg);
+  }
+
+  50% {
+    transform: translateY(-7px) rotate(12deg);
+  }
+}
+
+@keyframes copy-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progress-travel {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes stamp-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-18deg);
+  }
+
+  65% {
+    opacity: 1;
+    transform: scale(1.14) rotate(5deg);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes particle-burst {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(0) scale(0.3);
+  }
+
+  22% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(var(--burst-x), var(--burst-y)) rotate(150deg) scale(1);
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: 32px;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(clr.$acc-purple, 0.6) 0,
+      rgba(clr.$acc-purple, 0.18) 24%,
+      transparent 50%
+    ),
+    linear-gradient(145deg, rgba(clr.$ns-50, 0.98), rgba(clr.$acc-beige, 0.98));
+  backdrop-filter: blur(14px);
+  animation: launch-curtain-in 0.55s $ease both;
+  isolation: isolate;
+}
+
+.ambient {
+  position: absolute;
+  z-index: -1;
+  width: min(900px, 88vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at 22% 32%,
+      rgba(clr.$acc-yellow, 0.78) 0 7px,
+      transparent 8px
+    ),
+    radial-gradient(
+      circle at 78% 25%,
+      rgba(clr.$prm, 0.3) 0 5px,
+      transparent 6px
+    ),
+    radial-gradient(
+      circle at 84% 68%,
+      rgba(clr.$acc-purple, 0.9) 0 8px,
+      transparent 9px
+    ),
+    radial-gradient(
+      circle at 18% 74%,
+      rgba(clr.$prm, 0.2) 0 6px,
+      transparent 7px
+    );
+  opacity: 0.72;
+  animation: ambient-drift 18s linear infinite;
+}
+
+.scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 440px;
+  height: 270px;
+  max-width: 86vw;
+}
+
+.orbit {
+  position: absolute;
+  border: 1px solid rgba(clr.$prm, 0.19);
+  border-radius: 50%;
+  animation: orbit-spin 8s linear infinite;
+}
+
+.orbitOuter {
+  width: 420px;
+  height: 230px;
+}
+
+.orbitInner {
+  width: 352px;
+  height: 188px;
+  animation-direction: reverse;
+  animation-duration: 6.5s;
+}
+
+.orbitDot {
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: clr.$prm;
+  box-shadow:
+    0 0 0 6px rgba(clr.$acc-yellow, 0.72),
+    0 5px 16px rgba(clr.$ns-900, 0.18);
+}
+
+.orbitInner .orbitDot {
+  top: 12%;
+  right: auto;
+  left: 15%;
+  width: 8px;
+  height: 8px;
+  background: clr.$acc-purple;
+  box-shadow: 0 0 0 5px rgba(clr.$prm, 0.1);
+}
+
+.card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: min(330px, calc(86vw - 16px));
+  height: 188px;
+  padding: 22px 24px;
+  overflow: hidden;
+  border: 1px solid rgba(clr.$prm, 0.48);
+  border-radius: 18px;
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(clr.$acc-yellow, 0.95),
+      transparent 32%
+    ),
+    linear-gradient(145deg, clr.$acc-purple, clr.$ns-50 64%);
+  box-shadow:
+    0 26px 50px rgba(clr.$ns-900, 0.2),
+    0 2px 0 rgba(255, 255, 255, 0.72) inset;
+  animation:
+    card-arrive 0.62s $ease both,
+    card-float 2.2s ease-in-out 0.62s infinite;
+}
+
+.cardTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.typePill {
+  padding: 4px 10px;
+  border: 1px solid rgba(clr.$prm, 0.65);
+  border-radius: 999px;
+  color: clr.$prm;
+  font-family: var(--font-sk-modernist);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-transform: capitalize;
+}
+
+.brand {
+  color: clr.$prm;
+  font-family: var(--font-sk-modernist);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.cardTitle {
+  display: -webkit-box;
+  max-width: 260px;
+  margin-top: auto;
+  overflow: hidden;
+  color: clr.$ns-900;
+  font-family: var(--font-sk-modernist);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 27px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cardLine,
+.cardLineShort {
+  display: block;
+  height: 6px;
+  margin-top: 9px;
+  border-radius: 999px;
+  background: rgba(clr.$prm, 0.2);
+}
+
+.cardLine {
+  width: 156px;
+}
+
+.cardLineShort {
+  width: 96px;
+  margin-top: 6px;
+}
+
+.shimmer {
+  position: absolute;
+  inset: -40% auto -40% -30%;
+  width: 42%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.62),
+    transparent
+  );
+  animation: shimmer-pass 2.2s ease-in-out 0.4s infinite;
+}
+
+.sparkleBadge {
+  position: absolute;
+  top: 22px;
+  right: 20px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 1px solid rgba(clr.$prm, 0.38);
+  border-radius: 16px;
+  background: clr.$acc-yellow;
+  color: clr.$prm;
+  box-shadow: 0 12px 24px rgba(clr.$ns-900, 0.14);
+  animation: badge-bob 2s ease-in-out infinite;
+
+  > svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.successStamp {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: clr.$prm;
+  color: clr.$ns-50;
+  box-shadow: 0 8px 20px rgba(clr.$ns-900, 0.2);
+  opacity: 0;
+}
+
+.burst {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+}
+
+.burstParticle {
+  --burst-x: 0px;
+  --burst-y: 0px;
+
+  position: absolute;
+  top: -5px;
+  left: -3px;
+  width: 7px;
+  height: 14px;
+  border-radius: 999px;
+  background: clr.$prm;
+  opacity: 0;
+
+  &:nth-child(2n) {
+    background: clr.$acc-purple;
+  }
+
+  &:nth-child(3n) {
+    background: #d39d2f;
+  }
+
+  &:nth-child(1) {
+    --burst-x: -176px;
+    --burst-y: -95px;
+  }
+
+  &:nth-child(2) {
+    --burst-x: -98px;
+    --burst-y: -142px;
+  }
+
+  &:nth-child(3) {
+    --burst-x: 18px;
+    --burst-y: -160px;
+  }
+
+  &:nth-child(4) {
+    --burst-x: 154px;
+    --burst-y: -104px;
+  }
+
+  &:nth-child(5) {
+    --burst-x: 182px;
+    --burst-y: 42px;
+  }
+
+  &:nth-child(6) {
+    --burst-x: 104px;
+    --burst-y: 126px;
+  }
+
+  &:nth-child(7) {
+    --burst-x: -72px;
+    --burst-y: 136px;
+  }
+
+  &:nth-child(8) {
+    --burst-x: -174px;
+    --burst-y: 62px;
+  }
+}
+
+.copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(470px, 88vw);
+  text-align: center;
+  animation: copy-in 0.4s $ease both;
+}
+
+.heading {
+  margin: 0;
+  color: clr.$ns-900;
+  font-family: var(--font-sk-modernist);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 34px;
+  letter-spacing: -0.01em;
+}
+
+.body {
+  margin: 7px 0 0;
+  color: clr.$ns-700;
+  @include tp.text-body;
+}
+
+.progress {
+  display: block;
+  width: 168px;
+  height: 4px;
+  margin-top: 22px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(clr.$prm, 0.14);
+
+  > span {
+    display: block;
+    width: 48px;
+    height: 100%;
+    border-radius: inherit;
+    background: clr.$prm;
+    animation: progress-travel 1.15s ease-in-out infinite;
+  }
+}
+
+.success {
+  .card {
+    animation: card-success 0.72s $ease both;
+  }
+
+  .orbit {
+    animation-play-state: paused;
+  }
+
+  .sparkleBadge {
+    animation: none;
+    opacity: 0;
+    transform: scale(0.7);
+    transition:
+      opacity 0.22s ease,
+      transform 0.22s ease;
+  }
+
+  .successStamp {
+    animation: stamp-in 0.55s $ease 0.12s both;
+  }
+
+  .burstParticle {
+    animation: particle-burst 0.78s $ease both;
+
+    &:nth-child(2) {
+      animation-delay: 0.03s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.06s;
+    }
+
+    &:nth-child(4) {
+      animation-delay: 0.02s;
+    }
+
+    &:nth-child(5) {
+      animation-delay: 0.07s;
+    }
+
+    &:nth-child(6) {
+      animation-delay: 0.04s;
+    }
+
+    &:nth-child(7) {
+      animation-delay: 0.08s;
+    }
+
+    &:nth-child(8) {
+      animation-delay: 0.05s;
+    }
+  }
+
+  .progress > span {
+    width: 100%;
+    transform: none;
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .ambient,
+  .card,
+  .orbit,
+  .shimmer,
+  .sparkleBadge,
+  .copy,
+  .progress > span,
+  .success .successStamp,
+  .success .burstParticle {
+    animation: none;
+  }
+
+  .overlay {
+    clip-path: none;
+  }
+
+  .successStamp {
+    opacity: 1;
+  }
+
+  .success .burstParticle {
+    display: none;
+  }
+}

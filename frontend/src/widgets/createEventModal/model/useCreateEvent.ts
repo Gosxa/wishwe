@@ -4,9 +4,16 @@ import { createEvent, CreateEventError } from '@/shared/client_api/event';
 import type { BackendEvent, BackendEventType } from '@/shared/client_api/event';
 import { useEventForm } from '@/features/eventForm';
 
+type Options = {
+  showGlobalLoader?: boolean;
+  onSubmitStart?: () => void;
+  onSubmitSettled?: () => void;
+};
+
 export const useCreateEvent = (
   onCreated: (event: BackendEvent) => void,
   defaultType: BackendEventType = 'plan',
+  options: Options = {},
 ) =>
   useEventForm({
     mode: 'create',
@@ -30,4 +37,7 @@ export const useCreateEvent = (
     submitErrorBody: error =>
       error instanceof CreateEventError ? error.body : {},
     onSuccess: created => onCreated(created as BackendEvent),
+    onSubmitStart: options.onSubmitStart,
+    onSubmitSettled: options.onSubmitSettled,
+    showGlobalLoader: options.showGlobalLoader,
   });
