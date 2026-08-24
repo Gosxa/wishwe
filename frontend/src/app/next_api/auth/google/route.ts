@@ -18,6 +18,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(await authRes.json(), { status: authRes.status });
   }
 
+  if (!authRes.ok) {
+    const text = await authRes.text();
+    console.log('RENDER ERROR BODY:', text);
+    return NextResponse.json({ error: 'backend error' }, { status: authRes.status });
+  }
+
   const cookieHeader = extractCookieHeader(authRes);
   const meRes = await beApi.user.me(cookieHeader);
 
