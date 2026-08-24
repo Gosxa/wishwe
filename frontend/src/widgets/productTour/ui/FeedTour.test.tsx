@@ -17,6 +17,7 @@ vi.mock('@/shared/client_api/user', () => ({
 
 import type { BackendEvent } from '@/shared/client_api/event';
 import type { Profile } from '@/shared/client_api/auth/types';
+import { quickFillDuration, splitQuickFillWords } from '@/shared/lib/quickFill';
 import {
   useOnboardingStore,
   type OnboardingFormBridge,
@@ -28,7 +29,9 @@ import { FeedTour } from './FeedTour';
 
 const TITLE_TEMPLATE = 'Catch up over coffee or matcha?';
 
-const CASCADE_MS = 495;
+const CASCADE_MS = quickFillDuration(
+  splitQuickFillWords(TITLE_TEMPLATE).length,
+);
 
 const newcomer = {
   id: 7,

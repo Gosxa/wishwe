@@ -142,7 +142,7 @@ test.describe('feed onboarding tour', () => {
     }
   });
 
-  test('walks back a step when the create modal is closed', async ({
+  test('blocks clicks outside the tour card and highlighted control', async ({
     browser,
     baseURL,
   }) => {
@@ -156,9 +156,15 @@ test.describe('feed onboarding tour', () => {
 
       await expect(tourCard(page, 'Plan or wish? 🤔')).toBeVisible();
 
-      await page.getByRole('button', { name: 'Close', exact: true }).click();
+      const close = page.getByRole('button', { name: 'Close', exact: true });
+      const box = await close.boundingBox();
 
-      await expect(tourCard(page, 'Great! Tap the +')).toBeVisible();
+      if (!box) throw new Error('The create-modal close button is not visible');
+
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+
+      await expect(tourCard(page, 'Plan or wish? 🤔')).toBeVisible();
+      await expect(close).toBeVisible();
     } finally {
       await visitor.close();
     }

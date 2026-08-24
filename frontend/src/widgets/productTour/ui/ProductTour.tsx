@@ -13,6 +13,7 @@ import { useTourLayout } from '../model/useTourLayout';
 import { isPassthrough } from '../model/types';
 import type { AnchorRect, TourEndReason, TourStep } from '../model/types';
 import { TourCard } from './TourCard';
+import { TourClickShield } from './TourClickShield';
 import s from './productTour.module.scss';
 
 type Props = {
@@ -42,8 +43,8 @@ export const ProductTour = ({
   onQuickFill,
   nextDisabled = false,
 }: Props) => {
-  const pulseModal = useModalAttention();
   const cardRef = useRef<HTMLElement>(null);
+  const pulseModal = useModalAttention(cardRef);
   const endedRef = useRef(false);
   const { requestCloseWith, overlayRef, modalTransitionProps } =
     useModalTransition();
@@ -102,6 +103,8 @@ export const ProductTour = ({
       role="presentation"
       onClick={passthrough ? undefined : pulseModal}
     >
+      {passthrough && <TourClickShield rect={rect} onClick={pulseModal} />}
+
       <div
         className={clsx(s.spotlight, passthrough && s.spotlightSoft)}
         style={rectStyle(rect)}

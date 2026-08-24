@@ -59,6 +59,13 @@ $ring: clr.$acc-purple;
   }
 }
 
+.clickShield {
+  position: fixed;
+  z-index: 0;
+  pointer-events: auto;
+  touch-action: none;
+}
+
 .spotlight {
   position: fixed;
   pointer-events: none;
