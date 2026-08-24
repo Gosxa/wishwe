@@ -23,7 +23,10 @@ load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-DEBUG = False
+# DEBUG теперь читается из переменной окружения.
+# На Render НЕ ставь DEBUG=True постоянно - только временно для отладки,
+# потом обязательно верни DEBUG=False (или просто убери переменную).
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
     "wishwe.online",
@@ -45,7 +48,6 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
-    "debug_toolbar",
     "drf_spectacular",
     "corsheaders",
     "django_celery_beat",
@@ -57,7 +59,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -66,6 +67,12 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+# debug_toolbar подключаем ТОЛЬКО локально (DEBUG=True).
+# В проде (DEBUG=False) он не нужен и может провоцировать лишние ошибки.
+if DEBUG:
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.insert(1, "debug_toolbar.middleware.DebugToolbarMiddleware")
 
 ROOT_URLCONF = "wishwe_api.urls"
 
@@ -230,3 +237,32 @@ CSRF_TRUSTED_ORIGINS = [
     "https://wishwe.online",
     "https://www.wishwe.online",
 ]
+
+# Логирование ошибок в консоль - видно в Render Logs ВСЕГДА,
+# даже при DEBUG=False. Больше не нужно временно включать DEBUG=True,
+# чтобы увидеть traceback падающего запроса.
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "ERROR",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
