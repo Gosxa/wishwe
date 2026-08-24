@@ -32,7 +32,6 @@ export const useShareEvent = (event: FeedEvent, isOwn: boolean) => {
   const [imageClipboard, setImageClipboard] = useState(supportsImageClipboard);
   const [feedback, setFeedback] = useState<ShareFeedback>('idle');
   const [announcement, setAnnouncement] = useState('');
-  const [showLinkToast, setShowLinkToast] = useState(false);
   const linkPromiseRef = useRef<Promise<string> | null>(null);
   const imagesPromiseRef = useRef<Promise<GeneratedShareImage[]> | null>(null);
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -124,7 +123,6 @@ export const useShareEvent = (event: FeedEvent, isOwn: boolean) => {
     feedbackTimeoutRef.current = setTimeout(() => {
       setFeedback('idle');
       setAnnouncement('');
-      setShowLinkToast(false);
     }, FEEDBACK_DURATION_MS);
   };
 
@@ -148,7 +146,6 @@ export const useShareEvent = (event: FeedEvent, isOwn: boolean) => {
       await copyShareLink(getShareLink());
       setTemporaryFeedback('link');
       setAnnouncement('Link copied!');
-      setShowLinkToast(true);
     } catch {
       setAnnouncement("Couldn't copy the link. Please try again.");
     }
@@ -198,7 +195,6 @@ export const useShareEvent = (event: FeedEvent, isOwn: boolean) => {
     imageClipboard,
     feedback,
     announcement,
-    showLinkToast,
     socialUrls,
     selectFormat,
     moveSlide,

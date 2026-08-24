@@ -489,6 +489,20 @@ describe('ShareEventModal', () => {
     ).toBe('true');
   });
 
+  it('confirms a copied link on the button without a separate toast', async () => {
+    renderModal();
+
+    const copyLink = await screen.findByRole('button', { name: 'Copy link' });
+
+    fireEvent.click(copyLink);
+
+    await waitFor(() => expect(clipboardWriteText).toHaveBeenCalledTimes(1));
+
+    expect(screen.getByRole('button', { name: 'Link copied!' })).toBeTruthy();
+    expect(screen.queryByText('Link Copied!')).toBeNull();
+    expect(screen.queryByRole('status')).toBeNull();
+  });
+
   it('copies the selected PNG and announces confirmation', async () => {
     class TestClipboardItem {
       static supports = () => true;

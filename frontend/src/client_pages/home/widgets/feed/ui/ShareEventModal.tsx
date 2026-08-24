@@ -273,12 +273,6 @@ export const ShareEventModal = ({
           {share.announcement}
         </span>
       </div>
-
-      {share.showLinkToast && (
-        <div className={s.toast} role="status">
-          Link Copied!
-        </div>
-      )}
     </div>
   );
 };
