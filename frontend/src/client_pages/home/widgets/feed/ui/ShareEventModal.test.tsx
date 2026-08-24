@@ -353,6 +353,24 @@ describe('ShareEventModal', () => {
     expect(shareAnimate).not.toHaveBeenCalled();
   });
 
+  it('uses the celebratory arrival treatment for the onboarding handoff', () => {
+    const returnFocusRef = createRef<HTMLButtonElement>();
+
+    render(
+      <ShareEventModal
+        event={event}
+        isOwn
+        onClose={vi.fn()}
+        returnFocusRef={returnFocusRef}
+        celebrateArrival
+      />,
+    );
+
+    const dialog = screen.getByRole('dialog', { name: 'Share this plan' });
+
+    expect(dialog.parentElement?.dataset.arrival).toBe('celebration');
+  });
+
   it('uses the existing owner share link for every destination', async () => {
     renderModal(true);
 

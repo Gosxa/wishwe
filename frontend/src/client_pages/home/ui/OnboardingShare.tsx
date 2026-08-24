@@ -24,6 +24,7 @@ export const OnboardingShare = () => {
       isOwn
       onClose={dismissShare}
       returnFocusRef={returnFocusRef}
+      celebrateArrival
     />,
     document.body,
   );

@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import clsx from 'clsx';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
@@ -28,6 +29,7 @@ type Props = {
   isOwn: boolean;
   onClose: () => void;
   returnFocusRef: RefObject<HTMLButtonElement | null>;
+  celebrateArrival?: boolean;
 };
 
 const FOCUSABLE =
@@ -38,6 +40,7 @@ export const ShareEventModal = ({
   isOwn,
   onClose,
   returnFocusRef,
+  celebrateArrival = false,
 }: Props) => {
   const share = useShareEvent(event, isOwn);
   const { moveSlide } = share;
@@ -185,13 +188,22 @@ export const ShareEventModal = ({
   return (
     <div
       {...modalTransitionProps}
-      className={s.overlay}
+      className={clsx(s.overlay, celebrateArrival && s.arrivalOverlay)}
+      data-arrival={celebrateArrival ? 'celebration' : undefined}
       onClick={showInstagramNotice ? pulseInstagramNotice : pulseModal}
     >
+      {celebrateArrival && (
+        <div className={s.arrivalAura} aria-hidden="true">
+          {Array.from({ length: 8 }, (_, index) => (
+            <span key={index} />
+          ))}
+        </div>
+      )}
+
       <div
         data-modal-content
         ref={dialogRef}
-        className={s.modal}
+        className={clsx(s.modal, celebrateArrival && s.arrivalModal)}
         role="dialog"
         aria-modal="true"
         aria-labelledby="shareEventTitle"

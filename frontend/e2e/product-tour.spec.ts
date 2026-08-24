@@ -211,12 +211,43 @@ test.describe('feed onboarding tour', () => {
     const { page } = visitor;
 
     try {
+      await page.setViewportSize({ width: 1600, height: 820 });
       await runOnboarding(page);
 
       await expect(tourCard(page, /Now bring your people/)).toBeVisible();
       await expect(
         page.getByRole('button', { name: 'Copy link' }),
       ).toBeVisible();
+
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const overlay = document.querySelector<HTMLElement>(
+              '[data-arrival="celebration"]',
+            );
+
+            return {
+              bodyOverflow: document.body.style.overflow,
+              rootOverflow: document.documentElement.style.overflow,
+              overlayOverflowMode: overlay
+                ? getComputedStyle(overlay).overflowY
+                : null,
+              documentOverflow:
+                document.documentElement.scrollHeight -
+                document.documentElement.clientHeight,
+              overlayOverflow: overlay
+                ? overlay.scrollHeight - overlay.clientHeight
+                : null,
+            };
+          }),
+        )
+        .toEqual({
+          bodyOverflow: 'hidden',
+          rootOverflow: 'hidden',
+          overlayOverflowMode: 'hidden',
+          documentOverflow: 0,
+          overlayOverflow: 0,
+        });
 
       await page.getByRole('button', { name: 'Got it' }).click();
 
