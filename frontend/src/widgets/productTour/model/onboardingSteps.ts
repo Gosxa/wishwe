@@ -42,8 +42,8 @@ export const buildOnboardingSteps = ({
     id: 'type',
     anchor: 'event-type-wish',
     title: 'Plan or wish? 🤔',
-    body: 'Got a time and a place locked in? That’s a Plan 🏛️ Just floating an idea? That’s a Wish 🧸',
-    hint: 'Let’s start with a wish 👇',
+    body: 'Got a time and a place locked in? That’s a Plan 🏛️ Just floating an idea? That’s a Wish 👽',
+    hint: 'Let’s start with a wish',
     placement: 'bottom',
     padding: 6,
     radius: 12,
@@ -70,7 +70,7 @@ export const buildOnboardingSteps = ({
   {
     id: 'title',
     anchor: 'field-title',
-    title: 'Name it 📝',
+    title: 'Name it',
     body: 'Inviting beats clever. Fifty characters, tops — or borrow ours.',
     quickFill: { label: 'Use this', value: 'Catch up over coffee or matcha?' },
     placement: 'left',
@@ -106,7 +106,7 @@ export const buildOnboardingSteps = ({
   {
     id: 'timeframe',
     anchor: 'field-timeframe',
-    title: 'When, roughly? ⏰',
+    title: 'When, roughly?',
     body: 'No exact date needed. “This weekend” is a perfectly good answer.',
     quickFill: { label: 'Use this', value: 'How about this weekend' },
     placement: 'left',
@@ -126,8 +126,8 @@ export const buildOnboardingSteps = ({
   {
     id: 'share',
     anchor: 'share-actions',
-    title: 'Awesome. Now bring your people! 👯',
-    body: 'Drop this link in your group chat. Once your friends join, all their future plans and wishes land right here in your feed 📥',
+    title: 'Awesome. Now bring your people!',
+    body: 'Drop this link in your group chat. Once your friends join, all their future plans and wishes land right here in your feed',
     placement: 'right',
     padding: 10,
     passthrough: true,
@@ -135,7 +135,7 @@ export const buildOnboardingSteps = ({
   },
   {
     id: 'done',
-    title: 'You’re all set! ✅',
+    title: 'You’re all set!',
     body: 'Post it wherever your people hang out. We’ll notify you as soon as someone RSVPs 🔔',
     primaryLabel: 'Finish',
   },

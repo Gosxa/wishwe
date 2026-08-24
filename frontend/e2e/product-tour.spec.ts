@@ -59,10 +59,10 @@ const runOnboarding = async (page: Page) => {
   await page.locator('[data-tour^="category-"][aria-pressed]').first().click();
 
   for (const heading of [
-    'Name it 📝',
+    'Name it',
     'Roughly where? 📍',
     'Add a little colour 💬',
-    'When, roughly? ⏰',
+    'When, roughly?',
   ]) {
     await expect(tourCard(page, heading)).toBeVisible();
     await page.getByRole('button', { name: 'Use this' }).click();
@@ -187,7 +187,7 @@ test.describe('feed onboarding tour', () => {
         .first()
         .click();
 
-      const titleStep = tourCard(page, 'Name it 📝');
+      const titleStep = tourCard(page, 'Name it');
 
       await expect(titleStep).toBeVisible();
       await expect(
@@ -221,11 +221,11 @@ test.describe('feed onboarding tour', () => {
 
       await page.getByRole('button', { name: 'Got it' }).click();
 
-      await expect(tourCard(page, 'You’re all set! ✅')).toBeVisible();
+      await expect(tourCard(page, 'You’re all set!')).toBeVisible();
 
       await page.getByRole('button', { name: 'Finish' }).click();
 
-      await expect(tourCard(page, 'You’re all set! ✅')).toBeHidden();
+      await expect(tourCard(page, 'You’re all set!')).toBeHidden();
       await expect(
         page.getByRole('heading', { name: 'Share this wish' }),
       ).toBeVisible();

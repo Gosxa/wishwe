@@ -223,7 +223,7 @@ describe('FeedTour', () => {
     expect(screen.getByText(/food & Drinks/)).toBeTruthy();
 
     sync({ isWish: true, selectedCategoryId: 2 });
-    expect(heading('Name it 📝')).toBeTruthy();
+    expect(heading('Name it')).toBeTruthy();
   });
 
   it('keeps next locked until a required field has something in it', () => {
@@ -332,7 +332,7 @@ describe('FeedTour', () => {
     expect(heading(/Now bring your people/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }));
-    expect(heading('You’re all set! ✅')).toBeTruthy();
+    expect(heading('You’re all set!')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Finish' }));
     act(() => {
