@@ -13,6 +13,7 @@ import type { BackendEvent } from '@/shared/client_api/event';
 import type { EventFormModel } from '@/features/eventForm';
 import { useCreatedEventShareStore } from '@/shared/store/useCreatedEventShareStore';
 import { useOnboardingStore } from '@/shared/store/useOnboardingStore';
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 
 const mocks = vi.hoisted(() => ({
   requestClose: vi.fn(),
@@ -92,6 +93,12 @@ describe('CreateEventModal launch transition', () => {
       reportCreated,
     });
     useCreatedEventShareStore.setState({ event: null });
+    useEventsRefreshStore.setState({
+      refreshToken: 0,
+      isDeferred: false,
+      isPending: false,
+      revealEventId: null,
+    });
     mocks.useCreateEvent.mockImplementation(
       (onCreated, _defaultType, options) => {
         createdCallback = onCreated;
@@ -190,6 +197,39 @@ describe('CreateEventModal launch transition', () => {
     });
 
     expect(useCreatedEventShareStore.getState().event).toBeNull();
+  });
+
+  it('does not hold the feed refresh when onboarding owns the share modal', () => {
+    useOnboardingStore.setState({ step: 'submit' });
+
+    render(<CreateEventModal onClose={vi.fn()} onCreated={vi.fn()} />);
+
+    act(() => {
+      submitStartedCallback();
+      createdCallback(createdEvent);
+      submitSettledCallback();
+      vi.advanceTimersByTime(2500);
+    });
+
+    expect(useEventsRefreshStore.getState().isDeferred).toBe(false);
+
+    useEventsRefreshStore.getState().requestRefresh();
+
+    expect(useEventsRefreshStore.getState().refreshToken).toBe(1);
+  });
+
+  it('holds the feed refresh for the share modal the layout always mounts', () => {
+    render(<CreateEventModal onClose={vi.fn()} onCreated={vi.fn()} />);
+
+    act(() => {
+      submitStartedCallback();
+      createdCallback(createdEvent);
+      submitSettledCallback();
+      vi.advanceTimersByTime(2500);
+    });
+
+    expect(useEventsRefreshStore.getState().isDeferred).toBe(true);
+    expect(useEventsRefreshStore.getState().revealEventId).toBe('42');
   });
 
   it('keeps the regular close transition available before publishing', () => {

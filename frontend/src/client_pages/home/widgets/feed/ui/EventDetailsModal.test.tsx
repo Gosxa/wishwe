@@ -98,7 +98,12 @@ describe('EventDetailsModal', () => {
       configurable: true,
       value: { writeText },
     });
-    document.body.style.overflow = '';
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('position');
+    document.body.style.removeProperty('top');
+    document.body.style.removeProperty('left');
+    document.body.style.removeProperty('right');
+    document.body.style.removeProperty('padding-right');
   });
 
   afterEach(() => {
@@ -352,9 +357,9 @@ describe('EventDetailsModal', () => {
   it('locks body scrolling while open and restores it on close', () => {
     const { unmount } = renderModal();
 
-    expect(document.body.style.overflow).toBe('hidden');
+    expect(document.body.style.position).toBe('fixed');
 
     unmount();
-    expect(document.body.style.overflow).toBe('');
+    expect(document.body.style.position).toBe('');
   });
 });

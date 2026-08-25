@@ -2,6 +2,7 @@
 
 import { type MouseEvent, useEffect, useRef, useState } from 'react';
 import { useBodyScrollLock } from '@/features';
+import { ModalPortal } from '@shared/ui/modalPortal/ModalPortal';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import type { FeedEvent } from '@client_pages/home/model/types';
@@ -123,7 +124,7 @@ export const EventCard = ({
   };
 
   const modals = (
-    <>
+    <ModalPortal>
       {isRecapOpen && (
         <RecapModal event={event} onClose={() => setIsRecapOpen(false)} />
       )}
@@ -158,7 +159,7 @@ export const EventCard = ({
           {participationError}
         </div>
       )}
-    </>
+    </ModalPortal>
   );
 
   if (detailsOnly) return modals;

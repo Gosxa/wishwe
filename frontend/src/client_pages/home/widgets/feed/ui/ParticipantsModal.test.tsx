@@ -87,7 +87,12 @@ describe('ParticipantsModal', () => {
     apiMocks.listParticipants.mockReset();
     apiMocks.listParticipants.mockResolvedValue([] as BackendParticipant[]);
     useUserStore.setState({ user: null });
-    document.body.style.overflow = '';
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('position');
+    document.body.style.removeProperty('top');
+    document.body.style.removeProperty('left');
+    document.body.style.removeProperty('right');
+    document.body.style.removeProperty('padding-right');
   });
 
   afterEach(() => {
@@ -235,10 +240,10 @@ describe('ParticipantsModal', () => {
     const { rerender } = renderModal();
 
     await screen.findByText('No one has joined yet.');
-    expect(document.body.style.overflow).toBe('hidden');
+    expect(document.body.style.position).toBe('fixed');
 
     rerender(<Harness isOpen={false} />);
-    expect(document.body.style.overflow).toBe('');
+    expect(document.body.style.position).toBe('');
   });
 
   it('ignores a response that arrives after the modal is unmounted', async () => {

@@ -1029,15 +1029,15 @@ describe('EventFormModal', () => {
     });
 
     it('locks body scrolling while it is open and restores it on close', async () => {
-      document.body.style.overflow = 'auto';
+      document.body.style.position = 'relative';
 
       const { unmount } = renderForm();
 
       await awaitCategories();
-      expect(document.body.style.overflow).toBe('hidden');
+      expect(document.body.style.position).toBe('fixed');
 
       unmount();
-      expect(document.body.style.overflow).toBe('auto');
+      expect(document.body.style.position).toBe('relative');
     });
   });
 });

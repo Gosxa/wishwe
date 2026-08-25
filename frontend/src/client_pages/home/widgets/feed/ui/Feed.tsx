@@ -1,7 +1,11 @@
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { EventFeedLayout } from '@widgets/eventFeed';
+import {
+  EventFeedItem,
+  EventFeedLayout,
+  useEventReveal,
+} from '@widgets/eventFeed';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
@@ -26,6 +30,8 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
   useSearchDisabledSync(onSearchDisabledChange, events, search);
+
+  const revealEventId = useEventReveal(events.map(event => event.id));
 
   const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
     useEventDeepLink(events, isLoading);
@@ -58,15 +64,16 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
       loadMore={loadMore}
     >
       {events.map((event, position) => (
-        <EventCard
-          key={event.id}
-          event={event}
-          tourId={position === 0 ? 'feed-card' : undefined}
-          enableDetails
-          autoOpenDetails={event.id === openEventId}
-          onDetailsOpen={() => setEventParam(event.id)}
-          onDetailsClose={clearEventParam}
-        />
+        <EventFeedItem key={event.id} reveal={event.id === revealEventId}>
+          <EventCard
+            event={event}
+            tourId={position === 0 ? 'feed-card' : undefined}
+            enableDetails
+            autoOpenDetails={event.id === openEventId}
+            onDetailsOpen={() => setEventParam(event.id)}
+            onDetailsClose={clearEventParam}
+          />
+        </EventFeedItem>
       ))}
     </EventFeedLayout>
   );

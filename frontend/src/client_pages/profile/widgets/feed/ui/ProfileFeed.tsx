@@ -5,7 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { getEvent } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
-import { EventFeedLayout } from '@widgets/eventFeed';
+import {
+  EventFeedItem,
+  EventFeedLayout,
+  useEventReveal,
+} from '@widgets/eventFeed';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useUserStore } from '@/shared/store/useUserStore';
@@ -42,6 +46,8 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
 
   useSearchDisabledSync(onSearchDisabledChange, events, search);
+
+  const revealEventId = useEventReveal(events.map(event => event.id));
 
   const isArchive = tab === 'archive';
 
@@ -103,23 +109,24 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
         loadMore={loadMore}
       >
         {events.map(event => (
-          <EventCard
-            key={event.id}
-            event={event}
-            isOwn={
-              currentHandle != null && event.host.username === currentHandle
-            }
-            isArchived={isArchive}
-            enableDetails={!isArchive}
-            autoOpenDetails={!isArchive && event.id === openEventId}
-            showEventType={false}
-            showChat
-            onEdit={handleEditOpen}
-            onPlanIt={handlePlanItOpen}
-            onCancel={handleEventCancelled}
-            onDetailsOpen={() => setEventParam(event.id)}
-            onDetailsClose={clearEventParam}
-          />
+          <EventFeedItem key={event.id} reveal={event.id === revealEventId}>
+            <EventCard
+              event={event}
+              isOwn={
+                currentHandle != null && event.host.username === currentHandle
+              }
+              isArchived={isArchive}
+              enableDetails={!isArchive}
+              autoOpenDetails={!isArchive && event.id === openEventId}
+              showEventType={false}
+              showChat
+              onEdit={handleEditOpen}
+              onPlanIt={handlePlanItOpen}
+              onCancel={handleEventCancelled}
+              onDetailsOpen={() => setEventParam(event.id)}
+              onDetailsClose={clearEventParam}
+            />
+          </EventFeedItem>
         ))}
       </EventFeedLayout>
 

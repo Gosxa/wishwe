@@ -169,3 +169,16 @@ export const fillStable = async (locator: Locator, value: string) => {
     )
     .toBe(value);
 };
+
+export const createdEventShareDialog = (page: Page): Locator =>
+  page.getByRole('dialog').filter({
+    has: page.getByRole('heading', { name: /^Share this (plan|wish)$/ }),
+  });
+
+export const dismissCreatedEventShare = async (page: Page) => {
+  const dialog = createdEventShareDialog(page);
+
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Close share dialog' }).click();
+  await expect(dialog).toBeHidden();
+};

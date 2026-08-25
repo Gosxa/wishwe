@@ -121,7 +121,12 @@ describe('useFeedEvents', () => {
     navigationMocks.useSearchParams.mockReset();
     toolbarMocks.useFeedToolbar.mockReset();
     mapperMocks.toFeedEvents.mockClear();
-    useEventsRefreshStore.setState({ refreshToken: 0 });
+    useEventsRefreshStore.setState({
+      refreshToken: 0,
+      isDeferred: false,
+      isPending: false,
+      revealEventId: null,
+    });
 
     searchParams = new URLSearchParams();
     toolbar = { filter: 'all', reach: 'all', sort: 'recent' };

@@ -92,7 +92,12 @@ describe('Header', () => {
   beforeEach(() => {
     useCreateEventStore.setState({ isOpen: false, defaultType: 'plan' });
     useEventModalStore.setState({ eventId: null });
-    useEventsRefreshStore.setState({ refreshToken: 0 });
+    useEventsRefreshStore.setState({
+      refreshToken: 0,
+      isDeferred: false,
+      isPending: false,
+      revealEventId: null,
+    });
 
     mocks.useNotifications.mockReturnValue({
       unreadCount: 0,

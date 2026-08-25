@@ -70,7 +70,12 @@ describe('AvatarCrop', () => {
     cropperMocks.props.length = 0;
     cropImageMock.mockReset();
     cropImageMock.mockResolvedValue('data:image/jpeg;base64,cropped');
-    document.body.style.overflow = '';
+    document.body.style.removeProperty('overflow');
+    document.body.style.removeProperty('position');
+    document.body.style.removeProperty('top');
+    document.body.style.removeProperty('left');
+    document.body.style.removeProperty('right');
+    document.body.style.removeProperty('padding-right');
   });
 
   afterEach(() => {
@@ -196,9 +201,9 @@ describe('AvatarCrop', () => {
   it('locks body scrolling while cropping and restores it afterwards', () => {
     const { unmount } = renderCrop();
 
-    expect(document.body.style.overflow).toBe('hidden');
+    expect(document.body.style.position).toBe('fixed');
 
     unmount();
-    expect(document.body.style.overflow).toBe('');
+    expect(document.body.style.position).toBe('');
   });
 });

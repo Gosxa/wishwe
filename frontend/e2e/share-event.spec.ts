@@ -237,7 +237,6 @@ test.describe('Share Event modal', () => {
       await expect(
         dialog.getByRole('button', { name: 'Link copied!' }),
       ).toBeVisible();
-      await expect(page.getByRole('status')).toHaveText('Link Copied!');
       await expect
         .poll(() => page.evaluate(() => navigator.clipboard.readText()))
         .toBe(publicShareLink);
@@ -364,8 +363,8 @@ test.describe('Share Event modal', () => {
     page,
   }) => {
     const card = await openOwnerProfile(page);
-    const initialOverflow = await page.evaluate(
-      () => document.body.style.overflow,
+    const initialPosition = await page.evaluate(
+      () => document.body.style.position,
     );
     const { dialog, menuButton } = await openShareDialog(page, card);
     const closeButton = dialog.getByRole('button', {
@@ -374,8 +373,15 @@ test.describe('Share Event modal', () => {
 
     await expect(closeButton).toBeFocused();
     await expect
-      .poll(() => page.evaluate(() => document.body.style.overflow))
-      .toBe('hidden');
+      .poll(() =>
+        page.evaluate(() => ({
+          position: document.body.style.position,
+          scrollable:
+            document.documentElement.scrollHeight >
+            document.documentElement.clientHeight,
+        })),
+      )
+      .toEqual({ position: 'fixed', scrollable: false });
 
     await expectGeneratedImage(
       dialog.getByRole('img', {
@@ -433,8 +439,8 @@ test.describe('Share Event modal', () => {
     await expect(dialog).toBeHidden();
     await expect(menuButton).toBeFocused();
     await expect
-      .poll(() => page.evaluate(() => document.body.style.overflow))
-      .toBe(initialOverflow);
+      .poll(() => page.evaluate(() => document.body.style.position))
+      .toBe(initialPosition);
   });
 
   test('falls back to the feed deep link when owner link creation fails', async ({

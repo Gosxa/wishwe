@@ -7,6 +7,7 @@ import {
 import { createWish } from './support/fixtures';
 import {
   categoryChipName,
+  dismissCreatedEventShare,
   eventCard,
   fillEventForm,
   isoDateIn,
@@ -71,6 +72,7 @@ test.describe('event lifecycle', () => {
 
       await dialog.getByRole('button', { name: 'Share', exact: true }).click();
       await expect(dialog).toBeHidden();
+      await dismissCreatedEventShare(page);
 
       await page.getByRole('button', { name: 'Wishes', exact: true }).click();
       await expect(eventCard(page, title)).toBeVisible();
@@ -107,6 +109,7 @@ test.describe('event lifecycle', () => {
 
       await dialog.getByRole('button', { name: 'Share', exact: true }).click();
       await expect(dialog).toBeHidden();
+      await dismissCreatedEventShare(page);
       await expect(eventCard(page, title)).toBeVisible();
 
       const response = await account.api.get(
@@ -313,6 +316,7 @@ test.describe('event lifecycle', () => {
       });
       await dialog.getByRole('button', { name: 'Share', exact: true }).click();
       await expect(dialog).toBeHidden();
+      await dismissCreatedEventShare(page);
 
       const card = eventCard(page, title);
 

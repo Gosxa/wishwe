@@ -792,4 +792,17 @@ describe('EventCard', () => {
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(onCancel).not.toHaveBeenCalled();
   });
+
+  it('renders its modal layers outside the card, not nested in it', () => {
+    const { container } = renderCard({ enableDetails: true });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Weekend trip' }));
+
+    const dialog = screen.getByRole('dialog');
+    const card = container.querySelector('article');
+
+    expect(card).toBeTruthy();
+    expect(card?.contains(dialog)).toBe(false);
+    expect(document.body.contains(dialog)).toBe(true);
+  });
 });

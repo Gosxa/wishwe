@@ -10,3 +10,4 @@ export { Stepper } from './stepper/Stepper';
 export { CoverUpload } from './coverUpload/CoverUpload';
 export { AuthLayout } from './authLayout/AuthLayout';
 export { BackButton } from './backButton/BackButton';
+export { ModalPortal } from './modalPortal/ModalPortal';

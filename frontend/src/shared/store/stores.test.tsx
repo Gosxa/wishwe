@@ -31,7 +31,12 @@ describe('shared Zustand stores', () => {
   beforeEach(() => {
     useCreateEventStore.setState({ isOpen: false, defaultType: 'plan' });
     useEventModalStore.setState({ eventId: null });
-    useEventsRefreshStore.setState({ refreshToken: 0 });
+    useEventsRefreshStore.setState({
+      refreshToken: 0,
+      isDeferred: false,
+      isPending: false,
+      revealEventId: null,
+    });
     useLoadingStore.setState({ isLoading: false });
     useUserStore.setState({ user: null });
   });
@@ -77,6 +82,46 @@ describe('shared Zustand stores', () => {
     useEventsRefreshStore.getState().requestRefresh();
 
     expect(useEventsRefreshStore.getState().refreshToken).toBe(2);
+  });
+
+  it('holds deferred refresh requests until they are flushed', () => {
+    useEventsRefreshStore.getState().deferRefresh();
+    useEventsRefreshStore.getState().requestRefresh();
+    useEventsRefreshStore.getState().requestRefresh();
+
+    expect(useEventsRefreshStore.getState().refreshToken).toBe(0);
+
+    useEventsRefreshStore.getState().flushRefresh();
+
+    expect(useEventsRefreshStore.getState().refreshToken).toBe(1);
+    expect(useEventsRefreshStore.getState().isDeferred).toBe(false);
+  });
+
+  it('flushes without refreshing when nothing was requested', () => {
+    useEventsRefreshStore.getState().deferRefresh();
+    useEventsRefreshStore.getState().flushRefresh();
+    useEventsRefreshStore.getState().flushRefresh();
+
+    expect(useEventsRefreshStore.getState().refreshToken).toBe(0);
+  });
+
+  it('keeps the event to reveal until the flushed refresh delivers it', () => {
+    useEventsRefreshStore.getState().deferRefresh('7');
+    useEventsRefreshStore.getState().requestRefresh();
+    useEventsRefreshStore.getState().flushRefresh();
+
+    expect(useEventsRefreshStore.getState().revealEventId).toBe('7');
+
+    useEventsRefreshStore.getState().clearReveal();
+
+    expect(useEventsRefreshStore.getState().revealEventId).toBeNull();
+  });
+
+  it('drops the event to reveal when no refresh was requested', () => {
+    useEventsRefreshStore.getState().deferRefresh('7');
+    useEventsRefreshStore.getState().flushRefresh();
+
+    expect(useEventsRefreshStore.getState().revealEventId).toBeNull();
   });
 
   it('sets and clears the global loading state', () => {

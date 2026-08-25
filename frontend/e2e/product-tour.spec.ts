@@ -227,7 +227,7 @@ test.describe('feed onboarding tour', () => {
             );
 
             return {
-              bodyOverflow: document.body.style.overflow,
+              bodyPosition: document.body.style.position,
               rootOverflow: document.documentElement.style.overflow,
               overlayOverflowMode: overlay
                 ? getComputedStyle(overlay).overflowY
@@ -242,8 +242,8 @@ test.describe('feed onboarding tour', () => {
           }),
         )
         .toEqual({
-          bodyOverflow: 'hidden',
-          rootOverflow: 'hidden',
+          bodyPosition: 'fixed',
+          rootOverflow: '',
           overlayOverflowMode: 'hidden',
           documentOverflow: 0,
           overlayOverflow: 0,

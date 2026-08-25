@@ -2,6 +2,8 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
 
+$list-gap: 24px;
+
 .feed {
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -26,8 +28,47 @@
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: $list-gap;
   margin-top: 16px;
+}
+
+.item {
+  display: grid;
+  grid-template-rows: 1fr;
+  min-width: 0;
+}
+
+.itemBody {
+  min-width: 0;
+}
+
+
+.itemRevealing {
+  overflow: hidden;
+  animation: feed-item-reveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  .itemBody {
+    min-height: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    overflow: visible;
+    animation: none;
+  }
+}
+
+
+@keyframes feed-item-reveal {
+  from {
+    grid-template-rows: 0fr;
+    margin-bottom: -$list-gap;
+    opacity: 0;
+  }
+  to {
+    grid-template-rows: 1fr;
+    margin-bottom: 0;
+    opacity: 1;
+  }
 }
 
 .emptySlot {

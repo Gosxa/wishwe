@@ -121,7 +121,12 @@ describe('useProfileEvents', () => {
     apiMocks.listUserEvents.mockReset();
     navigationMocks.useSearchParams.mockReset();
     mapperMocks.toFeedEvents.mockClear();
-    useEventsRefreshStore.setState({ refreshToken: 0 });
+    useEventsRefreshStore.setState({
+      refreshToken: 0,
+      isDeferred: false,
+      isPending: false,
+      revealEventId: null,
+    });
 
     searchParams = new URLSearchParams();
     navigationMocks.useSearchParams.mockImplementation(() => searchParams);
