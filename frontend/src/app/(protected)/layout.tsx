@@ -8,6 +8,7 @@ import {
   safeNextPath,
 } from '@/shared/lib/nextPath';
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
+import { CreatedEventShareHost } from './CreatedEventShareHost';
 import { EventModalHost } from './EventModalHost';
 
 export default async function UserLayout({
@@ -31,6 +32,7 @@ export default async function UserLayout({
       {user && <UserStoreInitializer user={user} />}
       {children}
       <EventModalHost />
+      <CreatedEventShareHost />
     </>
   );
 }

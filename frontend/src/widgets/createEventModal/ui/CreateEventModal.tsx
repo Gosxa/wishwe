@@ -11,6 +11,7 @@ import {
   type OnboardingField,
   type OnboardingFormBridge,
 } from '@/shared/store/useOnboardingStore';
+import { useCreatedEventShareStore } from '@/shared/store/useCreatedEventShareStore';
 import { useCreateEvent } from '../model/useCreateEvent';
 import {
   WishLaunchTransition,
@@ -71,7 +72,9 @@ export const CreateEventModal = ({
   onCreated,
   defaultType,
 }: Props) => {
+  const isOnboarding = useOnboardingStore(state => state.step !== null);
   const reportCreated = useOnboardingStore(state => state.reportCreated);
+  const openCreatedEventShare = useCreatedEventShareStore(state => state.open);
   const { requestClose, modalTransitionProps } = useModalTransition(onClose);
   const [launchState, setLaunchState] = useState<WishLaunchState>('idle');
   const pendingCreatedRef = useRef<BackendEvent | null>(null);
@@ -109,6 +112,7 @@ export const CreateEventModal = ({
       if (!created) return;
 
       reportCreated(created);
+      if (!isOnboarding) openCreatedEventShare(created);
       onCreated();
     }, successHoldMs());
   };

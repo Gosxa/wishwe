@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Mock } from 'vitest';
 import type { BackendEvent } from '@/shared/client_api/event';
 import type { EventFormModel } from '@/features/eventForm';
+import { useCreatedEventShareStore } from '@/shared/store/useCreatedEventShareStore';
 import { useOnboardingStore } from '@/shared/store/useOnboardingStore';
 
 const mocks = vi.hoisted(() => ({
@@ -55,7 +56,13 @@ const createdEvent = { id: 42 } as BackendEvent;
 const makeForm = () =>
   ({
     isPlan: false,
-    titleInput: { value: 'Catch up over coffee or matcha?' },
+    category: { options: [], selected: null, onChange: vi.fn() },
+    titleInput: { value: 'Catch up over coffee or matcha?', onChange: vi.fn() },
+    locationInput: { value: 'Kyiv', onChange: vi.fn() },
+    descriptionInput: { value: '', onChange: vi.fn() },
+    timeframeInput: { value: 'This weekend', onChange: vi.fn() },
+    hasRequiredFields: true,
+    onTypeChange: vi.fn(),
     submit: { isSubmitting: false, onSubmit: vi.fn() },
   }) as unknown as EventFormModel;
 
@@ -84,6 +91,7 @@ describe('CreateEventModal launch transition', () => {
       createdEvent: null,
       reportCreated,
     });
+    useCreatedEventShareStore.setState({ event: null });
     mocks.useCreateEvent.mockImplementation(
       (onCreated, _defaultType, options) => {
         createdCallback = onCreated;
@@ -103,6 +111,7 @@ describe('CreateEventModal launch transition', () => {
       createdEvent: null,
       reportCreated: originalReportCreated,
     });
+    useCreatedEventShareStore.getState().close();
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
@@ -164,7 +173,23 @@ describe('CreateEventModal launch transition', () => {
     act(() => vi.advanceTimersByTime(1));
 
     expect(reportCreated).toHaveBeenCalledWith(createdEvent);
+    expect(useCreatedEventShareStore.getState().event).toBe(createdEvent);
     expect(onCreated).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves sharing to the onboarding flow when the event was created there', () => {
+    useOnboardingStore.setState({ step: 'submit' });
+
+    render(<CreateEventModal onClose={vi.fn()} onCreated={vi.fn()} />);
+
+    act(() => {
+      submitStartedCallback();
+      createdCallback(createdEvent);
+      submitSettledCallback();
+      vi.advanceTimersByTime(2500);
+    });
+
+    expect(useCreatedEventShareStore.getState().event).toBeNull();
   });
 
   it('keeps the regular close transition available before publishing', () => {
