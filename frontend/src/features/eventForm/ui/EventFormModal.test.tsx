@@ -364,6 +364,13 @@ describe('EventFormModal', () => {
   });
 
   describe('categories', () => {
+    it('shows loading text while categories are loading', () => {
+      eventApiMocks.listCategories.mockReturnValue(new Promise(() => {}));
+      renderForm();
+
+      expect(screen.getByText('loading...')).toBeTruthy();
+    });
+
     it('loads the categories and toggles a selection', async () => {
       renderForm();
       await awaitCategories();

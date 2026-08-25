@@ -61,6 +61,7 @@ export const useEventForm = ({
   const setLoading = useLoadingStore(state => state.setLoading);
   const [values, setValues] = useState(initialValues);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreviewUrl, setCoverPreviewUrl] = useState(initialCoverUrl);
   const [errors, setErrors] = useState<EventFormErrors>({});
@@ -99,6 +100,11 @@ export const useEventForm = ({
           ...current,
           category: 'Failed to load categories. Please try again.',
         }));
+      })
+      .finally(() => {
+        if (isActive) {
+          setIsCategoriesLoading(false);
+        }
       });
 
     return () => {
@@ -234,6 +240,7 @@ export const useEventForm = ({
     },
     category: {
       options: categories,
+      isLoading: isCategoriesLoading,
       selected: values.categoryId,
       onChange: id => updateValue('categoryId', id, 'category'),
       error: errors.category,

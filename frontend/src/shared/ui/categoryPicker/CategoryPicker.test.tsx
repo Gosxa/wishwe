@@ -67,6 +67,21 @@ describe('CategoryPicker', () => {
     expect(screen.getByRole('button', { name: 'foodAndDrinks' })).toBeTruthy();
   });
 
+  it('shows loading text while categories load', () => {
+    const onChange = vi.fn();
+
+    render(
+      <CategoryPicker
+        categories={[]}
+        isLoading
+        selected={null}
+        onChange={onChange}
+      />,
+    );
+
+    expect(screen.getByText('loading...')).toBeTruthy();
+  });
+
   it('selects an unselected category', () => {
     const { onChange } = renderPicker();
 

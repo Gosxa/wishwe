@@ -40,6 +40,7 @@ export type EventFormModel = {
   onTypeChange: (type: BackendEventType) => void;
   category: {
     options: Category[];
+    isLoading: boolean;
     selected: number | null;
     onChange: (id: number | null) => void;
     error?: string;

@@ -13,6 +13,7 @@ import s from './categoryPicker.module.scss';
 
 type Props = {
   categories: Category[];
+  isLoading?: boolean;
   selected: number | null;
   onChange: (id: number | null) => void;
   error?: string;
@@ -22,6 +23,7 @@ const SCROLL_EDGE_TOLERANCE = 1;
 
 export const CategoryPicker = ({
   categories,
+  isLoading = false,
   selected,
   onChange,
   error,
@@ -87,20 +89,25 @@ export const CategoryPicker = ({
           </button>
         )}
         <div ref={chipsRef} className={s.chips} data-tour="category-picker">
-          {categories.map(category => (
-            <button
-              key={category.id}
-              type="button"
-              data-tour={categoryTourId(category.name)}
-              aria-pressed={selected === category.id}
-              className={clsx(s.chip, selected === category.id && s.selected)}
-              onClick={() =>
-                onChange(selected === category.id ? null : category.id)
-              }
-            >
-              {formatCategoryDisplayName(category.name)}
-            </button>
-          ))}
+          {isLoading
+            ? 'loading...'
+            : categories.map(category => (
+                <button
+                  key={category.id}
+                  type="button"
+                  data-tour={categoryTourId(category.name)}
+                  aria-pressed={selected === category.id}
+                  className={clsx(
+                    s.chip,
+                    selected === category.id && s.selected,
+                  )}
+                  onClick={() =>
+                    onChange(selected === category.id ? null : category.id)
+                  }
+                >
+                  {formatCategoryDisplayName(category.name)}
+                </button>
+              ))}
         </div>
         {canScrollRight && (
           <button

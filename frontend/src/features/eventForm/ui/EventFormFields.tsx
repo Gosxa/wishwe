@@ -31,6 +31,7 @@ export const EventFormFields = ({ mode, form }: Props) => {
     <div className={s.fields}>
       <CategoryPicker
         categories={category.options}
+        isLoading={category.isLoading}
         selected={category.selected}
         onChange={category.onChange}
         error={category.error}
