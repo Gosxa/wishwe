@@ -38,6 +38,21 @@ $ring: clr.$acc-purple;
   @include anim.modal-overlay-enter;
 }
 
+.overlayPassthrough {
+  pointer-events: none;
+
+  .card {
+    pointer-events: auto;
+  }
+}
+
+.clickShield {
+  position: fixed;
+  z-index: 0;
+  pointer-events: auto;
+  touch-action: none;
+}
+
 .spotlight {
   position: fixed;
   pointer-events: none;
@@ -47,7 +62,8 @@ $ring: clr.$acc-purple;
     left $travel $ease,
     width $travel $ease,
     height $travel $ease,
-    border-radius $travel $ease;
+    border-radius $travel $ease,
+    opacity 0.3s ease-out;
 }
 
 .halo {
@@ -65,14 +81,31 @@ $ring: clr.$acc-purple;
     opacity 0.3s ease-out;
 }
 
-.haloHidden {
+.spotlightSoft {
+  box-shadow: 0 0 0 9999px rgba(clr.$ns-900, 0.34);
+}
+
+.haloHidden,
+.spotlightHidden {
   opacity: 0;
+}
+
+.overlayStill {
+  .spotlight,
+  .halo,
+  .card {
+    transition: opacity 0.3s ease-out;
+  }
+  .spotlightHidden,
+  .haloHidden {
+    transition: none;
+  }
 }
 
 .card {
   position: fixed;
   z-index: 1;
-  width: 344px;
+  width: 360px;
   max-width: calc(100vw - 40px);
   padding: 18px 20px 20px;
   border: 1px solid clr.$prm;
@@ -216,6 +249,69 @@ $ring: clr.$acc-purple;
   @include tp.text-body;
 }
 
+.hint {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba($ring, 0.28);
+  color: clr.$ns-900;
+
+  @include tp.text-caption;
+}
+
+.quickFill {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px dashed clr.$ns-300;
+  border-radius: 12px;
+  background: clr.$ns-100;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s $ease;
+
+  &:hover {
+    border-color: clr.$prm;
+    background: clr.$acc-yellow;
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+.quickFillValue {
+  color: clr.$ns-900;
+
+  @include tp.text-body;
+}
+
+.quickFillLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: clr.$prm;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+
+  @include tp.text-caption;
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
 .footer {
   display: flex;
   align-items: center;
@@ -327,7 +423,13 @@ $ring: clr.$acc-purple;
   .spotlight,
   .halo,
   .card,
-  .dot {
+  .quickFill,
+  .dot,
+  .overlayStill .spotlight,
+  .overlayStill .halo,
+  .overlayStill .card,
+  .overlayStill .spotlightHidden,
+  .overlayStill .haloHidden {
     transition: none;
   }
 

@@ -39,7 +39,10 @@ type Options = {
     payload: FormData | Record<string, unknown>,
   ) => Promise<unknown>;
   submitErrorBody: (error: unknown) => Record<string, unknown>;
-  onSuccess: () => void;
+  onSuccess: (created: unknown) => void;
+  onSubmitStart?: () => void;
+  onSubmitSettled?: () => void;
+  showGlobalLoader?: boolean;
 };
 
 export const useEventForm = ({
@@ -51,6 +54,9 @@ export const useEventForm = ({
   submitEvent,
   submitErrorBody,
   onSuccess,
+  onSubmitStart,
+  onSubmitSettled,
+  showGlobalLoader = true,
 }: Options): EventFormModel => {
   const setLoading = useLoadingStore(state => state.setLoading);
   const [values, setValues] = useState(initialValues);
@@ -194,20 +200,27 @@ export const useEventForm = ({
     }
 
     setErrors({});
+    onSubmitStart?.();
     setIsSubmitting(true);
-    setLoading(true);
+    if (showGlobalLoader) {
+      setLoading(true);
+    }
 
     try {
       const fields = buildEventFields(values, mode);
       const payload = buildEventPayload(fields, coverFile);
 
-      await submitEvent(values.type, payload);
-      onSuccess();
+      const created = await submitEvent(values.type, payload);
+
+      onSuccess(created);
     } catch (error) {
       setErrors(mapEventFormErrors(submitErrorBody(error)));
     } finally {
       setIsSubmitting(false);
-      setLoading(false);
+      onSubmitSettled?.();
+      if (showGlobalLoader) {
+        setLoading(false);
+      }
     }
   };
 

@@ -1,0 +1,16 @@
+@use '@shared/styles/colors' as clr;
+
+$field-padding: 9px 16px;
+$field-padding-block-mobile: 12px;
+
+@mixin quick-fill-overlay {
+  position: absolute;
+  inset: 0;
+  padding: $field-padding;
+  color: clr.$ns-900;
+  font: inherit;
+  font-size: max(16px, 1em);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  pointer-events: none;
+}

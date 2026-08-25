@@ -1,4 +1,5 @@
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/fields' as fld;
 @use '@shared/styles/typography' as typo;
 
 $ERR_SHADOW:
@@ -55,9 +56,9 @@ $FOCUS_SHADOW:
   outline: none;
   border-radius: 8px;
   border: none;
-  padding: 9px 16px;
+  padding: fld.$field-padding;
   color: clr.$ns-900;
-  transition: all 0.3s ease;
+  transition: box-shadow 0.3s ease;
   background-color: clr.$ns-50;
   box-shadow: inset 0 0 0 1px clr.$ns-300;
   resize: none;
@@ -111,4 +112,13 @@ $FOCUS_SHADOW:
       box-shadow: $SUCESS_SHADOW;
     }
   }
+
+  &.textareaQuickFilling {
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.quickFillOverlay {
+  @include fld.quick-fill-overlay;
 }

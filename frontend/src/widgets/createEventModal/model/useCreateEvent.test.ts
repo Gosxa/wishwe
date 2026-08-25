@@ -65,8 +65,14 @@ describe('useCreateEvent', () => {
     vi.unstubAllGlobals();
   });
 
-  const renderCreateHook = (defaultType: 'plan' | 'wish' = 'plan') =>
-    renderHook(() => useCreateEvent(onCreated, defaultType));
+  const renderCreateHook = (
+    defaultType: 'plan' | 'wish' = 'plan',
+    options: {
+      showGlobalLoader?: boolean;
+      onSubmitStart?: () => void;
+      onSubmitSettled?: () => void;
+    } = {},
+  ) => renderHook(() => useCreateEvent(onCreated, defaultType, options));
 
   const fillValidPlan = (
     result: ReturnType<typeof renderCreateHook>['result'],
@@ -144,6 +150,28 @@ describe('useCreateEvent', () => {
     expect(setLoading.mock.calls).toEqual([[true], [false]]);
     expect(onCreated).toHaveBeenCalledOnce();
     expect(result.current.submit.isSubmitting).toBe(false);
+  });
+
+  it('can leave loading feedback to a local transition', async () => {
+    const onSubmitStart = vi.fn();
+    const onSubmitSettled = vi.fn();
+    const { result } = renderCreateHook('plan', {
+      showGlobalLoader: false,
+      onSubmitStart,
+      onSubmitSettled,
+    });
+
+    await waitFor(() =>
+      expect(result.current.category.options).toHaveLength(2),
+    );
+    fillValidPlan(result);
+
+    await act(async () => result.current.submit.onSubmit());
+
+    expect(setLoading).not.toHaveBeenCalled();
+    expect(onCreated).toHaveBeenCalledOnce();
+    expect(onSubmitStart).toHaveBeenCalledOnce();
+    expect(onSubmitSettled).toHaveBeenCalledOnce();
   });
 
   it('validates the submitted title after trimming surrounding whitespace', async () => {

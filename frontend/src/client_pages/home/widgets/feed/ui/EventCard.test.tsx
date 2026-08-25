@@ -611,7 +611,9 @@ describe('EventCard', () => {
     expect(
       screen.getByRole('dialog', { name: 'Share this plan' }),
     ).toBeTruthy();
-    expect(screen.getByRole('status').textContent).toBe('Link Copied!');
+    expect(
+      within(dialog).getByRole('button', { name: 'Link copied!' }),
+    ).toBeTruthy();
   });
 
   it('keeps sharing open on Escape and closes by X', async () => {

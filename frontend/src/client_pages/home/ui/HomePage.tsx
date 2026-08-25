@@ -6,6 +6,7 @@ import { Sidebar } from '@widgets/sidebar';
 import { FeedTour } from '@widgets/productTour';
 import { useFeedSearch } from '@client_pages/home/model/useFeedSearch';
 import { Feed } from '../widgets/feed';
+import { OnboardingShare } from './OnboardingShare';
 import s from './homePage.module.scss';
 
 type Props = {
@@ -42,7 +43,12 @@ function HomePageContent({ showTour }: Required<Props>) {
           <Feed onSearchDisabledChange={setSearchDisabled} />
         </main>
       </div>
-      {showTour && <FeedTour />}
+      {showTour && (
+        <>
+          <FeedTour />
+          <OnboardingShare />
+        </>
+      )}
     </div>
   );
 }

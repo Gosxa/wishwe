@@ -18,6 +18,7 @@ export const EventTimingFields = ({ mode, form }: Props) => {
       <>
         <TextInput
           id="eventTimeframe"
+          tourId="field-timeframe"
           label="Timeframe"
           placeholder="Next weekend or sometime in June"
           required

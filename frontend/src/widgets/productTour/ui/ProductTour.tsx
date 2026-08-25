@@ -1,22 +1,29 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
+import { useAnchorSettled } from '../model/useAnchorSettled';
 import { useScrollLock } from '../model/useScrollLock';
 import { useTourKeyboard } from '../model/useTourKeyboard';
 import { useTourLayout } from '../model/useTourLayout';
-import { useTourNavigation } from '../model/useTourNavigation';
+import { isPassthrough } from '../model/types';
 import type { AnchorRect, TourEndReason, TourStep } from '../model/types';
 import { TourCard } from './TourCard';
+import { TourClickShield } from './TourClickShield';
 import s from './productTour.module.scss';
 
 type Props = {
   steps: TourStep[];
+  index: number;
+  onNext: () => void;
+  onBack?: () => void;
   onEnd: (reason: TourEndReason) => void;
+  onQuickFill?: (step: TourStep) => void;
+  nextDisabled?: boolean;
 };
 
 const rectStyle = (rect: AnchorRect | null): CSSProperties => ({
@@ -27,63 +34,120 @@ const rectStyle = (rect: AnchorRect | null): CSSProperties => ({
   borderRadius: rect?.radius ?? 0,
 });
 
-export const ProductTour = ({ steps: tourSteps, onEnd }: Props) => {
-  const pulseModal = useModalAttention();
+export const ProductTour = ({
+  steps,
+  index,
+  onNext,
+  onBack,
+  onEnd,
+  onQuickFill,
+  nextDisabled = false,
+}: Props) => {
   const cardRef = useRef<HTMLElement>(null);
+  const pulseModal = useModalAttention(cardRef);
+  const endedRef = useRef(false);
   const { requestCloseWith, overlayRef, modalTransitionProps } =
     useModalTransition();
 
   const titleId = useId();
   const bodyId = useId();
 
-  const { index, isLast, end, goBack, goNext } = useTourNavigation(
-    tourSteps.length,
-    reason => requestCloseWith(() => onEnd(reason)),
-  );
-
-  const step = tourSteps[index];
+  const step = steps[index];
+  const isLast = index === steps.length - 1;
   const isAnchored = Boolean(step?.anchor);
+  const passthrough = step ? isPassthrough(step) : false;
 
-  const anchoredSteps = tourSteps.filter(item => item.anchor);
+  const anchoredSteps = steps.filter(item => item.anchor);
   const anchoredNumber = step?.anchor ? anchoredSteps.indexOf(step) + 1 : 0;
 
-  const { rect, position } = useTourLayout(step, cardRef);
+  const { rect, position, hasAnchor, isSteady } = useTourLayout(step, cardRef);
+  const isSettled = useAnchorSettled(step, hasAnchor, isSteady);
+  const [placedStepId, setPlacedStepId] = useState<string | null>(null);
 
-  useScrollLock(overlayRef);
-  useTourKeyboard({ cardRef, goBack, goNext });
+  const stepId = step?.id ?? null;
+  const canTravel = isSettled && placedStepId === stepId;
 
   useEffect(() => {
+    if (!isSettled || placedStepId === stepId) return;
+
+    const frame = requestAnimationFrame(() => setPlacedStepId(stepId));
+
+    return () => cancelAnimationFrame(frame);
+  }, [isSettled, placedStepId, stepId]);
+
+  const end = useCallback(
+    (reason: TourEndReason) => {
+      if (endedRef.current) return;
+
+      endedRef.current = true;
+      requestCloseWith(() => onEnd(reason));
+    },
+    [onEnd, requestCloseWith],
+  );
+
+  const goNext = useCallback(() => {
+    if (endedRef.current) return;
+
+    if (isLast) end('finished');
+    else onNext();
+  }, [end, isLast, onNext]);
+
+  useScrollLock(overlayRef);
+  useTourKeyboard({
+    cardRef,
+    goBack: onBack ?? (() => {}),
+    goNext,
+    enabled: !passthrough,
+  });
+
+  useEffect(() => {
+    if (passthrough) return;
+
     cardRef.current?.focus({ preventScroll: true });
-  }, [index]);
+  }, [index, passthrough]);
 
   if (!step) return null;
 
   return createPortal(
     <div
       {...modalTransitionProps}
-      className={s.overlay}
+      className={clsx(
+        s.overlay,
+        passthrough && s.overlayPassthrough,
+        !canTravel && s.overlayStill,
+      )}
       role="presentation"
-      onClick={pulseModal}
+      onClick={passthrough ? undefined : pulseModal}
     >
-      <div className={s.spotlight} style={rectStyle(rect)} />
+      {passthrough && <TourClickShield rect={rect} onClick={pulseModal} />}
 
       <div
-        className={clsx(s.halo, !isAnchored && s.haloHidden)}
+        className={clsx(
+          s.spotlight,
+          passthrough && s.spotlightSoft,
+          !isSettled && s.spotlightHidden,
+        )}
+        style={rectStyle(rect)}
+      />
+
+      <div
+        className={clsx(s.halo, (!isAnchored || !isSettled) && s.haloHidden)}
         style={rectStyle(rect)}
       />
 
       <TourCard
         step={step}
-        index={index}
         isLast={isLast}
-        position={position}
+        position={isSettled ? position : null}
         anchoredSteps={anchoredSteps}
         anchoredNumber={anchoredNumber}
         titleId={titleId}
         bodyId={bodyId}
         cardRef={cardRef}
-        onBack={goBack}
+        nextDisabled={nextDisabled}
+        onBack={onBack}
         onNext={goNext}
+        onQuickFill={onQuickFill}
         onSkip={() => end('skipped')}
       />
     </div>,

@@ -33,6 +33,10 @@ vi.mock('./EventModalHost', () => ({
   EventModalHost: () => <div data-testid="event-modal-host" />,
 }));
 
+vi.mock('./CreatedEventShareHost', () => ({
+  CreatedEventShareHost: () => <div data-testid="created-event-share-host" />,
+}));
+
 import UserLayout from './layout';
 
 const profile = (overrides: Partial<Profile> = {}): Profile => ({
@@ -81,6 +85,7 @@ describe('(protected)/layout', () => {
 
     expect(screen.getByTestId('child')).toBeDefined();
     expect(screen.getByTestId('event-modal-host')).toBeDefined();
+    expect(screen.getByTestId('created-event-share-host')).toBeDefined();
     expect(mocks.storeInit).toHaveBeenCalledWith(user);
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
@@ -92,6 +97,7 @@ describe('(protected)/layout', () => {
 
     expect(screen.getByTestId('child')).toBeDefined();
     expect(screen.getByTestId('event-modal-host')).toBeDefined();
+    expect(screen.getByTestId('created-event-share-host')).toBeDefined();
     expect(screen.queryByTestId('user-store-initializer')).toBeNull();
     expect(mocks.redirect).not.toHaveBeenCalled();
   });

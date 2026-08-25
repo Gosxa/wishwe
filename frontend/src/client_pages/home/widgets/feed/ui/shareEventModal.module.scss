@@ -16,6 +16,71 @@
   }
 }
 
+@keyframes share-arrival-modal {
+  0% {
+    opacity: 0;
+    transform: translateY(34px) scale(0.9);
+  }
+
+  62% {
+    opacity: 1;
+    transform: translateY(-5px) scale(1.012);
+  }
+
+  82% {
+    transform: translateY(2px) scale(0.997);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes share-arrival-aura {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.38);
+  }
+
+  42% {
+    opacity: 0.92;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.18);
+  }
+}
+
+@keyframes share-arrival-particle {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--arrival-angle)) translateY(0) scale(0.4);
+  }
+
+  24% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: rotate(var(--arrival-angle)) translateY(-330px) scale(1);
+  }
+}
+
+@keyframes share-arrival-content {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes skeleton-pulse {
   0%,
   100% {
@@ -39,7 +104,7 @@
   padding: 24px;
   background: rgba(clr.$ns-900, 0.42);
   backdrop-filter: blur(8px);
-  overflow-y: auto;
+  overflow: hidden;
   @include anim.modal-overlay-enter;
 }
 
@@ -55,6 +120,124 @@
   box-shadow: 0 18px 56px rgba(clr.$ns-900, 0.24);
   overflow: hidden;
   @include anim.modal-enter;
+}
+
+.arrivalOverlay {
+  isolation: isolate;
+}
+
+.arrivalAura {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 0;
+  width: 680px;
+  height: 680px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(clr.$acc-purple, 0.7);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(clr.$acc-yellow, 0.2),
+    rgba(clr.$acc-purple, 0.12) 42%,
+    transparent 68%
+  );
+  animation: share-arrival-aura 0.9s ease-out both;
+
+  > span {
+    --arrival-angle: 0deg;
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 7px;
+    height: 17px;
+    margin: -8px 0 0 -3px;
+    border-radius: 999px;
+    background: clr.$acc-yellow;
+    opacity: 0;
+    transform-origin: 50% 8px;
+    animation: share-arrival-particle 0.82s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+    &:nth-child(2n) {
+      background: clr.$acc-purple;
+    }
+
+    &:nth-child(3n) {
+      background: clr.$prm;
+    }
+
+    &:nth-child(1) {
+      --arrival-angle: 0deg;
+    }
+
+    &:nth-child(2) {
+      --arrival-angle: 45deg;
+      animation-delay: 0.03s;
+    }
+
+    &:nth-child(3) {
+      --arrival-angle: 90deg;
+      animation-delay: 0.06s;
+    }
+
+    &:nth-child(4) {
+      --arrival-angle: 135deg;
+      animation-delay: 0.02s;
+    }
+
+    &:nth-child(5) {
+      --arrival-angle: 180deg;
+      animation-delay: 0.07s;
+    }
+
+    &:nth-child(6) {
+      --arrival-angle: 225deg;
+      animation-delay: 0.04s;
+    }
+
+    &:nth-child(7) {
+      --arrival-angle: 270deg;
+      animation-delay: 0.08s;
+    }
+
+    &:nth-child(8) {
+      --arrival-angle: 315deg;
+      animation-delay: 0.05s;
+    }
+  }
+}
+
+.arrivalModal {
+  z-index: 1;
+  animation: share-arrival-modal 0.72s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  .header,
+  .close,
+  .body > * {
+    animation: share-arrival-content 0.42s ease-out both;
+  }
+
+  .header {
+    animation-delay: 0.16s;
+  }
+
+  .close {
+    animation-delay: 0.2s;
+  }
+
+  .body > :nth-child(1) {
+    animation-delay: 0.21s;
+  }
+
+  .body > :nth-child(2) {
+    animation-delay: 0.27s;
+  }
+
+  .body > :nth-child(3) {
+    animation-delay: 0.33s;
+  }
 }
 
 .body {
@@ -629,21 +812,6 @@
   cursor: pointer;
 }
 
-.toast {
-  position: fixed;
-  bottom: 32px;
-  left: 50%;
-  z-index: 300;
-  padding: 12px 24px;
-  transform: translateX(-50%);
-  border-radius: 12px;
-  background: clr.$ns-900;
-  color: clr.$ns-50;
-  box-shadow: 0 8px 24px rgba(clr.$ns-900, 0.24);
-  white-space: nowrap;
-  @include tp.text-body;
-}
-
 .srOnly {
   position: absolute;
   width: 1px;
@@ -659,6 +827,11 @@
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   .modal,
+  .arrivalAura,
+  .arrivalAura > span,
+  .arrivalModal .header,
+  .arrivalModal .close,
+  .arrivalModal .body > *,
   .confirmOverlay,
   .confirmModal,
   .preview,
@@ -669,5 +842,9 @@
   .dot,
   .networkButton {
     transition: none;
+  }
+
+  .arrivalAura {
+    display: none;
   }
 }

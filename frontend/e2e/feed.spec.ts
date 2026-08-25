@@ -212,6 +212,8 @@ test.describe('feed contents', () => {
       await expect(details).toBeVisible();
 
       await details.getByRole('button', { name: 'Join', exact: true }).click();
+
+      await movePointerAway(reader.page);
       await expect(
         details.getByRole('button', { name: /Joined/ }),
       ).toBeVisible();
@@ -224,6 +226,7 @@ test.describe('feed contents', () => {
         participants.getByRole('link', { name: `@${reader.account.username}` }),
       ).toBeVisible();
       await participants.getByRole('button', { name: 'Close' }).click();
+      await movePointerAway(reader.page);
 
       await reader.page.reload();
 
@@ -294,6 +297,7 @@ test.describe('feed contents', () => {
 
       await reader.page.unroute(joinEndpoint);
       await card.getByRole('button', { name: 'Join', exact: true }).click();
+      await movePointerAway(reader.page);
 
       await expect(card.getByRole('button', { name: /Joined/ })).toBeVisible();
     } finally {

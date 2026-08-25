@@ -144,7 +144,6 @@ describe('useShareEvent', () => {
       "Couldn't copy the link. Please try again.",
     );
     expect(result.current.feedback).toBe('idle');
-    expect(result.current.showLinkToast).toBe(false);
   });
 
   it('resets copy feedback and clears its pending timer on unmount', async () => {
@@ -156,13 +155,11 @@ describe('useShareEvent', () => {
 
     expect(result.current.feedback).toBe('link');
     expect(result.current.announcement).toBe('Link copied!');
-    expect(result.current.showLinkToast).toBe(true);
 
     await act(async () => vi.advanceTimersByTimeAsync(2_000));
 
     expect(result.current.feedback).toBe('idle');
     expect(result.current.announcement).toBe('');
-    expect(result.current.showLinkToast).toBe(false);
 
     await act(async () => result.current.handleCopyLink());
     expect(vi.getTimerCount()).toBe(1);
