@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   redirect: vi.fn((path: string) => {
     throw new Error(`NEXT_REDIRECT:${path}`);
   }),
+  sidebar: vi.fn(),
   storeInit: vi.fn(),
 }));
 
@@ -35,6 +36,14 @@ vi.mock('./EventModalHost', () => ({
 
 vi.mock('./CreatedEventShareHost', () => ({
   CreatedEventShareHost: () => <div data-testid="created-event-share-host" />,
+}));
+
+vi.mock('./ProtectedSidebar', () => ({
+  ProtectedSidebar: ({ isAuthenticated }: { isAuthenticated: boolean }) => {
+    mocks.sidebar(isAuthenticated);
+
+    return <nav data-testid="protected-sidebar" />;
+  },
 }));
 
 import UserLayout from './layout';
@@ -86,6 +95,8 @@ describe('(protected)/layout', () => {
     expect(screen.getByTestId('child')).toBeDefined();
     expect(screen.getByTestId('event-modal-host')).toBeDefined();
     expect(screen.getByTestId('created-event-share-host')).toBeDefined();
+    expect(screen.getByTestId('protected-sidebar')).toBeDefined();
+    expect(mocks.sidebar).toHaveBeenCalledWith(true);
     expect(mocks.storeInit).toHaveBeenCalledWith(user);
     expect(mocks.redirect).not.toHaveBeenCalled();
   });
@@ -98,6 +109,7 @@ describe('(protected)/layout', () => {
     expect(screen.getByTestId('child')).toBeDefined();
     expect(screen.getByTestId('event-modal-host')).toBeDefined();
     expect(screen.getByTestId('created-event-share-host')).toBeDefined();
+    expect(mocks.sidebar).toHaveBeenCalledWith(false);
     expect(screen.queryByTestId('user-store-initializer')).toBeNull();
     expect(mocks.redirect).not.toHaveBeenCalled();
   });

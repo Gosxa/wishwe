@@ -136,11 +136,6 @@ describe('FriendsPage search results', () => {
 
     expect(screen.getByRole('link', { name: '@Alice' })).toBeTruthy();
     expect(screen.getByRole('link', { name: '@Bob' })).toBeTruthy();
-    expect(
-      screen
-        .getByRole('link', { name: 'Friends' })
-        .getAttribute('aria-current'),
-    ).toBe('page');
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
     fireEvent.click(screen.getByRole('button', { name: 'Decline' }));

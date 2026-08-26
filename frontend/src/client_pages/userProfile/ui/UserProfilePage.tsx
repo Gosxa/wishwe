@@ -6,7 +6,6 @@ import type {
   PublicProfile,
 } from '@/shared/client_api/user/types';
 import { Header } from '@widgets/header';
-import { Sidebar } from '@widgets/sidebar';
 import { useProfileSearch } from '@client_pages/profile/model/useProfileSearch';
 import s from '@client_pages/profile/ui/profilePage.module.scss';
 import { UserProfileHeader } from './UserProfileHeader';
@@ -35,7 +34,6 @@ function UserProfilePageContent({ profile }: Props) {
     <div className={s.shell}>
       <Header search={{ ...search, placeholder: 'Search events' }} />
       <div className={s.body}>
-        <Sidebar />
         <main className={s.content}>
           <UserProfileHeader
             profile={profile}

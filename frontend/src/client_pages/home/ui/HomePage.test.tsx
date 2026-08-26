@@ -7,10 +7,6 @@ vi.mock('@widgets/header', () => ({
   Header: () => <header />,
 }));
 
-vi.mock('@widgets/sidebar', () => ({
-  Sidebar: () => <nav />,
-}));
-
 vi.mock('@widgets/productTour', () => ({
   FeedTour: () => <div data-testid="feed-tour" />,
 }));

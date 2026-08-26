@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 import { Header } from '@widgets/header';
-import { Sidebar } from '@widgets/sidebar';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useFriends } from '../model/useFriends';
 import { useUserSearch } from '../model/useUserSearch';
@@ -58,7 +57,6 @@ export default function FriendsPage() {
         }}
       />
       <div className={s.body}>
-        <Sidebar activeKey="friends" />
         <main className={s.content}>
           <div className={s.columns}>
             <div className={s.leftCol}>

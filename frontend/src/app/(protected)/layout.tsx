@@ -10,6 +10,7 @@ import {
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
 import { CreatedEventShareHost } from './CreatedEventShareHost';
 import { EventModalHost } from './EventModalHost';
+import { ProtectedSidebar } from './ProtectedSidebar';
 
 export default async function UserLayout({
   children,
@@ -30,6 +31,7 @@ export default async function UserLayout({
   return (
     <>
       {user && <UserStoreInitializer user={user} />}
+      <ProtectedSidebar isAuthenticated={Boolean(user)} />
       {children}
       <EventModalHost />
       <CreatedEventShareHost />

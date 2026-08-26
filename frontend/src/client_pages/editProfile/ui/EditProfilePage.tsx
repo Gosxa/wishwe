@@ -2,7 +2,6 @@
 
 import type { Profile } from '@/shared/client_api/auth/types';
 import { Header } from '@widgets/header';
-import { Sidebar } from '@widgets/sidebar';
 import { Avatar, Pencil } from '@shared/ui/icons';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { TextArea } from '@shared/ui/textArea/TextArea';
@@ -41,7 +40,6 @@ export default function EditProfilePage({ initialUser }: Props) {
     <div className={s.shell}>
       <Header showSearch={false} />
       <div className={s.body}>
-        <Sidebar activeKey="profile" />
         <main className={s.content}>
           <section className={s.card}>
             <h1 className={s.title}>Edit your profile</h1>
