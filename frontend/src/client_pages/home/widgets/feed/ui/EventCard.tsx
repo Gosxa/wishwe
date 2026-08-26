@@ -49,7 +49,16 @@ export const EventCard = ({
   const participation = useEventParticipation(event);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [isRecapOpen, setIsRecapOpen] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(autoOpenDetails);
+  const [detailsState, setDetailsState] = useState({
+    autoOpenDetails,
+    isOpen: autoOpenDetails,
+  });
+  const isDetailsOpen =
+    detailsState.autoOpenDetails === autoOpenDetails
+      ? detailsState.isOpen
+      : autoOpenDetails;
+  const setIsDetailsOpen = (isOpen: boolean) =>
+    setDetailsState({ autoOpenDetails, isOpen });
   const [participationError, setParticipationError] = useState<string | null>(
     null,
   );

@@ -7,11 +7,15 @@ import type { FeedEvent } from '@client_pages/home/model/types';
 import type { PublicProfile } from '@/shared/client_api/user/types';
 
 const mocks = vi.hoisted(() => ({
+  clearEventParam: vi.fn(),
   error: null as string | null,
   events: [] as FeedEvent[],
+  openEventId: null as string | null,
   retry: vi.fn(),
+  setEventParam: vi.fn(),
   setSort: vi.fn(),
   setTab: vi.fn(),
+  showDeepLinkCard: false,
   sort: 'recent' as 'recent' | 'soonest',
   tab: 'plans' as 'plans' | 'wishes' | 'archive',
   useProfileEvents: vi.fn(),
@@ -32,6 +36,15 @@ vi.mock('@client_pages/profile/model/useProfileToolbar', () => ({
 
 vi.mock('@client_pages/profile/model/useProfileEvents', () => ({
   useProfileEvents: mocks.useProfileEvents,
+}));
+
+vi.mock('@shared/hooks/useEventDeepLink', () => ({
+  useEventDeepLink: () => ({
+    clearEventParam: mocks.clearEventParam,
+    openEventId: mocks.openEventId,
+    setEventParam: mocks.setEventParam,
+    showDeepLinkCard: mocks.showDeepLinkCard,
+  }),
 }));
 
 vi.mock('@widgets/header', () => ({
@@ -73,8 +86,45 @@ vi.mock('./UserProfileFriendButton', () => ({
 }));
 
 vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
-  EventCard: ({ event }: { event: FeedEvent }) => (
-    <article>{event.title}</article>
+  EventCard: ({
+    autoOpenDetails,
+    event,
+    onDetailsClose,
+    onDetailsOpen,
+  }: {
+    autoOpenDetails: boolean;
+    event: FeedEvent;
+    onDetailsClose: () => void;
+    onDetailsOpen: () => void;
+  }) => (
+    <article>
+      <button type="button" onClick={onDetailsOpen}>
+        {event.title}
+      </button>
+      {autoOpenDetails && (
+        <section aria-label={`${event.title} details`}>
+          <button type="button" onClick={onDetailsClose}>
+            Close details
+          </button>
+        </section>
+      )}
+    </article>
+  ),
+}));
+
+vi.mock('@client_pages/home/widgets/feed/ui/DeepLinkCard', () => ({
+  DeepLinkCard: ({
+    eventId,
+    onClose,
+  }: {
+    eventId: string;
+    onClose: () => void;
+  }) => (
+    <section aria-label={`Linked event ${eventId}`}>
+      <button type="button" onClick={onClose}>
+        Close linked event
+      </button>
+    </section>
   ),
 }));
 
@@ -112,6 +162,8 @@ describe('UserProfilePage', () => {
     vi.clearAllMocks();
     mocks.error = null;
     mocks.events = [];
+    mocks.openEventId = null;
+    mocks.showDeepLinkCard = false;
     mocks.sort = 'recent';
     mocks.tab = 'plans';
     mocks.useProfileEvents.mockImplementation(
@@ -205,5 +257,40 @@ describe('UserProfilePage', () => {
 
     expect(screen.queryByText('Friends-only profile')).toBeNull();
     expect(screen.getByRole('article').textContent).toBe('Board games');
+  });
+
+  it('round-trips event details through the URL on another user profile', () => {
+    mocks.events = [event];
+    mocks.openEventId = event.id;
+
+    render(
+      <UserProfilePage profile={profile({ friendship_status: 'friends' })} />,
+    );
+
+    expect(
+      screen.getByRole('region', { name: 'Board games details' }),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Board games' }));
+    expect(mocks.setEventParam).toHaveBeenCalledWith('event-8');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close details' }));
+    expect(mocks.clearEventParam).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads an event URL that is not present in the visible profile feed', () => {
+    mocks.openEventId = 'event-99';
+    mocks.showDeepLinkCard = true;
+
+    render(
+      <UserProfilePage profile={profile({ friendship_status: 'friends' })} />,
+    );
+
+    expect(
+      screen.getByRole('region', { name: 'Linked event event-99' }),
+    ).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close linked event' }));
+    expect(mocks.clearEventParam).toHaveBeenCalledTimes(1);
   });
 });

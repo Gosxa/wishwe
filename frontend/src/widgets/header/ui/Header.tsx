@@ -7,7 +7,6 @@ import { logout } from '@/shared/client_api/auth';
 import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
-import { useEventModalStore } from '@/shared/store/useEventModalStore';
 import { CreateEventModal } from '@widgets/createEventModal';
 import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
@@ -39,7 +38,6 @@ export const Header = ({
   const createDefaultType = useCreateEventStore(state => state.defaultType);
   const openCreate = useCreateEventStore(state => state.open);
   const closeCreate = useCreateEventStore(state => state.close);
-  const openEventModal = useEventModalStore(state => state.open);
   const [openMenu, setOpenMenu] = useState<'notifications' | 'settings' | null>(
     null,
   );
@@ -144,7 +142,7 @@ export const Header = ({
               onRetry={retryNotifications}
               onEventClick={eventId => {
                 setOpenMenu(null);
-                openEventModal(String(eventId));
+                router.push(`/feed?event=${encodeURIComponent(eventId)}`);
               }}
               onUserClick={username => {
                 setOpenMenu(null);

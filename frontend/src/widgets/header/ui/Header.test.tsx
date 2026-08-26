@@ -81,7 +81,6 @@ vi.mock('./NotificationsDropdown', () => ({
 
 import { Header } from './Header';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
-import { useEventModalStore } from '@/shared/store/useEventModalStore';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
 import s from '../header.module.scss';
@@ -91,7 +90,6 @@ describe('Header', () => {
 
   beforeEach(() => {
     useCreateEventStore.setState({ isOpen: false, defaultType: 'plan' });
-    useEventModalStore.setState({ eventId: null });
     useEventsRefreshStore.setState({
       refreshToken: 0,
       isDeferred: false,
@@ -298,13 +296,13 @@ describe('Header', () => {
       expect(retry).toHaveBeenCalledOnce();
     });
 
-    it('opens the event modal and closes the dropdown on an event click', () => {
+    it('navigates to the event URL and closes the dropdown on an event click', () => {
       render(<Header />);
 
       fireEvent.click(notificationsButton());
       fireEvent.click(screen.getByRole('button', { name: 'Open event' }));
 
-      expect(useEventModalStore.getState().eventId).toBe('42');
+      expect(mocks.push).toHaveBeenCalledWith('/feed?event=42');
       expect(
         screen.queryByRole('region', { name: 'Notifications panel' }),
       ).toBeNull();

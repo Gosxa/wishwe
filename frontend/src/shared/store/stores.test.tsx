@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { UserStoreInitializer } from './UserStoreInitializer';
 import { useCreateEventStore } from './useCreateEventStore';
-import { useEventModalStore } from './useEventModalStore';
 import { useEventsRefreshStore } from './useEventsRefreshStore';
 import { useLoadingStore } from './useLoadingStore';
 import { useUserStore } from './useUserStore';
@@ -30,7 +29,6 @@ const profile: Profile = {
 describe('shared Zustand stores', () => {
   beforeEach(() => {
     useCreateEventStore.setState({ isOpen: false, defaultType: 'plan' });
-    useEventModalStore.setState({ eventId: null });
     useEventsRefreshStore.setState({
       refreshToken: 0,
       isDeferred: false,
@@ -64,17 +62,6 @@ describe('shared Zustand stores', () => {
       defaultType: 'plan',
       isOpen: true,
     });
-  });
-
-  it('opens, replaces, and closes the selected event modal', () => {
-    useEventModalStore.getState().open('first');
-    expect(useEventModalStore.getState().eventId).toBe('first');
-
-    useEventModalStore.getState().open('second');
-    expect(useEventModalStore.getState().eventId).toBe('second');
-
-    useEventModalStore.getState().close();
-    expect(useEventModalStore.getState().eventId).toBeNull();
   });
 
   it('increments the event refresh token for every request', () => {

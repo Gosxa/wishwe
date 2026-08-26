@@ -30,10 +30,6 @@ vi.mock('@/shared/store/UserStoreInitializer', () => ({
   },
 }));
 
-vi.mock('./EventModalHost', () => ({
-  EventModalHost: () => <div data-testid="event-modal-host" />,
-}));
-
 vi.mock('./CreatedEventShareHost', () => ({
   CreatedEventShareHost: () => <div data-testid="created-event-share-host" />,
 }));
@@ -85,7 +81,7 @@ describe('(protected)/layout', () => {
     cleanup();
   });
 
-  it('renders children, hydrates the user store, and mounts the global modal host', async () => {
+  it('renders children, hydrates the user store, and mounts global UI', async () => {
     const user = profile();
 
     mocks.authUser.mockResolvedValue(user);
@@ -93,7 +89,6 @@ describe('(protected)/layout', () => {
     await renderLayout();
 
     expect(screen.getByTestId('child')).toBeDefined();
-    expect(screen.getByTestId('event-modal-host')).toBeDefined();
     expect(screen.getByTestId('created-event-share-host')).toBeDefined();
     expect(screen.getByTestId('protected-sidebar')).toBeDefined();
     expect(mocks.sidebar).toHaveBeenCalledWith(true);
@@ -107,7 +102,6 @@ describe('(protected)/layout', () => {
     await renderLayout();
 
     expect(screen.getByTestId('child')).toBeDefined();
-    expect(screen.getByTestId('event-modal-host')).toBeDefined();
     expect(screen.getByTestId('created-event-share-host')).toBeDefined();
     expect(mocks.sidebar).toHaveBeenCalledWith(false);
     expect(screen.queryByTestId('user-store-initializer')).toBeNull();

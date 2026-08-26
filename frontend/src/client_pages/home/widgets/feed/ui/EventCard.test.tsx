@@ -539,6 +539,23 @@ describe('EventCard', () => {
     expect(onDetailsClose).toHaveBeenCalledTimes(1);
   });
 
+  it('follows event URL selection changes after the card has mounted', () => {
+    const event = feedEvent();
+    const { rerender } = render(
+      <EventCard event={event} enableDetails autoOpenDetails={false} />,
+    );
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    rerender(<EventCard event={event} enableDetails autoOpenDetails={true} />);
+
+    expect(screen.getByRole('dialog', { name: 'Weekend trip' })).toBeTruthy();
+
+    rerender(<EventCard event={event} enableDetails autoOpenDetails={false} />);
+
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
   it('deactivates event details while participants are open', () => {
     renderCard({
       event: feedEvent({

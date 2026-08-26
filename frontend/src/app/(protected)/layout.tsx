@@ -9,7 +9,6 @@ import {
 } from '@/shared/lib/nextPath';
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
 import { CreatedEventShareHost } from './CreatedEventShareHost';
-import { EventModalHost } from './EventModalHost';
 import { ProtectedSidebar } from './ProtectedSidebar';
 
 export default async function UserLayout({
@@ -33,7 +32,6 @@ export default async function UserLayout({
       {user && <UserStoreInitializer user={user} />}
       <ProtectedSidebar isAuthenticated={Boolean(user)} />
       {children}
-      <EventModalHost />
       <CreatedEventShareHost />
     </>
   );

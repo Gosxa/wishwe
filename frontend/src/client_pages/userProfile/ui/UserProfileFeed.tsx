@@ -5,6 +5,8 @@ import type {
   PublicProfile,
 } from '@/shared/client_api/user/types';
 import { EventFeedLayout } from '@widgets/eventFeed';
+import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
+import { DeepLinkCard } from '@client_pages/home/widgets/feed/ui/DeepLinkCard';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
 import { useProfileToolbar } from '@client_pages/profile/model/useProfileToolbar';
@@ -33,9 +35,17 @@ export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
 
   const isArchive = tab === 'archive';
 
+  const { openEventId, setEventParam, clearEventParam, showDeepLinkCard } =
+    useEventDeepLink(events, isLoading);
+
   return (
     <EventFeedLayout
       variant="profile"
+      before={
+        showDeepLinkCard && openEventId ? (
+          <DeepLinkCard eventId={openEventId} onClose={clearEventParam} />
+        ) : null
+      }
       toolbar={
         <ProfileFeedToolbar
           activeTab={tab}
@@ -66,8 +76,11 @@ export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
           isOwn={false}
           isArchived={isArchive}
           enableDetails={!isArchive}
+          autoOpenDetails={!isArchive && event.id === openEventId}
           showEventType={false}
           showChat
+          onDetailsOpen={() => setEventParam(event.id)}
+          onDetailsClose={clearEventParam}
         />
       ))}
     </EventFeedLayout>
