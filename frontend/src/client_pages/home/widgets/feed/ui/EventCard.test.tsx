@@ -12,6 +12,7 @@ import {
 import type { ComponentProps } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BackendEvent } from '@/shared/client_api/event';
+import { FALLBACK_COVER } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 
 const apiMocks = vi.hoisted(() => ({
@@ -196,9 +197,47 @@ describe('EventCard', () => {
     window.sessionStorage.clear();
   });
 
+  it('uses the bundled cover when the event image fails to load', () => {
+    renderCard({
+      event: feedEvent({ image: '/media/deleted-cover.jpg' }),
+    });
+
+    const cover = screen.getByRole('img', { name: 'Weekend trip' });
+
+    expect(cover.getAttribute('src')).toBe('/media/deleted-cover.jpg');
+
+    fireEvent.error(cover);
+
+    expect(cover.getAttribute('src')).toBe(FALLBACK_COVER);
+
+    fireEvent.error(cover);
+
+    expect(cover.getAttribute('src')).toBe(FALLBACK_COVER);
+  });
+
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
+  });
+
+  it('recovers when the cover failed before React attached its handler', async () => {
+    vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(
+      true,
+    );
+    vi.spyOn(HTMLImageElement.prototype, 'naturalWidth', 'get').mockReturnValue(
+      0,
+    );
+
+    renderCard({
+      event: feedEvent({ image: '/media/cached-missing-cover.jpg' }),
+    });
+
+    await waitFor(() =>
+      expect(
+        screen.getByRole('img', { name: 'Weekend trip' }).getAttribute('src'),
+      ).toBe(FALLBACK_COVER),
+    );
   });
 
   it('joins a plan and applies the returned count and participant preview', async () => {

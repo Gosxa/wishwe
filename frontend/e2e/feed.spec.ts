@@ -1,4 +1,5 @@
 import type { Browser, Page } from '@playwright/test';
+import type { BackendEvent, Paginated } from '@shared/client_api/event';
 import { expect, test, expectNoA11yViolations } from './support/test';
 import {
   registerDisposableAccount,
@@ -113,6 +114,69 @@ test.describe('feed toolbar', () => {
 });
 
 test.describe('feed contents', () => {
+  test('falls back from a missing cover without stretching the media', async ({
+    browser,
+    baseURL,
+  }) => {
+    const reader = await readerWithFriend(browser, baseURL!, 'missingcover');
+    const title = 'Picnic with a deleted cover';
+    const deletedCover = '/media/deleted-event-cover.jpg';
+    const longDescription = Array(8)
+      .fill('This longer description keeps the event details readable.')
+      .join(' ');
+
+    try {
+      const event = await createPlan(reader.friend.api, { title });
+
+      await reader.page.route('**/api/event/events?**', async route => {
+        const response = await route.fetch();
+        const page = (await response.json()) as Paginated<BackendEvent>;
+
+        await route.fulfill({
+          response,
+          json: {
+            ...page,
+            results: page.results.map(item =>
+              String(item.id) === event.id
+                ? {
+                    ...item,
+                    cover_image: deletedCover,
+                    description: longDescription,
+                  }
+                : item,
+            ),
+          },
+        });
+      });
+      await reader.page.route(`**${deletedCover}`, route =>
+        route.fulfill({ status: 404, body: '' }),
+      );
+
+      const missingCoverRequest = reader.page.waitForRequest(
+        `**${deletedCover}`,
+      );
+
+      await reader.page.goto('/feed');
+      await missingCoverRequest;
+
+      const card = eventCard(reader.page, title);
+      const cover = card.getByRole('img', { name: title });
+
+      await expect(cover).toHaveAttribute('src', '/bg-gradient-noise.webp');
+
+      const media = cover.locator('..');
+      const mediaBox = await media.boundingBox();
+      const cardBox = await card.boundingBox();
+
+      expect(mediaBox).not.toBeNull();
+      expect(cardBox).not.toBeNull();
+      expect(mediaBox!.width / mediaBox!.height).toBeCloseTo(16 / 9, 1);
+      expect(mediaBox!.height).toBeLessThan(cardBox!.height);
+    } finally {
+      await reader.close();
+    }
+  });
+
   test('shows a friend’s plan and lets you join and leave it', async ({
     browser,
     baseURL,

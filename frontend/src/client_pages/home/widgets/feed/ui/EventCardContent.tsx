@@ -1,4 +1,4 @@
-import type { MouseEventHandler } from 'react';
+import { useEffect, useRef, useState, type MouseEventHandler } from 'react';
 import clsx from 'clsx';
 import {
   Avatar,
@@ -13,6 +13,7 @@ import {
   X,
 } from '@shared/ui/icons';
 import { ProfileLink } from '@shared/ui/profileLink';
+import { FALLBACK_COVER } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { EventCardMenu } from './EventCardMenu';
 import type { EventParticipation } from '../model/useEventParticipation';
@@ -37,6 +38,45 @@ type Props = {
 };
 
 const MAX_VISIBLE_AVATARS = 3;
+
+type EventCoverProps = {
+  src: string;
+  alt: string;
+  isArchived: boolean;
+};
+
+const EventCover = ({ src, alt, isArchived }: EventCoverProps) => {
+  const [resolvedSrc, setResolvedSrc] = useState(src);
+  const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const image = imageRef.current;
+
+    if (!image?.complete || image.naturalWidth > 0) return;
+
+    let isMounted = true;
+
+    queueMicrotask(() => {
+      if (isMounted) setResolvedSrc(FALLBACK_COVER);
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      ref={imageRef}
+      className={clsx(s.image, isArchived && s.imageArchived)}
+      src={resolvedSrc}
+      alt={alt}
+      loading="lazy"
+      onError={() => setResolvedSrc(FALLBACK_COVER)}
+    />
+  );
+};
 
 export const EventCardContent = ({
   event,
@@ -88,12 +128,11 @@ export const EventCardContent = ({
       onClick={onSurfaceClick}
     >
       <div className={s.media} data-tour={tourId}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className={clsx(s.image, isArchived && s.imageArchived)}
+        <EventCover
+          key={image}
           src={image}
           alt={title}
-          loading="lazy"
+          isArchived={isArchived}
         />
         <div className={s.tags}>
           {showEventType && (
