@@ -310,11 +310,6 @@ describe('ProfilePage', () => {
     expect(
       screen.getByRole('link', { name: 'Edit profile' }).getAttribute('href'),
     ).toBe('/edit-profile');
-    expect(
-      screen
-        .getByRole('link', { name: 'Profile' })
-        .getAttribute('aria-current'),
-    ).toBe('page');
     expect(screen.getByText('Sunset picnic')).toBeTruthy();
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy link!' }));

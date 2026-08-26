@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 import Link from 'next/link';
-import type { ComponentType } from 'react';
+import type { ComponentType, Ref } from 'react';
 import s from '../sidebar.module.scss';
 
 type Props = {
@@ -10,6 +10,7 @@ type Props = {
   isActive?: boolean;
   avatarUrl?: string | null;
   tourId?: string;
+  itemRef?: Ref<HTMLAnchorElement>;
 };
 
 export const NavItem = ({
@@ -19,8 +20,10 @@ export const NavItem = ({
   isActive,
   avatarUrl,
   tourId,
+  itemRef,
 }: Props) => (
   <Link
+    ref={itemRef}
     href={href}
     data-tour={tourId}
     className={clsx(s.navItem, isActive && s.active)}

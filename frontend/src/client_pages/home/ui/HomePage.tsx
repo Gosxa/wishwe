@@ -2,7 +2,6 @@
 
 import { Suspense, useState } from 'react';
 import { Header } from '@widgets/header';
-import { Sidebar } from '@widgets/sidebar';
 import { FeedTour } from '@widgets/productTour';
 import { useFeedSearch } from '@client_pages/home/model/useFeedSearch';
 import { Feed } from '../widgets/feed';
@@ -38,7 +37,6 @@ function HomePageContent({ showTour }: Required<Props>) {
         }}
       />
       <div className={s.body}>
-        <Sidebar activeKey="home" mobileFeedLayout />
         <main className={s.content}>
           <Feed onSearchDisabledChange={setSearchDisabled} />
         </main>

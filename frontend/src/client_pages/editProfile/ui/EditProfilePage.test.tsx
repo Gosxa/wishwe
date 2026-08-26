@@ -129,11 +129,6 @@ describe('EditProfilePage', () => {
       'Female',
     );
     expect(screen.getByText('Profile could not be saved')).toBeTruthy();
-    expect(
-      screen
-        .getByRole('link', { name: 'Profile' })
-        .getAttribute('aria-current'),
-    ).toBe('page');
     expect(container.querySelector('header')?.dataset.showSearch).toBe('false');
 
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));

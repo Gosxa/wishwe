@@ -1,6 +1,7 @@
 import { HomePage } from '@/client_pages';
 import { UserStoreInitializer } from '@/shared/store/UserStoreInitializer';
 import { Profile } from '@/shared/client_api/auth/types';
+import { Sidebar } from '@widgets/sidebar';
 
 const STUB_USER: Profile = {
   id: 1,
@@ -23,6 +24,7 @@ export default function TestPage() {
   return (
     <>
       <UserStoreInitializer user={STUB_USER} />
+      <Sidebar activeKey="home" mobileFeedLayout />
       <HomePage />
     </>
   );

@@ -3,19 +3,40 @@
 @use '@shared/styles/breakpoints' as bp;
 
 .sidebar {
-  position: sticky;
+  position: fixed;
   top: 72px;
+  left: 0;
+  z-index: 90;
   align-self: start;
   display: flex;
   flex-direction: column;
   gap: 24px;
   grid-column: 1;
+  width: var(--sidebar-width);
   height: calc(100vh - 72px);
   padding: 12px 0;
   border-right: 1px solid clr.$ns-300;
+  background: clr.$ns-50;
+}
+
+.activeIndicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 10px;
+  background: clr.$acc-beige;
+  pointer-events: none;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, width, height;
 }
 
 .navItem {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -24,10 +45,17 @@
   border-radius: 10px;
   cursor: pointer;
   color: clr.$ns-700;
-  transition: background 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
     background: clr.$acc-beige;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: -2px;
   }
 }
 
@@ -37,6 +65,14 @@
 
   &:hover {
     background: clr.$acc-beige;
+  }
+}
+
+.sidebar[data-indicator-ready='true'] .active {
+  background: transparent;
+
+  &:hover {
+    background: transparent;
   }
 }
 
@@ -81,24 +117,39 @@
       border-radius: 8px;
     }
 
-    .navItem:nth-child(1) {
+    .navItem:nth-of-type(1) {
       grid-column: 1;
     }
 
-    .navItem:nth-child(2) {
+    .navItem:nth-of-type(2) {
       grid-column: 2;
     }
 
-    .navItem:nth-child(3) {
+    .navItem:nth-of-type(3) {
       grid-column: 5;
+    }
+
+    .activeIndicator {
+      background: rgba(clr.$prm-light, 0.1);
     }
 
     .active {
       background: rgba(clr.$prm-light, 0.1);
     }
 
+    &[data-indicator-ready='true'] .active {
+      background: transparent;
+    }
+
     .label {
       display: none;
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .activeIndicator,
+  .navItem {
+    transition: none;
   }
 }
