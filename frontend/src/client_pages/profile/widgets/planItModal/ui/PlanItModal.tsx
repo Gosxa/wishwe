@@ -7,6 +7,7 @@ import {
   PlanConversionFields,
 } from '@/features/eventForm';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
+import { EVENT_IMAGE_FALLBACK } from '@shared/lib/mediaFallbacks';
 import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
 import { usePlanIt } from '../model/usePlanIt';
 
@@ -16,8 +17,6 @@ type Props = {
   onConverted: () => void;
 };
 
-const FALLBACK_COVER = '/bg-gradient-noise.webp';
-
 export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
   const { requestClose, requestCloseWith, modalTransitionProps } =
     useModalTransition(onClose);
@@ -26,7 +25,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
   );
 
   const coverPreviewUrl =
-    toAbsoluteMediaUrl(event.cover_image) ?? FALLBACK_COVER;
+    toAbsoluteMediaUrl(event.cover_image) ?? EVENT_IMAGE_FALLBACK;
 
   return (
     <EventFormModalLayout

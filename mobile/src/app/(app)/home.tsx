@@ -62,7 +62,9 @@ export default function HomeScreen() {
           <View style={styles.row}>
             <Text style={styles.label}>Name</Text>
             <Text style={styles.value}>
-              {[profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Not set'}
+              {[profile?.first_name, profile?.last_name]
+                .filter(Boolean)
+                .join(' ') || 'Not set'}
             </Text>
           </View>
         </View>

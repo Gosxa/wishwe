@@ -4,6 +4,7 @@ import { type DragEvent, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { getCoverImageAcceptAttribute } from '@shared/lib/validation/imageUpload';
 import { Pencil, Upload } from '@shared/ui/icons';
+import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import s from './coverUpload.module.scss';
 
@@ -60,8 +61,11 @@ export const CoverUpload = ({
       >
         {previewUrl ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={s.preview} src={previewUrl} alt="Event cover" />
+            <EventImage
+              className={s.preview}
+              src={previewUrl}
+              alt="Event cover"
+            />
             <button
               type="button"
               className={s.changeButton}

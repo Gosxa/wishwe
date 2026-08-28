@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import Link from 'next/link';
 import type { ComponentType, Ref } from 'react';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import s from '../sidebar.module.scss';
 
 type Props = {
@@ -30,8 +31,13 @@ export const NavItem = ({
     aria-current={isActive ? 'page' : undefined}
   >
     {avatarUrl ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img className={s.avatar} src={avatarUrl} alt={label} />
+      <AvatarImage
+        className={s.avatar}
+        src={avatarUrl}
+        alt={label}
+        fallbackWidth={24}
+        fallbackHeight={24}
+      />
     ) : (
       <Icon />
     )}

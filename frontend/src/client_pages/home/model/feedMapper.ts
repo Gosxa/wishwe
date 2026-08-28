@@ -1,11 +1,12 @@
 import { formatCategoryHashtag } from '@/shared/lib/formatCategoryName';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
+import { EVENT_IMAGE_FALLBACK } from '@/shared/lib/mediaFallbacks';
 import type { BackendEvent } from '@/shared/client_api/event';
 import type { FeedEvent } from './types';
 
 export { toAbsoluteMediaUrl };
 
-export const FALLBACK_COVER = '/bg-gradient-noise.webp';
+export const FALLBACK_COVER = EVENT_IMAGE_FALLBACK;
 
 const eventImage = (coverImage: string | null) =>
   toAbsoluteMediaUrl(coverImage) ?? FALLBACK_COVER;

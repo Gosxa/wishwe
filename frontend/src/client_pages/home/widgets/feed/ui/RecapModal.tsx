@@ -1,6 +1,8 @@
 'use client';
 
-import { Avatar, X } from '@shared/ui/icons';
+import { X } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
+import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
@@ -52,8 +54,7 @@ export const RecapModal = ({ event, onClose }: Props) => {
         </button>
 
         <div className={s.cover}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt={title} />
+          <EventImage src={image} alt={title} />
         </div>
 
         <div className={s.body}>
@@ -95,16 +96,13 @@ export const RecapModal = ({ event, onClose }: Props) => {
                           username={participant.username}
                           className={s.stackAvatar}
                         >
-                          {participant.avatar ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={participant.avatar}
-                              alt={participant.username}
-                              loading="lazy"
-                            />
-                          ) : (
-                            <Avatar width={28} height={28} />
-                          )}
+                          <AvatarImage
+                            src={participant.avatar}
+                            alt={participant.username}
+                            loading="lazy"
+                            fallbackWidth={28}
+                            fallbackHeight={28}
+                          />
                         </ProfileLink>
                       ))}
                     </div>

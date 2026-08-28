@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import {
-  Avatar,
   CalendarClock,
   Check,
   Location,
@@ -12,6 +11,8 @@ import {
   UsersRound,
   X,
 } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
+import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
@@ -100,8 +101,7 @@ export const EventPreviewModal = ({
 
           <div className={s.left}>
             <div className={s.cover}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cover} alt={title} />
+              <EventImage src={cover} alt={title} />
               <span className={s.privacyPill}>
                 <Lock width={14} height={14} />
                 <span>Private event</span>
@@ -110,12 +110,12 @@ export const EventPreviewModal = ({
 
             <div className={s.hostCard}>
               <span className={s.hostAvatar}>
-                {avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar} alt={username} />
-                ) : (
-                  <Avatar width={40} height={40} />
-                )}
+                <AvatarImage
+                  src={avatar}
+                  alt={username}
+                  fallbackWidth={40}
+                  fallbackHeight={40}
+                />
               </span>
               <div className={s.hostText}>
                 {isAuthenticated ? (

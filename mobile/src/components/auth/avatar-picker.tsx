@@ -13,7 +13,13 @@ type Props = {
   error?: string;
 };
 
-export function AvatarPicker({ uri, onPick, onRemove, disabled = false, error }: Props) {
+export function AvatarPicker({
+  uri,
+  onPick,
+  onRemove,
+  disabled = false,
+  error,
+}: Props) {
   return (
     <View style={styles.wrap}>
       <View style={styles.circleWrap}>
@@ -22,10 +28,17 @@ export function AvatarPicker({ uri, onPick, onRemove, disabled = false, error }:
           disabled={disabled}
           accessibilityRole="button"
           accessibilityLabel={uri ? 'Change photo' : 'Add photo'}
-          style={({ pressed }) => [styles.circle, pressed && !disabled && styles.pressed]}
+          style={({ pressed }) => [
+            styles.circle,
+            pressed && !disabled && styles.pressed,
+          ]}
         >
           {uri ? (
-            <Image source={{ uri }} style={styles.image} accessibilityIgnoresInvertColors />
+            <Image
+              source={{ uri }}
+              style={styles.image}
+              accessibilityIgnoresInvertColors
+            />
           ) : (
             <PersonIcon />
           )}
@@ -50,9 +63,14 @@ export function AvatarPicker({ uri, onPick, onRemove, disabled = false, error }:
         disabled={disabled}
         accessibilityRole="button"
         accessibilityLabel={uri ? 'Change photo' : 'Add photo'}
-        style={({ pressed }) => [styles.action, pressed && !disabled && styles.pressed]}
+        style={({ pressed }) => [
+          styles.action,
+          pressed && !disabled && styles.pressed,
+        ]}
       >
-        <Text style={styles.actionLabel}>{uri ? 'Change photo' : 'Add photo'}</Text>
+        <Text style={styles.actionLabel}>
+          {uri ? 'Change photo' : 'Add photo'}
+        </Text>
       </Pressable>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}

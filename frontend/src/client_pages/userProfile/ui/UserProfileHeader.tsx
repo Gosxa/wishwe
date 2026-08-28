@@ -4,7 +4,7 @@ import type {
   FriendshipStatus,
   PublicProfile,
 } from '@/shared/client_api/user/types';
-import { Avatar } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import s from '@client_pages/profile/widgets/profileHeader/ui/profileHeader.module.scss';
 import { UserProfileFriendButton } from './UserProfileFriendButton';
 
@@ -27,12 +27,12 @@ export const UserProfileHeader = ({
     <section className={s.header}>
       <div className={s.identity}>
         <span className={`${s.avatar}${avatar ? ` ${s.avatarUploaded}` : ''}`}>
-          {avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt={username} />
-          ) : (
-            <Avatar width={72} height={72} />
-          )}
+          <AvatarImage
+            src={avatar}
+            alt={username}
+            fallbackWidth={72}
+            fallbackHeight={72}
+          />
         </span>
 
         <div className={s.identityBody}>

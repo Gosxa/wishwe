@@ -1,7 +1,7 @@
 import { type ChangeEvent, useRef } from 'react';
 import clsx from 'clsx';
 import { TextInput } from '@shared/ui/textInput/TextInput';
-import { Avatar } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
 import { HelperText } from '@/shared';
 import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
@@ -75,16 +75,11 @@ export const PersonalDataContent = ({
           <label
             className={clsx(s.avatarBtn, inviteLayout && s.inviteAvatarBtn)}
           >
-            {avatar.url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatar.url}
-                alt="avatar"
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              />
-            ) : (
-              <Avatar />
-            )}
+            <AvatarImage
+              src={avatar.url}
+              alt="avatar"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
             <input
               ref={fileInputRef}
               type="file"

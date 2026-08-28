@@ -1,4 +1,5 @@
 import type { FeedEvent } from './types';
+import { EVENT_IMAGE_FALLBACK } from '@/shared/lib/mediaFallbacks';
 import { FALLBACK_FONT_SANS, FALLBACK_FONT_SERIF } from './shareImage/drawing';
 import type { CanvasImage, FontFamilies } from './shareImage/drawing';
 import { renderPoster } from './shareImage/renderPoster';
@@ -43,16 +44,32 @@ export type ShareDateParts = {
   time: string;
 };
 
-const loadImage = (source: string | null | undefined) => {
-  if (!source) return Promise.resolve<CanvasImage>(null);
+const loadImage = (
+  source: string | null | undefined,
+  fallbackSource?: string,
+) => {
+  const initialSource = source || fallbackSource;
+
+  if (!initialSource) return Promise.resolve<CanvasImage>(null);
 
   return new Promise<CanvasImage>(resolve => {
     const image = new Image();
+    let triedFallback = initialSource === fallbackSource;
 
     image.crossOrigin = 'anonymous';
     image.onload = () => resolve(image);
-    image.onerror = () => resolve(null);
-    image.src = source;
+    image.onerror = () => {
+      if (fallbackSource && !triedFallback) {
+        triedFallback = true;
+        image.src = fallbackSource;
+
+        return;
+      }
+
+      resolve(null);
+    };
+
+    image.src = initialSource;
   });
 };
 
@@ -116,7 +133,7 @@ export const generateShareImages = async (
   event: FeedEvent,
 ): Promise<GeneratedShareImage[]> => {
   const [cover, avatar, logo, fonts] = await Promise.all([
-    loadImage(event.image),
+    loadImage(event.image, EVENT_IMAGE_FALLBACK),
     loadImage(event.host.avatar),
     loadImage('/icon.svg'),
     getFonts(),

@@ -1,7 +1,6 @@
-import { useEffect, useRef, useState, type MouseEventHandler } from 'react';
+import { type MouseEventHandler } from 'react';
 import clsx from 'clsx';
 import {
-  Avatar,
   CalendarClock,
   Location,
   MessagesSquare,
@@ -12,8 +11,9 @@ import {
   UsersRound,
   X,
 } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
+import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { ProfileLink } from '@shared/ui/profileLink';
-import { FALLBACK_COVER } from '@client_pages/home/model/feedMapper';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { EventCardMenu } from './EventCardMenu';
 import type { EventParticipation } from '../model/useEventParticipation';
@@ -38,45 +38,6 @@ type Props = {
 };
 
 const MAX_VISIBLE_AVATARS = 3;
-
-type EventCoverProps = {
-  src: string;
-  alt: string;
-  isArchived: boolean;
-};
-
-const EventCover = ({ src, alt, isArchived }: EventCoverProps) => {
-  const [resolvedSrc, setResolvedSrc] = useState(src);
-  const imageRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const image = imageRef.current;
-
-    if (!image?.complete || image.naturalWidth > 0) return;
-
-    let isMounted = true;
-
-    queueMicrotask(() => {
-      if (isMounted) setResolvedSrc(FALLBACK_COVER);
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      ref={imageRef}
-      className={clsx(s.image, isArchived && s.imageArchived)}
-      src={resolvedSrc}
-      alt={alt}
-      loading="lazy"
-      onError={() => setResolvedSrc(FALLBACK_COVER)}
-    />
-  );
-};
 
 export const EventCardContent = ({
   event,
@@ -128,11 +89,12 @@ export const EventCardContent = ({
       onClick={onSurfaceClick}
     >
       <div className={s.media} data-tour={tourId}>
-        <EventCover
+        <EventImage
           key={image}
+          className={clsx(s.image, isArchived && s.imageArchived)}
           src={image}
           alt={title}
-          isArchived={isArchived}
+          loading="lazy"
         />
         <div className={s.tags}>
           {showEventType && (
@@ -173,12 +135,13 @@ export const EventCardContent = ({
             <li className={s.metaRow}>
               <UserRound />
               <span className={s.avatar}>
-                {host.avatar ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={host.avatar} alt={host.username} loading="lazy" />
-                ) : (
-                  <Avatar width={14} height={14} />
-                )}
+                <AvatarImage
+                  src={host.avatar}
+                  alt={host.username}
+                  loading="lazy"
+                  fallbackWidth={14}
+                  fallbackHeight={14}
+                />
               </span>
               <ProfileLink username={host.username} className={s.username}>
                 {host.username}
@@ -218,16 +181,13 @@ export const EventCardContent = ({
               <div className={s.avatars}>
                 {shownParticipants.map(participant => (
                   <span key={participant.username} className={s.stackAvatar}>
-                    {participant.avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={participant.avatar}
-                        alt={participant.username}
-                        loading="lazy"
-                      />
-                    ) : (
-                      <Avatar width={28} height={28} />
-                    )}
+                    <AvatarImage
+                      src={participant.avatar}
+                      alt={participant.username}
+                      loading="lazy"
+                      fallbackWidth={28}
+                      fallbackHeight={28}
+                    />
                   </span>
                 ))}
               </div>

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useInviteContext } from '@/client_pages/onboard/model';
 import { toAbsoluteMediaUrl } from '@/client_pages/home/model/feedMapper';
 import { useUserStore } from '@/shared/store/useUserStore';
-import { Avatar } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 
 import s from './inviteRequestSent.module.scss';
 
@@ -24,20 +24,20 @@ export const InviteRequestSentContent = () => {
         <div
           className={`${s.avatarLeft}${userAvatar ? ` ${s.avatarUploaded}` : ''}`}
         >
-          {userAvatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={userAvatar} alt="Your profile" />
-          ) : (
-            <Avatar width={80} height={80} />
-          )}
+          <AvatarImage
+            src={userAvatar}
+            alt="Your profile"
+            fallbackWidth={80}
+            fallbackHeight={80}
+          />
         </div>
         <div className={s.avatarRight}>
-          {inviterAvatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={inviterAvatar} alt="Inviter profile" />
-          ) : (
-            <Avatar width={80} height={80} />
-          )}
+          <AvatarImage
+            src={inviterAvatar}
+            alt="Inviter profile"
+            fallbackWidth={80}
+            fallbackHeight={80}
+          />
         </div>
       </div>
       <div className={s.contentStack}>

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { EVENT_IMAGE_FALLBACK } from '@/shared/lib/mediaFallbacks';
 import type { FeedEvent } from './types';
 import {
   SHARE_FORMATS,
@@ -144,6 +145,35 @@ describe('share image metadata', () => {
     expect(result).toHaveLength(3);
     expect(result.map(r => r.format)).toEqual(['poster', 'card', 'story']);
     expect(context.stroke).toHaveBeenCalled();
+  });
+
+  it('uses the bundled placeholder when the cover fails to load', async () => {
+    installCanvasMock();
+    const sources: string[] = [];
+
+    class MockImage {
+      width = 100;
+      height = 100;
+      onload: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+
+      set src(source: string) {
+        sources.push(source);
+        setTimeout(() => {
+          if (source === '/missing-cover.jpg') {
+            this.onerror?.();
+          } else {
+            this.onload?.();
+          }
+        }, 0);
+      }
+    }
+
+    vi.stubGlobal('Image', MockImage);
+
+    await generateShareImages(makeEvent({ image: '/missing-cover.jpg' }));
+
+    expect(sources).toContain(EVENT_IMAGE_FALLBACK);
   });
 
   it('rejects image generation when a 2D canvas context is unavailable', async () => {

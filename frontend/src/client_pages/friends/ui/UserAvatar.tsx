@@ -1,4 +1,4 @@
-import { Avatar } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import s from './userAvatar.module.scss';
 
 type Props = {
@@ -8,11 +8,6 @@ type Props = {
 
 export const UserAvatar = ({ src, alt }: Props) => (
   <span className={s.avatar}>
-    {src ? (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img src={src} alt={alt} />
-    ) : (
-      <Avatar width={28} height={28} />
-    )}
+    <AvatarImage src={src} alt={alt} fallbackWidth={28} fallbackHeight={28} />
   </span>
 );

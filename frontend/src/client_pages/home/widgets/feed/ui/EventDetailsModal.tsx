@@ -2,7 +2,9 @@
 
 import { useRef, useState } from 'react';
 import clsx from 'clsx';
-import { Avatar, Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
+import { Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
+import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
@@ -100,8 +102,7 @@ export const EventDetailsModal = ({
         </button>
 
         <div className={s.cover}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image} alt={title} />
+          <EventImage src={image} alt={title} />
         </div>
 
         <div className={s.body}>
@@ -173,16 +174,13 @@ export const EventDetailsModal = ({
                           key={participant.username}
                           className={s.stackAvatar}
                         >
-                          {participant.avatar ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={participant.avatar}
-                              alt={participant.username}
-                              loading="lazy"
-                            />
-                          ) : (
-                            <Avatar width={28} height={28} />
-                          )}
+                          <AvatarImage
+                            src={participant.avatar}
+                            alt={participant.username}
+                            loading="lazy"
+                            fallbackWidth={28}
+                            fallbackHeight={28}
+                          />
                         </span>
                       ))}
                     </div>

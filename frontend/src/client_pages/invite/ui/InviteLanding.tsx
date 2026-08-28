@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { AuthLayout } from '@/shared';
-import { Avatar } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import s from './inviteLanding.module.scss';
 
 type Props = {
@@ -24,12 +24,12 @@ export const InviteLanding = ({ token, username, avatarSrc }: Props) => {
           <div
             className={`${s.avatar}${avatarSrc ? ` ${s.avatarUploaded}` : ''}`}
           >
-            {avatarSrc ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarSrc} alt={`${inviteHandle} profile`} />
-            ) : (
-              <Avatar width={80} height={80} />
-            )}
+            <AvatarImage
+              src={avatarSrc}
+              alt={`${inviteHandle} profile`}
+              fallbackWidth={80}
+              fallbackHeight={80}
+            />
           </div>
           <div className={s.content}>
             <div className={s.primaryGroup}>

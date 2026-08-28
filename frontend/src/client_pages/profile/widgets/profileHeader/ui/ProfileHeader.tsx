@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import type { Profile } from '@/shared/client_api/auth/types';
-import { Avatar, Pencil } from '@shared/ui/icons';
+import { Pencil } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { InviteFriends } from './InviteFriends';
 import s from './profileHeader.module.scss';
@@ -22,12 +23,12 @@ export const ProfileHeader = ({ initialUser }: Props) => {
     <section className={s.header}>
       <div className={s.identity}>
         <span className={`${s.avatar}${avatar ? ` ${s.avatarUploaded}` : ''}`}>
-          {avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatar} alt={username} />
-          ) : (
-            <Avatar width={72} height={72} />
-          )}
+          <AvatarImage
+            src={avatar}
+            alt={username}
+            fallbackWidth={72}
+            fallbackHeight={72}
+          />
         </span>
 
         <div className={s.identityBody}>

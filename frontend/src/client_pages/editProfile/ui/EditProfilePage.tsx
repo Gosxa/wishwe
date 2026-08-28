@@ -2,7 +2,8 @@
 
 import type { Profile } from '@/shared/client_api/auth/types';
 import { Header } from '@widgets/header';
-import { Avatar, Pencil } from '@shared/ui/icons';
+import { Pencil } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { TextInput } from '@shared/ui/textInput/TextInput';
 import { TextArea } from '@shared/ui/textArea/TextArea';
 import { Toggle } from '@shared/ui/toggle/Toggle';
@@ -48,12 +49,12 @@ export default function EditProfilePage({ initialUser }: Props) {
               <span
                 className={`${s.avatarPreview}${avatar.url ? ` ${s.avatarUploaded}` : ''}`}
               >
-                {avatar.url ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={avatar.url} alt="avatar" />
-                ) : (
-                  <Avatar width={160} height={160} />
-                )}
+                <AvatarImage
+                  src={avatar.url}
+                  alt="avatar"
+                  fallbackWidth={160}
+                  fallbackHeight={160}
+                />
               </span>
               <label className={s.avatarEdit}>
                 <Pencil />

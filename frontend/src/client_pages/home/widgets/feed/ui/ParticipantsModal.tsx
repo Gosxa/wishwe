@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { RefObject } from 'react';
-import { Avatar, X } from '@shared/ui/icons';
+import { X } from '@shared/ui/icons';
+import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
@@ -118,16 +119,13 @@ export const ParticipantsModal = ({
             {participants.map(participant => (
               <li key={participant.username} className={s.row}>
                 <span className={s.avatar}>
-                  {participant.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={participant.avatar}
-                      alt={participant.username}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <Avatar width={48} height={48} />
-                  )}
+                  <AvatarImage
+                    src={participant.avatar}
+                    alt={participant.username}
+                    loading="lazy"
+                    fallbackWidth={48}
+                    fallbackHeight={48}
+                  />
                 </span>
                 <ProfileLink
                   username={participant.username}

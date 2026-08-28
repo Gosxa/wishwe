@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import type { BackendEventType } from '@/shared/client_api/event';
 import { BadgeInfo } from '@shared/ui/icons';
+import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import {
   PlanTimingFields,
@@ -37,8 +38,11 @@ export const EventTypePreview = ({ type, coverUrl }: PreviewProps) => {
 
       <div className={s.coverPreviewSlot}>
         <span className={s.label}>Cover</span>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={s.coverPreview} src={coverUrl} alt="Event cover" />
+        <EventImage
+          className={s.coverPreview}
+          src={coverUrl}
+          alt="Event cover"
+        />
       </div>
     </div>
   );
