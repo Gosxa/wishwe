@@ -4,13 +4,25 @@
     "appVersionSource": "remote"
   },
   "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://wishwe.online",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com"
+      }
+    },
     "preview": {
       "distribution": "internal",
       "android": {
         "buildType": "apk"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://wishwe.online"
+        "EXPO_PUBLIC_API_URL": "https://wishwe.online",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com"
       }
     },
     "production": {
@@ -18,7 +30,8 @@
         "buildType": "app-bundle"
       },
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://wishwe.online"
+        "EXPO_PUBLIC_API_URL": "https://wishwe.online",
+        "EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID": "904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com"
       }
     }
   }

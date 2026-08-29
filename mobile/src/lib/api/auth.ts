@@ -66,6 +66,15 @@ export async function login(email: string, password: string): Promise<void> {
   await storeSessionFrom(response);
 }
 
+export async function loginWithGoogle(idToken: string): Promise<void> {
+  const { response } = await apiRequestWithResponse('/api/user/auth/google/', {
+    method: 'POST',
+    body: { token: idToken },
+  });
+
+  await storeSessionFrom(response);
+}
+
 /** Final registration step: creates the account and signs the user in. */
 export async function createAccount(token: string, password: string): Promise<void> {
   const { response } = await apiRequestWithResponse('/api/user/auth/set-password/', {

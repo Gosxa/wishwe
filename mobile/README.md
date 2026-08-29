@@ -113,6 +113,22 @@ depends on the target you will open:
 using `localhost` there points at the emulator itself, not Django. Restart Expo
 after changing `.env` so it picks up the new public environment variable.
 
+Google sign-in also needs the public Web OAuth client ID:
+
+```dotenv
+EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=904699722219-hsmhbcc5gd17lu710mff0m26bvauiur3.apps.googleusercontent.com
+```
+
+The backend's `GOOGLE_OAUTH_CLIENT_ID` must contain this same value because it
+checks that each Google ID token was created for WishWe. This is a public app
+identifier, not a client secret.
+
+For Android, the Google Cloud project must also have an Android OAuth client for
+package `online.wishwe.app`. Add the SHA-1 fingerprint of every certificate that
+can sign the app: the local debug key, the EAS build key, and the Google Play app
+signing key where applicable. A missing package/SHA-1 pair normally appears as a
+Google `DEVELOPER_ERROR` before the backend is contacted.
+
 ## 4. Launch on iOS
 
 iOS simulator support requires macOS. After Xcode and at least one iOS
@@ -121,25 +137,33 @@ run:
 
 ```bash
 cd mobile
-npx expo start --ios
+npx expo start --go --ios
 ```
 
-Expo starts Metro and opens the app in the available simulator. If Metro is
-already running, press `i` in its terminal to open iOS instead. The first run
-may prompt inside the simulator to open Expo Go; accept it.
+Expo starts Metro and opens the app in the available simulator. Google sign-in
+is currently enabled only on Android; iOS continues through the email flow.
+Native Google sign-in is technically possible on iOS, but it also needs an iOS
+OAuth client ID and its reversed URL scheme in the Expo native configuration.
 
 ## 5. Launch on Android
 
-Start an AVD from Android Studio's Device Manager first. Set the API URL to
-`http://10.0.2.2:8000`, then run:
+Google sign-in contains native code and therefore does not run in Expo Go. Start
+an AVD from Android Studio's Device Manager, set the API URL to
+`http://10.0.2.2:8000`, and create/install the development build once:
 
 ```bash
 cd mobile
-npx expo start --android
+npx expo run:android
 ```
 
-Expo starts Metro and opens the app in the running emulator. If Metro is
-already running, press `a` in its terminal to open Android.
+After that first native build, start Metro for the installed development client:
+
+```bash
+npx expo start --dev-client
+```
+
+Alternatively, create an installable EAS development build with
+`npx eas-cli build --platform android --profile development`.
 
 ## Using both platforms
 
@@ -155,5 +179,6 @@ From `mobile/`:
 
 ```bash
 npm run lint
+npm test
 npx tsc --noEmit
 ```

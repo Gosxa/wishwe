@@ -14,12 +14,21 @@ import { router } from 'expo-router';
 import { GoogleIcon } from '@/components/icons';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
 import { useReduceMotion } from '@/hooks/use-reduce-motion';
+import { useAuth } from '@/lib/auth/auth-context';
+import {
+  GoogleSignInCancelledError,
+  requestGoogleIdToken,
+} from '@/lib/auth/google-sign-in';
 
 const heroImage = require('../../assets/images/onboarding-hero.jpg');
 const useNativeDriver = Platform.OS !== 'web';
+const supportsGoogleSignIn = Platform.OS === 'android';
 
 export function OnboardingScreen() {
   const [isStarted, setIsStarted] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState('');
+  const { signInWithGoogle } = useAuth();
   const reduceMotion = useReduceMotion();
   const [sheetProgress] = useState(() => new Animated.Value(0));
   const [labelProgress] = useState(() => new Animated.Value(0));
@@ -62,6 +71,38 @@ export function OnboardingScreen() {
     ]).start();
   };
 
+  const handlePrimaryPress = async () => {
+    if (!isStarted) {
+      handleStart();
+      return;
+    }
+
+    if (!supportsGoogleSignIn) {
+      router.push('/enter-email');
+      return;
+    }
+
+    setGoogleError('');
+    setIsGoogleLoading(true);
+
+    try {
+      const idToken = await requestGoogleIdToken();
+      await signInWithGoogle(idToken);
+    } catch (error) {
+      if (error instanceof GoogleSignInCancelledError) {
+        return;
+      }
+
+      setGoogleError(
+        error instanceof Error
+          ? error.message
+          : 'Could not sign in with Google. Please try again.',
+      );
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
+
   return (
     <View style={styles.screen}>
       <Image source={heroImage} style={styles.hero} resizeMode="cover" accessibilityIgnoresInvertColors />
@@ -96,78 +137,112 @@ export function OnboardingScreen() {
           <Text style={styles.body}>No random people. No noise. Just you and your inner circle.</Text>
         </View>
 
-        <Animated.View
-          style={[
-            styles.actions,
-            {
-              height: sheetProgress.interpolate({ inputRange: [0, 1], outputRange: [40, 88] }),
-            },
-          ]}
-        >
-          <Pressable
-            style={styles.primaryButton}
-            onPress={handleStart}
-            disabled={isStarted}
-            accessibilityRole="button"
-            accessibilityLabel={isStarted ? 'Continue with Google' : 'Get started'}
-            accessibilityState={{ disabled: isStarted }}
-          >
-            <Animated.View
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              style={[
-                styles.labelLayer,
-                {
-                  pointerEvents: 'none',
-                  opacity: labelProgress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
-                },
-              ]}
-            >
-              <Text style={styles.primaryButtonLabel}>Get started</Text>
-            </Animated.View>
-
-            <Animated.View
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-              style={[styles.labelLayer, { pointerEvents: 'none', opacity: labelProgress }]}
-            >
-              <Text style={styles.primaryButtonLabel}>Continue with Google</Text>
-              <View style={styles.googleIcon}>
-                <GoogleIcon />
-              </View>
-            </Animated.View>
-          </Pressable>
-
+        <View style={styles.actionGroup}>
           <Animated.View
-            aria-hidden={!isStarted}
-            accessibilityElementsHidden={!isStarted}
-            importantForAccessibility={isStarted ? 'auto' : 'no-hide-descendants'}
             style={[
-              styles.secondaryLayer,
+              styles.actions,
               {
-                pointerEvents: isStarted ? 'auto' : 'none',
-                opacity: optionsProgress,
-                transform: [
-                  {
-                    translateY: optionsProgress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [12, 0],
-                    }),
-                  },
-                ],
+                height: sheetProgress.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [40, supportsGoogleSignIn ? 88 : 40],
+                }),
               },
             ]}
           >
             <Pressable
-              style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
-              onPress={() => router.push('/enter-email')}
+              style={({ pressed }) => [
+                styles.primaryButton,
+                pressed && styles.primaryPressed,
+                isGoogleLoading && styles.primaryDisabled,
+              ]}
+              onPress={() => void handlePrimaryPress()}
+              disabled={isGoogleLoading}
               accessibilityRole="button"
-              accessibilityLabel="Continue with email"
+              accessibilityLabel={
+                isStarted
+                  ? supportsGoogleSignIn
+                    ? 'Continue with Google'
+                    : 'Continue with email'
+                  : 'Get started'
+              }
+              accessibilityState={{ disabled: isGoogleLoading, busy: isGoogleLoading }}
             >
-              <Text style={styles.secondaryButtonLabel}>Continue with email</Text>
+              <Animated.View
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+                style={[
+                  styles.labelLayer,
+                  {
+                    pointerEvents: 'none',
+                    opacity: labelProgress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }),
+                  },
+                ]}
+              >
+                <Text style={styles.primaryButtonLabel}>Get started</Text>
+              </Animated.View>
+
+              <Animated.View
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+                style={[styles.labelLayer, { pointerEvents: 'none', opacity: labelProgress }]}
+              >
+                <Text style={styles.primaryButtonLabel}>
+                  {isGoogleLoading
+                    ? 'Connecting...'
+                    : supportsGoogleSignIn
+                      ? 'Continue with Google'
+                      : 'Continue with email'}
+                </Text>
+                {supportsGoogleSignIn && !isGoogleLoading && (
+                  <View style={styles.googleIcon}>
+                    <GoogleIcon />
+                  </View>
+                )}
+              </Animated.View>
             </Pressable>
+
+            {supportsGoogleSignIn && (
+              <Animated.View
+                aria-hidden={!isStarted}
+                accessibilityElementsHidden={!isStarted}
+                importantForAccessibility={isStarted ? 'auto' : 'no-hide-descendants'}
+                style={[
+                  styles.secondaryLayer,
+                  {
+                    pointerEvents: isStarted ? 'auto' : 'none',
+                    opacity: optionsProgress,
+                    transform: [
+                      {
+                        translateY: optionsProgress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [12, 0],
+                        }),
+                      },
+                    ],
+                  },
+                ]}
+              >
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.secondaryButton,
+                    pressed && styles.secondaryPressed,
+                  ]}
+                  onPress={() => router.push('/enter-email')}
+                  accessibilityRole="button"
+                  accessibilityLabel="Continue with email"
+                >
+                  <Text style={styles.secondaryButtonLabel}>Continue with email</Text>
+                </Pressable>
+              </Animated.View>
+            )}
           </Animated.View>
-        </Animated.View>
+
+          {!!googleError && (
+            <Text style={styles.error} accessibilityLiveRegion="polite">
+              {googleError}
+            </Text>
+          )}
+        </View>
       </Animated.View>
     </View>
   );
@@ -216,6 +291,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  actionGroup: {
+    gap: Spacing.two,
+  },
   secondaryLayer: {
     position: 'absolute',
     right: 0,
@@ -243,6 +321,12 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two,
+  },
+  primaryPressed: {
+    opacity: 0.85,
+  },
+  primaryDisabled: {
+    backgroundColor: Colors.primaryDisabled,
   },
   primaryButtonLabel: {
     fontFamily: Fonts.bold,
@@ -278,6 +362,13 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     letterSpacing: 0.32,
     color: Colors.primary,
+    textAlign: 'center',
+  },
+  error: {
+    fontFamily: Fonts.regular,
+    fontSize: 13,
+    lineHeight: 18,
+    color: Colors.error,
     textAlign: 'center',
   },
 });

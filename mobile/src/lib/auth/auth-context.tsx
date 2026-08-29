@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { createAccount, login, logout } from '@/lib/api/auth';
+import { createAccount, login, loginWithGoogle, logout } from '@/lib/api/auth';
 import { ApiError } from '@/lib/api/client';
 import { getMyProfile, needsOnboarding, type Profile } from '@/lib/api/profile';
 import { clearSession, loadSession } from '@/lib/auth/session-store';
@@ -25,6 +25,7 @@ type AuthContextValue = {
   /** True while the account exists but the profile details are still missing. */
   needsOnboarding: boolean;
   signIn: (email: string, password: string) => Promise<void>;
+  signInWithGoogle: (idToken: string) => Promise<void>;
   finishRegistration: (verificationToken: string, password: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
@@ -95,6 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [completeSignIn],
   );
 
+  const signInWithGoogle = useCallback(
+    async (idToken: string) => {
+      await loginWithGoogle(idToken);
+      await completeSignIn();
+    },
+    [completeSignIn],
+  );
+
   const finishRegistration = useCallback(
     async (verificationToken: string, password: string) => {
       await createAccount(verificationToken, password);
@@ -128,11 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       needsOnboarding: status === 'signedIn' && needsOnboarding(profile),
       signIn,
+      signInWithGoogle,
       finishRegistration,
       refreshProfile,
       signOut,
     }),
-    [status, profile, signIn, finishRegistration, refreshProfile, signOut],
+    [status, profile, signIn, signInWithGoogle, finishRegistration, refreshProfile, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
