@@ -8,3 +8,4 @@ export { InviteLanding } from './invite';
 export { SharedEventPage } from './share';
 export { LandingPage } from './landing';
 export { ThankYou } from './thankYou';
+export { NotFound } from './notFound';

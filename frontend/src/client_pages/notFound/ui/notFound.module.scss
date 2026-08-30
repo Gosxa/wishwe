@@ -1,0 +1,150 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
+
+$enter-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+.page {
+  position: relative;
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 64px 24px;
+  background: clr.$ns-50;
+}
+
+.glowPurple,
+.glowYellow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+}
+
+.glowPurple {
+  top: -22vmin;
+  left: -18vmin;
+  width: 56vmin;
+  height: 56vmin;
+  background: rgba(clr.$acc-purple, 0.55);
+}
+
+.glowYellow {
+  right: -20vmin;
+  bottom: -24vmin;
+  width: 52vmin;
+  height: 52vmin;
+  background: rgba(clr.$acc-yellow, 0.7);
+}
+
+@keyframes not-found-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: min(420px, 100%);
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logo {
+  display: block;
+  animation: not-found-rise-in 0.6s $enter-ease 0.05s both;
+}
+
+.code {
+  margin: 24px 0 0;
+  animation: not-found-rise-in 0.6s $enter-ease 0.16s both;
+  font-family: var(--font-sk-modernist);
+  font-weight: 700;
+  font-size: clamp(96px, 22vw, 148px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: clr.$prm;
+  user-select: none;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.title {
+  margin: 0;
+  animation: not-found-rise-in 0.6s $enter-ease 0.28s both;
+  color: clr.$ns-900;
+
+  @include tp.h1;
+}
+
+.subtitle {
+  margin: 0;
+  animation: not-found-rise-in 0.6s $enter-ease 0.36s both;
+  color: clr.$ns-700;
+  font-family: var(--font-sk-modernist);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.actions {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  animation: not-found-rise-in 0.6s $enter-ease 0.44s both;
+}
+
+.primary {
+  @include btn.primary(8px, 100%, 40px);
+}
+
+.tertiary {
+  @include btn.tertiary(4px, 100%, 40px);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@include bp.mobile {
+  .page {
+    padding: 40px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo,
+  .code,
+  .title,
+  .subtitle,
+  .actions {
+    animation: none;
+  }
+}
