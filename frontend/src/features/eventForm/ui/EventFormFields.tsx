@@ -5,6 +5,7 @@ import { TextInput } from '@shared/ui/textInput/TextInput';
 import type { EventFormMode, EventFormModel } from '../model/types';
 import { EVENT_FORM_COPY } from './eventFormCopy';
 import { EventTimingFields } from './EventTimingFields';
+import { LocationField } from './LocationField';
 import { PrivacyPicker } from './PrivacyPicker';
 import s from './eventFormModal.module.scss';
 
@@ -19,6 +20,7 @@ export const EventFormFields = ({ mode, form }: Props) => {
     category,
     titleInput,
     locationInput,
+    locationPicker,
     descriptionInput,
     chatLinkInput,
     visibility,
@@ -51,15 +53,11 @@ export const EventFormFields = ({ mode, form }: Props) => {
         showCounter
       />
 
-      <TextInput
-        id="eventLocation"
-        tourId="field-location"
-        label="Where?"
+      <LocationField
+        mode={mode}
         placeholder={content.locationPlaceholder[eventType]}
-        required
-        value={locationInput.value}
-        onChange={event => locationInput.onChange(event.target.value)}
-        error={locationInput.error}
+        input={locationInput}
+        picker={locationPicker}
       />
 
       <TextArea

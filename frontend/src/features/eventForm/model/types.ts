@@ -1,4 +1,5 @@
 import type { BackendEventType, Category } from '@/shared/client_api/event';
+import type { LocationPin } from '@/shared/lib/googleMaps/types';
 
 export type EventVisibility = 'friends-only' | 'f-o-f';
 
@@ -47,6 +48,13 @@ export type EventFormModel = {
   };
   titleInput: TextFieldModel;
   locationInput: TextFieldModel;
+  locationPicker: {
+    pin: LocationPin | null;
+    status: 'none' | 'pinned' | 'edited';
+    announcement: string;
+    apply: (pin: LocationPin) => void;
+    clear: () => void;
+  };
   descriptionInput: TextFieldModel;
   dateInput: TextFieldModel & { min: string };
   timeInput: TextFieldModel & { min?: string };

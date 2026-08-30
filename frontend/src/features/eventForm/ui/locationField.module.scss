@@ -1,0 +1,71 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+.pickButton {
+  @include btn.secondary(6px, auto, 32px);
+  padding: 0 12px;
+  font-size: 14px;
+  letter-spacing: 0;
+  cursor: pointer;
+  @include btn.tap-target(40px);
+}
+
+.statusRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: clr.$ns-100;
+  @include typo.text-caption;
+  color: clr.$ns-900;
+
+  > svg {
+    flex-shrink: 0;
+    color: clr.$ns-700;
+  }
+}
+
+.chipWarn {
+  background: rgba(clr.$warn, 0.14);
+
+  > svg {
+    color: clr.$warn;
+  }
+}
+
+.link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: clr.$prm;
+  text-decoration: underline;
+  cursor: pointer;
+  @include typo.text-caption;
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+.announcer {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
