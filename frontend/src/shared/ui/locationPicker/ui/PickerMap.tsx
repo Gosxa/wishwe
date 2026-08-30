@@ -197,6 +197,10 @@ export const PickerMap = ({
         onWheelCapture={() => handlers.current.onUserMove()}
       />
 
+      {isReady && hasPin && stage === 'resolved' && (
+        <span className={s.pinHalo} aria-hidden="true" />
+      )}
+
       {isReady && (
         <span
           data-testid="location-picker-pin"
@@ -207,7 +211,6 @@ export const PickerMap = ({
           )}
           aria-hidden="true"
         >
-          {hasPin && stage === 'resolved' && <span className={s.pinHalo} />}
           <svg width="32" height="46" viewBox="0 0 32 48" fill="none">
             <path
               d="M16 42C16 42 30 23.5 30 15C30 7.27 23.73 1 16 1C8.27 1 2 7.27 2 15C2 23.5 16 42 16 42Z"
