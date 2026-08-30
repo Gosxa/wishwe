@@ -22,10 +22,9 @@ $FOCUS_SHADOW:
   @include typo.text-body;
   color: clr.$ns-900;
 
-  > label {
+  label {
     display: flex;
     gap: 8px;
-    margin-bottom: 8px;
 
     > svg {
       color: clr.$err;
@@ -33,6 +32,18 @@ $FOCUS_SHADOW:
       height: 16px;
     }
   }
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.labelRowWithAction {
+  gap: 12px;
+  justify-content: space-between;
+  min-height: 32px;
 }
 
 .inputWrapper {
