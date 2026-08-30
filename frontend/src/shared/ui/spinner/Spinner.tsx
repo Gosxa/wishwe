@@ -4,25 +4,29 @@ type Props = {
   fullscreen?: boolean;
   inline?: boolean;
   compact?: boolean;
+  small?: boolean;
 };
 
-const rootClass = ({ fullscreen, inline, compact }: Props) => {
+const rootClass = ({ fullscreen, inline, compact, small }: Props) => {
   const base = inline
     ? s.inline
     : fullscreen
       ? `${s.backdrop} ${s.fullscreen}`
       : s.backdrop;
 
-  return compact ? `${base} ${s.responsive}` : base;
+  return [base, compact && s.responsive, small && s.small]
+    .filter(Boolean)
+    .join(' ');
 };
 
 export const Spinner = ({
   fullscreen = false,
   inline = false,
   compact = false,
+  small = false,
 }: Props) => (
   <div
-    className={rootClass({ fullscreen, inline, compact })}
+    className={rootClass({ fullscreen, inline, compact, small })}
     role="status"
     aria-label="Loading"
   >

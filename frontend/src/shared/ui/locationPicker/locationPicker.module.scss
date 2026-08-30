@@ -162,8 +162,12 @@ $control-size: 36px;
 .searchSpinner {
   display: flex;
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  color: clr.$prm;
 }
 
 .suggestionPanel {

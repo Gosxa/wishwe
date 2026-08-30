@@ -236,7 +236,7 @@ export const PlaceSearch = ({
         />
         {status === 'searching' ? (
           <span className={s.searchSpinner}>
-            <Spinner inline compact />
+            <Spinner inline small />
           </span>
         ) : (
           query.length > 0 && (
