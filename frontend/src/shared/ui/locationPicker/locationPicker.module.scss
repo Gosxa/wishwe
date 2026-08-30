@@ -1,0 +1,772 @@
+@use '@shared/styles/animations' as anim;
+@use '@shared/styles/breakpoints' as bp;
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+$map-height: 304px;
+$map-height-short: 240px;
+$control-size: 36px;
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  @include anim.modal-overlay-enter;
+}
+
+.modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: min(800px, 100%);
+  max-height: 90vh;
+  padding: 24px;
+  overflow-y: auto;
+  border-radius: 16px;
+  border: 1px solid clr.$prm;
+  background: clr.$ns-50;
+  box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.2);
+  @include anim.modal-enter;
+}
+
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  @include typo.h2;
+  color: clr.$ns-900;
+}
+
+.subtitle {
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.close {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: clr.$ns-700;
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+
+.searchWrapper {
+  position: relative;
+}
+
+.searchField {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 10px 0 14px;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-300;
+  transition: box-shadow 0.3s ease;
+
+  &:focus-within {
+    box-shadow:
+      inset 0 0 0 1px clr.$prm,
+      0 0 4px 0 rgba(clr.$prm-light, 0.4);
+  }
+}
+
+.searchIcon {
+  display: flex;
+  flex-shrink: 0;
+  color: clr.$ns-700;
+
+  > svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.searchInput {
+  flex: 1 0 0;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: clr.$ns-900;
+  @include typo.text-body;
+
+  &::placeholder {
+    color: clr.$ns-500;
+  }
+}
+
+.searchClear {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 12px;
+  background: clr.$ns-200;
+  color: clr.$ns-700;
+  cursor: pointer;
+
+  > svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+.searchSpinner {
+  display: flex;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.suggestionPanel {
+  position: absolute;
+  z-index: 2;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: clr.$ns-50;
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.16);
+  animation: suggestions-in 0.12s ease-out both;
+}
+
+@keyframes suggestions-in {
+  from {
+    transform: translateY(4px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.suggestionList {
+  max-height: 280px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.suggestion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.suggestionActive {
+  background: clr.$ns-100;
+}
+
+.suggestionIcon {
+  display: flex;
+  flex-shrink: 0;
+  color: clr.$ns-700;
+}
+
+.suggestionText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.suggestionPrimary {
+  @include typo.text-body;
+  color: clr.$ns-900;
+}
+
+.suggestionSecondary {
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.suggestionMeta {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px;
+  border-top: 1px solid clr.$ns-200;
+  @include typo.text-caption;
+  color: clr.$ns-500;
+}
+
+.suggestionState {
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.suggestionStateIcon {
+  display: inline-flex;
+  color: clr.$ns-500;
+}
+
+.suggestionStateTitle {
+  margin-top: 8px;
+  @include typo.text-body;
+  font-weight: 700;
+  color: clr.$ns-900;
+}
+
+.suggestionStateBody {
+  margin-top: 4px;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+
+.map {
+  position: relative;
+  height: $map-height;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #e7e1d0;
+  transition: opacity 0.12s ease;
+}
+
+.mapDimmed {
+  opacity: 0.88;
+}
+
+.mapCanvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mapSkeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  height: $map-height;
+  padding: 24px;
+  text-align: center;
+  border-radius: 12px;
+  background: clr.$ns-100;
+}
+
+.mapSkeletonNote {
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.mapFallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: $map-height;
+  padding: 24px;
+  text-align: center;
+  border-radius: 12px;
+  background: clr.$ns-100;
+}
+
+.mapFallbackIcon {
+  color: clr.$ns-700;
+}
+
+.mapFallbackTitle {
+  margin-top: 12px;
+  @include typo.text-body;
+  font-weight: 700;
+  color: clr.$ns-900;
+}
+
+.mapFallbackBody {
+  max-width: 420px;
+  margin-top: 8px;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.mapFallbackActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.pin {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, calc(-100% + 4px));
+  pointer-events: none;
+
+  > svg {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.32));
+  }
+}
+
+.pinGhost {
+  color: clr.$prm-dark;
+  opacity: 0.86;
+}
+
+.pinSolid {
+  color: clr.$cta;
+  animation: pin-drop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.pinWarn {
+  color: clr.$warn;
+}
+
+.pinHalo {
+  position: absolute;
+  z-index: 0;
+  bottom: -56px;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  transform: translateX(-50%);
+  border: 1.5px solid rgba(clr.$cta, 0.5);
+  border-radius: 50%;
+  background: rgba(clr.$cta, 0.14);
+}
+
+@keyframes pin-drop {
+  from {
+    transform: translate(-50%, calc(-100% - 8px));
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, calc(-100% + 4px));
+    opacity: 1;
+  }
+}
+
+.hintChip {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.14);
+  @include typo.text-caption;
+  color: clr.$ns-900;
+  white-space: nowrap;
+}
+
+.hintChipWarn {
+  background: mix(#fff, clr.$warn, 86%);
+}
+
+.zoom {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.16);
+}
+
+.zoomButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $control-size;
+  height: $control-size;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: clr.$ns-900;
+  cursor: pointer;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: -2px;
+  }
+}
+
+.zoomDivider {
+  width: $control-size;
+  height: 1px;
+  background: clr.$ns-200;
+}
+
+.locateButton {
+  position: absolute;
+  z-index: 3;
+  top: 101px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $control-size;
+  height: $control-size;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.16);
+  color: clr.$prm;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: clr.$ns-100;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+.locateButtonBlocked {
+  color: clr.$ns-500;
+}
+
+
+.addressCard {
+  display: flex;
+  gap: 12px;
+  min-height: 82px;
+  padding: 16px;
+  border-radius: 12px;
+  background: clr.$ns-100;
+}
+
+.addressCardMuted {
+  color: clr.$ns-500;
+}
+
+.addressCardWarn {
+  background: rgba(clr.$warn, 0.14);
+}
+
+.addressCardError {
+  background: rgba(clr.$err, 0.1);
+}
+
+.addressIcon {
+  display: flex;
+  flex-shrink: 0;
+  color: clr.$ns-700;
+
+  .addressCardWarn & {
+    color: clr.$warn;
+  }
+
+  .addressCardError & {
+    color: clr.$err;
+  }
+}
+
+.addressText {
+  display: flex;
+  flex: 1 0 0;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.addressTitle {
+  @include typo.text-body;
+  font-size: 16px;
+  font-weight: 700;
+  color: clr.$ns-900;
+
+  .addressCardMuted & {
+    color: clr.$ns-700;
+  }
+}
+
+.addressBody {
+  @include typo.text-body;
+  color: clr.$ns-700;
+  overflow-wrap: anywhere;
+}
+
+.addressMeta {
+  @include typo.text-caption;
+  color: clr.$ns-500;
+  overflow-wrap: anywhere;
+}
+
+.addressBanner {
+  margin-top: 4px;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
+
+.addressTrimmed {
+  display: block;
+  margin-top: 4px;
+  color: clr.$ns-900;
+  overflow-wrap: anywhere;
+}
+
+.skeletonLine {
+  height: 12px;
+  border-radius: 4px;
+  background: linear-gradient(
+    90deg,
+    clr.$ns-200 25%,
+    clr.$ns-100 50%,
+    clr.$ns-200 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s linear infinite;
+}
+
+.skeletonLineShort {
+  width: 40%;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.cardAction {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: clr.$prm;
+  cursor: pointer;
+  @include typo.text-caption;
+
+  > span {
+    text-decoration: underline;
+  }
+}
+
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.keyboardHint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  @include typo.text-caption;
+  color: clr.$ns-500;
+
+  > svg {
+    flex-shrink: 0;
+  }
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.primaryButton {
+  @include btn.primary(8px, auto, 40px);
+  padding: 0 20px;
+  cursor: pointer;
+}
+
+.secondaryButton {
+  @include btn.secondary(8px, auto, 40px);
+  padding: 0 20px;
+  cursor: pointer;
+}
+
+.linkButton {
+  @include btn.tertiary(8px, auto, 40px);
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.cancelButton {
+  width: 120px;
+  padding: 0;
+}
+
+.confirmButton {
+  min-width: 210px;
+}
+
+
+.dialogLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.dialog {
+  width: min(440px, 100%);
+  padding: 24px;
+  border-radius: 12px;
+  background: clr.$ns-50;
+  box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.24);
+}
+
+.dialogTitle {
+  @include typo.h2;
+  font-size: 20px;
+  line-height: 24px;
+  color: clr.$ns-900;
+}
+
+.dialogBody {
+  margin-top: 8px;
+  @include typo.text-body;
+  color: clr.$ns-700;
+}
+
+.dialogPreview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: clr.$ns-100;
+  @include typo.text-caption;
+  color: clr.$ns-900;
+  overflow-wrap: anywhere;
+
+  > span > svg {
+    width: 14px;
+    height: 14px;
+    color: clr.$ns-700;
+  }
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+
+@media (max-height: 900px) {
+  .map,
+  .mapSkeleton,
+  .mapFallback {
+    height: $map-height-short;
+  }
+}
+
+@include bp.tablet {
+  .modal {
+    padding: 20px;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pinSolid,
+  .suggestionPanel,
+  .skeletonLine {
+    animation: none;
+  }
+}
