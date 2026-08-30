@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID:
       process.env.GOOGLE_OAUTH_CLIENT_ID ?? '',
+    NEXT_PUBLIC_GOOGLE_MAPS_KEY:
+      process.env.GOOGLE_MAPS_KEY ??
+      process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ??
+      '',
   },
 };
 
