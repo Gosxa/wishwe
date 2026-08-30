@@ -1,5 +1,8 @@
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+
+// eslint-disable-next-line no-console
 console.log('DEBUG BACKEND VALUE:', BACKEND);
+
 const post = (url: string, body: unknown) =>
   fetch(url, {
     method: 'POST',
