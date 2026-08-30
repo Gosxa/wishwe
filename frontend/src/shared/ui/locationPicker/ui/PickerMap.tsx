@@ -65,7 +65,7 @@ export const PickerMap = ({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const map = new libraries.maps.Map(containerRef.current, {
+    mapRef.current = new libraries.maps.Map(containerRef.current, {
       center: initialCamera.current.center,
       zoom: initialCamera.current.zoom,
       disableDefaultUI: true,
@@ -74,8 +74,13 @@ export const PickerMap = ({
       gestureHandling: 'greedy',
     });
 
-    mapRef.current = map;
     setIsReady(true);
+  }, [libraries]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+
+    if (!map) return;
 
     const idle = map.addListener('idle', () => {
       const nextCenter = map.getCenter();
@@ -97,7 +102,7 @@ export const PickerMap = ({
       idle.remove();
       dragStart.remove();
     };
-  }, [libraries]);
+  }, [isReady]);
 
   useEffect(() => {
     const map = mapRef.current;

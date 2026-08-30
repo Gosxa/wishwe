@@ -40,6 +40,12 @@ export type PickerStage =
 
 export type PickerDialog = 'replace' | 'discard' | null;
 
+const SETTLED_STAGES: PickerStage[] = [
+  'resolved',
+  'noAddress',
+  'geocodeFailed',
+];
+
 type Resolved = { place: ResolvedPlace; parts: AddressParts };
 
 type Options = {
@@ -82,6 +88,12 @@ export const useLocationPicker = ({
   const requestId = useRef(0);
   const hasConfirmed = useRef(false);
   const hasPinRef = useRef(Boolean(initialPin));
+  const stageRef = useRef<PickerStage>(stage);
+  const settledStage = useRef<PickerStage | null>(null);
+
+  useEffect(() => {
+    stageRef.current = stage;
+  }, [stage]);
 
   useEffect(() => {
     trackLocationPicker('location_picker_opened', { mode, source });
@@ -184,6 +196,7 @@ export const useLocationPicker = ({
       if (nextZoom < MIN_STREET_ZOOM) {
         if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
         requestId.current += 1;
+        settledStage.current = null;
         setStage('tooBroad');
 
         return;
@@ -191,8 +204,18 @@ export const useLocationPicker = ({
 
       const key = `${next.lat.toFixed(6)},${next.lng.toFixed(6)}`;
 
-      if (key === lastGeocoded.current && stage !== 'tooBroad') return;
+      if (key === lastGeocoded.current && stage !== 'tooBroad') {
+        // The camera came back to the point we already know: put its answer
+        // back instead of leaving the card stuck on "looking up".
+        if (settledStage.current) {
+          setStage(settledStage.current);
+          settledStage.current = null;
+        }
 
+        return;
+      }
+
+      settledStage.current = null;
       lastGeocoded.current = key;
 
       if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
@@ -205,7 +228,16 @@ export const useLocationPicker = ({
   );
 
   const handleUserMove = useCallback(() => {
-    if (hasPinRef.current) return;
+    if (hasPinRef.current) {
+      // The pin is leaving the point we resolved, so the card must stop
+      // claiming an address the pin no longer stands on.
+      if (SETTLED_STAGES.includes(stageRef.current)) {
+        settledStage.current = stageRef.current;
+        setStage('resolving');
+      }
+
+      return;
+    }
 
     hasPinRef.current = true;
     setHasPin(true);
@@ -220,6 +252,9 @@ export const useLocationPicker = ({
         return;
       }
 
+      // Keep our camera state on the point the user dragged to; otherwise the
+      // next zoom change replays a stale center and snaps the map back.
+      setCenter(next);
       queueGeocode(next, nextZoom);
     },
     [queueGeocode],
@@ -236,6 +271,7 @@ export const useLocationPicker = ({
 
   const handlePlacePicked = useCallback((result: Resolved) => {
     requestId.current += 1;
+    settledStage.current = null;
     lastGeocoded.current = `${result.place.lat.toFixed(6)},${result.place.lng.toFixed(6)}`;
     hasPinRef.current = true;
     setCenter({ lat: result.place.lat, lng: result.place.lng });
@@ -260,6 +296,7 @@ export const useLocationPicker = ({
       position => {
         setIsLocating(false);
         hasPinRef.current = true;
+        settledStage.current = null;
         setCenter({
           lat: position.coords.latitude,
           lng: position.coords.longitude,

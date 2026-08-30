@@ -7,6 +7,7 @@ import {
   render,
   screen,
 } from '@testing-library/react';
+import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AddressParts } from '@/shared/lib/googleMaps/formatLocation';
 import type { LocationPin, ResolvedPlace } from '@/shared/lib/googleMaps/types';
@@ -243,6 +244,80 @@ describe('LocationPickerModal', () => {
 
     expect(mocks.reverseGeocode).toHaveBeenCalledTimes(1);
     expect(confirmButton().disabled).toBe(false);
+  });
+
+  it('still reacts to drags after a StrictMode remount', async () => {
+    render(
+      <StrictMode>
+        <LocationPickerModal
+          mode="create"
+          source="button"
+          initialValue=""
+          initialPin={null}
+          onConfirm={vi.fn()}
+          onClose={vi.fn()}
+        />
+      </StrictMode>,
+    );
+    await settle();
+
+    await dropPin();
+
+    expect(mocks.reverseGeocode).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByText('Khreshchatyk St, 22, Kyiv, 01001, Ukraine'),
+    ).toBeTruthy();
+  });
+
+  it('drops the resolved address the moment the map moves again', async () => {
+    renderPicker();
+    await settle();
+    await dropPin();
+
+    await act(async () => {
+      fake.listeners.get('dragstart')?.forEach(handler => handler());
+    });
+
+    expect(
+      screen.queryByText('Khreshchatyk St, 22, Kyiv, 01001, Ukraine'),
+    ).toBeNull();
+    expect(screen.getByText('Finding the address…')).toBeTruthy();
+    expect(confirmButton().disabled).toBe(true);
+
+    fake.center = { lat: 50.4, lng: 30.5 };
+    resolvedTo({
+      formattedAddress: 'Velyka Vasylkivska St, 100, Kyiv, Ukraine',
+      lat: 50.4,
+      lng: 30.5,
+    });
+
+    await act(async () => {
+      fake.listeners.get('idle')?.forEach(handler => handler());
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(400);
+      await Promise.resolve();
+    });
+
+    expect(
+      screen.getByText('Velyka Vasylkivska St, 100, Kyiv, Ukraine'),
+    ).toBeTruthy();
+  });
+
+  it('keeps the dragged point when the zoom buttons are used next', async () => {
+    renderPicker();
+    await settle();
+
+    fake.center = { lat: 50.4, lng: 30.5 };
+    await dropPin();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zoom in' }));
+    await act(async () => {
+      fake.listeners.get('idle')?.forEach(handler => handler());
+    });
+
+    expect(fake.center).toEqual({ lat: 50.4, lng: 30.5 });
+    expect(fake.zoom).toBe(17);
   });
 
   it('uses the map surface gesture when Google omits dragstart', async () => {
