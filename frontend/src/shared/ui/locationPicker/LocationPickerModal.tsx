@@ -156,12 +156,12 @@ export const LocationPickerModal = ({
           />
 
           <footer className={s.footer}>
-            <p className={s.keyboardHint}>
-              <Keyboard />
-              {picker.isSearchListOpen
-                ? COPY.keyboard.listOpen
-                : COPY.keyboard.idle}
-            </p>
+            {picker.isSearchListOpen && (
+              <p className={s.keyboardHint}>
+                <Keyboard />
+                {COPY.keyboard.listOpen}
+              </p>
+            )}
             <div className={s.actions}>
               <button
                 type="button"

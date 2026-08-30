@@ -20,7 +20,6 @@ export const LOCATION_PICKER_COPY = {
     noAddress: 'No address here — coordinates will be used',
   },
   keyboard: {
-    idle: 'Enter confirms',
     listOpen: '↑ ↓ to move · Enter to pick · Esc to close the list',
   },
   actions: {
