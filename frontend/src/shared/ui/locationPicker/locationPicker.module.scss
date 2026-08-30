@@ -45,20 +45,9 @@ $control-size: 36px;
   gap: 16px;
 }
 
-.titles {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
 .title {
   @include typo.h2;
   color: clr.$ns-900;
-}
-
-.subtitle {
-  @include typo.text-caption;
-  color: clr.$ns-700;
 }
 
 .close {

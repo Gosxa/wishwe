@@ -4,8 +4,6 @@ export const LOCATION_PICKER_COPY = {
     create: 'Pick a location',
     change: 'Change the location',
   },
-  subtitle:
-    'Search, click a spot, or move the map. The pin stays in the center.',
   searchPlaceholder: 'Search for a place or an address',
   emptyCard: 'Click a spot or move the map to place the pin',
   emptyCardHint:
@@ -14,7 +12,6 @@ export const LOCATION_PICKER_COPY = {
   slowLoad:
     'Still loading the map — you can close this and type the address instead.',
   hints: {
-    dragMap: 'Click or drag the map to place the pin',
     fineTune: 'Move the map to fine-tune the pin',
     zoomIn: 'Zoom in to place the pin on a street',
     noAddress: 'No address here — coordinates will be used',

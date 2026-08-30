@@ -70,12 +70,9 @@ export const LocationPickerModal = ({
           aria-labelledby={TITLE_ID}
         >
           <header className={s.header}>
-            <div className={s.titles}>
-              <h2 id={TITLE_ID} className={s.title}>
-                {source === 'change' ? COPY.title.change : COPY.title.create}
-              </h2>
-              <p className={s.subtitle}>{COPY.subtitle}</p>
-            </div>
+            <h2 id={TITLE_ID} className={s.title}>
+              {source === 'change' ? COPY.title.change : COPY.title.create}
+            </h2>
             <button
               type="button"
               className={s.close}

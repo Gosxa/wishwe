@@ -338,7 +338,6 @@ export const useLocationPicker = ({
   }, [source, stage]);
 
   const hint = useMemo(() => {
-    if (stage === 'idle') return COPY.hints.dragMap;
     if (stage === 'tooBroad') return COPY.hints.zoomIn;
     if (stage === 'noAddress') return COPY.hints.noAddress;
     if (stage === 'resolved' || stage === 'geocodeFailed') {

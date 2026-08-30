@@ -211,6 +211,15 @@ describe('LocationPickerModal', () => {
     );
   });
 
+  it('shows the initial placement instructions only once', async () => {
+    renderPicker();
+    await settle();
+
+    expect(screen.getAllByText(/(?:click|drag).*(?:spot|map)/i)).toHaveLength(
+      1,
+    );
+  });
+
   it('keeps confirm disabled until a pin resolves to an address', async () => {
     renderPicker();
     await settle();
