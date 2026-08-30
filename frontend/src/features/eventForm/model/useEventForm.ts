@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import type { BackendEventType, Category } from '@/shared/client_api/event';
 import { listCategories } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
+import type { LocationPin } from '@/shared/lib/googleMaps/types';
+import { LOCATION_FIELD_COPY } from '@/shared/ui/locationPicker/copy';
 import {
   getDateInputValue,
   getEventDateTimeErrors,
@@ -68,6 +70,9 @@ export const useEventForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPreparingCover, setIsPreparingCover] = useState(false);
   const [previousResetType, setPreviousResetType] = useState(resetType);
+  const [locationPin, setLocationPin] = useState<LocationPin | null>(null);
+  const [wasPinCleared, setWasPinCleared] = useState(false);
+  const [locationAnnouncement, setLocationAnnouncement] = useState('');
 
   if (resetType !== previousResetType) {
     setPreviousResetType(resetType);
@@ -136,6 +141,30 @@ export const useEventForm = ({
   ) => {
     setValues(current => ({ ...current, [key]: value }));
     if (errorKey) clearError(errorKey);
+  };
+
+  const changeLocation = (value: string) => {
+    updateValue('location', value, 'location');
+    setLocationAnnouncement('');
+
+    if (locationPin && value !== locationPin.formatted) {
+      setLocationPin(null);
+      setWasPinCleared(true);
+    }
+  };
+
+  const applyLocationPin = (pin: LocationPin) => {
+    updateValue('location', pin.formatted, 'location');
+    setLocationPin(pin);
+    setWasPinCleared(false);
+    setLocationAnnouncement(LOCATION_FIELD_COPY.announce(pin.formatted));
+  };
+
+  const clearLocation = () => {
+    updateValue('location', '', 'location');
+    setLocationPin(null);
+    setWasPinCleared(false);
+    setLocationAnnouncement('');
   };
 
   const applyDateTimeErrors = (eventDate: string, eventTime: string) => {
@@ -252,8 +281,15 @@ export const useEventForm = ({
     },
     locationInput: {
       value: values.location,
-      onChange: value => updateValue('location', value, 'location'),
+      onChange: changeLocation,
       error: errors.location,
+    },
+    locationPicker: {
+      pin: locationPin,
+      status: locationPin ? 'pinned' : wasPinCleared ? 'edited' : 'none',
+      announcement: locationAnnouncement,
+      apply: applyLocationPin,
+      clear: clearLocation,
     },
     descriptionInput: {
       value: values.description,

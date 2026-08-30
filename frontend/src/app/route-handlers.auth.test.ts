@@ -29,12 +29,17 @@ describe('authentication orchestration route handlers', () => {
       mock: backendMocks.auth.getTokens,
       body: { email: 'amy@example.com', password: 'secret-password' },
       invoke: (req: NextRequest) => login(req),
+      expectedAuthError: {
+        detail: 'Invalid credentials',
+        code: 'authentication_failed',
+      },
     },
     {
       name: 'Google login',
       mock: backendMocks.auth.google,
       body: { token: 'google-id-token' },
       invoke: (req: NextRequest) => googleAuth(req),
+      expectedAuthError: { error: 'backend error' },
     },
   ];
 
@@ -73,8 +78,8 @@ describe('authentication orchestration route handlers', () => {
   );
 
   it.each(authenticationCases)(
-    '$name preserves an authentication error and skips the profile call',
-    async ({ mock, body, invoke }) => {
+    '$name surfaces an authentication error and skips the profile call',
+    async ({ mock, body, invoke, expectedAuthError }) => {
       const backendBody = {
         detail: 'Invalid credentials',
         code: 'authentication_failed',
@@ -87,7 +92,7 @@ describe('authentication orchestration route handlers', () => {
       );
 
       expect(response.status).toBe(401);
-      await expect(response.json()).resolves.toEqual(backendBody);
+      await expect(response.json()).resolves.toEqual(expectedAuthError);
       expect(backendMocks.user.me).not.toHaveBeenCalled();
     },
   );

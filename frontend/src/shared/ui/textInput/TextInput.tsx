@@ -1,7 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { type ChangeEvent } from 'react';
+import { type ChangeEvent, type ReactNode } from 'react';
 import { useQuickFillWords } from '@/shared/store/useQuickFillStore';
 import { Asterisk } from '../icons';
 import { HelperText } from '../helperText/HelperText';
@@ -23,6 +23,8 @@ type Props = {
   maxLength?: number;
   showCounter?: boolean;
   tourId?: string;
+  labelAction?: ReactNode;
+  statusRow?: ReactNode;
 };
 
 export const TextInput = ({
@@ -40,6 +42,8 @@ export const TextInput = ({
   maxLength,
   showCounter = false,
   tourId,
+  labelAction,
+  statusRow,
 }: Props) => {
   const helperContent = error ?? helperText;
   const helperType = error ? 'error' : isSuccess ? 'success' : 'info';
@@ -47,11 +51,14 @@ export const TextInput = ({
 
   return (
     <div className={s.wrapper} data-tour={tourId}>
-      {(label || required) && (
-        <label htmlFor={id}>
-          {label}
-          {required && <Asterisk />}
-        </label>
+      {(label || required || labelAction) && (
+        <div className={clsx(s.labelRow, labelAction && s.labelRowWithAction)}>
+          <label htmlFor={id}>
+            {label}
+            {required && <Asterisk />}
+          </label>
+          {labelAction}
+        </div>
       )}
       <div className={s.inputWrapper}>
         <input
@@ -76,6 +83,7 @@ export const TextInput = ({
             className={s.quickFillOverlay}
           />
         )}
+        {statusRow}
         {helperContent && <HelperText text={helperContent} type={helperType} />}
         {showCounter && maxLength != null && (
           <span

@@ -1,7 +1,11 @@
-export const Location = () => (
+type Props = {
+  size?: number;
+};
+
+export const Location = ({ size = 16 }: Props) => (
   <svg
-    width="13"
-    height="16"
+    width={(size * 13) / 16}
+    height={size}
     viewBox="0 0 12 15"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
