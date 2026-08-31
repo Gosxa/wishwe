@@ -1,9 +1,11 @@
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/breakpoints' as bp;
 
 .shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-height: 100dvh;
   background: clr.$ns-50;
 }
 
@@ -14,12 +16,31 @@
   column-gap: 16px;
   padding-right: var(--page-margin);
   min-width: 0;
+
+  @include bp.tablet {
+    padding-right: 24px;
+  }
+
+  @include bp.mobile {
+    grid-template-columns: minmax(0, 1fr);
+    padding-right: 0;
+  }
 }
 
 .content {
   position: relative;
   grid-column: 2 / -1;
+  min-width: 0;
   min-height: calc(100vh - 72px);
+
+  @include bp.compact {
+    min-height: calc(100dvh - 72px);
+  }
+
+  @include bp.mobile {
+    grid-column: 1;
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
 }
 
 .columns {
@@ -44,14 +65,31 @@
   gap: 16px;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1199px) {
+  .leftCol {
+    grid-column: 1 / 7;
+  }
+
+  .rightCol {
+    grid-column: 7 / -1;
+  }
+}
+
+@include bp.compact {
   .columns {
     grid-template-columns: minmax(0, 1fr);
-    padding-inline: 16px;
+    row-gap: 16px;
+    padding: 24px 0 32px;
   }
 
   .leftCol,
   .rightCol {
     grid-column: 1;
+  }
+}
+
+@include bp.mobile {
+  .columns {
+    padding: 16px 16px 24px;
   }
 }

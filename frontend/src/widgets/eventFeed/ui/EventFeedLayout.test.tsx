@@ -8,6 +8,7 @@ import {
   screen,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import spinner from '@shared/ui/spinner/spinner.module.scss';
 import { EventFeedLayout } from './EventFeedLayout';
 
 describe('EventFeedLayout', () => {
@@ -93,6 +94,15 @@ describe('EventFeedLayout', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(onRetry).toHaveBeenCalledOnce();
+  });
+
+  it('shows the initial spinner in the flow, without the blur backdrop', () => {
+    renderLayout({ isLoading: true });
+
+    const status = screen.getByRole('status', { name: 'Loading' });
+
+    expect(status.className).toContain(spinner.inline);
+    expect(status.className).not.toContain(spinner.backdrop);
   });
 
   it('prefers the spinner over the error while a retry is running', () => {

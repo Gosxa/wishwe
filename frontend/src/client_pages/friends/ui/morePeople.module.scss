@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 .hint {
   margin: 8px 0 0;
@@ -12,6 +13,10 @@
   padding: 0;
   list-style: none;
   transition: opacity 0.2s ease;
+
+  @include bp.mobile {
+    margin-top: 16px;
+  }
 }
 
 .stale {

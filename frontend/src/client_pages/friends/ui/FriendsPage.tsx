@@ -50,6 +50,7 @@ export default function FriendsPage() {
   return (
     <div className={s.shell}>
       <Header
+        mobileFeedLayout
         search={{
           value: query,
           onChange: setQuery,

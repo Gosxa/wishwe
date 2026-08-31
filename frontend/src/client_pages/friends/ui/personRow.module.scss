@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 .row {
   display: flex;
@@ -12,6 +13,10 @@
     border-bottom: 1px solid clr.$ns-200;
     padding-bottom: 8px;
     margin-bottom: 8px;
+  }
+
+  @include bp.mobile {
+    gap: 12px;
   }
 }
 
@@ -28,6 +33,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (max-width: 1199px) {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 .name {
@@ -36,9 +47,36 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+
+  @media (max-width: 1199px) {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
 }
 
 .action {
   margin-left: auto;
   flex-shrink: 0;
+}
+
+@include bp.mobile {
+  .rowStacked {
+    flex-wrap: wrap;
+
+    .info {
+      flex: 1 1 0;
+    }
+
+    .action {
+      width: 100%;
+      margin-left: 0;
+      margin-top: 12px;
+    }
+
+    &:not(:last-child) {
+      padding-bottom: 16px;
+      margin-bottom: 16px;
+    }
+  }
 }

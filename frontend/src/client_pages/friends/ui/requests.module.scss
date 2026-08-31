@@ -1,16 +1,25 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/buttons' as btn;
+@use '@shared/styles/breakpoints' as bp;
 
 .list {
   margin: 40px 0 0;
   padding: 0;
   list-style: none;
+
+  @include bp.compact {
+    margin-top: 24px;
+  }
 }
 
 .status {
   position: relative;
   min-height: 220px;
+
+  @include bp.mobile {
+    min-height: 160px;
+  }
 }
 
 .empty {
@@ -23,10 +32,19 @@
   display: flex;
   align-items: center;
   gap: 16px;
+
+  @include bp.mobile {
+    gap: 8px;
+  }
 }
 
 .accept {
   @include btn.primary(8px, 88px, 40px);
+
+  @include bp.mobile {
+    flex: 1;
+    width: auto;
+  }
 }
 
 .decline {
@@ -50,6 +68,12 @@
 
   &:active {
     background: #d2cfc5;
+  }
+
+  @include bp.mobile {
+    flex: 1;
+    padding: 0 12px;
+    box-shadow: inset 0 0 0 1px clr.$ns-300;
   }
 }
 

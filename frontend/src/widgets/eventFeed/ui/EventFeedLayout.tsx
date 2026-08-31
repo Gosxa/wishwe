@@ -62,8 +62,8 @@ export const EventFeedLayout = ({
       <div className={s.toolbarSlot}>{toolbar}</div>
 
       {isLoading ? (
-        <div className={s.statusSlot}>
-          <Spinner />
+        <div className={clsx(s.statusSlot, s.loadingSlot)}>
+          <Spinner inline />
         </div>
       ) : error ? (
         <div className={s.errorSlot} role="alert">

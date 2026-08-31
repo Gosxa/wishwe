@@ -550,11 +550,41 @@ test.describe('feed contents', () => {
     baseURL,
   }) => {
     const reader = await readerWithFriend(browser, baseURL!, 'phone');
+    let releaseFeedRequest = () => {};
 
     try {
       await createPlan(reader.friend.api, { title: 'Pocket sized plan' });
 
-      await reader.page.goto('/feed');
+      await reader.page.setViewportSize({ width: 320, height: 860 });
+      await reader.page.goto('/friends');
+
+      const feedRequestGate = new Promise<void>(resolve => {
+        releaseFeedRequest = resolve;
+      });
+
+      await reader.page.route('**/api/event/events?**', async route => {
+        await feedRequestGate;
+        await route.continue();
+      });
+
+      const primaryNav = reader.page.getByRole('navigation', {
+        name: 'Primary',
+      });
+
+      await primaryNav.locator('a[href="/feed"]').click();
+      await expect(reader.page).toHaveURL('/feed');
+      await expect(
+        reader.page.getByRole('status', { name: 'Loading' }),
+      ).toBeVisible();
+      expect(
+        await reader.page.evaluate(
+          () =>
+            document.documentElement.scrollWidth <=
+            document.documentElement.clientWidth,
+        ),
+      ).toBe(true);
+
+      releaseFeedRequest();
 
       const card = eventCard(reader.page, 'Pocket sized plan');
 
@@ -564,6 +594,26 @@ test.describe('feed contents', () => {
       const box = (await card.boundingBox())!;
 
       expect(box.width).toBeLessThanOrEqual(viewport.width);
+
+      const bottomControls = [
+        primaryNav.locator('a[href="/feed"]'),
+        primaryNav.locator('a[href="/friends"]'),
+        reader.page.locator('[data-tour="create-event"]'),
+        reader.page.getByRole('button', { name: /^Notifications/ }),
+        primaryNav.locator('a[href="/profile"]'),
+      ];
+      const controlBoxes = await Promise.all(
+        bottomControls.map(control => control.boundingBox()),
+      );
+
+      for (const controlBox of controlBoxes) {
+        expect(controlBox).not.toBeNull();
+        expect(controlBox!.x).toBeGreaterThanOrEqual(0);
+        expect(controlBox!.x + controlBox!.width).toBeLessThanOrEqual(
+          viewport.width,
+        );
+      }
+
       await expect
         .poll(() =>
           reader.page.evaluate(
@@ -574,6 +624,7 @@ test.describe('feed contents', () => {
         )
         .toBe(true);
     } finally {
+      releaseFeedRequest();
       await reader.close();
     }
   });

@@ -40,6 +40,9 @@ export const ProtectedSidebar = ({ isAuthenticated }: Props) => {
   const activeKey = getActiveKey(pathname);
 
   return (
-    <Sidebar activeKey={activeKey} mobileFeedLayout={activeKey === 'home'} />
+    <Sidebar
+      activeKey={activeKey}
+      mobileFeedLayout={activeKey === 'home' || activeKey === 'friends'}
+    />
   );
 };

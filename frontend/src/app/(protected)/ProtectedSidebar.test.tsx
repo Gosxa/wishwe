@@ -32,7 +32,7 @@ describe('ProtectedSidebar', () => {
 
   it.each([
     ['/feed', 'home', true],
-    ['/friends', 'friends', false],
+    ['/friends', 'friends', true],
     ['/profile', 'profile', false],
     ['/edit-profile', 'profile', false],
     ['/user/alice', undefined, false],

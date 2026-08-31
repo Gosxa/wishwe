@@ -55,6 +55,7 @@ export const Requests = ({
             key={request.id}
             username={request.username}
             avatar={request.avatar}
+            stackActions
           >
             <div className={s.actions}>
               <button
