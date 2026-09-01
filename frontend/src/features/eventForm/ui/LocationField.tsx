@@ -1,7 +1,10 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { isMapsConfigured } from '@/shared/lib/googleMaps/loadGoogleMaps';
+import {
+  GOOGLE_MAPS_ENABLED,
+  isMapsConfigured,
+} from '@/shared/lib/googleMaps/loadGoogleMaps';
 import { Location, WarningTriangle } from '@shared/ui/icons';
 import { LOCATION_FIELD_COPY as COPY } from '@shared/ui/locationPicker/copy';
 import { LocationPickerModal } from '@shared/ui/locationPicker/LocationPickerModal';
@@ -42,7 +45,7 @@ export const LocationField = ({ mode, placeholder, input, picker }: Props) => {
   ) : null;
 
   const statusRow =
-    picker.status === 'none' ? null : (
+    !isAvailable || picker.status === 'none' ? null : (
       <div className={s.statusRow}>
         {picker.status === 'pinned' ? (
           <>
@@ -90,7 +93,9 @@ export const LocationField = ({ mode, placeholder, input, picker }: Props) => {
         value={input.value}
         onChange={event => input.onChange(event.target.value)}
         error={input.error}
-        helperText={isAvailable ? undefined : COPY.unavailable}
+        helperText={
+          GOOGLE_MAPS_ENABLED && !isAvailable ? COPY.unavailable : undefined
+        }
         labelAction={labelAction}
         statusRow={statusRow}
       />
@@ -99,7 +104,7 @@ export const LocationField = ({ mode, placeholder, input, picker }: Props) => {
         {picker.announcement}
       </p>
 
-      {openedFrom && (
+      {isAvailable && openedFrom && (
         <LocationPickerModal
           mode={mode}
           source={openedFrom}

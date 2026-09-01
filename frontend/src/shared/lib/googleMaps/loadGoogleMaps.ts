@@ -1,9 +1,9 @@
 const SCRIPT_ID = 'google-maps-js';
 const CALLBACK_NAME = '__wishweGoogleMapsReady';
 
-/** How long we wait before admitting the SDK is slow (the button stays disabled). */
+export const GOOGLE_MAPS_ENABLED = false;
+
 export const MAPS_SLOW_MS = 3_000;
-/** How long we wait before giving up entirely and hiding the button. */
 export const MAPS_TIMEOUT_MS = 8_000;
 
 export type MapsLibraries = {
@@ -14,7 +14,7 @@ export type MapsLibraries = {
 };
 
 export const getMapsApiKey = (): string =>
-  process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '';
+  GOOGLE_MAPS_ENABLED ? (process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? '') : '';
 
 export const isMapsConfigured = (): boolean => getMapsApiKey().length > 0;
 

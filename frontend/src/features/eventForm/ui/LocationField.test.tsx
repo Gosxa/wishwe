@@ -8,6 +8,7 @@ import type { EventFormModel } from '../model/types';
 const mapsMocks = vi.hoisted(() => ({ isConfigured: vi.fn(() => true) }));
 
 vi.mock('@/shared/lib/googleMaps/loadGoogleMaps', () => ({
+  GOOGLE_MAPS_ENABLED: true,
   isMapsConfigured: mapsMocks.isConfigured,
 }));
 
@@ -166,11 +167,17 @@ describe('LocationField', () => {
     expect(onChange).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the button and explains why when there is no API key', () => {
+  it('hides all map controls and explains why when there is no API key', () => {
     mapsMocks.isConfigured.mockReturnValue(false);
-    renderField();
+    renderField({
+      value: PIN.formatted,
+      picker: { pin: PIN, status: 'pinned' },
+    });
 
     expect(screen.queryByRole('button', { name: 'Pick on map' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Change' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Clear' })).toBeNull();
+    expect(screen.queryByText('Pinned on the map')).toBeNull();
     expect(
       screen.getByText(
         'Map picking is unavailable right now — type the address instead.',
