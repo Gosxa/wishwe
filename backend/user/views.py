@@ -4,7 +4,7 @@ import uuid
 
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Prefetch, Q
+from django.db.models import Prefetch, Q, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import (
     extend_schema,
@@ -417,7 +417,25 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        queryset = self.queryset.filter(is_private=False)
+        queryset = self.queryset.filter(is_private=False).annotate(
+            active_events_count=Count(
+                "user__event_participations__event",
+                filter=Q(
+                    user__event_participations__event__status__in=(
+                        EventStatus.ACTIVE,
+                        EventStatus.CLOSED,
+                    )
+                ),
+                distinct=True,
+            ),
+            archived_events_count=Count(
+                "user__event_participations__event",
+                filter=Q(
+                    user__event_participations__event__status=EventStatus.COMPLETED
+                ),
+                distinct=True,
+            ),
+        )
         username = self.request.query_params.get("username")
 
         if username:
@@ -454,7 +472,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["get"])
     def me(self, request):
-        profile = request.user.profile
+        profile = self.get_queryset().get(pk=request.user.profile.pk)
         serializer = self.get_serializer(
             profile
         )
