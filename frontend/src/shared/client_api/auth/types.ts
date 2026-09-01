@@ -13,6 +13,8 @@ export type Profile = {
   social_media_url: string | null;
   is_private: boolean;
   has_seen_feed_tour: boolean;
+  active_events_count?: number;
+  archived_events_count?: number;
 };
 
 export type CheckEmailRes = { flow: 'login' | 'register' };

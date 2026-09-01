@@ -417,7 +417,7 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = DefaultPagination
 
     def get_queryset(self):
-        queryset = self.queryset.filter(is_private=False).annotate(
+        queryset = self.queryset.annotate(
             active_events_count=Count(
                 "user__event_participations__event",
                 filter=Q(
@@ -436,6 +436,10 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
                 distinct=True,
             ),
         )
+
+        if self.action != "me":
+            queryset = queryset.filter(is_private=False)
+
         username = self.request.query_params.get("username")
 
         if username:

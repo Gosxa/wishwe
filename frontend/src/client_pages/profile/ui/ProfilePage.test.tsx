@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => ({
   getEvent: vi.fn(),
   openCreate: vi.fn(),
   openEventId: null as string | null,
+  refresh: vi.fn(),
   search: '',
   setEventParam: vi.fn(),
   setSort: vi.fn(),
@@ -36,6 +37,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: mocks.refresh }),
   useSearchParams: () => ({
     get: (key: string) => (key === 'title' ? mocks.search : null),
   }),
@@ -208,6 +210,8 @@ const profile: Profile = {
   social_media_url: null,
   is_private: false,
   has_seen_feed_tour: true,
+  active_events_count: 3,
+  archived_events_count: 8,
 };
 
 const feedEvent = {
@@ -307,6 +311,9 @@ describe('ProfilePage', () => {
     ).toBeTruthy();
     expect(screen.getByRole('heading', { name: '@alice' })).toBeTruthy();
     expect(screen.getByText('Always planning something')).toBeTruthy();
+    expect(
+      screen.getAllByRole('definition').map(node => node.textContent),
+    ).toEqual(['3', '8']);
     expect(
       screen.getByRole('link', { name: 'Edit profile' }).getAttribute('href'),
     ).toBe('/edit-profile');

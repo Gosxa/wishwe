@@ -6,6 +6,7 @@ import { Pencil } from '@shared/ui/icons';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { InviteFriends } from './InviteFriends';
+import { ProfileStats } from './ProfileStats';
 import s from './profileHeader.module.scss';
 
 type Props = {
@@ -18,6 +19,11 @@ export const ProfileHeader = ({ initialUser }: Props) => {
   const username = user?.username ?? '';
   const bio = user?.bio ?? '';
   const avatar = user?.avatar ?? null;
+  const activeCount =
+    user?.active_events_count ?? initialUser?.active_events_count;
+  const archivedCount =
+    user?.archived_events_count ?? initialUser?.archived_events_count;
+  const hasStats = activeCount != null || archivedCount != null;
 
   return (
     <section className={s.header}>
@@ -34,6 +40,13 @@ export const ProfileHeader = ({ initialUser }: Props) => {
         <div className={s.identityBody}>
           {username && <h1 className={s.username}>@{username}</h1>}
           {bio && <p className={s.bio}>{bio}</p>}
+
+          {hasStats && (
+            <ProfileStats
+              activeCount={activeCount ?? 0}
+              archivedCount={archivedCount ?? 0}
+            />
+          )}
 
           <Link href="/edit-profile" className={s.editButton}>
             <Pencil />

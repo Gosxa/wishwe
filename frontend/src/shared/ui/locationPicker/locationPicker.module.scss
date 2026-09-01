@@ -1,3 +1,5 @@
+@use 'sass:color';
+
 @use '@shared/styles/animations' as anim;
 @use '@shared/styles/breakpoints' as bp;
 @use '@shared/styles/buttons' as btn;
@@ -414,7 +416,7 @@ $control-size: 36px;
 }
 
 .hintChipWarn {
-  background: mix(#fff, clr.$warn, 86%);
+  background: color.mix(#fff, clr.$warn, 86%);
 }
 
 .zoom {

@@ -1,12 +1,19 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FeedEvent } from '@client_pages/home/model/types';
 
 const mocks = vi.hoisted(() => ({
   error: null as string | null,
   events: [] as FeedEvent[],
+  refresh: vi.fn(),
   retry: vi.fn(),
   setSort: vi.fn(),
   setTab: vi.fn(),
@@ -15,6 +22,7 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('next/navigation', () => ({
+  useRouter: () => ({ refresh: mocks.refresh }),
   useSearchParams: () => new URLSearchParams(),
 }));
 
@@ -64,8 +72,19 @@ vi.mock('@client_pages/home/widgets/feed/ui/DeepLinkCard', () => ({
 }));
 
 vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
-  EventCard: ({ event }: { event: FeedEvent }) => (
-    <article>{event.title}</article>
+  EventCard: ({
+    event,
+    onCancel,
+  }: {
+    event: FeedEvent;
+    onCancel: (id: string) => void;
+  }) => (
+    <article>
+      {event.title}
+      <button type="button" onClick={() => onCancel(event.id)}>
+        Cancel event
+      </button>
+    </article>
   ),
 }));
 
@@ -77,7 +96,25 @@ vi.mock('@client_pages/profile/widgets/planItModal', () => ({
   PlanItModal: () => null,
 }));
 
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { ProfileFeed } from './ProfileFeed';
+
+const feedEvent = {
+  id: 'event-7',
+  type: 'plan',
+  image: '/event.jpg',
+  title: 'Sunset picnic',
+  host: { username: '@me' },
+  date: 'Sunday',
+  startsAt: null,
+  createdAt: 1,
+  location: 'The park',
+  chatLink: null,
+  participantCount: 2,
+  maxParticipants: 6,
+  participants: [],
+  userParticipationStatus: null,
+} satisfies FeedEvent;
 
 describe('ProfileFeed error handling', () => {
   beforeEach(() => {
@@ -114,5 +151,39 @@ describe('ProfileFeed error handling', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
 
     expect(mocks.retry).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('ProfileFeed counter refresh', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mocks.error = null;
+    mocks.events = [];
+    mocks.sort = 'recent';
+    mocks.tab = 'plans';
+  });
+
+  afterEach(cleanup);
+
+  it('re-runs the server render once an event is archived', () => {
+    mocks.events = [feedEvent];
+
+    render(<ProfileFeed initialUser={null} />);
+
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel event' }));
+
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('re-runs the server render when an event is created elsewhere', () => {
+    render(<ProfileFeed initialUser={null} />);
+
+    expect(mocks.refresh).not.toHaveBeenCalled();
+
+    act(() => useEventsRefreshStore.getState().requestRefresh());
+
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
   });
 });

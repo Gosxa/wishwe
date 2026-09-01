@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { getEvent } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
@@ -13,6 +13,7 @@ import {
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useUserStore } from '@/shared/store/useUserStore';
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { DeepLinkCard } from '@client_pages/home/widgets/feed/ui/DeepLinkCard';
 import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
 import { EditEventModal } from '@client_pages/profile/widgets/editEventModal';
@@ -30,6 +31,7 @@ type Props = {
 
 export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
   const { tab, sort, setTab, setSort } = useProfileToolbar();
+  const router = useRouter();
 
   const user = useUserStore(state => state.user) ?? initialUser;
 
@@ -44,6 +46,16 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
     useProfileEvents({ userId: user?.user_id ?? null, tab, sort, refreshKey });
 
   const search = useSearchParams().get(SEARCH_PARAM) ?? '';
+
+  const refreshToken = useEventsRefreshStore(state => state.refreshToken);
+  const lastRefreshToken = useRef(refreshToken);
+
+  useEffect(() => {
+    if (lastRefreshToken.current === refreshToken) return;
+
+    lastRefreshToken.current = refreshToken;
+    router.refresh();
+  }, [refreshToken, router]);
 
   useSearchDisabledSync(onSearchDisabledChange, events, search);
 
@@ -80,7 +92,8 @@ export const ProfileFeed = ({ initialUser, onSearchDisabledChange }: Props) => {
 
   const handleEventCancelled = useCallback(() => {
     setRefreshKey(key => key + 1);
-  }, []);
+    router.refresh();
+  }, [router]);
 
   return (
     <>

@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.core import mail
 from django.test import override_settings
 
-from user.models import EmailVerification
+from user.models import EmailVerification, Profile
 
 
 User = get_user_model()
@@ -240,3 +240,24 @@ class AuthFlowTests(APITestCase):
         })
 
         self.assertEqual(response.status_code, 400)
+
+
+class ProfileTests(APITestCase):
+
+    def test_private_profile_is_available_to_its_owner(self):
+        user = User.objects.create_user(
+            email="private-profile@test.com",
+            password="testpass123",
+        )
+        Profile.objects.create(
+            user=user,
+            username="private-profile",
+            is_private=True,
+        )
+        self.client.force_authenticate(user=user)
+
+        response = self.client.get(reverse("user:profile-me"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["username"], "private-profile")
+        self.assertTrue(response.data["is_private"])

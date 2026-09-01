@@ -1,3 +1,4 @@
+export { Archive } from './archive/Archive';
 export { ArrowDown } from './arrowDown/ArrowDown';
 export { ArrowDownShort } from './arrowDownShort/ArrowDownShort';
 export { Asterisk } from './asterisk/Asterisk';
