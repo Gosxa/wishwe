@@ -351,12 +351,7 @@
   justify-content: center;
   padding: 24px;
   background: rgba(clr.$ns-900, 0.42);
-  backdrop-filter: blur(8px);
   @include anim.modal-overlay-enter;
-}
-
-.leaveOverlayNested {
-  backdrop-filter: none;
 }
 
 .leaveDialog {

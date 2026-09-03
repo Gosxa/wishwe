@@ -153,7 +153,6 @@ export const EventCard = ({
 
       {isLeaveDialogOpen && (
         <LeaveEventDialog
-          isNested={isDetailsOpen}
           isPending={participation.isPending}
           cancelRef={leaveCancelRef}
           transitionProps={leaveDialogTransitionProps}

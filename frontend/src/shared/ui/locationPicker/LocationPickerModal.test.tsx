@@ -10,6 +10,7 @@ import {
 import { StrictMode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AddressParts } from '@/shared/lib/googleMaps/formatLocation';
+import type { SourcedSuggestion } from '@/shared/lib/googleMaps/placesService';
 import type { LocationPin, ResolvedPlace } from '@/shared/lib/googleMaps/types';
 
 type Listener = (...args: unknown[]) => void;
@@ -30,11 +31,25 @@ const mocks = vi.hoisted(() => ({
     () => () => {},
   ),
   reverseGeocode: vi.fn(),
-  fetchSuggestions: vi.fn(async () => []),
+  fetchSuggestions: vi.fn(async (): Promise<SourcedSuggestion[]> => []),
   fetchPlaceDetails: vi.fn(),
   createSessionToken: vi.fn(() => ({})),
+  readGeolocationPermission: vi.fn(async () => 'prompt' as const),
+  requestCurrentPosition: vi.fn(),
   track: vi.fn(),
 }));
+
+vi.mock('@/shared/lib/geolocation/permission', () => ({
+  readGeolocationPermission: mocks.readGeolocationPermission,
+}));
+
+vi.mock('@/shared/lib/geolocation/requestPosition', async () => {
+  const actual = await vi.importActual<
+    typeof import('@/shared/lib/geolocation/requestPosition')
+  >('@/shared/lib/geolocation/requestPosition');
+
+  return { ...actual, requestCurrentPosition: mocks.requestCurrentPosition };
+});
 
 vi.mock('@/shared/lib/googleMaps/loadGoogleMaps', () => ({
   loadGoogleMaps: mocks.loadGoogleMaps,
@@ -55,6 +70,7 @@ vi.mock('@/shared/lib/googleMaps/placesService', () => ({
 
 vi.mock('@vercel/analytics', () => ({ track: mocks.track }));
 
+import { GeolocationError } from '@/shared/lib/geolocation/requestPosition';
 import { LocationPickerModal } from './LocationPickerModal';
 
 class FakeMap {
@@ -147,13 +163,77 @@ const renderPicker = (
 const settle = async () => {
   await act(async () => {
     await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
   });
 };
 
-const dropPin = async () => {
+const pickPlace = async (
+  place: ResolvedPlace = {
+    lat: 50.44001,
+    lng: 30.52001,
+    formattedAddress: 'Khreshchatyk St, 20, Kyiv, 01001, Ukraine',
+  },
+) => {
+  mocks.fetchSuggestions.mockResolvedValueOnce([
+    {
+      placeId: place.placeId ?? 'place-1',
+      primary: place.name ?? 'Khreshchatyk St, 20',
+      secondary: 'Kyiv, Ukraine',
+      prediction: {} as google.maps.places.PlacePrediction,
+    },
+  ]);
+  mocks.fetchPlaceDetails.mockResolvedValueOnce({
+    place: {
+      lat: place.lat ?? 50.44001,
+      lng: place.lng ?? 30.52001,
+      formattedAddress:
+        place.formattedAddress ?? 'Khreshchatyk St, 20, Kyiv, 01001, Ukraine',
+      placeId: place.placeId,
+      name: place.name,
+    },
+    parts: {},
+  });
+
+  const searchInput = screen.getByRole('combobox', {
+    name: 'Search for a place or an address',
+  });
+
+  fireEvent.change(searchInput, { target: { value: 'Khreshchatyk' } });
+
+  await act(async () => {
+    vi.advanceTimersByTime(350);
+    await Promise.resolve();
+  });
+
+  const option = screen.getByRole('option');
+
+  await act(async () => {
+    fireEvent.click(option);
+    await Promise.resolve();
+  });
+  await settle();
+};
+
+const skipToMap = async () => {
+  await settle();
+
+  const skip = screen.queryByRole('button', { name: 'I’ll type the address' });
+
+  if (skip) fireEvent.click(skip);
+
+  await pickPlace();
+};
+
+const dropPin = async (next?: { lat: number; lng: number }) => {
   await act(async () => {
     fake.listeners.get('dragstart')?.forEach(handler => handler());
   });
+  fake.center =
+    next ??
+    (fake.center.lat === 50.44001
+      ? { lat: 50.44771, lng: 30.52258 }
+      : fake.center);
   await act(async () => {
     fake.listeners.get('idle')?.forEach(handler => handler());
   });
@@ -183,6 +263,10 @@ describe('LocationPickerModal', () => {
     mocks.hasMapsAuthFailed.mockReturnValue(false);
     mocks.onMapsAuthFailure.mockImplementation(() => () => {});
     mocks.loadGoogleMaps.mockResolvedValue(libraries);
+    mocks.readGeolocationPermission.mockResolvedValue('prompt');
+    mocks.requestCurrentPosition.mockRejectedValue(
+      new GeolocationError('denied'),
+    );
     resolvedTo(KYIV);
     vi.stubGlobal(
       'matchMedia',
@@ -200,10 +284,69 @@ describe('LocationPickerModal', () => {
     vi.clearAllMocks();
   });
 
-  it('opens with focus on the search input, which is the keyboard path', async () => {
+  it('opens by asking for a location, with the offer holding focus', async () => {
     renderPicker();
     await settle();
 
+    expect(screen.getByText('Start from where you are?')).toBeTruthy();
+    expect(screen.queryByTestId('location-picker-map-canvas')).toBeNull();
+    expect(document.activeElement).toBe(
+      screen.getByRole('button', { name: 'Use my location' }),
+    );
+    expect(mocks.requestCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it('opens the map on the reported position once sharing is allowed', async () => {
+    const home = { lat: 49.8397, lng: 24.0297 };
+
+    mocks.requestCurrentPosition.mockResolvedValue(home);
+    resolvedTo({ ...home, formattedAddress: 'Rynok Square, Lviv, Ukraine' });
+    renderPicker();
+    await settle();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use my location' }));
+    await settle();
+
+    expect(screen.getByTestId('location-picker-map-canvas')).toBeTruthy();
+    expect(fake.center).toEqual(home);
+    expect(screen.getByTestId('location-picker-pin').className).toContain(
+      'pinSolid',
+    );
+
+    await act(async () => {
+      fake.listeners.get('idle')?.forEach(handler => handler());
+    });
+    await act(async () => {
+      vi.advanceTimersByTime(400);
+      await Promise.resolve();
+    });
+
+    expect(mocks.reverseGeocode).toHaveBeenCalledWith({
+      geocoding: libraries.geocoding,
+      ...home,
+    });
+    expect(screen.getByText('Rynok Square, Lviv, Ukraine')).toBeTruthy();
+    expect(confirmButton().disabled).toBe(false);
+  });
+
+  it('hands a refusal to the autocomplete instead of opening the map', async () => {
+    mocks.requestCurrentPosition.mockRejectedValue(
+      new GeolocationError('denied'),
+    );
+    renderPicker();
+    await settle();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use my location' }));
+    await settle();
+
+    expect(screen.getByText('Type the address above')).toBeTruthy();
+    expect(
+      screen.getByText('Location sharing is off, so let’s do this by hand.'),
+    ).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: 'Or browse the map' }),
+    ).toBeNull();
+    expect(screen.queryByTestId('location-picker-map-canvas')).toBeNull();
     expect(document.activeElement).toBe(
       screen.getByRole('combobox', {
         name: 'Search for a place or an address',
@@ -211,39 +354,168 @@ describe('LocationPickerModal', () => {
     );
   });
 
-  it('shows the initial placement instructions only once', async () => {
+  it('skips the ask entirely when the browser already blocked us', async () => {
+    mocks.readGeolocationPermission.mockResolvedValue(
+      'denied' as unknown as 'prompt',
+    );
     renderPicker();
     await settle();
 
-    expect(screen.getAllByText(/(?:click|drag).*(?:spot|map)/i)).toHaveLength(
-      1,
+    expect(screen.queryByText('Start from where you are?')).toBeNull();
+    expect(screen.getByText('Type the address above')).toBeTruthy();
+    expect(mocks.requestCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it('locates without asking twice when permission is already granted', async () => {
+    const home = { lat: 49.8397, lng: 24.0297 };
+
+    mocks.readGeolocationPermission.mockResolvedValue(
+      'granted' as unknown as 'prompt',
+    );
+    mocks.requestCurrentPosition.mockResolvedValue(home);
+    renderPicker();
+    await settle();
+
+    expect(screen.queryByText('Start from where you are?')).toBeNull();
+    expect(screen.getByTestId('location-picker-map-canvas')).toBeTruthy();
+    expect(fake.center).toEqual(home);
+  });
+
+  it('never asks when reopened on a pin that is already placed', async () => {
+    renderPicker({
+      initialPin: { lat: 50.44771, lng: 30.52258, formatted: 'Khreshchatyk' },
+    });
+    await settle();
+
+    expect(screen.queryByText('Start from where you are?')).toBeNull();
+    expect(mocks.readGeolocationPermission).not.toHaveBeenCalled();
+    expect(screen.getByTestId('location-picker-map-canvas')).toBeTruthy();
+  });
+
+  it('stays on the typing screen when a position lands after the user gave up', async () => {
+    let arrive: (position: { lat: number; lng: number }) => void = () => {};
+
+    mocks.requestCurrentPosition.mockReturnValue(
+      new Promise(resolve => {
+        arrive = resolve;
+      }),
+    );
+    renderPicker();
+    await settle();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use my location' }));
+    await settle();
+
+    expect(screen.getByText('Finding your position…')).toBeTruthy();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'Type the address instead' }),
+    );
+    expect(screen.getByText('Type the address above')).toBeTruthy();
+
+    await act(async () => {
+      arrive({ lat: 49.8397, lng: 24.0297 });
+      await Promise.resolve();
+    });
+    await settle();
+
+    expect(screen.getByText('Type the address above')).toBeTruthy();
+    expect(screen.queryByTestId('location-picker-map-canvas')).toBeNull();
+  });
+
+  it('keeps the locate button live after a failure that is not a refusal', async () => {
+    mocks.requestCurrentPosition.mockRejectedValue(
+      new GeolocationError('timeout'),
+    );
+    renderPicker();
+    await settle();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use my location' }));
+    await settle();
+
+    expect(
+      screen.getByText('Finding you took too long, so let’s do this by hand.'),
+    ).toBeTruthy();
+
+    await pickPlace();
+
+    const locate = screen.getByRole('button', {
+      name: 'We couldn’t read your position — try again',
+    });
+
+    expect(locate.hasAttribute('disabled')).toBe(false);
+  });
+
+  it('disables the locate button once the browser has refused outright', async () => {
+    renderPicker();
+    await settle();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Use my location' }));
+    await settle();
+
+    await pickPlace();
+
+    const locate = screen.getByRole('button', {
+      name: 'Location access is blocked in your browser',
+    });
+
+    expect(locate.hasAttribute('disabled')).toBe(true);
+  });
+
+  it('does not offer browsing the map when declined, opening the map only after selecting an address', async () => {
+    renderPicker();
+    await settle();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'I’ll type the address' }),
+    );
+    expect(screen.getByText('Type the address above')).toBeTruthy();
+    expect(
+      screen.queryByRole('button', { name: 'Or browse the map' }),
+    ).toBeNull();
+    expect(screen.queryByTestId('location-picker-map-canvas')).toBeNull();
+
+    await pickPlace();
+
+    expect(screen.getByTestId('location-picker-map-canvas')).toBeTruthy();
+    expect(screen.getByTestId('location-picker-pin').className).toContain(
+      'pinSolid',
     );
   });
 
-  it('keeps confirm disabled until a pin resolves to an address', async () => {
+  it('shows the initial placement instructions only once', async () => {
+    renderPicker();
+    await skipToMap();
+
+    expect(screen.getByText('Move the map to fine-tune the pin')).toBeTruthy();
+  });
+
+  it('keeps confirm disabled on the manual screen until an address is selected', async () => {
     renderPicker();
     await settle();
 
+    fireEvent.click(
+      screen.getByRole('button', { name: 'I’ll type the address' }),
+    );
     expect(confirmButton().disabled).toBe(true);
-    expect(
-      screen.getByText('Click a spot or move the map to place the pin'),
-    ).toBeTruthy();
+    expect(screen.getByText('No place picked yet')).toBeTruthy();
 
-    await dropPin();
+    await pickPlace();
 
     expect(confirmButton().disabled).toBe(false);
     expect(
-      screen.getByText('Khreshchatyk St, 22, Kyiv, 01001, Ukraine'),
+      screen.getByText('Khreshchatyk St, 20, Kyiv, 01001, Ukraine'),
     ).toBeTruthy();
     expect(screen.queryByText(/match:/i)).toBeNull();
   });
 
   it('does not lose the first drag when Maps settles before React rerenders', async () => {
     renderPicker();
-    await settle();
+    await skipToMap();
 
     await act(async () => {
       fake.listeners.get('dragstart')?.forEach(handler => handler());
+      fake.center = { lat: 50.44771, lng: 30.52258 };
       fake.listeners.get('idle')?.forEach(handler => handler());
     });
     await act(async () => {
@@ -268,7 +540,7 @@ describe('LocationPickerModal', () => {
         />
       </StrictMode>,
     );
-    await settle();
+    await skipToMap();
 
     await dropPin();
 
@@ -280,7 +552,7 @@ describe('LocationPickerModal', () => {
 
   it('drops the resolved address the moment the map moves again', async () => {
     renderPicker();
-    await settle();
+    await skipToMap();
     await dropPin();
 
     await act(async () => {
@@ -315,7 +587,7 @@ describe('LocationPickerModal', () => {
 
   it('keeps the dragged point when the zoom buttons are used next', async () => {
     renderPicker();
-    await settle();
+    await skipToMap();
 
     fake.center = { lat: 50.4, lng: 30.5 };
     await dropPin();
@@ -331,7 +603,7 @@ describe('LocationPickerModal', () => {
 
   it('uses the map surface gesture when Google omits dragstart', async () => {
     renderPicker();
-    await settle();
+    await skipToMap();
 
     fireEvent.pointerDown(screen.getByTestId('location-picker-map-canvas'));
     await act(async () => {
@@ -357,7 +629,7 @@ describe('LocationPickerModal', () => {
       formattedAddress: 'Maidan Nezalezhnosti, Kyiv, Ukraine',
     });
     renderPicker();
-    await settle();
+    await skipToMap();
 
     const mapCanvas = screen.getByTestId('location-picker-map-canvas');
 
@@ -393,7 +665,7 @@ describe('LocationPickerModal', () => {
   it('writes the resolved address back to the form on confirm', async () => {
     const { onConfirm } = renderPicker();
 
-    await settle();
+    await skipToMap();
     await dropPin();
     fireEvent.click(confirmButton());
 
@@ -414,7 +686,7 @@ describe('LocationPickerModal', () => {
 
     const { onConfirm } = renderPicker();
 
-    await settle();
+    await skipToMap();
     await dropPin();
 
     expect(confirmButton().textContent).toBe('Use these coordinates');
@@ -428,7 +700,7 @@ describe('LocationPickerModal', () => {
     mocks.reverseGeocode.mockRejectedValue(new Error('geocoder down'));
     renderPicker();
 
-    await settle();
+    await skipToMap();
     await dropPin();
 
     expect(confirmButton().textContent).toBe('Use coordinates anyway');
@@ -441,7 +713,7 @@ describe('LocationPickerModal', () => {
       initialValue: 'Bar Nebo, Lviv — the one by the park',
     });
 
-    await settle();
+    await skipToMap();
     await dropPin();
     fireEvent.click(confirmButton());
 
@@ -459,7 +731,7 @@ describe('LocationPickerModal', () => {
   it('guards an unconfirmed pin behind the discard dialog on close', async () => {
     const { onClose } = renderPicker();
 
-    await settle();
+    await skipToMap();
     await dropPin();
     fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
@@ -472,6 +744,27 @@ describe('LocationPickerModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     fireEvent.click(screen.getByRole('button', { name: 'Discard' }));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('pulses the confirm dialog on backdrop click and closes on Escape', async () => {
+    const { onClose } = renderPicker();
+
+    await skipToMap();
+    await dropPin();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+
+    const confirmDialog = screen.getByRole('alertdialog');
+    const confirmOverlay = confirmDialog.parentElement as HTMLElement;
+
+    expect(confirmOverlay.getAttribute('data-modal-state')).toBe('open');
+
+    fireEvent.click(confirmOverlay);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(confirmDialog.animate).toHaveBeenCalled();
+
+    fireEvent.keyDown(confirmDialog, { key: 'Escape' });
+    expect(screen.queryByText('Discard this pin?')).toBeNull();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('closes losslessly when nothing was picked', async () => {
@@ -560,7 +853,7 @@ describe('LocationPickerModal', () => {
 
   it('refuses an address too broad to be useful', async () => {
     renderPicker();
-    await settle();
+    await skipToMap();
 
     await act(async () => {
       fake.listeners.get('dragstart')?.forEach(handler => handler());

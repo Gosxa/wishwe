@@ -19,7 +19,6 @@ $control-size: 36px;
   justify-content: center;
   padding: 24px;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
   @include anim.modal-overlay-enter;
 }
 
@@ -38,7 +37,6 @@ $control-size: 36px;
   box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.2);
   @include anim.modal-enter;
 }
-
 
 .header {
   display: flex;
@@ -76,7 +74,6 @@ $control-size: 36px;
     outline-offset: 2px;
   }
 }
-
 
 .searchWrapper {
   position: relative;
@@ -261,7 +258,6 @@ $control-size: 36px;
   @include typo.text-caption;
   color: clr.$ns-700;
 }
-
 
 .map {
   position: relative;
@@ -496,6 +492,136 @@ $control-size: 36px;
   color: clr.$ns-500;
 }
 
+.intro {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: $map-height;
+  padding: 24px;
+  overflow: hidden;
+  text-align: center;
+  border-radius: 12px;
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      rgba(clr.$prm-light, 0.16) 0%,
+      rgba(clr.$prm-light, 0) 62%
+    ),
+    clr.$ns-100;
+}
+
+.introManual {
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      rgba(clr.$acc-beige, 0.5) 0%,
+      rgba(clr.$acc-beige, 0) 62%
+    ),
+    clr.$ns-100;
+}
+
+.introBadge {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid rgba(clr.$prm, 0.14);
+  background: clr.$ns-50;
+  box-shadow: 0 4px 14px 0 rgba(clr.$prm-dark, 0.08);
+  color: clr.$prm;
+
+  > svg {
+    position: relative;
+    z-index: 1;
+    width: 26px;
+    height: 26px;
+  }
+
+  > div {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.introBadgeLive {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid rgba(clr.$prm-light, 0.45);
+    border-radius: 50%;
+    animation: intro-pulse 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+  }
+
+  &::after {
+    animation-delay: 1.2s;
+  }
+}
+
+@keyframes intro-pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+
+  to {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.introTitle {
+  @include typo.h2;
+  font-size: 20px;
+  line-height: 24px;
+  color: clr.$ns-900;
+}
+
+.introBody {
+  max-width: 48ch;
+  @include typo.text-body;
+  color: clr.$ns-700;
+}
+
+.introActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.introPrivacy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  @include typo.text-caption;
+  color: clr.$ns-500;
+
+  > svg {
+    flex-shrink: 0;
+  }
+}
+
+.introNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: clr.$ns-50;
+  @include typo.text-caption;
+  color: clr.$ns-700;
+}
 
 .addressCard {
   display: flex;
@@ -503,18 +629,26 @@ $control-size: 36px;
   min-height: 82px;
   padding: 16px;
   border-radius: 12px;
+  border: 1px solid transparent;
   background: clr.$ns-100;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .addressCardMuted {
+  border: 1px dashed clr.$ns-300;
+  background: rgba(clr.$ns-100, 0.55);
   color: clr.$ns-500;
 }
 
 .addressCardWarn {
+  border-color: rgba(clr.$warn, 0.3);
   background: rgba(clr.$warn, 0.14);
 }
 
 .addressCardError {
+  border-color: rgba(clr.$err, 0.3);
   background: rgba(clr.$err, 0.1);
 }
 
@@ -530,6 +664,10 @@ $control-size: 36px;
   .addressCardError & {
     color: clr.$err;
   }
+}
+
+.addressIconPlaceholder {
+  opacity: 0.5;
 }
 
 .addressText {
@@ -621,7 +759,6 @@ $control-size: 36px;
   }
 }
 
-
 .footer {
   display: flex;
   align-items: center;
@@ -674,7 +811,6 @@ $control-size: 36px;
   min-width: 210px;
 }
 
-
 .dialogLayer {
   position: absolute;
   inset: 0;
@@ -685,14 +821,17 @@ $control-size: 36px;
   padding: 24px;
   border-radius: 16px;
   background: rgba(0, 0, 0, 0.35);
+  @include anim.modal-overlay-enter;
 }
 
 .dialog {
   width: min(440px, 100%);
   padding: 24px;
   border-radius: 12px;
+  border: 1px solid clr.$ns-200;
   background: clr.$ns-50;
   box-shadow: 0 12px 32px 0 rgba(0, 0, 0, 0.24);
+  @include anim.modal-enter;
 }
 
 .dialogTitle {
@@ -734,12 +873,17 @@ $control-size: 36px;
   margin-top: 24px;
 }
 
-
 @media (max-height: 900px) {
   .map,
   .mapSkeleton,
   .mapFallback {
     height: $map-height-short;
+  }
+
+  .intro {
+    min-height: $map-height-short;
+    gap: 10px;
+    padding: 20px;
   }
 }
 
@@ -757,6 +901,15 @@ $control-size: 36px;
   .actions {
     justify-content: flex-end;
   }
+
+  .introActions {
+    flex-direction: column;
+    align-self: stretch;
+
+    > button {
+      width: 100%;
+    }
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -764,5 +917,11 @@ $control-size: 36px;
   .suggestionPanel,
   .skeletonLine {
     animation: none;
+  }
+
+  .introBadgeLive::before,
+  .introBadgeLive::after {
+    animation: none;
+    opacity: 0.35;
   }
 }

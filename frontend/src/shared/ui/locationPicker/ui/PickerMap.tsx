@@ -7,6 +7,7 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
+import type { GeolocationFailure } from '@/shared/lib/geolocation/types';
 import type { MapsLibraries } from '@/shared/lib/googleMaps/loadGoogleMaps';
 import { Crosshair, Minus, Plus, TargetOff } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
@@ -26,6 +27,7 @@ type Props = {
   hasPin: boolean;
   isLocating: boolean;
   isGeolocationBlocked: boolean;
+  geolocationFailure: GeolocationFailure | null;
   isDimmed: boolean;
   onIdle: (center: LatLng, zoom: number) => void;
   onPick: (center: LatLng, zoom: number) => void;
@@ -43,6 +45,7 @@ export const PickerMap = ({
   hasPin,
   isLocating,
   isGeolocationBlocked,
+  geolocationFailure,
   isDimmed,
   onIdle,
   onPick,
@@ -182,6 +185,12 @@ export const PickerMap = ({
     handlers.current.onPick(picked.toJSON(), mapZoom);
   };
 
+  const locateLabel = isGeolocationBlocked
+    ? COPY.errors.geolocationBlocked
+    : geolocationFailure
+      ? COPY.errors.geolocationRetry
+      : 'Use my location';
+
   return (
     <div className={clsx(s.map, isDimmed && s.mapDimmed)}>
       <div
@@ -261,14 +270,8 @@ export const PickerMap = ({
             )}
             onClick={onLocateMe}
             disabled={isLocating || isGeolocationBlocked}
-            aria-label={
-              isGeolocationBlocked
-                ? COPY.errors.geolocationBlocked
-                : 'Use my location'
-            }
-            title={
-              isGeolocationBlocked ? COPY.errors.geolocationBlocked : undefined
-            }
+            aria-label={locateLabel}
+            title={geolocationFailure ? locateLabel : undefined}
           >
             {isGeolocationBlocked ? <TargetOff /> : <Crosshair />}
           </button>

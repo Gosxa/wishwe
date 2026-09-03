@@ -1,7 +1,7 @@
 const SCRIPT_ID = 'google-maps-js';
 const CALLBACK_NAME = '__wishweGoogleMapsReady';
 
-export const GOOGLE_MAPS_ENABLED = false;
+export const GOOGLE_MAPS_ENABLED = true;
 
 export const MAPS_SLOW_MS = 3_000;
 export const MAPS_TIMEOUT_MS = 8_000;

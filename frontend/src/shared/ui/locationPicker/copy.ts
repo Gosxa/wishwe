@@ -5,9 +5,35 @@ export const LOCATION_PICKER_COPY = {
     change: 'Change the location',
   },
   searchPlaceholder: 'Search for a place or an address',
+  permission: {
+    title: 'Start from where you are?',
+    body: 'We’ll centre the map on you and drop the pin there. Nudge it afterwards if it lands on the wrong side of the street.',
+    privacy: 'Used to look up the address. Nothing is saved until you confirm.',
+    allow: 'Use my location',
+    skip: 'I’ll type the address',
+  },
+  locating: {
+    title: 'Finding your position…',
+    body: 'Your browser is working out where you are. It usually takes a moment.',
+    skip: 'Type the address instead',
+  },
+  manual: {
+    title: 'Type the address above',
+    body: 'We suggest matching places as you type — pick one and the pin lands on it.',
+    notes: {
+      denied: 'Location sharing is off, so let’s do this by hand.',
+      unsupported:
+        'This browser cannot share a location, so let’s do this by hand.',
+      unavailable: 'We couldn’t read your position, so let’s do this by hand.',
+      timeout: 'Finding you took too long, so let’s do this by hand.',
+    },
+  },
   emptyCard: 'Click a spot or move the map to place the pin',
   emptyCardHint:
     'Or search above. We use the address Google returns for the pin — you can still edit it afterwards.',
+  pendingCard: 'No place picked yet',
+  pendingCardHint:
+    'Whatever you pick shows up here in full before it reaches the form.',
   lookingUp: 'Finding the address…',
   slowLoad:
     'Still loading the map — you can close this and type the address instead.',
@@ -65,6 +91,7 @@ export const LOCATION_PICKER_COPY = {
         `Addresses are stored up to ${limit} characters. Check it still makes sense before you confirm.`,
     },
     geolocationBlocked: 'Location access is blocked in your browser',
+    geolocationRetry: 'We couldn’t read your position — try again',
   },
   dialogs: {
     replace: {
@@ -82,8 +109,10 @@ export const LOCATION_PICKER_COPY = {
   },
   searchMeta: {
     poweredBy: 'powered by Google',
-    resultCount: (count: number) =>
-      `${count} of ${count} results · biased to the map viewport`,
+    resultCount: (count: number, isBiased: boolean) =>
+      isBiased
+        ? `${count} of ${count} results · biased to the map viewport`
+        : `${count} of ${count} results`,
   },
 } as const;
 

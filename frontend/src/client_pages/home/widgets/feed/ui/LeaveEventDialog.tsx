@@ -4,11 +4,9 @@ import type {
   MouseEventHandler,
   RefObject,
 } from 'react';
-import clsx from 'clsx';
 import s from './eventCard.module.scss';
 
 type Props = {
-  isNested: boolean;
   isPending: boolean;
   cancelRef: RefObject<HTMLButtonElement | null>;
   transitionProps: ComponentPropsWithRef<'div'>;
@@ -18,7 +16,6 @@ type Props = {
 };
 
 export const LeaveEventDialog = ({
-  isNested,
   isPending,
   cancelRef,
   transitionProps,
@@ -59,7 +56,7 @@ export const LeaveEventDialog = ({
   return (
     <div
       {...transitionProps}
-      className={clsx(s.leaveOverlay, isNested && s.leaveOverlayNested)}
+      className={s.leaveOverlay}
       onClick={onBackdropClick}
     >
       <div

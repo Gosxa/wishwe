@@ -29,6 +29,7 @@ export { ProfileIcon } from './profile/ProfileIcon';
 export { CalendarClock } from './calendarClock/CalendarClock';
 export { DotsVertical } from './dotsVertical/DotsVertical';
 export { Location } from './location/Location';
+export { Navigation } from './navigation/Navigation';
 export { Lock } from './lock/Lock';
 export { StickyNote } from './stickyNote/StickyNote';
 export { UserPlus } from './userPlus/UserPlus';

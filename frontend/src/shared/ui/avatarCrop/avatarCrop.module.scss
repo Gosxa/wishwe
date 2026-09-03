@@ -5,22 +5,24 @@
 .overlay {
   position: fixed;
   inset: 0;
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.5);
   z-index: 100;
   @include anim.modal-overlay-enter;
 }
 
 .modal {
   background: clr.$ns-50;
+  border: 1px solid clr.$prm;
   border-radius: 16px;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 560px;
+  width: min(560px, 100%);
   @include anim.modal-enter;
 }
 

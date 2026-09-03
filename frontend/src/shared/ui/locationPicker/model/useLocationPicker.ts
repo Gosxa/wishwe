@@ -1,6 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { readGeolocationPermission } from '@/shared/lib/geolocation/permission';
+import {
+  GEOLOCATION_TIMEOUT_MS,
+  requestCurrentPosition,
+  toGeolocationFailure,
+} from '@/shared/lib/geolocation/requestPosition';
+import type { GeolocationFailure } from '@/shared/lib/geolocation/types';
 import { trackLocationPicker } from '@/shared/lib/googleMaps/analytics';
 import {
   formatLocation,
@@ -23,10 +30,9 @@ import { LOCATION_PICKER_COPY as COPY } from '../copy';
 
 export const MIN_STREET_ZOOM = 15;
 const GEOCODE_IDLE_MS = 400;
-const GEOLOCATION_TIMEOUT_MS = 10_000;
-/** Kyiv — where the map opens when we know nothing else about the user. */
-const FALLBACK_CENTER = { lat: 50.4501, lng: 30.5234 };
 const DEFAULT_ZOOM = 16;
+
+type LatLng = { lat: number; lng: number };
 
 export type PickerStage =
   | 'loading'
@@ -39,6 +45,10 @@ export type PickerStage =
   | 'tooBroad';
 
 export type PickerDialog = 'replace' | 'discard' | null;
+
+export type PickerStep = 'permission' | 'locating' | 'manual' | 'map';
+
+type LocateSource = 'auto' | 'prompt' | 'map';
 
 const SETTLED_STAGES: PickerStage[] = [
   'resolved',
@@ -74,13 +84,17 @@ export const useLocationPicker = ({
   const [dialog, setDialog] = useState<PickerDialog>(null);
   const [isSearchListOpen, setIsSearchListOpen] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
-  const [isGeolocationBlocked, setIsGeolocationBlocked] = useState(false);
+  const [geolocationFailure, setGeolocationFailure] =
+    useState<GeolocationFailure | null>(null);
+  const [step, setStep] = useState<PickerStep>(
+    initialPin ? 'map' : 'permission',
+  );
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
   const [hasPin, setHasPin] = useState(Boolean(initialPin));
   const [loadAttempt, setLoadAttempt] = useState(0);
 
-  const [center, setCenter] = useState(
-    initialPin ? { lat: initialPin.lat, lng: initialPin.lng } : FALLBACK_CENTER,
+  const [center, setCenter] = useState<LatLng | null>(
+    initialPin ? { lat: initialPin.lat, lng: initialPin.lng } : null,
   );
 
   const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -88,6 +102,7 @@ export const useLocationPicker = ({
   const requestId = useRef(0);
   const hasConfirmed = useRef(false);
   const hasPinRef = useRef(Boolean(initialPin));
+  const locateId = useRef(0);
   const stageRef = useRef<PickerStage>(stage);
   const settledStage = useRef<PickerStage | null>(null);
 
@@ -122,7 +137,9 @@ export const useLocationPicker = ({
         if (!isActive) return;
 
         setLibraries(loaded);
-        setStage(initialPin ? 'resolving' : 'idle');
+        // A position that arrived before the SDK already put us on a pin, so
+        // resolve it rather than resetting the card to "nothing picked".
+        setStage(hasPinRef.current ? 'resolving' : 'idle');
       })
       .catch(() => {
         if (!isActive) return;
@@ -280,42 +297,117 @@ export const useLocationPicker = ({
     setResolved(result);
     setStage(result.place.formattedAddress ? 'resolved' : 'noAddress');
     setIsSearchListOpen(false);
+    // A picked suggestion is a pin, so the map takes over from the intro.
+    setStep('map');
     trackLocationPicker('location_picker_pin_moved', { method: 'search' });
   }, []);
 
-  const locateMe = useCallback(() => {
-    if (!navigator.geolocation) {
-      setIsGeolocationBlocked(true);
+  /**
+   * Asks the browser where the user is and, on success, opens the map on that
+   * point with the pin already down. A refusal from the intro steps falls
+   * through to `manual`; a refusal from the map's own button leaves the map be.
+   */
+  const locate = useCallback(async (locateSource: LocateSource) => {
+    const id = ++locateId.current;
 
-      return;
-    }
+    if (locateSource !== 'map') setStep('locating');
 
     setIsLocating(true);
+    setGeolocationFailure(null);
 
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        setIsLocating(false);
-        hasPinRef.current = true;
-        settledStage.current = null;
-        setCenter({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-        setZoom(DEFAULT_ZOOM);
-        setHasPin(true);
-        lastGeocoded.current = null;
-        trackLocationPicker('location_picker_pin_moved', {
-          method: 'geolocate',
-        });
-      },
-      () => {
-        setIsLocating(false);
-        setIsGeolocationBlocked(true);
-        trackLocationPicker('location_picker_failed', { stage: 'geolocation' });
-      },
-      { timeout: GEOLOCATION_TIMEOUT_MS },
-    );
+    try {
+      const position = await requestCurrentPosition({
+        timeout: GEOLOCATION_TIMEOUT_MS,
+      });
+
+      // Someone who gave up waiting has moved on; a position that lands after
+      // that must not drag them back onto a map they chose to leave.
+      if (id !== locateId.current) return;
+
+      hasPinRef.current = true;
+      settledStage.current = null;
+      lastGeocoded.current = null;
+      setCenter(position);
+      setZoom(DEFAULT_ZOOM);
+      setHasPin(true);
+      // The map geocodes the point once it mounts and settles; saying so now
+      // stops the card from claiming nothing is picked in the meantime.
+      setStage(previous => (previous === 'mapFailed' ? previous : 'resolving'));
+      setStep('map');
+      trackLocationPicker('location_picker_permission', {
+        outcome: 'granted',
+        source: locateSource,
+      });
+      trackLocationPicker('location_picker_pin_moved', { method: 'geolocate' });
+    } catch (error) {
+      if (id !== locateId.current) return;
+
+      const failure = toGeolocationFailure(error);
+
+      setGeolocationFailure(failure);
+
+      if (locateSource !== 'map') setStep('manual');
+
+      trackLocationPicker('location_picker_permission', {
+        outcome: failure === 'timeout' ? 'unavailable' : failure,
+        source: locateSource,
+      });
+      trackLocationPicker('location_picker_failed', { stage: 'geolocation' });
+    } finally {
+      if (id === locateId.current) setIsLocating(false);
+    }
   }, []);
+
+  const locateMe = useCallback(() => void locate('map'), [locate]);
+
+  const allowLocation = useCallback(() => void locate('prompt'), [locate]);
+
+  const enterManually = useCallback(() => {
+    // Abandons a request still in flight — see the guards in `locate`.
+    locateId.current += 1;
+    setIsLocating(false);
+    setStep('manual');
+    trackLocationPicker('location_picker_permission', {
+      outcome: 'skipped',
+      source: 'prompt',
+    });
+  }, []);
+
+  /**
+   * Decides whether the ask is worth showing at all: an answer already on file
+   * means we either locate straight away or skip to typing, and only a browser
+   * that would really pop its own dialog gets our screen first.
+   */
+  useEffect(() => {
+    if (initialPin) return;
+
+    let isActive = true;
+
+    void readGeolocationPermission().then(permission => {
+      if (!isActive) return;
+
+      if (permission === 'granted') {
+        void locate('auto');
+
+        return;
+      }
+
+      if (permission === 'denied' || permission === 'unsupported') {
+        setGeolocationFailure(
+          permission === 'denied' ? 'denied' : 'unsupported',
+        );
+        setStep('manual');
+        trackLocationPicker('location_picker_permission', {
+          outcome: permission,
+          source: 'auto',
+        });
+      }
+    });
+
+    return () => {
+      isActive = false;
+    };
+  }, [initialPin, locate]);
 
   const formatted: FormattedLocation | null = useMemo(() => {
     if (!resolved) return null;
@@ -425,6 +517,7 @@ export const useLocationPicker = ({
   return {
     libraries,
     stage,
+    step,
     isSlow,
     center,
     zoom,
@@ -439,13 +532,17 @@ export const useLocationPicker = ({
     dialog,
     isSearchListOpen,
     isLocating,
-    isGeolocationBlocked,
+    geolocationFailure,
+    isGeolocationBlocked:
+      geolocationFailure === 'denied' || geolocationFailure === 'unsupported',
     setIsSearchListOpen,
     handleMapIdle,
     handleMapPick,
     handleUserMove,
     handlePlacePicked,
     locateMe,
+    allowLocation,
+    enterManually,
     retryLoad,
     retryGeocode,
     requestConfirm,

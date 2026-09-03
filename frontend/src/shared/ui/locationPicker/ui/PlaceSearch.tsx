@@ -286,7 +286,12 @@ export const PlaceSearch = ({
                 ))}
               </ul>
               <p className={s.suggestionMeta}>
-                <span>{COPY.searchMeta.resultCount(suggestions.length)}</span>
+                <span>
+                  {COPY.searchMeta.resultCount(
+                    suggestions.length,
+                    Boolean(bias),
+                  )}
+                </span>
                 <span>{COPY.searchMeta.poweredBy}</span>
               </p>
             </>

@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useRef, type KeyboardEvent } from 'react';
+import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
+import { useModalAttention } from '@/shared/hooks/useModalAttention';
+import { useModalTransition } from '@/shared/hooks/useModalTransition';
 import { Pencil } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
 import type { PickerDialog } from '../model/useLocationPicker';
@@ -18,16 +21,39 @@ export const PickerConfirmDialog = ({
   onResolve,
 }: Props) => {
   const keepRef = useRef<HTMLButtonElement>(null);
+  const pulseModal = useModalAttention();
+  const { requestCloseWith, modalTransitionProps } = useModalTransition();
+  const { containerProps } = useFocusTrap({ initialFocusRef: keepRef });
+
   const content = COPY.dialogs[kind];
   const titleId = `locationPicker-${kind}-title`;
 
-  useEffect(() => {
-    keepRef.current?.focus();
-  }, []);
+  const handleResolve = (accepted: boolean) => {
+    requestCloseWith(() => onResolve(accepted));
+  };
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      handleResolve(false);
+
+      return;
+    }
+
+    containerProps.onKeyDown?.(event);
+  };
 
   return (
-    <div className={s.dialogLayer}>
+    <div
+      {...modalTransitionProps}
+      className={s.dialogLayer}
+      onClick={pulseModal}
+    >
       <div
+        {...containerProps}
+        onKeyDown={handleKeyDown}
+        data-modal-content
         className={s.dialog}
         role="alertdialog"
         aria-modal="true"
@@ -52,14 +78,14 @@ export const PickerConfirmDialog = ({
             ref={keepRef}
             type="button"
             className={s.secondaryButton}
-            onClick={() => onResolve(false)}
+            onClick={() => handleResolve(false)}
           >
             <span>{content.keep}</span>
           </button>
           <button
             type="button"
             className={s.primaryButton}
-            onClick={() => onResolve(true)}
+            onClick={() => handleResolve(true)}
           >
             <span>{content.confirm}</span>
           </button>

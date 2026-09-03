@@ -1,7 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useBodyScrollLock } from '@/features/useBodyScrollLock/useBodyScrollLock';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { useModalAttention } from '@/shared/hooks/useModalAttention';
@@ -14,6 +14,7 @@ import { LOCATION_PICKER_COPY as COPY } from './copy';
 import { useLocationPicker } from './model/useLocationPicker';
 import { AddressCard } from './ui/AddressCard';
 import { PickerConfirmDialog } from './ui/PickerConfirmDialog';
+import { PickerIntro } from './ui/PickerIntro';
 import { PickerMap } from './ui/PickerMap';
 import { PlaceSearch } from './ui/PlaceSearch';
 import s from './locationPicker.module.scss';
@@ -43,6 +44,7 @@ export const LocationPickerModal = ({
   const { requestClose, requestCloseWith, modalTransitionProps } =
     useModalTransition(onClose);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const allowLocationRef = useRef<HTMLButtonElement>(null);
   const { containerProps } = useFocusTrap({ initialFocusRef: searchInputRef });
   const [bias, setBias] = useState<google.maps.LatLngBounds | null>(null);
 
@@ -57,6 +59,21 @@ export const LocationPickerModal = ({
 
   const isMapFailed = picker.stage === 'mapFailed';
   const isLoading = picker.stage === 'loading';
+  const introStep = picker.step === 'map' ? null : picker.step;
+  const focusedStep = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (focusedStep.current === picker.step) return;
+
+    focusedStep.current = picker.step;
+
+    const target =
+      picker.step === 'permission' || picker.step === 'locating'
+        ? allowLocationRef.current
+        : searchInputRef.current;
+
+    target?.focus();
+  }, [picker.step]);
 
   return (
     <ModalPortal>
@@ -118,6 +135,14 @@ export const LocationPickerModal = ({
                 </button>
               </div>
             </div>
+          ) : introStep ? (
+            <PickerIntro
+              step={introStep}
+              failure={picker.geolocationFailure}
+              allowRef={allowLocationRef}
+              onAllow={picker.allowLocation}
+              onSkip={picker.enterManually}
+            />
           ) : isLoading || !picker.libraries ? (
             <div className={s.mapSkeleton}>
               <Spinner inline />
@@ -125,7 +150,7 @@ export const LocationPickerModal = ({
                 <p className={s.mapSkeletonNote}>{COPY.slowLoad}</p>
               )}
             </div>
-          ) : (
+          ) : picker.center ? (
             <PickerMap
               libraries={picker.libraries}
               center={picker.center}
@@ -135,6 +160,7 @@ export const LocationPickerModal = ({
               hasPin={picker.hasPin}
               isLocating={picker.isLocating}
               isGeolocationBlocked={picker.isGeolocationBlocked}
+              geolocationFailure={picker.geolocationFailure}
               isDimmed={picker.isSearchListOpen}
               onIdle={picker.handleMapIdle}
               onPick={picker.handleMapPick}
@@ -142,10 +168,11 @@ export const LocationPickerModal = ({
               onLocateMe={picker.locateMe}
               onBoundsChange={setBias}
             />
-          )}
+          ) : null}
 
           <AddressCard
             stage={picker.stage}
+            step={picker.step}
             place={picker.resolved?.place ?? null}
             formatted={picker.formatted}
             maxLength={picker.maxLength}

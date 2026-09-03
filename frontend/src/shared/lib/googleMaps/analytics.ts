@@ -6,6 +6,10 @@ type LocationPickerEvents = {
     source: 'button' | 'change';
   };
   location_picker_search: { query_length: number; result_count: number };
+  location_picker_permission: {
+    outcome: 'granted' | 'denied' | 'skipped' | 'unsupported' | 'unavailable';
+    source: 'auto' | 'prompt' | 'map';
+  };
   location_picker_pin_moved: { method: 'drag' | 'search' | 'geolocate' };
   location_picker_confirmed: {
     had_address: boolean;

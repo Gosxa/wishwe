@@ -18,7 +18,6 @@
     max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
     max(24px, env(safe-area-inset-left));
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
   overflow-x: hidden;
   z-index: 100;
   @include anim.modal-overlay-enter;

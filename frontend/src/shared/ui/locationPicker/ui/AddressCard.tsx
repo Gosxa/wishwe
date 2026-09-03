@@ -1,26 +1,39 @@
 'use client';
 
 import clsx from 'clsx';
+import type { ReactNode } from 'react';
 import type { FormattedLocation } from '@/shared/lib/googleMaps/formatLocation';
 import { formatCoordinates } from '@/shared/lib/googleMaps/formatLocation';
 import type { ResolvedPlace } from '@/shared/lib/googleMaps/types';
-import { InfoCircle, Location, Refresh, WarningTriangle } from '../../icons';
+import { Location, Refresh, WarningTriangle, WifiOff } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
-import type { PickerStage } from '../model/useLocationPicker';
+import type { PickerStage, PickerStep } from '../model/useLocationPicker';
 import s from '../locationPicker.module.scss';
 
 type Props = {
   stage: PickerStage;
+  step: PickerStep;
   place: ResolvedPlace | null;
   formatted: FormattedLocation | null;
   maxLength: number;
   onRetryGeocode: () => void;
 };
 
-const EmptyCard = ({ title, body }: { title: string; body?: string }) => (
+const EmptyCard = ({
+  title,
+  body,
+  icon,
+}: {
+  title: string;
+  body?: string;
+  icon?: ReactNode;
+}) => (
   <div className={clsx(s.addressCard, s.addressCardMuted)}>
-    <span className={s.addressIcon} aria-hidden="true">
-      <InfoCircle size={20} />
+    <span
+      className={clsx(s.addressIcon, s.addressIconPlaceholder)}
+      aria-hidden="true"
+    >
+      {icon ?? <Location size={20} />}
     </span>
     <div className={s.addressText}>
       <p className={s.addressTitle}>{title}</p>
@@ -31,6 +44,7 @@ const EmptyCard = ({ title, body }: { title: string; body?: string }) => (
 
 export const AddressCard = ({
   stage,
+  step,
   place,
   formatted,
   maxLength,
@@ -39,6 +53,7 @@ export const AddressCard = ({
   if (stage === 'mapFailed') {
     return (
       <EmptyCard
+        icon={<WifiOff size={20} />}
         title={COPY.errors.mapFailedCard.title}
         body={COPY.errors.mapFailedCard.body}
       />
@@ -46,6 +61,10 @@ export const AddressCard = ({
   }
 
   if (stage === 'idle' || stage === 'loading') {
+    if (step !== 'map') {
+      return <EmptyCard title={COPY.pendingCard} body={COPY.pendingCardHint} />;
+    }
+
     return <EmptyCard title={COPY.emptyCard} body={COPY.emptyCardHint} />;
   }
 
