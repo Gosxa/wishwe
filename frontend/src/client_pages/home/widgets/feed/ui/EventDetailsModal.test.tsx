@@ -125,6 +125,20 @@ describe('EventDetailsModal', () => {
     ).toBe('/cover.jpg');
   });
 
+  it('links a map-pinned address to the exact Google place', () => {
+    renderModal({
+      event: feedEvent({ locationPlaceId: 'ChIJ123' }),
+    });
+
+    const link = screen.getByRole('link', {
+      name: /open kyiv in google maps/i,
+    });
+    const url = new URL(link.getAttribute('href') as string);
+
+    expect(url.searchParams.get('query_place_id')).toBe('ChIJ123');
+    expect(link.getAttribute('target')).toBe('_blank');
+  });
+
   it('falls back to a hint when the host added no description', () => {
     renderModal({ event: feedEvent({ description: '' }) });
 

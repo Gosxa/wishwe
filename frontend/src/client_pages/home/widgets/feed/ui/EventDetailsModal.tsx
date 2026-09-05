@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { EventImage } from '@shared/ui/eventImage/EventImage';
+import { MapLinkedAddress } from '@shared/ui/mapLinkedAddress/MapLinkedAddress';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
@@ -38,6 +39,7 @@ export const EventDetailsModal = ({
     title,
     date,
     location,
+    locationPlaceId,
     description,
     chatLink,
     maxParticipants,
@@ -121,7 +123,12 @@ export const EventDetailsModal = ({
 
               <div className={s.field}>
                 <span className={s.fieldLabel}>Where</span>
-                <span className={s.fieldValue}>{location}</span>
+                <div className={s.fieldValue}>
+                  <MapLinkedAddress
+                    address={location}
+                    placeId={locationPlaceId}
+                  />
+                </div>
               </div>
 
               <div className={s.field}>

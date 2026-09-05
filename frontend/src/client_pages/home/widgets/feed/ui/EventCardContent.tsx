@@ -14,6 +14,7 @@ import {
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { ProfileLink } from '@shared/ui/profileLink';
+import { MapLinkedAddress } from '@shared/ui/mapLinkedAddress/MapLinkedAddress';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import { EventCardMenu } from './EventCardMenu';
 import type { EventParticipation } from '../model/useEventParticipation';
@@ -56,8 +57,18 @@ export const EventCardContent = ({
   onPlanIt,
   onCancel,
 }: Props) => {
-  const { id, type, hashtag, image, title, host, date, location, description } =
-    event;
+  const {
+    id,
+    type,
+    hashtag,
+    image,
+    title,
+    host,
+    date,
+    location,
+    locationPlaceId,
+    description,
+  } = event;
   const {
     count,
     participants,
@@ -161,7 +172,7 @@ export const EventCardContent = ({
             </li>
             <li className={s.metaRow}>
               <Location />
-              <span>{location}</span>
+              <MapLinkedAddress address={location} placeId={locationPlaceId} />
             </li>
             <li className={clsx(s.metaRow, s.metaRowTop)}>
               <StickyNote />
