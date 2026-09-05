@@ -253,7 +253,7 @@ test.describe('event lifecycle', () => {
     }
   });
 
-  test('converts a wish into a scheduled plan', async ({
+  test('converts a wish into a scheduled plan @mobile', async ({
     browser,
     baseURL,
   }) => {
@@ -262,6 +262,9 @@ test.describe('event lifecycle', () => {
     const title = 'Picnic in the park';
 
     try {
+      const viewport = test.info().project.use.viewport;
+
+      if (viewport) await page.setViewportSize(viewport);
       await createWish(account.api, { title });
 
       await page.goto('/profile');
@@ -280,6 +283,29 @@ test.describe('event lifecycle', () => {
       await dialog.getByLabel('Event time').fill('12:00');
       await dialog.getByRole('button', { name: 'Share', exact: true }).click();
 
+      const transition = page.getByTestId('plan-conversion-transition');
+
+      await expect(transition).toHaveAttribute('data-state', 'converting');
+      await page.keyboard.press('Escape');
+      await expect(transition).toBeVisible();
+      await expect(transition).toHaveAttribute('data-state', 'success');
+      await expect(transition).toContainText('Someday just got a date.');
+      await test.info().attach('wish-to-plan-success', {
+        body: await page.screenshot(),
+        contentType: 'image/png',
+      });
+      expect(
+        await transition.evaluate(node => node.scrollWidth <= node.clientWidth),
+      ).toBe(true);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      expect(
+        await transition.evaluate(node =>
+          [node, ...node.querySelectorAll('*')].every(
+            element => getComputedStyle(element).animationName === 'none',
+          ),
+        ),
+      ).toBe(true);
+      await expect(transition).toBeHidden();
       await expect(dialog).toBeHidden();
 
       await expect(eventCard(page, title)).toBeVisible();
