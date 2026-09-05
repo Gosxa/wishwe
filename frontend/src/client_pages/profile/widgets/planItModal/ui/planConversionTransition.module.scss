@@ -1,0 +1,444 @@
+@use '@shared/styles/colors' as clr;
+
+$ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+@keyframes dismiss {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gather {
+  from {
+    opacity: 0;
+    transform: translateY(26px) rotate(-6deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(-3deg) scale(1);
+  }
+}
+
+@keyframes breathe {
+  50% {
+    transform: scale(1.08);
+    opacity: 0.65;
+  }
+}
+
+@keyframes calendar-arrive {
+  from {
+    opacity: 0;
+    transform: translate(24px, 20px) rotate(12deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0);
+  }
+}
+
+@keyframes trace {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+
+@keyframes seal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5) rotate(-25deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.12) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
+}
+
+@keyframes ripple {
+  from {
+    opacity: 0.5;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.25);
+  }
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  padding: 28px 20px;
+  overflow: auto;
+  isolation: isolate;
+  outline: none;
+  color: clr.$ns-900;
+  background:
+    radial-gradient(
+      ellipse at 50% 38%,
+      rgba(clr.$acc-purple, 0.42),
+      transparent 58%
+    ),
+    clr.$ns-50;
+  font-family: var(--font-sk-modernist);
+  animation: reveal 0.35s $ease both;
+
+  &[data-state='closing'] {
+    animation: dismiss var(--exit-duration) ease-out both;
+  }
+}
+
+.scene {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: min(420px, 100%);
+  height: 300px;
+}
+
+.halo {
+  position: absolute;
+  z-index: -1;
+  // Leave room for the success ripple to expand inside narrow viewports.
+  width: min(350px, 75vw);
+  max-width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid rgba(clr.$prm, 0.12);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(clr.$acc-purple, 0.35),
+    transparent 70%
+  );
+  animation: breathe 2.8s ease-in-out infinite;
+
+  &::after {
+    position: absolute;
+    inset: 18px;
+    border: 1px dashed rgba(clr.$prm, 0.12);
+    border-radius: inherit;
+    content: '';
+  }
+}
+
+.card {
+  position: relative;
+  width: min(340px, calc(100% - 16px));
+  padding: 24px;
+  border: 1px solid rgba(clr.$prm, 0.3);
+  border-radius: 22px;
+  background: clr.$ns-50;
+  box-shadow: 0 24px 55px -18px rgba(clr.$prm, 0.3);
+  transform: rotate(-3deg);
+  animation: gather 0.7s $ease both;
+  transition:
+    transform 0.7s $ease,
+    box-shadow 0.7s $ease;
+
+  &::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(145deg, clr.$acc-yellow, clr.$ns-50 80%);
+    opacity: 0;
+    content: '';
+    transition: opacity 0.8s ease;
+  }
+}
+
+.topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: clr.$prm;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.typePill {
+  display: grid;
+  padding: 5px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(clr.$prm, 0.2);
+  border-radius: 999px;
+  background: clr.$acc-purple;
+  transition: background 0.5s ease;
+
+  > span {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition:
+      opacity 0.35s ease,
+      transform 0.5s $ease;
+  }
+
+  svg {
+    width: 13px;
+    height: 13px;
+  }
+}
+
+.planLabel {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.brand {
+  letter-spacing: -0.03em;
+}
+
+.cardTitle {
+  display: -webkit-box;
+  margin: 22px 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  font-size: 24px;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.schedule {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(clr.$prm, 0.15);
+}
+
+.calendar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 58px;
+  overflow: hidden;
+  border: 1px solid rgba(clr.$prm, 0.25);
+  border-radius: 12px;
+  background: clr.$ns-50;
+  box-shadow: 0 5px 10px rgba(clr.$prm, 0.06);
+  animation: calendar-arrive 0.6s $ease 0.25s both;
+
+  > strong {
+    padding: 4px 0 6px;
+    font-size: 27px;
+    line-height: 1;
+  }
+}
+
+.month {
+  width: 100%;
+  padding: 4px;
+  background: clr.$prm;
+  color: clr.$ns-50;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.scheduleCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  animation: reveal 0.5s $ease 0.4s both;
+
+  > span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: clr.$ns-700;
+  }
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.seal {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: clr.$prm;
+  color: clr.$ns-50;
+  opacity: 0;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.sparkle {
+  position: absolute;
+  top: 10px;
+  right: 18px;
+  color: clr.$prm;
+  opacity: 0;
+
+  svg {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+.caption {
+  position: absolute;
+  bottom: -10px;
+  color: clr.$prm;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.6s ease 0.2s,
+    transform 0.6s $ease 0.2s;
+}
+
+.copy {
+  width: min(480px, 100%);
+  text-align: center;
+}
+.heading {
+  margin: 0;
+  font-size: clamp(25px, 5vw, 34px);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+.body {
+  margin: 12px 0 0;
+  color: clr.$ns-700;
+  font-size: 14px;
+  line-height: 1.5;
+  text-wrap: balance;
+}
+
+.progress {
+  display: block;
+  width: 100px;
+  height: 3px;
+  margin: 24px auto 0;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(clr.$prm, 0.12);
+
+  > span {
+    display: block;
+    width: 30%;
+    height: 100%;
+    border-radius: inherit;
+    background: clr.$prm;
+    animation: trace 1.4s ease-in-out infinite;
+  }
+}
+
+.success {
+  .card {
+    animation: none;
+    transform: rotate(0);
+    box-shadow: 0 18px 40px -16px rgba(clr.$prm, 0.25);
+  }
+  .card::before {
+    opacity: 1;
+  }
+  .typePill {
+    background: clr.$acc-yellow;
+  }
+  .wishLabel {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  .planLabel {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .seal {
+    animation: seal-in 0.6s $ease 0.25s both;
+  }
+  .sparkle {
+    animation: seal-in 0.7s $ease 0.15s both;
+  }
+  .halo {
+    animation: ripple 1.2s $ease both;
+  }
+  .caption {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .progress > span {
+    width: 100%;
+    animation: none;
+  }
+}
+
+@media (max-height: 600px) {
+  .overlay {
+    justify-content: flex-start;
+    gap: 22px;
+  }
+  .scene {
+    height: 270px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay[data-state='closing'],
+  .overlay,
+  .overlay *,
+  .overlay *::before,
+  .overlay *::after,
+  .success .seal,
+  .success .sparkle,
+  .success .halo {
+    animation: none;
+    transition: none;
+  }
+
+  .card {
+    transform: none;
+  }
+  .success .seal,
+  .success .sparkle {
+    opacity: 1;
+  }
+  .success .halo {
+    opacity: 0;
+  }
+}
