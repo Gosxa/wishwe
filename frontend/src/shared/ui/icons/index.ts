@@ -43,3 +43,4 @@ export { WarningTriangle } from './warningTriangle/WarningTriangle';
 export { WifiOff } from './wifiOff/WifiOff';
 export { Refresh } from './refresh/Refresh';
 export { InfoCircle } from './infoCircle/InfoCircle';
+export { ExternalLink } from './externalLink/ExternalLink';

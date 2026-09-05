@@ -6,11 +6,16 @@
   display: block;
   min-width: 0;
 
-  &:hover .bubble,
-  &:focus-within .bubble {
+  &:not([data-open]):hover .bubble,
+  &:not([data-open]):focus-within .bubble,
+  &[data-open='true'] .bubble {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+  }
+
+  &[data-open='false'] .bubble {
+    transition: none;
   }
 }
 

@@ -1,0 +1,41 @@
+@use '@shared/styles/colors' as clr;
+
+.tooltip {
+  display: inline-block;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.link {
+  display: inline;
+  color: clr.$ns-900;
+  text-decoration-line: underline;
+  text-decoration-color: clr.$ns-300;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+
+  &:focus-visible {
+    border-radius: 2px;
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  vertical-align: middle;
+  text-decoration: none;
+
+  > svg {
+    flex-shrink: 0;
+  }
+}
