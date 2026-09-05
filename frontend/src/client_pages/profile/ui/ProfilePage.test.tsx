@@ -282,13 +282,13 @@ describe('ProfilePage', () => {
       },
       submit: { error: undefined, isSubmitting: false, onSubmit: vi.fn() },
       when: {
-        date: '',
+        date: '2099-01-02',
         dateError: undefined,
         minDate: '2026-08-21',
         minTime: '',
         onDateChange: vi.fn(),
         onTimeChange: vi.fn(),
-        time: '',
+        time: '14:30',
         timeError: undefined,
       },
     });
@@ -363,6 +363,7 @@ describe('ProfilePage', () => {
     expect(mocks.usePlanIt).toHaveBeenCalledWith(
       backendEvent,
       expect.any(Function),
+      expect.objectContaining({ showGlobalLoader: false }),
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Close plan modal' }));
@@ -390,8 +391,15 @@ describe('ProfilePage', () => {
     await waitFor(() => expect(mocks.usePlanIt).toHaveBeenCalled());
 
     const onConverted = mocks.usePlanIt.mock.calls.at(-1)?.[1] as () => void;
+    const options = mocks.usePlanIt.mock.calls.at(-1)?.[2] as {
+      onSubmitStart: () => void;
+    };
 
+    vi.useFakeTimers();
+    act(options.onSubmitStart);
     act(onConverted);
+    await act(async () => vi.runAllTimersAsync());
+    vi.useRealTimers();
 
     expect(mocks.setTab).toHaveBeenCalledWith('plans');
     expect(
