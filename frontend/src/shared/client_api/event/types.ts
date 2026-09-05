@@ -29,6 +29,7 @@ type BackendEvent = {
   description: string;
   cover_image: string | null;
   location: string;
+  location_place_id?: string | null;
   external_link: string | null;
   event_date: string | null;
   event_time: string | null;

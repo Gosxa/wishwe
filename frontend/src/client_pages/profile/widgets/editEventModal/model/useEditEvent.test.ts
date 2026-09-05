@@ -164,6 +164,7 @@ describe('useEditEvent', () => {
       title: 'Updated title',
       description: 'Updated description',
       location: 'Lviv',
+      location_place_id: '',
       event_date: futureDate,
       event_time: '18:45',
       min_participants: 3,
@@ -218,10 +219,29 @@ describe('useEditEvent', () => {
       title: 'Original title',
       description: 'Original description',
       location: 'Kyiv',
+      location_place_id: '',
       min_participants: 4,
       timeframe_text: 'When everyone is free',
     });
     expect(onSaved).toHaveBeenCalledOnce();
+  });
+
+  it('preserves a pinned location Place ID when the address is unchanged', async () => {
+    const { result } = renderEditHook(
+      makeEvent({ location_place_id: 'ChIJ123' }),
+    );
+
+    await waitFor(() => expect(result.current.category.selected).toBe(7));
+
+    expect(result.current.locationPicker.status).toBe('pinned');
+
+    await act(async () => result.current.submit.onSubmit());
+
+    expect(eventApiMocks.updateEvent).toHaveBeenCalledWith(
+      '42',
+      'plan',
+      expect.objectContaining({ location_place_id: 'ChIJ123' }),
+    );
   });
 
   it('sends a prepared replacement cover as multipart data', async () => {

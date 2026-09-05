@@ -95,6 +95,7 @@ export const hasRequiredEventFields = (values: EventFormValues): boolean => {
 export const buildEventFields = (
   values: EventFormValues,
   mode: EventFormMode,
+  locationPlaceId: string | null = null,
 ): Record<string, string | number> => {
   const fields: Record<string, string | number> = {
     title: values.title.trim(),
@@ -103,6 +104,10 @@ export const buildEventFields = (
   };
 
   if (mode === 'create') fields.event_visibility = values.visibility;
+  if (mode === 'edit' || locationPlaceId) {
+    fields.location_place_id = locationPlaceId ?? '';
+  }
+
   if (values.categoryId != null) fields.category = values.categoryId;
 
   if (mode === 'edit' || values.description.trim()) {

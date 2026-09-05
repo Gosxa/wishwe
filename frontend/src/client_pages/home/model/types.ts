@@ -29,6 +29,7 @@ export type FeedEvent = {
   startsAt: number | null;
   createdAt: number;
   location: string;
+  locationPlaceId?: string | null;
   description?: string;
   chatLink: string | null;
   participantCount: number;

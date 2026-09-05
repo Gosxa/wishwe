@@ -75,6 +75,7 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
       startsAt: startDate?.getTime() ?? null,
       createdAt: new Date(event.created_at).getTime(),
       location: event.location,
+      locationPlaceId: event.location_place_id ?? null,
       description: event.description,
       chatLink: event.external_link,
       participantCount:

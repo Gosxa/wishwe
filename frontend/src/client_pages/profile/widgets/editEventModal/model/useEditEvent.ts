@@ -12,6 +12,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
 
   return useEventForm({
     mode: 'edit',
+    initialLocationPlaceId: event.location_place_id,
     initialValues: {
       type: event.event_type,
       categoryId: null,

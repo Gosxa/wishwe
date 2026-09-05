@@ -152,6 +152,65 @@ describe('useCreateEvent', () => {
     expect(result.current.submit.isSubmitting).toBe(false);
   });
 
+  it('submits the Place ID when the location was picked on Google Maps', async () => {
+    const { result } = renderCreateHook();
+
+    await waitFor(() =>
+      expect(result.current.category.options).toHaveLength(2),
+    );
+    fillValidPlan(result);
+
+    act(() => {
+      result.current.locationPicker.apply({
+        lat: 50.438,
+        lng: 30.515,
+        formatted: 'Velyka Vasylkivska St, 100, Kyiv',
+        placeId: 'ChIJ123',
+      });
+    });
+
+    await act(async () => result.current.submit.onSubmit());
+
+    expect(eventApiMocks.createEvent).toHaveBeenCalledWith(
+      'plan',
+      expect.objectContaining({
+        location: 'Velyka Vasylkivska St, 100, Kyiv',
+        location_place_id: 'ChIJ123',
+      }),
+    );
+  });
+
+  it('drops the Place ID when a pinned address is edited by hand', async () => {
+    const { result } = renderCreateHook();
+
+    await waitFor(() =>
+      expect(result.current.category.options).toHaveLength(2),
+    );
+    fillValidPlan(result);
+
+    act(() => {
+      result.current.locationPicker.apply({
+        lat: 50.438,
+        lng: 30.515,
+        formatted: 'Velyka Vasylkivska St, 100, Kyiv',
+        placeId: 'ChIJ123',
+      });
+    });
+
+    act(() => {
+      result.current.locationInput.onChange(
+        'Velyka Vasylkivska St, 100, meet by the door',
+      );
+    });
+
+    await act(async () => result.current.submit.onSubmit());
+
+    expect(eventApiMocks.createEvent).toHaveBeenCalledWith(
+      'plan',
+      expect.not.objectContaining({ location_place_id: expect.anything() }),
+    );
+  });
+
   it('can leave loading feedback to a local transition', async () => {
     const onSubmitStart = vi.fn();
     const onSubmitSettled = vi.fn();

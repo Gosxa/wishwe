@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { hasRequiredEventFields, validateEventForm } from './eventForm';
+import {
+  buildEventFields,
+  hasRequiredEventFields,
+  validateEventForm,
+} from './eventForm';
 import type { EventFormValues } from './types';
 
 const validPlan = (
@@ -53,5 +57,18 @@ describe('eventForm', () => {
         }),
       ),
     ).toBe(false);
+  });
+
+  it('includes a Google Place ID only for a map-pinned location', () => {
+    expect(
+      buildEventFields(validPlan(), 'create', 'ChIJ123').location_place_id,
+    ).toBe('ChIJ123');
+    expect(buildEventFields(validPlan(), 'create')).not.toHaveProperty(
+      'location_place_id',
+    );
+  });
+
+  it('clears a stored Place ID when an edited address is typed by hand', () => {
+    expect(buildEventFields(validPlan(), 'edit').location_place_id).toBe('');
   });
 });

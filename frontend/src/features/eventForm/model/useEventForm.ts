@@ -33,6 +33,7 @@ import type {
 type Options = {
   mode: EventFormMode;
   initialValues: EventFormValues;
+  initialLocationPlaceId?: string | null;
   initialCategoryName?: string | null;
   initialCoverUrl?: string | null;
   resetType?: BackendEventType;
@@ -50,6 +51,7 @@ type Options = {
 export const useEventForm = ({
   mode,
   initialValues,
+  initialLocationPlaceId = null,
   initialCategoryName,
   initialCoverUrl = null,
   resetType,
@@ -71,6 +73,9 @@ export const useEventForm = ({
   const [isPreparingCover, setIsPreparingCover] = useState(false);
   const [previousResetType, setPreviousResetType] = useState(resetType);
   const [locationPin, setLocationPin] = useState<LocationPin | null>(null);
+  const [locationPlaceId, setLocationPlaceId] = useState<string | null>(
+    initialLocationPlaceId,
+  );
   const [wasPinCleared, setWasPinCleared] = useState(false);
   const [locationAnnouncement, setLocationAnnouncement] = useState('');
 
@@ -147,8 +152,12 @@ export const useEventForm = ({
     updateValue('location', value, 'location');
     setLocationAnnouncement('');
 
-    if (locationPin && value !== locationPin.formatted) {
+    if (
+      (locationPin && value !== locationPin.formatted) ||
+      (!locationPin && locationPlaceId)
+    ) {
       setLocationPin(null);
+      setLocationPlaceId(null);
       setWasPinCleared(true);
     }
   };
@@ -156,6 +165,7 @@ export const useEventForm = ({
   const applyLocationPin = (pin: LocationPin) => {
     updateValue('location', pin.formatted, 'location');
     setLocationPin(pin);
+    setLocationPlaceId(pin.placeId ?? null);
     setWasPinCleared(false);
     setLocationAnnouncement(LOCATION_FIELD_COPY.announce(pin.formatted));
   };
@@ -163,6 +173,7 @@ export const useEventForm = ({
   const clearLocation = () => {
     updateValue('location', '', 'location');
     setLocationPin(null);
+    setLocationPlaceId(null);
     setWasPinCleared(false);
     setLocationAnnouncement('');
   };
@@ -242,7 +253,7 @@ export const useEventForm = ({
     }
 
     try {
-      const fields = buildEventFields(values, mode);
+      const fields = buildEventFields(values, mode, locationPlaceId);
       const payload = buildEventPayload(fields, coverFile);
 
       const created = await submitEvent(values.type, payload);
@@ -286,7 +297,12 @@ export const useEventForm = ({
     },
     locationPicker: {
       pin: locationPin,
-      status: locationPin ? 'pinned' : wasPinCleared ? 'edited' : 'none',
+      status:
+        locationPin || locationPlaceId
+          ? 'pinned'
+          : wasPinCleared
+            ? 'edited'
+            : 'none',
       announcement: locationAnnouncement,
       apply: applyLocationPin,
       clear: clearLocation,

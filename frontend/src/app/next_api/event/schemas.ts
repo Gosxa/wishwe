@@ -7,6 +7,7 @@ const baseSchema = {
   title: z.string().min(1).max(50),
   description: z.string().max(200).optional(),
   location: z.string().min(1).max(255),
+  location_place_id: z.string().max(255).optional(),
   min_participants: z.coerce.number().int().min(1),
   event_visibility: z.enum(['friends-only', 'f-o-f']).optional(),
 };
