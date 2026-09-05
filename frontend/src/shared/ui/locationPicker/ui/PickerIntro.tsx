@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import type { RefObject } from 'react';
 import type { GeolocationFailure } from '@/shared/lib/geolocation/types';
 import { Crosshair, Location, Lock, SearchIcon } from '../../icons';
-import { Spinner } from '../../spinner/Spinner';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
 import s from '../locationPicker.module.scss';
 
@@ -40,14 +39,11 @@ export const PickerIntro = ({
       <span
         className={clsx(s.introBadge, step !== 'manual' && s.introBadgeLive)}
         aria-hidden="true"
+        data-testid={
+          step === 'locating' ? 'location-picker-pin-pulse' : undefined
+        }
       >
-        {step === 'locating' ? (
-          <Spinner inline small />
-        ) : isManual ? (
-          <SearchIcon />
-        ) : (
-          <Location size={26} />
-        )}
+        {isManual ? <SearchIcon /> : <Location size={26} />}
       </span>
 
       <h3 id={TITLE_ID} className={s.introTitle}>

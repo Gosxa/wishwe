@@ -407,6 +407,8 @@ describe('LocationPickerModal', () => {
     await settle();
 
     expect(screen.getByText('Finding your position…')).toBeTruthy();
+    expect(screen.getByTestId('location-picker-pin-pulse')).toBeTruthy();
+    expect(screen.queryByRole('status', { name: 'Loading' })).toBeNull();
 
     fireEvent.click(
       screen.getByRole('button', { name: 'Type the address instead' }),

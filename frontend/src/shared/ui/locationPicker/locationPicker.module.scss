@@ -919,9 +919,13 @@ $control-size: 36px;
     animation: none;
   }
 
-  .introBadgeLive::before,
-  .introBadgeLive::after {
+  .introBadgeLive::before {
     animation: none;
-    opacity: 0.35;
+    transform: scale(1.35);
+    opacity: 0.25;
+  }
+
+  .introBadgeLive::after {
+    display: none;
   }
 }
