@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { ConvertEventError, convertToPlan } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
@@ -20,8 +20,19 @@ const DRF_FIELD_MAP: Record<string, keyof FieldErrors> = {
   max_participants: 'maxParticipants',
 };
 
-export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
+type Options = {
+  showGlobalLoader?: boolean;
+  onSubmitStart?: () => void;
+  onSubmitError?: () => void;
+};
+
+export const usePlanIt = (
+  event: BackendEvent,
+  onConverted: () => void,
+  options: Options = {},
+) => {
   const setLoading = useLoadingStore(s => s.setLoading);
+  const submittingRef = useRef(false);
 
   const [eventDate, setEventDate] = useState('');
   const [eventTime, setEventTime] = useState('');
@@ -70,6 +81,8 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
   };
 
   const onSubmit = async () => {
+    if (submittingRef.current) return;
+
     const validationErrors = validate();
 
     if (Object.values(validationErrors).some(Boolean)) {
@@ -79,8 +92,10 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
     }
 
     setErrors({});
+    submittingRef.current = true;
     setIsSubmitting(true);
-    setLoading(true);
+    if (options.showGlobalLoader !== false) setLoading(true);
+    options.onSubmitStart?.();
 
     try {
       await convertToPlan(String(event.id), {
@@ -94,9 +109,11 @@ export const usePlanIt = (event: BackendEvent, onConverted: () => void) => {
       const body = e instanceof ConvertEventError ? e.body : {};
 
       setErrors(mapApiFormErrors(body, DRF_FIELD_MAP));
+      options.onSubmitError?.();
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
-      setLoading(false);
+      if (options.showGlobalLoader !== false) setLoading(false);
     }
   };
 
