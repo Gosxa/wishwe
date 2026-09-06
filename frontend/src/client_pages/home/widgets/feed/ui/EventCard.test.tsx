@@ -574,7 +574,7 @@ describe('EventCard', () => {
       name: 'Weekend trip',
     });
     const participantsTrigger = within(detailsDialog).getByRole('button', {
-      name: '2/10',
+      name: 'View all 2 participants',
     });
 
     participantsTrigger.focus();

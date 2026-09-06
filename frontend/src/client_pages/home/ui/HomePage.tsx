@@ -30,7 +30,7 @@ function HomePageContent({ showTour }: Required<Props>) {
         mobileFeedLayout
         search={{
           ...search,
-          placeholder: 'Search',
+          placeholder: 'Search events',
           disabled: searchDisabled,
           disabledHint:
             'Search is available once there are events in your feed. Add friends or create an event to get started.',

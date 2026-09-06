@@ -2,7 +2,18 @@
 
 import { useRef, useState } from 'react';
 import clsx from 'clsx';
-import { Copy, MessagesSquare, Plus, X } from '@shared/ui/icons';
+import {
+  CalendarClock,
+  ChevronLeft,
+  Copy,
+  Location,
+  MessagesSquare,
+  Plus,
+  StickyNote,
+  UsersRound,
+  X,
+} from '@shared/ui/icons';
+import { ProfileLink } from '@shared/ui/profileLink';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { MapLinkedAddress } from '@shared/ui/mapLinkedAddress/MapLinkedAddress';
@@ -12,6 +23,8 @@ import { useModalTransition } from '@shared/hooks/useModalTransition';
 import type { FeedEvent } from '@client_pages/home/model/types';
 import type { EventParticipation } from '../model/useEventParticipation';
 import { ParticipantsModal } from './ParticipantsModal';
+import { EventCardMenu } from './EventCardMenu';
+import cardStyles from './eventCard.module.scss';
 import s from './eventDetailsModal.module.scss';
 
 type Props = {
@@ -100,7 +113,12 @@ export const EventDetailsModal = ({
           onClick={requestClose}
           aria-label="Close"
         >
-          <X />
+          <span className={s.desktopClose}>
+            <X />
+          </span>
+          <span className={s.mobileBack}>
+            <ChevronLeft />
+          </span>
         </button>
 
         <div className={s.cover}>
@@ -108,20 +126,67 @@ export const EventDetailsModal = ({
         </div>
 
         <div className={s.body}>
-          <h2 id="eventDetailsTitle" className={s.title}>
-            {title}
-          </h2>
+          <div className={s.titleRow}>
+            <h2 id="eventDetailsTitle" className={s.title}>
+              {title}
+            </h2>
+            <div className={s.mobileMenu}>
+              <EventCardMenu event={event} />
+            </div>
+          </div>
+          <div className={s.tags}>
+            <span
+              className={clsx(
+                cardStyles.tag,
+                event.type === 'plan' ? cardStyles.plan : cardStyles.wish,
+              )}
+            >
+              {event.type}
+            </span>
+            {event.hashtag && (
+              <span className={clsx(cardStyles.tag, cardStyles.hashtag)}>
+                {event.hashtag}
+              </span>
+            )}
+          </div>
 
           <div className={s.divider} />
 
           <div className={s.content}>
             <div className={s.fields}>
-              <div className={s.field}>
+              <div className={s.host}>
+                <span className={s.hostAvatar}>
+                  <AvatarImage
+                    src={event.host.avatar}
+                    alt=""
+                    fallbackWidth={16}
+                    fallbackHeight={16}
+                  />
+                </span>
+                <ProfileLink username={event.host.username}>
+                  {event.host.username}
+                </ProfileLink>
+                {event.host.mutualFriend && (
+                  <span>
+                    · friend of{' '}
+                    <ProfileLink username={event.host.mutualFriend}>
+                      {event.host.mutualFriend}
+                    </ProfileLink>
+                  </span>
+                )}
+              </div>
+              <div className={clsx(s.field, s.timeField)}>
+                <span className={s.mobileIcon}>
+                  <CalendarClock />
+                </span>
                 <span className={s.fieldLabel}>Timeframe</span>
                 <span className={s.fieldValue}>{date}</span>
               </div>
 
-              <div className={s.field}>
+              <div className={clsx(s.field, s.locationField)}>
+                <span className={s.mobileIcon}>
+                  <Location />
+                </span>
                 <span className={s.fieldLabel}>Where</span>
                 <div className={s.fieldValue}>
                   <MapLinkedAddress
@@ -131,7 +196,10 @@ export const EventDetailsModal = ({
                 </div>
               </div>
 
-              <div className={s.field}>
+              <div className={clsx(s.field, s.descriptionField)}>
+                <span className={s.mobileIcon}>
+                  <StickyNote />
+                </span>
                 <span className={s.fieldLabel}>Description</span>
                 {description ? (
                   <span className={s.fieldValue}>{description}</span>
@@ -142,7 +210,7 @@ export const EventDetailsModal = ({
                 )}
               </div>
 
-              <div className={s.field}>
+              <div className={clsx(s.field, s.chatField)}>
                 <span className={s.fieldLabel}>Chat link</span>
                 <div className={s.chatBox}>
                   {!isParticipating ? (
@@ -171,7 +239,10 @@ export const EventDetailsModal = ({
                 </div>
               </div>
 
-              <div className={s.field}>
+              <div className={clsx(s.field, s.participantsField)}>
+                <span className={s.mobileIcon}>
+                  <UsersRound />
+                </span>
                 <span className={s.fieldLabel}>Who is going:</span>
                 {count > 0 ? (
                   <div className={s.attendees}>
@@ -195,9 +266,13 @@ export const EventDetailsModal = ({
                       ref={participantsTriggerRef}
                       type="button"
                       className={s.counter}
+                      aria-label={`View all ${count} participants`}
                       onClick={() => setIsParticipantsOpen(true)}
                     >
-                      {counterLabel}
+                      <span className={s.desktopCount}>{counterLabel}</span>
+                      <span className={s.mobileCount}>
+                        {count > 3 ? `+${count - 3}` : count}
+                      </span>
                     </button>
                   </div>
                 ) : (
@@ -235,6 +310,7 @@ export const EventDetailsModal = ({
                   href={chatLink}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Open chat"
                 >
                   <MessagesSquare />
                   <span>Open chat</span>

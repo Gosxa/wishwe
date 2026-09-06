@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import clsx from 'clsx';
 import type { NotificationItem } from '@/shared/client_api/notifications';
 import s from '../header.module.scss';
@@ -11,6 +12,7 @@ type Props = {
   onRetry: () => void;
   onEventClick: (eventId: number) => void;
   onUserClick: (username: string) => void;
+  presentation?: 'dropdown' | 'page';
 };
 
 const relativeTime = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
@@ -45,15 +47,16 @@ export const NotificationsDropdown = ({
   onRetry,
   onEventClick,
   onUserClick,
+  presentation = 'dropdown',
 }: Props) => (
   <section
     id={id}
-    className={s.notificationsMenu}
+    className={presentation === 'page' ? s.activity : s.notificationsMenu}
     role="region"
     aria-labelledby={titleId}
   >
     <h2 id={titleId} className={s.notificationsTitle}>
-      Notifications
+      {presentation === 'page' ? 'Activity' : 'Notifications'}
     </h2>
 
     <div className={s.notificationsContent} aria-live="polite">
@@ -78,7 +81,11 @@ export const NotificationsDropdown = ({
 
       {notifications.length > 0 && (
         <div className={s.notificationsList}>
-          {notifications.map(notification => {
+          {notifications.map((notification, index) => {
+            const itemStyle = {
+              '--item-index': Math.min(index, 8),
+            } as CSSProperties;
+
             const body = (
               <>
                 <p>{notification.message}</p>
@@ -97,6 +104,7 @@ export const NotificationsDropdown = ({
                   key={notification.id}
                   type="button"
                   className={clsx(s.notificationItem, s.notificationItemButton)}
+                  style={itemStyle}
                   onClick={() => onEventClick(notification.related_object_id)}
                 >
                   {body}
@@ -113,6 +121,7 @@ export const NotificationsDropdown = ({
                   key={notification.id}
                   type="button"
                   className={clsx(s.notificationItem, s.notificationItemButton)}
+                  style={itemStyle}
                   onClick={() => onUserClick(notification.creator)}
                 >
                   {body}
@@ -121,7 +130,11 @@ export const NotificationsDropdown = ({
             }
 
             return (
-              <article key={notification.id} className={s.notificationItem}>
+              <article
+                key={notification.id}
+                className={s.notificationItem}
+                style={itemStyle}
+              >
                 {body}
               </article>
             );

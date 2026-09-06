@@ -1,5 +1,4 @@
 @use '@shared/styles/colors' as clr;
-@use '@shared/styles/breakpoints' as bp;
 
 .avatar {
   flex-shrink: 0;
@@ -11,11 +10,6 @@
   border-radius: 50%;
   overflow: hidden;
   background: clr.$ns-100;
-
-  @include bp.mobile {
-    width: 40px;
-    height: 40px;
-  }
 
   > img {
     width: 100%;

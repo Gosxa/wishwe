@@ -32,6 +32,7 @@ export const EventFeedToolbar = <Value extends string>({
           key={option.key}
           type="button"
           className={clsx(s.filter, option.key === value && s.active)}
+          aria-pressed={option.key === value}
           onClick={() => onChange(option.key)}
         >
           {option.label}
@@ -48,6 +49,7 @@ type DropdownProps<Value extends string> = {
   value: Value;
   options: EventFeedOption<Value>[];
   onChange: (value: Value) => void;
+  mobileContent?: ReactNode;
 };
 
 export const EventFeedDropdown = <Value extends string>({
@@ -55,6 +57,7 @@ export const EventFeedDropdown = <Value extends string>({
   value,
   options,
   onChange,
+  mobileContent,
 }: DropdownProps<Value>) => {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -95,28 +98,43 @@ export const EventFeedDropdown = <Value extends string>({
       <button
         type="button"
         className={s.control}
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(current => !current)}
       >
-        <span className={s.controlLabel}>{label}</span>
+        <span className={s.controlLabel}>
+          {mobileContent ? (
+            <>
+              <span className={s.desktopLabel}>{label}</span>
+              <span className={s.mobileLabel}>Sort</span>
+            </>
+          ) : (
+            label
+          )}
+        </span>
         <span className={s.controlValue}>{activeLabel}</span>
         <ChevronDown />
       </button>
 
       {isOpen && (
-        <div className={s.menu}>
-          {options.map(option => (
-            <button
-              key={option.key}
-              type="button"
-              className={clsx(
-                s.menuItem,
-                option.key === value && s.menuItemActive,
-              )}
-              onClick={() => handleSelect(option.key)}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className={clsx(s.menu, mobileContent && s.combinedMenu)}>
+          <div className={mobileContent ? s.desktopOptions : undefined}>
+            {options.map(option => (
+              <button
+                key={option.key}
+                type="button"
+                className={clsx(
+                  s.menuItem,
+                  option.key === value && s.menuItemActive,
+                )}
+                onClick={() => handleSelect(option.key)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          {mobileContent && (
+            <div className={s.mobileOptions}>{mobileContent}</div>
+          )}
         </div>
       )}
     </div>

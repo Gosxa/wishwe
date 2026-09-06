@@ -11,6 +11,10 @@
   @include bp.compact {
     margin-top: 24px;
   }
+
+  @include bp.mobile {
+    margin-top: 0;
+  }
 }
 
 .status {
@@ -60,7 +64,7 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: clr.$ns-500;
+  color: clr.$ns-700;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;

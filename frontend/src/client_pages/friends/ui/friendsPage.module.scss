@@ -1,5 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/breakpoints' as bp;
+@use '@shared/styles/typography' as tp;
 
 .shell {
   display: flex;
@@ -39,7 +40,7 @@
 
   @include bp.mobile {
     grid-column: 1;
-    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    padding-bottom: calc(61px + env(safe-area-inset-bottom));
   }
 }
 
@@ -88,8 +89,77 @@
   }
 }
 
+.tabs {
+  display: none;
+}
+
 @include bp.mobile {
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 16px 16px 0;
+
+    button {
+      @include tp.text-body;
+      height: 36px;
+      padding: 4px 16px;
+      border: 1px solid clr.$ns-100;
+      border-radius: 8px;
+      background: transparent;
+      color: clr.$ns-700;
+      cursor: pointer;
+      transition:
+        background-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+        color 0.2s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.1s ease;
+
+      &:active {
+        transform: scale(0.97);
+      }
+
+      &[aria-pressed='true'] {
+        @include tp.text-button;
+        border-color: clr.$prm;
+        background: clr.$prm;
+        color: clr.$ns-50;
+      }
+    }
+  }
+
+  .mobileHidden,
+  .invite {
+    display: none;
+  }
+
+  .activePane {
+    animation: tab-pane-reveal 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
   .columns {
-    padding: 16px 16px 24px;
+    padding: 40px 16px 24px;
+  }
+}
+
+@keyframes tab-pane-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tabs button {
+    transition: none;
+    transform: none;
+  }
+
+  .activePane {
+    animation: none;
   }
 }

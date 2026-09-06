@@ -13,8 +13,9 @@
   }
 
   @include bp.mobile {
-    padding: 16px;
-    border-radius: 12px;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 }
 
@@ -24,7 +25,6 @@
   color: clr.$ns-900;
 
   @include bp.mobile {
-    font-size: 20px;
-    line-height: 24px;
+    display: none;
   }
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import clsx from 'clsx';
 import { Header } from '@widgets/header';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { useFriends } from '../model/useFriends';
@@ -23,6 +24,7 @@ export default function FriendsPage() {
     declineRequest,
   } = useFriends();
   const [query, setQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
   const currentUsername = useUserStore(state => state.user?.username);
   const search = useUserSearch(query);
 
@@ -54,13 +56,35 @@ export default function FriendsPage() {
         search={{
           value: query,
           onChange: setQuery,
-          placeholder: 'Search people',
+          placeholder: 'Search friends',
         }}
       />
       <div className={s.body}>
         <main className={s.content}>
+          <div className={s.tabs} aria-label="Friends views">
+            <button
+              type="button"
+              aria-pressed={activeTab === 'friends'}
+              onClick={() => setActiveTab('friends')}
+            >
+              Your friends
+            </button>
+            <button
+              type="button"
+              aria-pressed={activeTab === 'requests'}
+              onClick={() => setActiveTab('requests')}
+            >
+              Requests
+            </button>
+          </div>
           <div className={s.columns}>
-            <div className={s.leftCol}>
+            <div
+              className={clsx(
+                s.leftCol,
+                activeTab !== 'friends' && s.mobileHidden,
+                activeTab === 'friends' && s.activePane,
+              )}
+            >
               <FriendsList
                 friends={friends}
                 query={query}
@@ -78,10 +102,22 @@ export default function FriendsPage() {
                 />
               )}
             </div>
-            <div className={s.rightCol}>
-              <FindMoreFriends />
+            <div
+              className={clsx(
+                s.rightCol,
+                activeTab !== 'requests' && s.mobileHidden,
+                activeTab === 'requests' && s.activePane,
+              )}
+            >
+              <div className={s.invite}>
+                <FindMoreFriends />
+              </div>
               <Requests
-                requests={requests}
+                requests={requests.filter(request =>
+                  request.username
+                    .toLowerCase()
+                    .includes(query.trim().toLowerCase()),
+                )}
                 isLoading={isLoading}
                 error={error}
                 onRetry={retry}

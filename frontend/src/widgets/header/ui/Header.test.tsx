@@ -365,7 +365,10 @@ describe('Header', () => {
     it('opens the terms in a new tab without leaking the opener', () => {
       render(<Header />);
       openSettings();
-      fireEvent.click(screen.getByRole('button', { name: 'Terms of Use' }));
+      const termsButton = screen.getByRole('button', { name: 'Terms of Use' });
+
+      expect(termsButton.querySelector('svg')).toBeTruthy();
+      fireEvent.click(termsButton);
 
       expect(window.open).toHaveBeenCalledWith(
         TERMS_OF_USE_URL,

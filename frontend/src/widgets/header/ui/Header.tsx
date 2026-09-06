@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { BellDot, Gear, Logo } from '@shared/ui/icons';
+import { BellDot, ExternalLink, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
 import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
@@ -17,7 +17,7 @@ import s from '../header.module.scss';
 const settingsItems = [
   { label: 'Edit profile' },
   { label: 'Support' },
-  { label: 'Terms of Use' },
+  { label: 'Terms of Use', external: true },
   { label: 'Log out', variant: 'danger' },
 ] as const;
 
@@ -182,7 +182,8 @@ export const Header = ({
                     }
                     onClick={settingsActions[item.label]}
                   >
-                    {item.label}
+                    <span>{item.label}</span>
+                    {'external' in item && item.external && <ExternalLink />}
                   </button>
                 ))}
               </div>

@@ -23,7 +23,7 @@ test.describe('friends', () => {
     try {
       await me.page.goto('/friends');
       await fillStable(
-        me.page.getByPlaceholder('Search people'),
+        me.page.getByPlaceholder('Search friends'),
         stranger.username,
       );
 

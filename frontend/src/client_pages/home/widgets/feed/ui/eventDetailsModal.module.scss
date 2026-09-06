@@ -21,15 +21,6 @@
   overflow-x: hidden;
   z-index: 100;
   @include anim.modal-overlay-enter;
-
-  @include bp.mobile {
-    align-items: flex-start;
-    padding: 16px;
-    padding: max(16px, env(safe-area-inset-top))
-      max(16px, env(safe-area-inset-right))
-      max(16px, env(safe-area-inset-bottom))
-      max(16px, env(safe-area-inset-left));
-  }
 }
 
 .modal {
@@ -53,11 +44,6 @@
     gap: 24px;
     padding: 72px 24px 24px;
   }
-
-  @include bp.mobile {
-    gap: 20px;
-    padding: 60px 16px 16px;
-  }
 }
 
 .close {
@@ -75,14 +61,9 @@
   color: clr.$ns-700;
   cursor: pointer;
 
-  > svg {
+  svg {
     width: 40px;
     height: 40px;
-  }
-
-  @include bp.mobile {
-    top: 12px;
-    right: 12px;
   }
 }
 
@@ -159,7 +140,6 @@
   color: clr.$ns-500;
 }
 
-
 .chatBox {
   display: flex;
   align-items: center;
@@ -220,7 +200,6 @@
   @include anim.copy-pop;
 }
 
-
 .attendees {
   display: flex;
   align-items: center;
@@ -274,15 +253,10 @@
   }
 }
 
-
 .actions {
   display: flex;
   gap: 8px;
   width: 100%;
-
-  @include bp.mobile {
-    flex-direction: column;
-  }
 }
 
 .action {
@@ -322,4 +296,234 @@
   flex: 1;
   min-width: 0;
   text-decoration: none;
+}
+
+.tags,
+.host,
+.mobileMenu,
+.mobileIcon,
+.mobileBack,
+.mobileCount {
+  display: none;
+}
+
+@include bp.mobile {
+  .overlay {
+    padding: 0;
+    background: clr.$ns-50;
+  }
+
+  .modal {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border-radius: 0;
+  }
+
+  .cover {
+    flex: 0 0 auto;
+    height: calc(272px + env(safe-area-inset-top));
+    aspect-ratio: auto;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .close {
+    top: calc(8px + env(safe-area-inset-top));
+    left: 16px;
+    right: auto;
+    z-index: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: clr.$ns-50;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .body {
+    position: relative;
+    flex: 1 0 auto;
+    gap: 0;
+    width: 100%;
+    margin-top: -66px;
+    padding: 40px 16px 0;
+    border-radius: 16px 16px 0 0;
+    background: clr.$ns-50;
+  }
+
+  .titleRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .title {
+    font-size: 24px;
+    line-height: 30px;
+    letter-spacing: 0;
+  }
+
+  .mobileMenu {
+    display: block;
+    flex-shrink: 0;
+    padding-top: 4px;
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 16px 0 32px;
+
+    > span {
+      padding: 4px 12px;
+      font-size: 16px;
+      line-height: 16px;
+      outline-width: 1px;
+      outline-offset: -1px;
+    }
+  }
+
+  .content {
+    flex: 1;
+    gap: 32px;
+  }
+
+  .fields {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 16px;
+  }
+
+  .host {
+    display: flex;
+    flex-wrap: wrap;
+    grid-column: 1 / -1;
+    grid-row: 1;
+    align-items: center;
+    gap: 6px;
+    color: clr.$ns-700;
+    @include tp.text-caption;
+  }
+
+  .hostAvatar {
+    width: 16px;
+    height: 16px;
+    margin-right: 2px;
+    overflow: hidden;
+    border-radius: 50%;
+
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .field {
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .fieldValue,
+  .emptyValue,
+  .muted {
+    font-size: 12px;
+    line-height: 16px;
+    color: clr.$ns-700;
+  }
+
+  .mobileIcon,
+  .mobileBack,
+  .mobileCount {
+    display: block;
+  }
+
+  .mobileIcon {
+    flex-shrink: 0;
+    color: clr.$ns-500;
+
+    > svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
+
+  .descriptionField {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding-bottom: 40px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid clr.$ns-200;
+  }
+
+  .timeField {
+    grid-column: 1;
+    grid-row: 3;
+  }
+
+  .locationField {
+    grid-column: 1;
+    grid-row: 4;
+  }
+
+  .participantsField {
+    grid-column: 2;
+    grid-row: 3 / 5;
+  }
+
+  .stackAvatar {
+    width: 32px;
+    height: 32px;
+    border-width: 1px;
+
+    &:nth-child(n + 4) {
+      display: none;
+    }
+  }
+
+  .counter {
+    min-width: 32px;
+    height: 32px;
+    font-size: 10px;
+  }
+
+  .fieldLabel,
+  .chatField,
+  .divider,
+  .desktopClose,
+  .desktopCount {
+    display: none;
+  }
+
+  .actions {
+    position: sticky;
+    bottom: 0;
+    gap: 16px;
+    margin-top: auto;
+    padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+    background: clr.$ns-50;
+  }
+
+  .action {
+    height: 48px;
+  }
+
+  .openChat {
+    @include btn.secondary(0, 80px, 48px);
+    flex: 0 0 80px;
+
+    > span {
+      display: none;
+    }
+  }
 }

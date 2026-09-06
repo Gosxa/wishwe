@@ -190,6 +190,20 @@ describe('NotificationsDropdown', () => {
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
+  it('assigns a staggered item index style to notification rows', () => {
+    renderDropdown({
+      notifications: [
+        notification({ id: 1, message: 'First' }),
+        notification({ id: 2, message: 'Second' }),
+      ],
+    });
+
+    const items = panel().querySelectorAll('button, article');
+
+    expect(items[0].getAttribute('style')).toContain('--item-index: 0');
+    expect(items[1].getAttribute('style')).toContain('--item-index: 1');
+  });
+
   it.each([
     ['2026-03-15T11:59:59.500Z', '0 seconds ago'],
     ['2026-03-15T11:59:30.000Z', '30 seconds ago'],

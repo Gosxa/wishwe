@@ -1,6 +1,7 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/typography' as tp;
+@use '@shared/styles/breakpoints' as bp;
 
 .empty {
   display: flex;
@@ -27,7 +28,6 @@
   line-height: 24px;
 }
 
-
 .inner {
   display: flex;
   flex-direction: column;
@@ -48,4 +48,40 @@
 
 .invite {
   @include btn.secondary(0, 240px, 40px);
+}
+
+@include bp.mobile {
+  .empty {
+    justify-content: center;
+    min-height: max(
+      360px,
+      calc(
+        100dvh - 270px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+      )
+    );
+    padding-top: 0;
+  }
+
+  .title {
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: 0;
+  }
+
+  .subtitle {
+    max-width: 370px;
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .actions {
+    gap: 8px;
+    margin-top: 32px;
+  }
+
+  .create,
+  .invite {
+    width: 192px;
+  }
 }

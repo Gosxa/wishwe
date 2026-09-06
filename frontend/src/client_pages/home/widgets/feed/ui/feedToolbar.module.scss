@@ -1,0 +1,88 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  border: 0;
+
+  legend {
+    @include tp.text-body;
+    margin-bottom: 4px;
+    line-height: 20px;
+    color: clr.$ns-900;
+  }
+
+  & + & {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid clr.$ns-200;
+
+    legend {
+      float: left;
+      width: 100%;
+    }
+  }
+}
+
+.option {
+  @include tp.text-caption;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: clr.$ns-700;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:has(:checked) {
+    background: clr.$ns-100;
+    color: clr.$prm;
+  }
+
+  input {
+    appearance: none;
+    flex: 0 0 20px;
+    width: 20px;
+    height: 20px;
+    border: 1.5px solid clr.$ns-500;
+    border-radius: 50%;
+    background: clr.$ns-50;
+    transition:
+      border 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:checked {
+      border: 6px solid clr.$prm;
+      transform: scale(1.05);
+    }
+
+    &:focus-visible {
+      outline: 2px solid clr.$prm;
+      outline-offset: 3px;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .option {
+    transition: none;
+    transform: none;
+
+    input {
+      transition: none;
+      transform: none;
+    }
+  }
+}

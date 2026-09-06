@@ -57,6 +57,23 @@ const chooseFromDropdown = async (
 };
 
 test.describe('feed toolbar', () => {
+  test('keeps the selected filter green after a tap @mobile', async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, 'Requires a touch device');
+    await page.goto('/feed');
+
+    for (const label of ['Plans', 'Wishes', 'All']) {
+      const filter = toolbarFilter(page, label);
+
+      await filter.tap();
+      await expect(filter).toHaveAttribute('aria-pressed', 'true');
+      await expect(filter).toHaveCSS('background-color', 'rgb(71, 75, 36)');
+      await expect(filter).toHaveCSS('color', 'rgb(247, 243, 227)');
+    }
+  });
+
   test('round-trips filter, reach and sort through the URL', async ({
     page,
   }) => {
@@ -409,7 +426,7 @@ test.describe('feed contents', () => {
       await expect(eventCard(reader.page, 'Kayak morning')).toBeVisible();
       await expect(eventCard(reader.page, 'Pottery evening')).toBeVisible();
 
-      await fillStable(reader.page.getByPlaceholder('Search'), 'kayak');
+      await fillStable(reader.page.getByPlaceholder('Search events'), 'kayak');
 
       await expect(reader.page).toHaveURL('/feed?title=kayak');
       await expect(eventCard(reader.page, 'Kayak morning')).toBeVisible();
@@ -598,8 +615,8 @@ test.describe('feed contents', () => {
       const bottomControls = [
         primaryNav.locator('a[href="/feed"]'),
         primaryNav.locator('a[href="/friends"]'),
-        reader.page.locator('[data-tour="create-event"]'),
-        reader.page.getByRole('button', { name: /^Notifications/ }),
+        primaryNav.getByRole('button', { name: 'Create', exact: true }),
+        primaryNav.getByRole('link', { name: /^Activity/ }),
         primaryNav.locator('a[href="/profile"]'),
       ];
       const controlBoxes = await Promise.all(

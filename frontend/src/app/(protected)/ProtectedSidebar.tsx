@@ -19,6 +19,10 @@ const getActiveKey = (pathname: string) => {
     return 'friends';
   }
 
+  if (pathMatches(pathname, '/activity')) {
+    return 'activity';
+  }
+
   if (
     pathMatches(pathname, '/profile') ||
     pathMatches(pathname, '/edit-profile')
@@ -42,7 +46,9 @@ export const ProtectedSidebar = ({ isAuthenticated }: Props) => {
   return (
     <Sidebar
       activeKey={activeKey}
-      mobileFeedLayout={activeKey === 'home' || activeKey === 'friends'}
+      mobileFeedLayout={['home', 'friends', 'activity'].includes(
+        activeKey ?? '',
+      )}
     />
   );
 };

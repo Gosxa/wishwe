@@ -14,10 +14,6 @@
     padding-bottom: 8px;
     margin-bottom: 8px;
   }
-
-  @include bp.mobile {
-    gap: 12px;
-  }
 }
 
 .info {
@@ -63,6 +59,10 @@
 @include bp.mobile {
   .rowStacked {
     flex-wrap: wrap;
+    gap: 8px 16px;
+    padding: 8px;
+    border-radius: 8px;
+    background: clr.$ns-100;
 
     .info {
       flex: 1 1 0;
@@ -71,11 +71,12 @@
     .action {
       width: 100%;
       margin-left: 0;
-      margin-top: 12px;
+      padding-top: 8px;
+      border-top: 1px solid clr.$ns-200;
     }
 
     &:not(:last-child) {
-      padding-bottom: 16px;
+      padding-bottom: 8px;
       margin-bottom: 16px;
     }
   }

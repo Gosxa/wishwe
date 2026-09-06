@@ -11,6 +11,10 @@
   @include bp.compact {
     margin-top: 24px;
   }
+
+  @include bp.mobile {
+    margin-top: 8px;
+  }
 }
 
 .status {
@@ -34,17 +38,13 @@
   gap: 16px;
 
   @include bp.mobile {
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 16px;
   }
 }
 
 .accept {
   @include btn.primary(8px, 88px, 40px);
-
-  @include bp.mobile {
-    flex: 1;
-    width: auto;
-  }
 }
 
 .decline {
@@ -71,9 +71,7 @@
   }
 
   @include bp.mobile {
-    flex: 1;
-    padding: 0 12px;
-    box-shadow: inset 0 0 0 1px clr.$ns-300;
+    padding: 0 16px;
   }
 }
 

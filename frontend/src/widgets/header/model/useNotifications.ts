@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useNotificationCountStore } from '@/shared/store/useNotificationCountStore';
 import {
   getNotifications,
   getUnreadCount,
@@ -33,12 +34,16 @@ const createTimeout = (callback: () => void, delay: number) => {
   return () => clearTimeout(timer);
 };
 
-export const useNotifications = (isOpen: boolean) => {
+export const useNotifications = (isOpen: boolean, pollUnread = true) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listRefresh, setListRefresh] = useState(0);
+
+  useEffect(() => {
+    useNotificationCountStore.getState().setUnreadCount(unreadCount);
+  }, [unreadCount]);
 
   const isOpenRef = useRef(isOpen);
   const unreadCountRef = useRef(unreadCount);
@@ -50,6 +55,8 @@ export const useNotifications = (isOpen: boolean) => {
   }, [isOpen]);
 
   useEffect(() => {
+    if (!pollUnread) return;
+
     let cancelTimer: (() => void) | null = null;
     let controller: AbortController | null = null;
     let disposed = false;
@@ -189,7 +196,7 @@ export const useNotifications = (isOpen: boolean) => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [pollUnread]);
 
   const fetchNotifications = useCallback(async () => {
     if (!isOpenRef.current) return;

@@ -1,6 +1,7 @@
 'use client';
 
 import { type MouseEvent, useEffect, useRef, useState } from 'react';
+import clsx from 'clsx';
 import { useBodyScrollLock } from '@/features';
 import { ModalPortal } from '@shared/ui/modalPortal/ModalPortal';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
@@ -28,6 +29,7 @@ type Props = {
   onDetailsOpen?: () => void;
   onDetailsClose?: () => void;
   tourId?: string;
+  compactMobile?: boolean;
 };
 
 export const EventCard = ({
@@ -45,6 +47,7 @@ export const EventCard = ({
   onDetailsOpen,
   onDetailsClose,
   tourId,
+  compactMobile = false,
 }: Props) => {
   const participation = useEventParticipation(event);
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
@@ -173,7 +176,7 @@ export const EventCard = ({
   if (detailsOnly) return modals;
 
   return (
-    <article className={s.card}>
+    <article className={clsx(s.card, compactMobile && s.compactMobile)}>
       <EventCardContent
         event={event}
         isOwn={isOwn}

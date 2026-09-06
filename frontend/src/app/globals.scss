@@ -1,3 +1,5 @@
+@use '@shared/styles/colors' as clr;
+
 *,
 *::before,
 *::after {
@@ -17,6 +19,7 @@ html {
 body {
   min-height: 100%;
   min-height: 100dvh;
+  background: clr.$ns-50;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

@@ -230,7 +230,9 @@ describe('EventDetailsModal', () => {
 
     expect(screen.queryByAltText('@guest6')).toBeNull();
     expect(screen.queryByAltText('@guest7')).toBeNull();
-    expect(screen.getByRole('button', { name: '8/10' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'View all 8 participants' }),
+    ).toBeTruthy();
   });
 
   it('drops the cap from the counter when the event has no limit', () => {
@@ -239,7 +241,9 @@ describe('EventDetailsModal', () => {
       participation: participation({ count: 3, participants: avatars(3) }),
     });
 
-    expect(screen.getByRole('button', { name: '3' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'View all 3 participants' }),
+    ).toBeTruthy();
   });
 
   it('treats an effectively unlimited cap as no cap', () => {
@@ -248,7 +252,9 @@ describe('EventDetailsModal', () => {
       participation: participation({ count: 3, participants: avatars(3) }),
     });
 
-    expect(screen.getByRole('button', { name: '3' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'View all 3 participants' }),
+    ).toBeTruthy();
     expect(screen.queryByRole('button', { name: '3/3000' })).toBeNull();
   });
 
@@ -260,7 +266,9 @@ describe('EventDetailsModal', () => {
     expect(dialog().getAttribute('aria-modal')).toBe('true');
     expect(dialog().hasAttribute('inert')).toBe(false);
 
-    fireEvent.click(screen.getByRole('button', { name: '2/10' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'View all 2 participants' }),
+    );
 
     expect(screen.getByTestId('participants-modal')).toBeTruthy();
     expect(participantsModalMock.mock.calls[0][0]).toMatchObject({
@@ -277,7 +285,9 @@ describe('EventDetailsModal', () => {
       participation: participation({ count: 2, participants: avatars(2) }),
     });
 
-    fireEvent.click(screen.getByRole('button', { name: '2/10' }));
+    fireEvent.click(
+      screen.getByRole('button', { name: 'View all 2 participants' }),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Close participants' }));
 
     expect(screen.queryByTestId('participants-modal')).toBeNull();
@@ -288,7 +298,7 @@ describe('EventDetailsModal', () => {
       .returnFocusRef as { current: HTMLElement | null };
 
     expect(returnFocusRef.current).toBe(
-      screen.getByRole('button', { name: '2/10' }),
+      screen.getByRole('button', { name: 'View all 2 participants' }),
     );
   });
 

@@ -8,6 +8,7 @@ import type {
   FeedReach,
   SortOption,
 } from '@client_pages/home/model/types';
+import s from './feedToolbar.module.scss';
 
 type Props = {
   activeFilter: FeedFilter;
@@ -67,6 +68,43 @@ export const FeedToolbar = ({
             value={activeSort}
             options={visibleSortOptions}
             onChange={onSortChange}
+            mobileContent={
+              <>
+                <fieldset className={s.group}>
+                  <legend>Sort</legend>
+                  {[
+                    { key: 'recent' as const, label: 'Recently added' },
+                    { key: 'soonest' as const, label: 'Soonest first' },
+                  ].map(option => (
+                    <label key={option.key} className={s.option}>
+                      <input
+                        type="radio"
+                        name="feed-sort"
+                        value={option.key}
+                        checked={activeSort === option.key}
+                        onChange={() => onSortChange(option.key)}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </fieldset>
+                <fieldset className={s.group}>
+                  <legend>Show</legend>
+                  {reachOptions.map(option => (
+                    <label key={option.key} className={s.option}>
+                      <input
+                        type="radio"
+                        name="feed-reach"
+                        value={option.key}
+                        checked={activeReach === option.key}
+                        onChange={() => onReachChange(option.key)}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </fieldset>
+              </>
+            }
           />
         </>
       }

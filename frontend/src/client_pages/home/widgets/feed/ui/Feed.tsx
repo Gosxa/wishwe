@@ -67,6 +67,7 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
         <EventFeedItem key={event.id} reveal={event.id === revealEventId}>
           <EventCard
             event={event}
+            compactMobile
             tourId={position === 0 ? 'feed-card' : undefined}
             enableDetails
             autoOpenDetails={event.id === openEventId}

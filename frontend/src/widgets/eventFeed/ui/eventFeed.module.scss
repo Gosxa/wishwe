@@ -42,7 +42,6 @@ $list-gap: 24px;
   min-width: 0;
 }
 
-
 .itemRevealing {
   overflow: hidden;
   animation: feed-item-reveal 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -56,7 +55,6 @@ $list-gap: 24px;
     animation: none;
   }
 }
-
 
 @keyframes feed-item-reveal {
   from {
@@ -130,7 +128,7 @@ $list-gap: 24px;
 
 @media (max-width: 767px) {
   .home {
-    padding-top: 8px;
+    padding-top: 16px;
     padding-inline: 16px;
 
     .toolbarSlot,
@@ -139,6 +137,11 @@ $list-gap: 24px;
     .errorSlot,
     .statusSlot {
       max-width: 560px;
+    }
+
+    .list {
+      gap: 32px;
+      margin-top: 32px;
     }
   }
 }

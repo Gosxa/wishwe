@@ -1,0 +1,16 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/breakpoints' as bp;
+
+.shell {
+  min-height: 100dvh;
+  background: clr.$ns-50;
+}
+
+.content {
+  margin-left: var(--sidebar-width);
+
+  @include bp.mobile {
+    margin-left: 0;
+    padding-bottom: calc(61px + env(safe-area-inset-bottom));
+  }
+}

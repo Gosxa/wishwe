@@ -1,7 +1,11 @@
 'use client';
 
 import { useLayoutEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useUserStore } from '@/shared/store/useUserStore';
+import { useNotificationCountStore } from '@/shared/store/useNotificationCountStore';
+import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
+import { BellDot, Plus } from '@shared/ui/icons';
 import { navConfig } from '../model/navConfig';
 import { NavItem } from './NavItem';
 import s from '../sidebar.module.scss';
@@ -20,6 +24,8 @@ type IndicatorRect = {
 
 export const Sidebar = ({ activeKey, mobileFeedLayout = false }: Props) => {
   const avatar = useUserStore(state => state.user?.avatar) ?? null;
+  const openCreate = useCreateEventStore(state => state.open);
+  const unreadCount = useNotificationCountStore(state => state.unreadCount);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const [indicatorRect, setIndicatorRect] = useState<IndicatorRect | null>(
     null,
@@ -96,6 +102,27 @@ export const Sidebar = ({ activeKey, mobileFeedLayout = false }: Props) => {
           }}
         />
       ))}
+      {mobileFeedLayout && (
+        <>
+          <button
+            type="button"
+            className={s.mobileCreate}
+            aria-label="Create"
+            onClick={() => openCreate()}
+          >
+            <Plus />
+          </button>
+          <Link
+            href="/activity"
+            className={`${s.navItem} ${s.mobileActivity} ${activeKey === 'activity' ? s.active : ''}`}
+            aria-current={activeKey === 'activity' ? 'page' : undefined}
+            aria-label={`Activity${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+          >
+            <BellDot hasUnread={unreadCount > 0} />
+            <span className={s.label}>Activity</span>
+          </Link>
+        </>
+      )}
     </nav>
   );
 };

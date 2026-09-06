@@ -161,6 +161,16 @@
   border-radius: 16px;
   background: clr.$ns-50;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  .notificationsContent {
+    flex: 1;
+    min-height: 0;
+    padding-right: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
+    @include scroll.thin;
+  }
 }
 
 @media (max-width: 480px) {
@@ -181,19 +191,54 @@
   @include tp.h2;
 }
 
+.activity {
+  width: 100%;
+  max-width: 760px;
+  margin-inline: auto;
+  padding: 32px 24px;
+
+  .notificationsTitle {
+    padding-bottom: 0;
+    margin-bottom: 24px;
+    border-bottom: 0;
+  }
+
+  .notificationsContent {
+    flex: none;
+    padding-right: 0;
+    overflow: visible;
+    overscroll-behavior: auto;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  @include bp.mobile {
+    padding-top: 20px;
+  }
+}
+
 .notificationsContent {
-  flex: 1;
-  min-height: 0;
-  padding-right: 12px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  @include scroll.thin;
+  width: 100%;
 }
 
 .notificationsList {
   display: flex;
   flex-direction: column;
+}
+
+@keyframes notification-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .notificationItem {
@@ -202,6 +247,14 @@
   gap: 8px;
   padding: 0 0 8px;
   border-bottom: 1px solid clr.$ns-200;
+  animation: notification-item-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--item-index, 0) * 35ms);
+
+  @for $i from 1 through 8 {
+    &:nth-child(#{$i}) {
+      --item-index: #{$i - 1};
+    }
+  }
 
   & + & {
     padding-top: 8px;
@@ -223,6 +276,10 @@
     color: clr.$ns-500;
 
     @include tp.text-caption;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 }
 
@@ -306,6 +363,24 @@
   border-radius: 10px;
   background: clr.$ns-50;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform-origin: top right;
+  animation: settings-menu-enter 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes settings-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .settingsTitle {
@@ -320,6 +395,7 @@
 .settingsItem {
   display: flex;
   align-items: center;
+  gap: 4px;
   width: 100%;
   padding: 8px 0;
   border-bottom: 1px solid #e5e6da;
@@ -371,22 +447,33 @@
 
 @include bp.mobile {
   .mobileFeedLayout {
-    z-index: 101;
-    display: block;
-    height: 72px;
-    padding: 16px;
+    display: flex;
+    gap: 31px;
+    height: calc(76px + env(safe-area-inset-top));
+    padding: calc(16px + env(safe-area-inset-top)) 16px 16px;
     border-bottom: 0;
 
     .logoSlot {
-      display: none;
+      flex: 0 0 66px;
+
+      > svg {
+        width: 66px;
+        height: 44px;
+      }
     }
 
     .searchBarWrap {
-      width: 100%;
+      flex: 1;
     }
 
     .searchBar {
       height: 40px;
+
+      > svg {
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+      }
     }
 
     .searchBar:not(.searchBarDisabled) {
@@ -397,47 +484,9 @@
       color: clr.$ns-500;
     }
 
-    .createBtn {
-      position: fixed;
-      left: 50%;
-      bottom: calc(16px + env(safe-area-inset-bottom));
-      z-index: 102;
-      width: 48px;
-      height: 40px;
-      padding: 0;
-      transform: translateX(-50%);
-
-      > span {
-        display: none;
-      }
-    }
-
+    .createBtn,
     .actions {
-      position: fixed;
-      left: calc(75% - 20px);
-      bottom: calc(16px + env(safe-area-inset-bottom));
-      z-index: 102;
-      display: block;
-      width: 48px;
-      height: 40px;
-      transform: translateX(-50%);
-    }
-
-    .notifications,
-    .iconBtn {
-      width: 48px;
-      height: 40px;
-    }
-
-    .settings {
       display: none;
-    }
-
-    .notificationsMenu {
-      position: fixed;
-      top: auto;
-      right: 16px;
-      bottom: calc(72px + env(safe-area-inset-bottom));
     }
   }
 }

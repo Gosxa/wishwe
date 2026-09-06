@@ -405,7 +405,7 @@
   @include tp.text-body;
 }
 
-@include bp.compact {
+@include bp.tablet {
   .card {
     width: 100%;
     max-width: 760px;
@@ -440,155 +440,167 @@
 }
 
 @include bp.mobile {
-  .card {
-    max-width: none;
-  }
-
-  .surface {
-    padding: 16px;
-  }
-
-  .media {
-    border-radius: 16px;
-  }
-
-  .tags {
-    top: 8px;
-    left: 8px;
-    gap: 4px;
-  }
-
-  .tag {
-    padding: 4px 12px;
-    font-size: 16px;
-    line-height: 16px;
-  }
-
-  .body {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-rows: repeat(7, auto);
-    column-gap: 8px;
-    row-gap: 8px;
-
-    &::before {
-      content: '';
-      grid-column: 1 / -1;
-      grid-row: 4;
-      width: 100%;
-      border-top: 1px solid clr.$ns-200;
-    }
-  }
-
-  .details,
-  .meta {
-    display: contents;
-  }
-
-  .titleRow {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    margin-bottom: 0;
-  }
-
-  .title {
-    font-size: 20px;
-    line-height: 28px;
-    letter-spacing: 0.01em;
-  }
-
-  .metaRow {
-    min-width: 0;
-    font-size: 12px;
-    line-height: 16px;
-
-    > svg {
-      width: 14px;
-      height: 14px;
+  .card:not(.compactMobile) {
+    .surface {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 16px;
+      padding: 16px;
+      border: 1px solid clr.$ns-200;
+      border-radius: 24px;
+      background: rgba(clr.$ns-100, 0.5);
     }
 
-    &:nth-child(1) {
-      grid-column: 1 / -1;
-      grid-row: 2;
-      gap: 6px;
+    .media,
+    .body {
+      grid-column: 1;
+    }
 
-      > svg:first-child {
-        display: none;
+    .media {
+      aspect-ratio: 336 / 154;
+    }
+
+    .media {
+      border-radius: 16px;
+    }
+
+    .tags {
+      top: 8px;
+      left: 8px;
+      gap: 4px;
+    }
+
+    .tag {
+      padding: 4px 12px;
+      font-size: 16px;
+      line-height: 16px;
+    }
+
+    .body {
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-rows: repeat(7, auto);
+      column-gap: 8px;
+      row-gap: 8px;
+
+      &::before {
+        content: '';
+        grid-column: 1 / -1;
+        grid-row: 4;
+        width: 100%;
+        border-top: 1px solid clr.$ns-200;
       }
     }
 
-    &:nth-child(2) {
-      grid-column: 1;
-      grid-row: 5;
+    .details,
+    .meta {
+      display: contents;
     }
 
-    &:nth-child(3) {
-      grid-column: 1;
-      grid-row: 6;
-    }
-
-    &:nth-child(4) {
+    .titleRow {
       grid-column: 1 / -1;
-      grid-row: 3;
+      grid-row: 1;
+      margin-bottom: 0;
     }
-  }
 
-  .metaRowTop {
-    > svg {
-      margin-top: 1px;
+    .title {
+      font-size: 20px;
+      line-height: 28px;
+      letter-spacing: 0.01em;
     }
-  }
 
-  .avatar {
-    width: 16px;
-    height: 16px;
-  }
+    .metaRow {
+      min-width: 0;
+      font-size: 12px;
+      line-height: 16px;
 
-  .participants {
-    grid-column: 2;
-    grid-row: 5 / 7;
-    align-self: center;
-    gap: 6px;
-    font-size: 12px;
-    line-height: 16px;
+      > svg {
+        width: 14px;
+        height: 14px;
+      }
 
-    > svg {
-      width: 14px;
-      height: 14px;
+      &:nth-child(1) {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        gap: 6px;
+
+        > svg:first-child {
+          display: none;
+        }
+      }
+
+      &:nth-child(2) {
+        grid-column: 1;
+        grid-row: 5;
+      }
+
+      &:nth-child(3) {
+        grid-column: 1;
+        grid-row: 6;
+      }
+
+      &:nth-child(4) {
+        grid-column: 1 / -1;
+        grid-row: 3;
+      }
     }
-  }
 
-  .avatars {
-    .stackAvatar:not(:first-child) {
+    .metaRowTop {
+      > svg {
+        margin-top: 1px;
+      }
+    }
+
+    .avatar {
+      width: 16px;
+      height: 16px;
+    }
+
+    .participants {
+      grid-column: 2;
+      grid-row: 5 / 7;
+      align-self: center;
+      gap: 6px;
+      font-size: 12px;
+      line-height: 16px;
+
+      > svg {
+        width: 14px;
+        height: 14px;
+      }
+    }
+
+    .avatars {
+      .stackAvatar:not(:first-child) {
+        margin-left: -4px;
+      }
+    }
+
+    .stackAvatar {
+      width: 32px;
+      height: 32px;
+      border-width: 1px;
+    }
+
+    .extra {
+      min-width: 32px;
+      height: 32px;
       margin-left: -4px;
     }
-  }
 
-  .stackAvatar {
-    width: 32px;
-    height: 32px;
-    border-width: 1px;
-  }
+    .actions,
+    .viewRecap {
+      grid-column: 1 / -1;
+      grid-row: 7;
+      width: 100%;
+      margin-top: 24px;
+    }
 
-  .extra {
-    min-width: 32px;
-    height: 32px;
-    margin-left: -4px;
-  }
-
-  .actions,
-  .viewRecap {
-    grid-column: 1 / -1;
-    grid-row: 7;
-    width: 100%;
-    margin-top: 24px;
-  }
-
-  .action,
-  .edit,
-  .planIt,
-  .viewRecap,
-  .chat {
-    height: 48px;
+    .action,
+    .edit,
+    .planIt,
+    .viewRecap,
+    .chat {
+      height: 48px;
+    }
   }
 
   .leaveDialog {
@@ -598,5 +610,116 @@
   .leaveDialogActions {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+}
+
+@include bp.mobile {
+  .compactMobile {
+    .surface {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .clickable:hover,
+    .clickable:active {
+      transform: none;
+      filter: none;
+    }
+
+    .media {
+      grid-column: 1;
+      align-self: stretch;
+      aspect-ratio: auto;
+      min-height: 154px;
+    }
+
+    .image {
+      position: absolute;
+      inset: 0;
+    }
+
+    .tags {
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      max-width: 100%;
+      padding: 4px 12px;
+      font-size: 16px;
+      line-height: 16px;
+      overflow-wrap: anywhere;
+    }
+
+    .wish {
+      outline-width: 1px;
+      outline-offset: -1px;
+    }
+
+    .body {
+      display: flex;
+      grid-column: 2;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .titleRow {
+      margin-bottom: 8px;
+    }
+
+    .title {
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .titleRow > :not(.title),
+    .metaRowTop,
+    .participants,
+    .muted,
+    .metaRow:first-child > svg {
+      display: none;
+    }
+
+    .meta {
+      gap: 4px;
+    }
+
+    .metaRow {
+      gap: 8px;
+      font-size: 10px;
+      line-height: 16px;
+      color: clr.$ns-700;
+
+      > svg {
+        width: 12px;
+        height: 12px;
+      }
+    }
+
+    .username {
+      overflow-wrap: anywhere;
+    }
+
+    .avatar {
+      width: 16px;
+      height: 16px;
+    }
+
+    .actions {
+      width: 100%;
+    }
+
+    .action {
+      height: 44px;
+
+      > svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
   }
 }
