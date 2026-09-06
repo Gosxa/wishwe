@@ -22,7 +22,7 @@ import {
 
 const heroImage = require('../../assets/images/onboarding-hero.jpg');
 const useNativeDriver = Platform.OS !== 'web';
-const supportsGoogleSignIn = Platform.OS === 'android';
+const supportsGoogleSignIn = Platform.OS === 'android' || Platform.OS === 'ios';
 
 export function OnboardingScreen() {
   const [isStarted, setIsStarted] = useState(false);

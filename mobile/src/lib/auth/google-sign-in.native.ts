@@ -1,4 +1,4 @@
-import { TurboModuleRegistry } from 'react-native';
+import { Platform, TurboModuleRegistry } from 'react-native';
 
 import {
   GoogleSignInCancelledError,
@@ -8,13 +8,14 @@ import {
 export { GoogleSignInCancelledError, GoogleSignInError } from './google-sign-in-errors';
 
 const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID?.trim();
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim();
 
 type GoogleSignInModule = typeof import('@react-native-google-signin/google-signin');
 
 let isConfigured = false;
 
 function assertGoogleSignInAvailable() {
-  if (!googleWebClientId) {
+  if (!googleWebClientId || (Platform.OS === 'ios' && !googleIosClientId)) {
     throw new GoogleSignInError('Google sign-in is not configured for this build.');
   }
 
@@ -46,7 +47,7 @@ function googleErrorMessage(error: unknown, googleModule: GoogleSignInModule | n
   return 'Could not connect to Google. Please try again.';
 }
 
-/** Opens Google's native Android account picker and returns an ID token for our API. */
+/** Opens native Google sign-in and returns an ID token for our API. */
 export async function requestGoogleIdToken(): Promise<string> {
   assertGoogleSignInAvailable();
 
@@ -57,13 +58,18 @@ export async function requestGoogleIdToken(): Promise<string> {
 
     if (!isConfigured) {
       googleModule.GoogleSignin.configure({
+        ...(Platform.OS === 'ios' ? { iosClientId: googleIosClientId } : {}),
         webClientId: googleWebClientId,
         offlineAccess: false,
       });
       isConfigured = true;
     }
 
-    await googleModule.GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    if (Platform.OS === 'android') {
+      await googleModule.GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
+    }
 
     const response = await googleModule.GoogleSignin.signIn();
 
