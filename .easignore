@@ -1,0 +1,45 @@
+# EAS archives from the Git repository root, even when run from mobile/.
+# The mobile app has its own lockfile and no dependencies on sibling projects.
+# Exclude all root entries except mobile (including .git and local build output).
+/*
+!/mobile
+
+# .easignore replaces all .gitignore files for EAS uploads. Keep the mobile
+# exclusions here too; retain src/lib, package-lock.json, and all app assets.
+node_modules/
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Generated native projects: EAS runs Expo Prebuild from app.json.
+/mobile/android/
+/mobile/ios/
+.kotlin/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem
+
+.metro-health-check*
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.DS_Store
+.env
+.env*.local
+*.tsbuildinfo
+example
+
+# Local tooling, reports, and build artifacts.
+.claude/
+.cursor/
+.idea/
+.vscode/
+coverage/
+*.apk
+*.aab
+*.ipa

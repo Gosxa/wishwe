@@ -165,6 +165,38 @@ npx expo start --dev-client
 Alternatively, create an installable EAS development build with
 `npx eas-cli build --platform android --profile development`.
 
+## Build an Android preview APK
+
+From `mobile/`, run:
+
+```bash
+npx eas-cli build --platform android --profile preview
+```
+
+The preview profile in `eas.json` supplies the hosted API URL and public Google
+Web client ID. EAS uses the configured remote Android signing credentials.
+
+EAS archives from the Git repository root. The root `.easignore` limits uploads
+to `mobile/` and excludes dependencies, local environment files, caches, and
+generated native projects. Keep it at the repository root, not in `mobile/`.
+It replaces the `.gitignore` rules for EAS uploads, so keep its mobile exclusions
+in sync with `mobile/.gitignore`. If the app gains shared workspace dependencies,
+include those paths in `.easignore` too.
+
+To inspect exactly what will be uploaded without starting a cloud build:
+
+```bash
+npx eas-cli build:inspect --platform android --profile preview --stage archive --output ../tmp/eas-preview-archive
+```
+
+Use a fresh output directory on subsequent runs. The extracted archive should
+contain the mobile source (including `src/lib`), assets, `package.json`,
+`package-lock.json`, and app/build configuration. It should not contain
+`frontend/`, `backend/`, `node_modules/`, `.expo/`, or `.env`. Excluding the
+generated `android/` and `ios/` directories lets EAS generate them with Expo
+Prebuild. This prevents local web build caches from pushing the upload over
+EAS's archive size limit.
+
 ## Using both platforms
 
 The app reads one `EXPO_PUBLIC_API_URL` from `mobile/.env`, so use one of these
