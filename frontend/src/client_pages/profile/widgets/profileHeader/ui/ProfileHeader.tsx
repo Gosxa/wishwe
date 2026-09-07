@@ -1,20 +1,31 @@
 'use client';
 
+import type { MouseEvent } from 'react';
 import Link from 'next/link';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { Pencil } from '@shared/ui/icons';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { useUserStore } from '@/shared/store/useUserStore';
+import { useExitNavigation } from '@shared/hooks/useExitNavigation';
 import { InviteFriends } from './InviteFriends';
 import { ProfileStats } from './ProfileStats';
 import s from './profileHeader.module.scss';
 
 type Props = {
   initialUser: Profile | null;
+  onEditClick?: (event: MouseEvent<HTMLAnchorElement>) => void;
+  isLeaving?: boolean;
 };
 
-export const ProfileHeader = ({ initialUser }: Props) => {
+export const ProfileHeader = ({
+  initialUser,
+  onEditClick,
+  isLeaving,
+}: Props) => {
   const user = useUserStore(state => state.user) ?? initialUser;
+  const fallback = useExitNavigation('/edit-profile');
+  const activeIsLeaving = isLeaving ?? fallback.isLeaving;
+  const activeOnEditClick = onEditClick ?? fallback.handleNavigate;
 
   const username = user?.username ?? '';
   const bio = user?.bio ?? '';
@@ -48,7 +59,12 @@ export const ProfileHeader = ({ initialUser }: Props) => {
             />
           )}
 
-          <Link href="/edit-profile" className={s.editButton}>
+          <Link
+            href="/edit-profile"
+            className={`${s.editButton}${activeIsLeaving ? ` ${s.editButtonLeaving}` : ''}`}
+            onClick={activeOnEditClick}
+            aria-disabled={activeIsLeaving}
+          >
             <Pencil />
             <span>Edit profile</span>
           </Link>

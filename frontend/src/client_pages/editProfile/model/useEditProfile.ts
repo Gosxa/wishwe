@@ -135,8 +135,6 @@ export const useEditProfile = (initialUser: Profile | null) => {
 
   const onCropCancel = () => setRawImageUrl(null);
 
-  const onCancel = () => router.push('/profile');
-
   const onSubmit = async () => {
     if (!user) return;
     setFormError(undefined);
@@ -236,6 +234,5 @@ export const useEditProfile = (initialUser: Profile | null) => {
     formError,
     isDirty,
     onSubmit,
-    onCancel,
   };
 };

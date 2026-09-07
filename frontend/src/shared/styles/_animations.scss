@@ -22,6 +22,63 @@ $modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
   }
 }
 
+@keyframes sheet-reveal-reverse {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@mixin sheet-reveal-reverse {
+  animation: sheet-reveal-reverse 0.32s ease-out both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes sheet-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.995);
+  }
+}
+
+@mixin sheet-exit {
+  animation: sheet-exit 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+@keyframes sheet-exit-reverse {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.995);
+  }
+}
+
+@mixin sheet-exit-reverse {
+  animation: sheet-exit-reverse 0.32s cubic-bezier(0.4, 0, 1, 1) both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
 @keyframes modal-overlay-in {
   from {
     opacity: 0;

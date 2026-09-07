@@ -21,6 +21,8 @@ const mocks = vi.hoisted(() => ({
   getEvent: vi.fn(),
   openCreate: vi.fn(),
   openEventId: null as string | null,
+  prefetch: vi.fn(),
+  push: vi.fn(),
   refresh: vi.fn(),
   search: '',
   setEventParam: vi.fn(),
@@ -37,7 +39,11 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ refresh: mocks.refresh }),
+  useRouter: () => ({
+    prefetch: mocks.prefetch,
+    push: mocks.push,
+    refresh: mocks.refresh,
+  }),
   useSearchParams: () => ({
     get: (key: string) => (key === 'title' ? mocks.search : null),
   }),
@@ -421,5 +427,54 @@ describe('ProfilePage', () => {
     ).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Create a plan' }));
     expect(mocks.openCreate).toHaveBeenCalledWith('plan');
+  });
+
+  it('prefetches edit-profile and waits for exit animation before navigating', async () => {
+    vi.useFakeTimers();
+    try {
+      render(<ProfilePage initialUser={profile} />);
+
+      expect(mocks.prefetch).toHaveBeenCalledWith('/edit-profile');
+
+      const editButton = screen.getByRole('link', { name: 'Edit profile' });
+
+      fireEvent.click(editButton);
+
+      expect(editButton.getAttribute('aria-disabled')).toBe('true');
+      expect(mocks.push).not.toHaveBeenCalled();
+
+      await act(async () => {
+        vi.advanceTimersByTime(319);
+      });
+      expect(mocks.push).not.toHaveBeenCalled();
+
+      await act(async () => {
+        vi.advanceTimersByTime(1);
+      });
+      expect(mocks.push).toHaveBeenCalledWith('/edit-profile');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('navigates immediately when reduced motion is requested on profile edit', () => {
+    const originalMatchMedia = window.matchMedia;
+
+    window.matchMedia = vi.fn().mockImplementation(query => ({
+      matches: query === '(prefers-reduced-motion: reduce)',
+      media: query,
+    }));
+
+    try {
+      render(<ProfilePage initialUser={profile} />);
+
+      const editButton = screen.getByRole('link', { name: 'Edit profile' });
+
+      fireEvent.click(editButton);
+
+      expect(mocks.push).toHaveBeenCalledWith('/edit-profile');
+    } finally {
+      window.matchMedia = originalMatchMedia;
+    }
   });
 });

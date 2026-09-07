@@ -130,6 +130,18 @@
   margin-top: 24px;
   padding: 0 24px;
   text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    opacity 0.2s ease;
+
+  &[aria-disabled='true'],
+  &.editButtonLeaving {
+    pointer-events: none;
+    opacity: 0.75;
+    transform: scale(0.98);
+  }
 }
 
 .invite {

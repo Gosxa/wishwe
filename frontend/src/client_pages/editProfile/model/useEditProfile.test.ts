@@ -502,14 +502,4 @@ describe('useEditProfile', () => {
     expect(navigationMocks.push).not.toHaveBeenCalled();
     expect(setLoading.mock.calls).toEqual([[true], [false]]);
   });
-
-  it('leaves the form for the profile page on cancel', () => {
-    const { result } = renderHook(() => useEditProfile(profile));
-
-    act(() => result.current.bio.onChange(textareaChange('Unsaved bio')));
-    act(() => result.current.onCancel());
-
-    expect(navigationMocks.push).toHaveBeenCalledWith('/profile');
-    expect(userApiMocks.updateProfile).not.toHaveBeenCalled();
-  });
 });

@@ -1,6 +1,7 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/buttons' as btn;
+@use '@shared/styles/animations' as anim;
 
 .shell {
   display: flex;
@@ -28,12 +29,18 @@
 }
 
 .card {
+  @include anim.sheet-reveal;
   display: flex;
   flex-direction: column;
   width: 500px;
   padding: 40px;
   border: 1px solid clr.$ns-200;
   border-radius: 16px;
+
+  &.leaving {
+    pointer-events: none;
+    @include anim.sheet-exit-reverse;
+  }
 }
 
 .title {

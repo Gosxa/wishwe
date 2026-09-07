@@ -10,6 +10,7 @@ import { Toggle } from '@shared/ui/toggle/Toggle';
 import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
 import { HelperText } from '@shared/ui/helperText/HelperText';
 import { useState } from 'react';
+import { useExitNavigation } from '@shared/hooks/useExitNavigation';
 import { ChangePasswordModal } from '../widgets/changePasswordModal';
 import { useEditProfile } from '../model/useEditProfile';
 import s from './editProfilePage.module.scss';
@@ -32,17 +33,18 @@ export default function EditProfilePage({ initialUser }: Props) {
     formError,
     isDirty,
     onSubmit,
-    onCancel,
   } = useEditProfile(initialUser);
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const { isLeaving, handleNavigate: handleCancel } =
+    useExitNavigation('/profile');
 
   return (
     <div className={s.shell}>
       <Header showSearch={false} />
       <div className={s.body}>
         <main className={s.content}>
-          <section className={s.card}>
+          <section className={`${s.card}${isLeaving ? ` ${s.leaving}` : ''}`}>
             <h1 className={s.title}>Edit your profile</h1>
 
             <div className={s.avatarBlock}>
@@ -148,7 +150,12 @@ export default function EditProfilePage({ initialUser }: Props) {
             {formError && <HelperText text={formError} type="error" inline />}
 
             <div className={s.actions}>
-              <button type="button" className={s.cancel} onClick={onCancel}>
+              <button
+                type="button"
+                className={s.cancel}
+                onClick={handleCancel}
+                aria-disabled={isLeaving}
+              >
                 <span>Cancel</span>
               </button>
               <button

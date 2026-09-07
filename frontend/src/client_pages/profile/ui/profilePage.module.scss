@@ -1,4 +1,5 @@
 @use '@shared/styles/colors' as clr;
+@use '@shared/styles/animations' as anim;
 
 .shell {
   display: flex;
@@ -20,4 +21,10 @@
   position: relative;
   grid-column: 2 / -1;
   min-height: calc(100vh - 72px);
+  @include anim.sheet-reveal-reverse;
+
+  &.leaving {
+    pointer-events: none;
+    @include anim.sheet-exit;
+  }
 }

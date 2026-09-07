@@ -1,16 +1,30 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Profile } from '@/shared/client_api/auth/types';
 
 const mocks = vi.hoisted(() => ({
-  cancelEdit: vi.fn(),
   changePasswordSubmit: vi.fn(),
   editResult: {} as Record<string, unknown>,
   submitEdit: vi.fn(),
   useChangePassword: vi.fn(),
   useEditProfile: vi.fn(),
+}));
+
+const routerMocks = vi.hoisted(() => ({
+  prefetch: vi.fn(),
+  push: vi.fn(),
+}));
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => routerMocks,
 }));
 
 vi.mock('../model/useEditProfile', () => ({
@@ -91,7 +105,6 @@ describe('EditProfilePage', () => {
       isDirty: true,
       lastName: input(profile.last_name ?? ''),
       nickname: input(profile.username ?? ''),
-      onCancel: mocks.cancelEdit,
       onSubmit: mocks.submitEdit,
       privacy: {
         checked: true,
@@ -115,7 +128,7 @@ describe('EditProfilePage', () => {
 
   afterEach(cleanup);
 
-  it('renders model values and wires the page actions', () => {
+  it('renders model values and wires the save action', () => {
     const { container } = render(<EditProfilePage initialUser={profile} />);
 
     expect(mocks.useEditProfile).toHaveBeenCalledWith(profile);
@@ -131,11 +144,35 @@ describe('EditProfilePage', () => {
     expect(screen.getByText('Profile could not be saved')).toBeTruthy();
     expect(container.querySelector('header')?.dataset.showSearch).toBe('false');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
-    expect(mocks.cancelEdit).toHaveBeenCalledTimes(1);
     expect(mocks.submitEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('prefetches Profile and waits for the reverse exit animation on cancel', () => {
+    vi.useFakeTimers();
+
+    try {
+      const { container } = render(<EditProfilePage initialUser={profile} />);
+
+      expect(routerMocks.prefetch).toHaveBeenCalledWith('/profile');
+
+      const cancel = screen.getByRole('button', { name: 'Cancel' });
+
+      fireEvent.click(cancel);
+
+      expect(cancel.getAttribute('aria-disabled')).toBe('true');
+      expect(container.querySelector('[class*="leaving"]')).toBeTruthy();
+      expect(routerMocks.push).not.toHaveBeenCalled();
+
+      act(() => {
+        vi.advanceTimersByTime(320);
+      });
+
+      expect(routerMocks.push).toHaveBeenCalledWith('/profile');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('opens the password dialog and connects its submit and close actions', () => {

@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import type { Profile } from '@/shared/client_api/auth/types';
 import { Header } from '@widgets/header';
 import { useProfileSearch } from '@client_pages/profile/model/useProfileSearch';
+import { useExitNavigation } from '@shared/hooks/useExitNavigation';
 import { ProfileFeed } from '../widgets/feed';
 import { ProfileHeader } from '../widgets/profileHeader';
 import s from './profilePage.module.scss';
@@ -25,6 +26,7 @@ export default function ProfilePage({ initialUser }: Props) {
 function ProfilePageContent({ initialUser }: Props) {
   const search = useProfileSearch();
   const [searchDisabled, setSearchDisabled] = useState(false);
+  const { isLeaving, handleNavigate } = useExitNavigation('/edit-profile');
 
   return (
     <div className={s.shell}>
@@ -38,8 +40,12 @@ function ProfilePageContent({ initialUser }: Props) {
         }}
       />
       <div className={s.body}>
-        <main className={s.content}>
-          <ProfileHeader initialUser={initialUser} />
+        <main className={`${s.content}${isLeaving ? ` ${s.leaving}` : ''}`}>
+          <ProfileHeader
+            initialUser={initialUser}
+            onEditClick={handleNavigate}
+            isLeaving={isLeaving}
+          />
           <ProfileFeed
             initialUser={initialUser}
             onSearchDisabledChange={setSearchDisabled}
