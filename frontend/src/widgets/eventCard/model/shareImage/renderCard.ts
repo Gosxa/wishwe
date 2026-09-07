@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import type { FeedEvent } from '../types';
+import type { FeedEvent } from '@entities/event';
 import {
   COLORS,
   drawCover,

@@ -3,7 +3,7 @@
 import type { ChangeEvent } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 import type { PublicProfile } from '@/shared/client_api/user/types';
 
 const mocks = vi.hoisted(() => ({
@@ -85,7 +85,7 @@ vi.mock('./UserProfileFriendButton', () => ({
   ),
 }));
 
-vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
+vi.mock('@widgets/eventCard', () => ({
   EventCard: ({
     autoOpenDetails,
     event,
@@ -110,9 +110,6 @@ vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
       )}
     </article>
   ),
-}));
-
-vi.mock('@client_pages/home/widgets/feed/ui/DeepLinkCard', () => ({
   DeepLinkCard: ({
     eventId,
     onClose,

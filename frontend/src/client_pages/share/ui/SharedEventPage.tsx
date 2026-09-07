@@ -6,8 +6,8 @@ import type { SharedEventResponse } from '@/shared/client_api/event';
 import type { FriendshipStatus } from '@/shared/client_api/user/types';
 import { HomePage } from '@client_pages/home';
 import { LandingPage } from '@client_pages/landing';
-import { toFeedEvents } from '@client_pages/home/model/feedMapper';
-import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
+import { toFeedEvents } from '@entities/event';
+import { EventCard } from '@widgets/eventCard';
 import { EventPreviewModal } from './EventPreviewModal';
 import { ShareErrorModal } from './ShareErrorModal';
 

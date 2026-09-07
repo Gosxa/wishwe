@@ -45,7 +45,7 @@ vi.mock('@client_pages/landing', () => ({
   LandingPage: () => <main data-testid="landing-background" />,
 }));
 
-vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
+vi.mock('@widgets/eventCard', () => ({
   EventCard: (props: {
     event: { title: string };
     onDetailsClose?: () => void;

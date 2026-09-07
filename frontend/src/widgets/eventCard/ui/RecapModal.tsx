@@ -7,7 +7,7 @@ import { ProfileLink } from '@shared/ui/profileLink';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 import s from './recapModal.module.scss';
 
 type Props = {

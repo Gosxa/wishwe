@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 
 const mocks = vi.hoisted(() => ({
   createShareLink: vi.fn(),
@@ -24,11 +24,8 @@ vi.mock('@/shared/client_api/event', () => ({
   createShareLink: mocks.createShareLink,
 }));
 
-vi.mock('@client_pages/home/model/shareImage', async importOriginal => {
-  const actual =
-    await importOriginal<
-      typeof import('@client_pages/home/model/shareImage')
-    >();
+vi.mock('../model/shareImage', async importOriginal => {
+  const actual = await importOriginal<typeof import('../model/shareImage')>();
 
   return {
     ...actual,

@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 
 const mocks = vi.hoisted(() => ({
   clearEventParam: vi.fn(),
@@ -80,7 +80,7 @@ vi.mock('@/shared/store/useCreateEventStore', () => ({
   ) => selector({ open: mocks.openCreate }),
 }));
 
-vi.mock('./DeepLinkCard', () => ({
+vi.mock('@widgets/eventCard', () => ({
   DeepLinkCard: ({
     eventId,
     onClose,
@@ -94,9 +94,6 @@ vi.mock('./DeepLinkCard', () => ({
       </button>
     </aside>
   ),
-}));
-
-vi.mock('./EventCard', () => ({
   EventCard: ({
     event,
     onDetailsOpen,

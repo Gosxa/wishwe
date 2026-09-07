@@ -1,8 +1,7 @@
 'use client';
 
 import clsx from 'clsx';
-import { SHARE_FORMATS } from '@client_pages/home/model/shareImage';
-import type { ShareFormat } from '@client_pages/home/model/shareImage';
+import { SHARE_FORMATS, type ShareFormat } from '../model/shareImage';
 import s from './sharePreview.module.scss';
 
 type Props = {

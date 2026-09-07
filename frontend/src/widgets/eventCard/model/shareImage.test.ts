@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EVENT_IMAGE_FALLBACK } from '@/shared/lib/mediaFallbacks';
-import type { FeedEvent } from './types';
+import type { FeedEvent } from '@entities/event';
 import {
   SHARE_FORMATS,
   generateShareImages,

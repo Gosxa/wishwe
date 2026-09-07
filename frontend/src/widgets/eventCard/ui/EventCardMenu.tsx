@@ -7,7 +7,7 @@ import { archiveEvent } from '@/shared/client_api/event';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 import { DotsVertical } from '@shared/ui/icons';
 import { ShareEventModal } from './ShareEventModal';
 import s from './eventCardMenu.module.scss';

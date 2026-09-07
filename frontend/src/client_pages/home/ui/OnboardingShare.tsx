@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useOnboardingStore } from '@/shared/store/useOnboardingStore';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
-import { toFeedEvents } from '../model/feedMapper';
-import { ShareEventModal } from '../widgets/feed/ui/ShareEventModal';
+import { toFeedEvents } from '@entities/event';
+import { ShareEventModal } from '@widgets/eventCard';
 
 export const OnboardingShare = () => {
   const createdEvent = useOnboardingStore(state => state.createdEvent);

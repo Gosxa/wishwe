@@ -11,13 +11,13 @@ import clsx from 'clsx';
 import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
-import type { FeedEvent } from '@client_pages/home/model/types';
-import { shareImageFilename } from '@client_pages/home/model/shareImage';
+import type { FeedEvent } from '@entities/event';
+import { shareImageFilename } from '../model/shareImage';
 import {
   readSkipInstagramNotice,
   saveSkipInstagramNotice,
-} from '@client_pages/home/model/shareEvent';
-import { useShareEvent } from '@client_pages/home/model/useShareEvent';
+} from '../model/shareEvent';
+import { useShareEvent } from '../model/useShareEvent';
 import { InstagramShareNotice } from './InstagramShareNotice';
 import { ShareActions } from './ShareActions';
 import { ShareDestinations } from './ShareDestinations';

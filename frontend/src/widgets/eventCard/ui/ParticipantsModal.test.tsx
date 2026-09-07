@@ -11,7 +11,7 @@ import {
 import { useRef } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Profile } from '@/shared/client_api/auth/types';
-import type { ParticipantAvatar } from '@client_pages/home/model/types';
+import type { ParticipantAvatar } from '@entities/event';
 
 vi.hoisted(() => {
   process.env.NEXT_PUBLIC_BACKEND_URL = 'https://media.wishwe.test/api';

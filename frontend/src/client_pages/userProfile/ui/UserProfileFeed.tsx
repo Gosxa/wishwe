@@ -6,8 +6,7 @@ import type {
 } from '@/shared/client_api/user/types';
 import { EventFeedLayout } from '@widgets/eventFeed';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
-import { DeepLinkCard } from '@client_pages/home/widgets/feed/ui/DeepLinkCard';
-import { EventCard } from '@client_pages/home/widgets/feed/ui/EventCard';
+import { DeepLinkCard, EventCard } from '@widgets/eventCard';
 import { useProfileEvents } from '@client_pages/profile/model/useProfileEvents';
 import { useProfileToolbar } from '@client_pages/profile/model/useProfileToolbar';
 import { ProfileFeedToolbar } from '@client_pages/profile/widgets/feed/ui/ProfileFeedToolbar';

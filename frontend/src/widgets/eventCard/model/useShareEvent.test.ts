@@ -2,7 +2,7 @@
 
 import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedEvent } from './types';
+import type { FeedEvent } from '@entities/event';
 
 const mocks = vi.hoisted(() => ({
   createShareLink: vi.fn(),

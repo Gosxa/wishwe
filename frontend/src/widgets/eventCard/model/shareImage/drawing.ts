@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 
-import type { FeedEvent } from '../types';
-import { FALLBACK_COVER } from '../feedMapper';
+import { FALLBACK_COVER, type FeedEvent } from '@entities/event';
 
 export type CanvasImage = HTMLImageElement | null;
 

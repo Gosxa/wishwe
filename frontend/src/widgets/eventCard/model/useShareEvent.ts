@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createShareLink } from '@/shared/client_api/event';
-import type { FeedEvent } from './types';
+import type { FeedEvent } from '@entities/event';
 import { generateShareImages, SHARE_FORMATS } from './shareImage';
 import type { GeneratedShareImage, ShareFormat } from './shareImage';
 import {

@@ -1,13 +1,9 @@
 'use client';
 
 import clsx from 'clsx';
-import type { FeedEvent } from '@client_pages/home/model/types';
-import { shareImageFilename } from '@client_pages/home/model/shareImage';
-import type { ShareFormat } from '@client_pages/home/model/shareImage';
-import type {
-  PreparedShareImage,
-  ShareFeedback,
-} from '@client_pages/home/model/shareEvent';
+import type { FeedEvent } from '@entities/event';
+import { shareImageFilename, type ShareFormat } from '../model/shareImage';
+import type { PreparedShareImage, ShareFeedback } from '../model/shareEvent';
 import s from './shareActions.module.scss';
 
 type Props = {

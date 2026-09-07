@@ -15,7 +15,7 @@ import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { EventImage } from '@shared/ui/eventImage/EventImage';
 import { ProfileLink } from '@shared/ui/profileLink';
 import { MapLinkedAddress } from '@shared/ui/mapLinkedAddress/MapLinkedAddress';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 import { EventCardMenu } from './EventCardMenu';
 import type { EventParticipation } from '../model/useEventParticipation';
 import s from './eventCard.module.scss';

@@ -12,8 +12,7 @@ import {
 import type { ComponentProps } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BackendEvent } from '@/shared/client_api/event';
-import { FALLBACK_COVER } from '@client_pages/home/model/feedMapper';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import { FALLBACK_COVER, type FeedEvent } from '@entities/event';
 
 const apiMocks = vi.hoisted(() => ({
   archiveEvent: vi.fn(),
@@ -41,11 +40,8 @@ vi.mock('@/features', () => ({
   useBodyScrollLock: vi.fn(),
 }));
 
-vi.mock('@client_pages/home/model/shareImage', async importOriginal => {
-  const actual =
-    await importOriginal<
-      typeof import('@client_pages/home/model/shareImage')
-    >();
+vi.mock('../model/shareImage', async importOriginal => {
+  const actual = await importOriginal<typeof import('../model/shareImage')>();
 
   return {
     ...actual,

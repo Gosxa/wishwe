@@ -9,10 +9,7 @@ import {
 } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type {
-  FeedEvent,
-  ParticipantAvatar,
-} from '@client_pages/home/model/types';
+import type { FeedEvent, ParticipantAvatar } from '@entities/event';
 import type { EventParticipation } from '../model/useEventParticipation';
 
 const participantsModalMock = vi.hoisted(() => vi.fn());

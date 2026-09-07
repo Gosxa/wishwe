@@ -4,8 +4,6 @@ import { EVENT_IMAGE_FALLBACK } from '@/shared/lib/mediaFallbacks';
 import type { BackendEvent } from '@/shared/client_api/event';
 import type { FeedEvent } from './types';
 
-export { toAbsoluteMediaUrl };
-
 export const FALLBACK_COVER = EVENT_IMAGE_FALLBACK;
 
 const eventImage = (coverImage: string | null) =>

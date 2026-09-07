@@ -10,7 +10,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 import type { Profile } from '@/shared/client_api/auth/types';
 import type { BackendEvent } from '@/shared/client_api/event';
 
@@ -117,11 +117,8 @@ vi.mock('@widgets/header', () => ({
   ),
 }));
 
-vi.mock('@client_pages/home/widgets/feed/ui/DeepLinkCard', () => ({
+vi.mock('@widgets/eventCard', () => ({
   DeepLinkCard: () => null,
-}));
-
-vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
   EventCard: ({
     event,
     onEdit,

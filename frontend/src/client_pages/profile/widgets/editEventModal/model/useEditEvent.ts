@@ -3,7 +3,7 @@
 import { updateEvent, UpdateEventError } from '@/shared/client_api/event';
 import type { BackendEvent } from '@/shared/client_api/event';
 import { UNLIMITED_PARTICIPANTS, useEventForm } from '@/features/eventForm';
-import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
+import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 
 export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
   const isPlan = event.event_type === 'plan';

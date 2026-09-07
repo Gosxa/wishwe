@@ -3,7 +3,7 @@
 import Link from 'next/link';
 
 import { useInviteContext } from '@/client_pages/onboard/model';
-import { toAbsoluteMediaUrl } from '@/client_pages/home/model/feedMapper';
+import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import { useUserStore } from '@/shared/store/useUserStore';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 

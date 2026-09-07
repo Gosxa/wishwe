@@ -6,8 +6,7 @@ import {
   joinPlan,
   leaveEvent,
 } from '@/shared/client_api/event';
-import { toFeedEvents } from '@client_pages/home/model/feedMapper';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import { toFeedEvents, type FeedEvent } from '@entities/event';
 
 export const useEventParticipation = (event: FeedEvent) => {
   const [status, setStatus] = useState(event.userParticipationStatus);

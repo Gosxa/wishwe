@@ -5,8 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { listEvents } from '@/shared/client_api/event';
 import { usePaginatedList } from '@shared/hooks/usePaginatedList';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
+import { toFeedEvents } from '@entities/event';
 import { toEventListParams } from './feedQuery';
-import { toFeedEvents } from './feedMapper';
 import { SEARCH_PARAM } from './useFeedSearch';
 import { useFeedToolbar } from './useFeedToolbar';
 

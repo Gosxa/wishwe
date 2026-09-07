@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { listUserEvents } from '@/shared/client_api/user';
 import { usePaginatedList } from '@shared/hooks/usePaginatedList';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
-import { toFeedEvents } from '@client_pages/home/model/feedMapper';
+import { toFeedEvents } from '@entities/event';
 import { toProfileEventListParams } from './profileEventsQuery';
 import { SEARCH_PARAM } from './useProfileSearch';
 import type { ProfileSort, ProfileTab } from './types';

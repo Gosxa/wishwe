@@ -1,4 +1,4 @@
-import type { FeedEvent } from './types';
+import type { FeedEvent } from '@entities/event';
 import { EVENT_IMAGE_FALLBACK } from '@/shared/lib/mediaFallbacks';
 import { FALLBACK_FONT_SANS, FALLBACK_FONT_SERIF } from './shareImage/drawing';
 import type { CanvasImage, FontFamilies } from './shareImage/drawing';

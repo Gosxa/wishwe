@@ -2,14 +2,13 @@
 
 import type { CSSProperties, MouseEvent, RefObject } from 'react';
 import clsx from 'clsx';
-import type { FeedEvent } from '@client_pages/home/model/types';
-import { shareImageFilename } from '@client_pages/home/model/shareImage';
-import type { ShareFormat } from '@client_pages/home/model/shareImage';
+import type { FeedEvent } from '@entities/event';
+import { shareImageFilename, type ShareFormat } from '../model/shareImage';
 import type {
   PreparedShareImage,
   ShareNetwork,
   SocialShareUrls,
-} from '@client_pages/home/model/shareEvent';
+} from '../model/shareEvent';
 import s from './shareDestinations.module.scss';
 
 type Props = {

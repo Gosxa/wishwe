@@ -6,13 +6,12 @@ import {
   EventFeedLayout,
   useEventReveal,
 } from '@widgets/eventFeed';
+import { DeepLinkCard, EventCard } from '@widgets/eventCard';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
 import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
 import { useFeedToolbar } from '@client_pages/home/model/useFeedToolbar';
 import { SEARCH_PARAM } from '@client_pages/home/model/useFeedSearch';
-import { DeepLinkCard } from './DeepLinkCard';
-import { EventCard } from './EventCard';
 import { FeedEmptyState } from './FeedEmptyState';
 import { FeedToolbar } from './FeedToolbar';
 

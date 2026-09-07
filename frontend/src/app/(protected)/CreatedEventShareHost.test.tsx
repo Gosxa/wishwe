@@ -9,11 +9,11 @@ const mocks = vi.hoisted(() => ({
   toFeedEvents: vi.fn(),
 }));
 
-vi.mock('@client_pages/home/model/feedMapper', () => ({
+vi.mock('@entities/event', () => ({
   toFeedEvents: mocks.toFeedEvents,
 }));
 
-vi.mock('@client_pages/home/widgets/feed/ui/ShareEventModal', () => ({
+vi.mock('@widgets/eventCard', () => ({
   ShareEventModal: ({
     event,
     celebrateArrival,

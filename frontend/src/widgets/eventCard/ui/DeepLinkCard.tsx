@@ -7,8 +7,7 @@ import { useBodyScrollLock } from '@/features';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { getEvent, GetEventError } from '@/shared/client_api/event';
-import { toFeedEvents } from '@client_pages/home/model/feedMapper';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import { toFeedEvents, type FeedEvent } from '@entities/event';
 import { EventCard } from './EventCard';
 import s from './deepLinkCard.module.scss';
 

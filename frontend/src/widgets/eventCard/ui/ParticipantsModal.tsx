@@ -10,8 +10,7 @@ import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { listParticipants } from '@/shared/client_api/event';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
-import { handle } from '@client_pages/home/model/feedMapper';
-import type { ParticipantAvatar } from '@client_pages/home/model/types';
+import { handle, type ParticipantAvatar } from '@entities/event';
 import s from './participantsModal.module.scss';
 
 type Props = {

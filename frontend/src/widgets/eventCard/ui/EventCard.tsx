@@ -6,7 +6,7 @@ import { useBodyScrollLock } from '@/features';
 import { ModalPortal } from '@shared/ui/modalPortal/ModalPortal';
 import { useModalAttention } from '@shared/hooks/useModalAttention';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 import { useEventParticipation } from '../model/useEventParticipation';
 import { EventCardContent } from './EventCardContent';
 import { EventDetailsModal } from './EventDetailsModal';

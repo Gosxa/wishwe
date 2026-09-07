@@ -8,7 +8,7 @@ import {
   screen,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { FeedEvent } from '@client_pages/home/model/types';
+import type { FeedEvent } from '@entities/event';
 
 const mocks = vi.hoisted(() => ({
   error: null as string | null,
@@ -67,11 +67,8 @@ vi.mock('@/shared/store/useUserStore', () => ({
 
 vi.mock('@/shared/client_api/event', () => ({ getEvent: vi.fn() }));
 
-vi.mock('@client_pages/home/widgets/feed/ui/DeepLinkCard', () => ({
+vi.mock('@widgets/eventCard', () => ({
   DeepLinkCard: () => null,
-}));
-
-vi.mock('@client_pages/home/widgets/feed/ui/EventCard', () => ({
   EventCard: ({
     event,
     onCancel,

@@ -8,7 +8,7 @@ import {
 } from '@/features/eventForm';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { EVENT_IMAGE_FALLBACK } from '@shared/lib/mediaFallbacks';
-import { toAbsoluteMediaUrl } from '@client_pages/home/model/feedMapper';
+import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 import { usePlanIt } from '../model/usePlanIt';
 import { usePlanConversionTransition } from '../model/usePlanConversionTransition';
 import { PlanConversionTransition } from './PlanConversionTransition';

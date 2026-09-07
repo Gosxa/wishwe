@@ -24,7 +24,7 @@ import {
   sendFriendRequest,
 } from '@/shared/client_api/user';
 import type { FriendshipStatus } from '@/shared/client_api/user/types';
-import { eventImage, handle } from '@client_pages/home/model/feedMapper';
+import { eventImage, handle } from '@entities/event';
 import s from './eventPreviewModal.module.scss';
 
 type Props = {

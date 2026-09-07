@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { toFeedEvents } from '@client_pages/home/model/feedMapper';
-import { ShareEventModal } from '@client_pages/home/widgets/feed/ui/ShareEventModal';
+import { toFeedEvents } from '@entities/event';
+import { ShareEventModal } from '@widgets/eventCard';
 import { useCreatedEventShareStore } from '@/shared/store/useCreatedEventShareStore';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 
