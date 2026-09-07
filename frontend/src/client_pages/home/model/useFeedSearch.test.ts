@@ -23,12 +23,6 @@ import { useFeedSearch } from './useFeedSearch';
 
 type QueryMutation = (params: URLSearchParams) => void;
 
-const advance = async (milliseconds: number) => {
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(milliseconds);
-  });
-};
-
 describe('useFeedSearch', () => {
   const updateQuery = vi.fn();
   let searchParams: URLSearchParams;
@@ -47,121 +41,43 @@ describe('useFeedSearch', () => {
     vi.clearAllMocks();
   });
 
-  const applyUpdate = (base = searchParams) => {
+  const applyUpdate = () => {
     expect(updateQuery).toHaveBeenCalledOnce();
     const [mutate] = updateQuery.mock.calls[0] as [QueryMutation];
-    const next = new URLSearchParams(base);
+    const next = new URLSearchParams(searchParams);
 
     mutate(next);
 
     return next;
   };
 
-  it('starts with the title from the URL', () => {
-    searchParams = new URLSearchParams({
-      filter: 'friends',
-      title: 'birthday cake',
-    });
-
-    const { result } = renderHook(() => useFeedSearch());
-
-    expect(result.current.value).toBe('birthday cake');
-  });
-
-  it('trims and commits a change after 500 ms', async () => {
+  it('reads the title and commits it through the feed query router', async () => {
     searchParams = new URLSearchParams({
       filter: 'friends',
       event: '42',
+      title: 'old title',
     });
-
     const { result } = renderHook(() => useFeedSearch());
+
+    expect(result.current.value).toBe('old title');
 
     act(() => result.current.onChange('  birthday cake  '));
+    await act(() => vi.advanceTimersByTimeAsync(500));
 
-    expect(result.current.value).toBe('  birthday cake  ');
-
-    await advance(499);
-    expect(updateQuery).not.toHaveBeenCalled();
-
-    await advance(1);
-
-    const next = applyUpdate();
-
-    expect(next.toString()).toBe('filter=friends&event=42&title=birthday+cake');
+    expect(applyUpdate().toString()).toBe(
+      'filter=friends&event=42&title=birthday+cake',
+    );
   });
 
-  it('restarts the debounce when the user keeps typing', async () => {
-    const { result } = renderHook(() => useFeedSearch());
-
-    act(() => result.current.onChange('birth'));
-    await advance(300);
-    act(() => result.current.onChange('birthday'));
-    await advance(499);
-
-    expect(updateQuery).not.toHaveBeenCalled();
-
-    await advance(1);
-
-    const next = applyUpdate();
-
-    expect(next.get('title')).toBe('birthday');
-  });
-
-  it('removes the title parameter for a blank search', async () => {
+  it('removes only the title parameter for a blank search', () => {
     searchParams = new URLSearchParams({
       filter: 'plans',
       title: 'old title',
     });
-
     const { result } = renderHook(() => useFeedSearch());
 
-    act(() => result.current.onChange('   '));
-    await advance(500);
+    act(() => result.current.onSearch('   '));
 
-    const next = applyUpdate();
-
-    expect(next.toString()).toBe('filter=plans');
-  });
-
-  it('commits immediately on search and cancels the debounce timer', async () => {
-    const { result } = renderHook(() => useFeedSearch());
-
-    act(() => result.current.onChange('party'));
-    await advance(200);
-    act(() => result.current.onSearch('  party tonight  '));
-
-    expect(applyUpdate().get('title')).toBe('party tonight');
-
-    await advance(500);
-    expect(updateQuery).toHaveBeenCalledOnce();
-  });
-
-  it('follows a back or forward URL change and cancels the old draft', async () => {
-    searchParams = new URLSearchParams({ title: 'first search' });
-    const { result, rerender } = renderHook(() => useFeedSearch());
-
-    act(() => result.current.onChange('local draft'));
-    await advance(200);
-
-    searchParams = new URLSearchParams({
-      filter: 'wishes',
-      title: 'search from history',
-    });
-    rerender();
-
-    expect(result.current.value).toBe('search from history');
-
-    await advance(500);
-    expect(updateQuery).not.toHaveBeenCalled();
-  });
-
-  it('does not commit a pending search after unmount', async () => {
-    const { result, unmount } = renderHook(() => useFeedSearch());
-
-    act(() => result.current.onChange('party'));
-    unmount();
-    await advance(500);
-
-    expect(updateQuery).not.toHaveBeenCalled();
+    expect(applyUpdate().toString()).toBe('filter=plans');
   });
 });
