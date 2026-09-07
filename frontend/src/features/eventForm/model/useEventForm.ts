@@ -4,18 +4,11 @@ import { useEffect, useState } from 'react';
 import type { BackendEventType, Category } from '@/shared/client_api/event';
 import { listCategories } from '@/shared/client_api/event';
 import { useLoadingStore } from '@/shared/store/useLoadingStore';
-import type { LocationPin } from '@/shared/lib/googleMaps/types';
-import { LOCATION_FIELD_COPY } from '@/shared/ui/locationPicker/copy';
 import {
   getDateInputValue,
   getEventDateTimeErrors,
   getEventTimeInputMin,
 } from '@/shared/lib/validation/eventDate';
-import {
-  isAllowedCoverImage,
-  MAX_COVER_IMAGE_SIZE,
-  prepareCoverImage,
-} from '@/shared/lib/validation/imageUpload';
 import {
   buildEventFields,
   buildEventPayload,
@@ -23,6 +16,8 @@ import {
   mapEventFormErrors,
   validateEventForm,
 } from './eventForm';
+import { useEventCover } from './useEventCover';
+import { useEventLocation } from './useEventLocation';
 import type {
   EventFormErrors,
   EventFormMode,
@@ -66,18 +61,9 @@ export const useEventForm = ({
   const [values, setValues] = useState(initialValues);
   const [categories, setCategories] = useState<Category[]>([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true);
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreviewUrl, setCoverPreviewUrl] = useState(initialCoverUrl);
   const [errors, setErrors] = useState<EventFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPreparingCover, setIsPreparingCover] = useState(false);
   const [previousResetType, setPreviousResetType] = useState(resetType);
-  const [locationPin, setLocationPin] = useState<LocationPin | null>(null);
-  const [locationPlaceId, setLocationPlaceId] = useState<string | null>(
-    initialLocationPlaceId,
-  );
-  const [wasPinCleared, setWasPinCleared] = useState(false);
-  const [locationAnnouncement, setLocationAnnouncement] = useState('');
 
   if (resetType !== previousResetType) {
     setPreviousResetType(resetType);
@@ -122,15 +108,6 @@ export const useEventForm = ({
     };
   }, [initialCategoryName]);
 
-  useEffect(
-    () => () => {
-      if (coverPreviewUrl?.startsWith('blob:')) {
-        URL.revokeObjectURL(coverPreviewUrl);
-      }
-    },
-    [coverPreviewUrl],
-  );
-
   const clearError = (key: keyof EventFormErrors) => {
     setErrors(current =>
       current[key] || current.submit
@@ -148,35 +125,21 @@ export const useEventForm = ({
     if (errorKey) clearError(errorKey);
   };
 
-  const changeLocation = (value: string) => {
-    updateValue('location', value, 'location');
-    setLocationAnnouncement('');
-
-    if (
-      (locationPin && value !== locationPin.formatted) ||
-      (!locationPin && locationPlaceId)
-    ) {
-      setLocationPin(null);
-      setLocationPlaceId(null);
-      setWasPinCleared(true);
-    }
-  };
-
-  const applyLocationPin = (pin: LocationPin) => {
-    updateValue('location', pin.formatted, 'location');
-    setLocationPin(pin);
-    setLocationPlaceId(pin.placeId ?? null);
-    setWasPinCleared(false);
-    setLocationAnnouncement(LOCATION_FIELD_COPY.announce(pin.formatted));
-  };
-
-  const clearLocation = () => {
-    updateValue('location', '', 'location');
-    setLocationPin(null);
-    setLocationPlaceId(null);
-    setWasPinCleared(false);
-    setLocationAnnouncement('');
-  };
+  const location = useEventLocation({
+    initialPlaceId: initialLocationPlaceId,
+    onValueChange: value => updateValue('location', value, 'location'),
+  });
+  const cover = useEventCover({
+    initialPreviewUrl: initialCoverUrl,
+    error: errors.cover,
+    onErrorChange: error => {
+      setErrors(current => ({
+        ...current,
+        cover: error,
+        ...(!error && { submit: undefined }),
+      }));
+    },
+  });
 
   const applyDateTimeErrors = (eventDate: string, eventTime: string) => {
     setErrors(current => ({
@@ -186,54 +149,6 @@ export const useEventForm = ({
       submit: undefined,
       ...getEventDateTimeErrors(eventDate, eventTime),
     }));
-  };
-
-  const onCoverSelect = async (file: File) => {
-    setCoverFile(null);
-
-    if (!isAllowedCoverImage(file)) {
-      setErrors(current => ({
-        ...current,
-        cover: 'Unsupported image format',
-      }));
-
-      return;
-    }
-
-    if (file.size > MAX_COVER_IMAGE_SIZE) {
-      setErrors(current => ({
-        ...current,
-        cover: 'Image must be 5 MB or less',
-      }));
-
-      return;
-    }
-
-    setIsPreparingCover(true);
-
-    try {
-      const preparedFile = await prepareCoverImage(file);
-
-      if (preparedFile.size > MAX_COVER_IMAGE_SIZE) {
-        setErrors(current => ({
-          ...current,
-          cover: 'Converted image must be 5 MB or less',
-        }));
-
-        return;
-      }
-
-      setCoverFile(preparedFile);
-      setCoverPreviewUrl(URL.createObjectURL(preparedFile));
-      clearError('cover');
-    } catch {
-      setErrors(current => ({
-        ...current,
-        cover: 'Could not process this image',
-      }));
-    } finally {
-      setIsPreparingCover(false);
-    }
   };
 
   const onSubmit = async () => {
@@ -253,8 +168,8 @@ export const useEventForm = ({
     }
 
     try {
-      const fields = buildEventFields(values, mode, locationPlaceId);
-      const payload = buildEventPayload(fields, coverFile);
+      const fields = buildEventFields(values, mode, location.placeId);
+      const payload = buildEventPayload(fields, cover.file);
 
       const created = await submitEvent(values.type, payload);
 
@@ -292,21 +207,10 @@ export const useEventForm = ({
     },
     locationInput: {
       value: values.location,
-      onChange: changeLocation,
+      onChange: location.onChange,
       error: errors.location,
     },
-    locationPicker: {
-      pin: locationPin,
-      status:
-        locationPin || locationPlaceId
-          ? 'pinned'
-          : wasPinCleared
-            ? 'edited'
-            : 'none',
-      announcement: locationAnnouncement,
-      apply: applyLocationPin,
-      clear: clearLocation,
-    },
+    locationPicker: location.picker,
     descriptionInput: {
       value: values.description,
       onChange: value => updateValue('description', value, 'description'),
@@ -357,12 +261,7 @@ export const useEventForm = ({
       value: values.visibility,
       onChange: value => updateValue('visibility', value),
     },
-    cover: {
-      previewUrl: coverPreviewUrl,
-      onSelect: onCoverSelect,
-      error: errors.cover,
-      isProcessing: isPreparingCover,
-    },
+    cover: cover.model,
     hasRequiredFields: hasRequiredEventFields(values),
     submit: {
       onSubmit,

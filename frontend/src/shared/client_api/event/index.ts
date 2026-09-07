@@ -8,6 +8,7 @@ import {
   EventListParams,
   Paginated,
 } from './types';
+import { writeEvent } from './writeEvent';
 const PAGE_SIZE = 5;
 
 const postAction = async (
@@ -136,35 +137,14 @@ export class CreateEventError extends Error {
 export const createEvent = async (
   type: BackendEventType,
   payload: FormData | Record<string, unknown>,
-): Promise<BackendEvent> => {
-  const isFormData = payload instanceof FormData;
-
-  if (isFormData) {
-    payload.set('type', type);
-  }
-
-  const res = await fetch('/next_api/event', {
-    method: 'POST',
-    ...(isFormData
-      ? { body: payload }
-      : {
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, type }),
-        }),
-  });
-
-  if (!res.ok) {
-    handleUnauthorized(res);
-    const body = (await res.json().catch(() => ({}))) as Record<
-      string,
-      unknown
-    >;
-
-    throw new CreateEventError(body);
-  }
-
-  return (await res.json()) as BackendEvent;
-};
+): Promise<BackendEvent> =>
+  writeEvent(
+    '/next_api/event',
+    'POST',
+    type,
+    payload,
+    body => new CreateEventError(body),
+  );
 
 export class UpdateEventError extends Error {
   constructor(public body: Record<string, unknown>) {
@@ -176,35 +156,14 @@ export const updateEvent = async (
   id: string,
   type: BackendEventType,
   payload: FormData | Record<string, unknown>,
-): Promise<BackendEvent> => {
-  const isFormData = payload instanceof FormData;
-
-  if (isFormData) {
-    payload.set('type', type);
-  }
-
-  const res = await fetch(`/next_api/event/${id}`, {
-    method: 'PATCH',
-    ...(isFormData
-      ? { body: payload }
-      : {
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...payload, type }),
-        }),
-  });
-
-  if (!res.ok) {
-    handleUnauthorized(res);
-    const body = (await res.json().catch(() => ({}))) as Record<
-      string,
-      unknown
-    >;
-
-    throw new UpdateEventError(body);
-  }
-
-  return (await res.json()) as BackendEvent;
-};
+): Promise<BackendEvent> =>
+  writeEvent(
+    `/next_api/event/${id}`,
+    'PATCH',
+    type,
+    payload,
+    body => new UpdateEventError(body),
+  );
 
 export class ConvertEventError extends Error {
   constructor(public body: Record<string, unknown>) {
