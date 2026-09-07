@@ -1,7 +1,6 @@
 @use '@shared/styles/colors' as clr;
 @use '@shared/styles/typography' as tp;
 @use '@shared/styles/buttons' as btn;
-@use '@shared/styles/animations' as anim;
 @use '@shared/styles/breakpoints' as bp;
 
 .card {
@@ -67,30 +66,6 @@
   left: 12px;
   display: flex;
   gap: 8px;
-}
-
-.tag {
-  padding: 2px 12px;
-  border-radius: 999px;
-  color: clr.$ns-900;
-
-  @include tp.text-accent;
-}
-
-.plan {
-  background: clr.$acc-purple;
-  box-shadow: inset 0 0 0 1px clr.$ns-900;
-}
-
-.wish {
-  background: clr.$acc-yellow;
-  outline: 2px dashed clr.$ns-900;
-  outline-offset: -2px;
-}
-
-.hashtag {
-  background: clr.$ns-50;
-  box-shadow: inset 0 0 0 1px clr.$ns-900;
 }
 
 .body {
@@ -342,52 +317,6 @@
   }
 }
 
-.leaveOverlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: rgba(clr.$ns-900, 0.42);
-  @include anim.modal-overlay-enter;
-}
-
-.leaveDialog {
-  width: min(690px, 100%);
-  padding: 40px 72px 32px;
-  border-radius: 16px;
-  background: clr.$ns-50;
-  box-shadow: 0 18px 56px rgba(clr.$ns-900, 0.24);
-  @include anim.modal-enter;
-}
-
-.leaveDialogTitle {
-  margin-bottom: 28px;
-  text-align: center;
-  color: clr.$ns-900;
-
-  @include tp.h2;
-}
-
-.leaveDialogActions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 32px;
-  align-items: center;
-}
-
-.noThanksButton {
-  @include btn.tertiary(0, 100%, 52px);
-
-  color: clr.$prm;
-}
-
-.leaveButton {
-  @include btn.primary(0, 100%, 52px);
-}
-
 .participationToast {
   position: fixed;
   bottom: 32px;
@@ -469,7 +398,7 @@
       gap: 4px;
     }
 
-    .tag {
+    .cardTag {
       padding: 4px 12px;
       font-size: 16px;
       line-height: 16px;
@@ -517,7 +446,7 @@
         height: 14px;
       }
 
-      &:nth-child(1) {
+      &.hostRow {
         grid-column: 1 / -1;
         grid-row: 2;
         gap: 6px;
@@ -527,17 +456,17 @@
         }
       }
 
-      &:nth-child(2) {
+      &.dateRow {
         grid-column: 1;
         grid-row: 5;
       }
 
-      &:nth-child(3) {
+      &.locationRow {
         grid-column: 1;
         grid-row: 6;
       }
 
-      &:nth-child(4) {
+      &.descriptionRow {
         grid-column: 1 / -1;
         grid-row: 3;
       }
@@ -603,14 +532,6 @@
     }
   }
 
-  .leaveDialog {
-    padding: 32px 24px 24px;
-  }
-
-  .leaveDialogActions {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
 }
 
 @include bp.mobile {
@@ -646,7 +567,7 @@
       flex-wrap: wrap;
     }
 
-    .tag {
+    .cardTag {
       max-width: 100%;
       padding: 4px 12px;
       font-size: 16px;
@@ -654,7 +575,7 @@
       overflow-wrap: anywhere;
     }
 
-    .wish {
+    .cardWish {
       outline-width: 1px;
       outline-offset: -1px;
     }
@@ -677,10 +598,10 @@
     }
 
     .titleRow > :not(.title),
-    .metaRowTop,
+    .descriptionRow,
     .participants,
     .muted,
-    .metaRow:first-child > svg {
+    .hostRow > svg {
       display: none;
     }
 

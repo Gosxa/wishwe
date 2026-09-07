@@ -1,0 +1,26 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.tag {
+  padding: 2px 12px;
+  border-radius: 999px;
+  color: clr.$ns-900;
+
+  @include tp.text-accent;
+}
+
+.plan {
+  background: clr.$acc-purple;
+  box-shadow: inset 0 0 0 1px clr.$ns-900;
+}
+
+.wish {
+  background: clr.$acc-yellow;
+  outline: 2px dashed clr.$ns-900;
+  outline-offset: -2px;
+}
+
+.hashtag {
+  background: clr.$ns-50;
+  box-shadow: inset 0 0 0 1px clr.$ns-900;
+}

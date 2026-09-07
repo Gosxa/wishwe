@@ -8,7 +8,7 @@ import type { ResolvedPlace } from '@/shared/lib/googleMaps/types';
 import { Location, Refresh, WarningTriangle, WifiOff } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
 import type { PickerStage, PickerStep } from '../model/useLocationPicker';
-import s from '../locationPicker.module.scss';
+import s from './addressCard.module.scss';
 
 type Props = {
   stage: PickerStage;

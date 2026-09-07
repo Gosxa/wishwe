@@ -12,7 +12,7 @@ import type { MapsLibraries } from '@/shared/lib/googleMaps/loadGoogleMaps';
 import { Crosshair, Minus, Plus, TargetOff } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
 import type { PickerStage } from '../model/useLocationPicker';
-import s from '../locationPicker.module.scss';
+import s from './pickerMap.module.scss';
 
 type LatLng = { lat: number; lng: number };
 

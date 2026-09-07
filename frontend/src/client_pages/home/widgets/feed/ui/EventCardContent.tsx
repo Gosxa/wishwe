@@ -19,6 +19,7 @@ import type { FeedEvent } from '@client_pages/home/model/types';
 import { EventCardMenu } from './EventCardMenu';
 import type { EventParticipation } from '../model/useEventParticipation';
 import s from './eventCard.module.scss';
+import tags from './eventTags.module.scss';
 
 type Props = {
   event: FeedEvent;
@@ -109,11 +110,21 @@ export const EventCardContent = ({
         />
         <div className={s.tags}>
           {showEventType && (
-            <span className={clsx(s.tag, type === 'plan' ? s.plan : s.wish)}>
+            <span
+              className={clsx(
+                tags.tag,
+                s.cardTag,
+                type === 'plan' ? tags.plan : [tags.wish, s.cardWish],
+              )}
+            >
               {type}
             </span>
           )}
-          {hashtag && <span className={clsx(s.tag, s.hashtag)}>{hashtag}</span>}
+          {hashtag && (
+            <span className={clsx(tags.tag, tags.hashtag, s.cardTag)}>
+              {hashtag}
+            </span>
+          )}
         </div>
       </div>
 
@@ -143,7 +154,7 @@ export const EventCardContent = ({
           </div>
 
           <ul className={s.meta}>
-            <li className={s.metaRow}>
+            <li className={clsx(s.metaRow, s.hostRow)}>
               <UserRound />
               <span className={s.avatar}>
                 <AvatarImage
@@ -166,15 +177,15 @@ export const EventCardContent = ({
                 </span>
               )}
             </li>
-            <li className={s.metaRow}>
+            <li className={clsx(s.metaRow, s.dateRow)}>
               <CalendarClock />
               <span>{date}</span>
             </li>
-            <li className={s.metaRow}>
+            <li className={clsx(s.metaRow, s.locationRow)}>
               <Location />
               <MapLinkedAddress address={location} placeId={locationPlaceId} />
             </li>
-            <li className={clsx(s.metaRow, s.metaRowTop)}>
+            <li className={clsx(s.metaRow, s.metaRowTop, s.descriptionRow)}>
               <StickyNote />
               {description ? (
                 <span className={s.description}>{description}</span>

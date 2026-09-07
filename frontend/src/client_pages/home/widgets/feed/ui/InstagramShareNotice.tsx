@@ -6,7 +6,7 @@ import type {
   MouseEventHandler,
   RefObject,
 } from 'react';
-import s from './shareEventModal.module.scss';
+import s from './instagramShareNotice.module.scss';
 
 type Props = {
   modalRef: RefObject<HTMLDivElement | null>;

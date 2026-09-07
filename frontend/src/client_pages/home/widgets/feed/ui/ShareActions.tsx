@@ -8,7 +8,7 @@ import type {
   PreparedShareImage,
   ShareFeedback,
 } from '@client_pages/home/model/shareEvent';
-import s from './shareEventModal.module.scss';
+import s from './shareActions.module.scss';
 
 type Props = {
   event: FeedEvent;

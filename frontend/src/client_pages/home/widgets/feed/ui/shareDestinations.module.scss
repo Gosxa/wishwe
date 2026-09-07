@@ -1,0 +1,136 @@
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.sectionLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+
+  > span {
+    flex: 1;
+    height: 1px;
+    background: clr.$ns-200;
+  }
+
+  > p {
+    color: clr.$ns-700;
+    font-family: var(--font-sk-modernist);
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 16px;
+    letter-spacing: 0.08em;
+  }
+}
+
+.networks {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.networkItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 88px;
+  color: clr.$ns-700;
+  @include tp.text-caption;
+
+  &:hover,
+  &:focus-visible {
+    color: clr.$ns-700;
+
+    .networkButton {
+      border-color: clr.$prm;
+      background: clr.$prm;
+      color: clr.$ns-50;
+    }
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    .networkButton {
+      box-shadow:
+        0 0 0 2px clr.$ns-50,
+        0 0 0 4px clr.$prm;
+    }
+  }
+
+  &[aria-disabled='true'] {
+    color: clr.$ns-500;
+    cursor: not-allowed;
+
+    .networkButton {
+      color: clr.$ns-500;
+    }
+  }
+}
+
+.networkButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid clr.$ns-200;
+  border-radius: 50%;
+  background: clr.$ns-100;
+  color: clr.$prm;
+  transition:
+    color 180ms ease-out,
+    background 180ms ease-out,
+    border-color 180ms ease-out;
+}
+
+.networkGlyph {
+  display: block;
+  width: 24px;
+  height: 24px;
+  background: currentColor;
+  mask-image: var(--share-icon);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.networkActive {
+  .networkButton {
+    border-color: clr.$prm;
+    background: clr.$prm;
+    color: clr.$ns-50;
+  }
+}
+
+.stories::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  right: -16px;
+  bottom: 88px;
+  z-index: 2;
+  display: none;
+  width: 252px;
+  padding: 7px 12px 8px;
+  border-radius: 8px;
+  background: clr.$ns-900;
+  color: clr.$ns-50;
+  box-shadow: 0 4px 12px rgba(clr.$ns-900, 0.28);
+  text-align: left;
+  white-space: nowrap;
+  @include tp.text-caption;
+}
+
+.stories:hover::before,
+.stories:focus-visible::before {
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .networkButton {
+    transition: none;
+  }
+}

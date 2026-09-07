@@ -22,7 +22,7 @@ import type { ResolvedPlace } from '@/shared/lib/googleMaps/types';
 import { Location, SearchIcon, X } from '../../icons';
 import { Spinner } from '../../spinner/Spinner';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
-import s from '../locationPicker.module.scss';
+import s from './placeSearch.module.scss';
 
 const DEBOUNCE_MS = 300;
 const MIN_QUERY_LENGTH = 3;

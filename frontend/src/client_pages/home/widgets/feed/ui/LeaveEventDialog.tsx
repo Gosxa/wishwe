@@ -4,7 +4,7 @@ import type {
   MouseEventHandler,
   RefObject,
 } from 'react';
-import s from './eventCard.module.scss';
+import s from './leaveEventDialog.module.scss';
 
 type Props = {
   isPending: boolean;

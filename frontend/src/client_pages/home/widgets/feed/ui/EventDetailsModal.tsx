@@ -24,8 +24,8 @@ import type { FeedEvent } from '@client_pages/home/model/types';
 import type { EventParticipation } from '../model/useEventParticipation';
 import { ParticipantsModal } from './ParticipantsModal';
 import { EventCardMenu } from './EventCardMenu';
-import cardStyles from './eventCard.module.scss';
 import s from './eventDetailsModal.module.scss';
+import tags from './eventTags.module.scss';
 
 type Props = {
   event: FeedEvent;
@@ -137,14 +137,14 @@ export const EventDetailsModal = ({
           <div className={s.tags}>
             <span
               className={clsx(
-                cardStyles.tag,
-                event.type === 'plan' ? cardStyles.plan : cardStyles.wish,
+                tags.tag,
+                event.type === 'plan' ? tags.plan : tags.wish,
               )}
             >
               {event.type}
             </span>
             {event.hashtag && (
-              <span className={clsx(cardStyles.tag, cardStyles.hashtag)}>
+              <span className={clsx(tags.tag, tags.hashtag)}>
                 {event.hashtag}
               </span>
             )}

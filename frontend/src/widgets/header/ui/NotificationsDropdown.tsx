@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import clsx from 'clsx';
 import type { NotificationItem } from '@/shared/client_api/notifications';
-import s from '../header.module.scss';
+import s from './notificationsDropdown.module.scss';
 
 type Props = {
   id: string;

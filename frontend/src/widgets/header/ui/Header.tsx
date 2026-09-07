@@ -97,6 +97,7 @@ export const Header = ({
       className={
         mobileFeedLayout ? `${s.header} ${s.mobileFeedLayout}` : s.header
       }
+      data-mobile-feed-layout={mobileFeedLayout ? '' : undefined}
     >
       <div className={s.logoSlot}>
         <Logo height={36} />

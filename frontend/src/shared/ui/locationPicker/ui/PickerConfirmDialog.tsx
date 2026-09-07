@@ -7,7 +7,8 @@ import { useModalTransition } from '@/shared/hooks/useModalTransition';
 import { Pencil } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
 import type { PickerDialog } from '../model/useLocationPicker';
-import s from '../locationPicker.module.scss';
+import controls from '../locationPicker.module.scss';
+import s from './pickerConfirmDialog.module.scss';
 
 type Props = {
   kind: Exclude<PickerDialog, null>;
@@ -77,14 +78,14 @@ export const PickerConfirmDialog = ({
           <button
             ref={keepRef}
             type="button"
-            className={s.secondaryButton}
+            className={controls.secondaryButton}
             onClick={() => handleResolve(false)}
           >
             <span>{content.keep}</span>
           </button>
           <button
             type="button"
-            className={s.primaryButton}
+            className={controls.primaryButton}
             onClick={() => handleResolve(true)}
           >
             <span>{content.confirm}</span>

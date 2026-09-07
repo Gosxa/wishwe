@@ -1,0 +1,22 @@
+@use '@shared/styles/breakpoints' as bp;
+@use '@shared/styles/buttons' as btn;
+
+.createBtn {
+  @include btn.primary(8px, auto, 40px);
+  grid-column: 11 / 13;
+  width: 100%;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+@include bp.tablet {
+  :global([data-mobile-feed-layout]) .createBtn {
+    grid-column: 3;
+  }
+}
+
+@include bp.mobile {
+  :global([data-mobile-feed-layout]) .createBtn {
+    display: none;
+  }
+}

@@ -1,5 +1,5 @@
 import { Plus } from '@shared/ui/icons';
-import s from '../header.module.scss';
+import s from './createButton.module.scss';
 
 type Props = {
   onClick?: () => void;

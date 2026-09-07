@@ -3,7 +3,7 @@
 import clsx from 'clsx';
 import { SHARE_FORMATS } from '@client_pages/home/model/shareImage';
 import type { ShareFormat } from '@client_pages/home/model/shareImage';
-import s from './shareEventModal.module.scss';
+import s from './sharePreview.module.scss';
 
 type Props = {
   eventTitle: string;

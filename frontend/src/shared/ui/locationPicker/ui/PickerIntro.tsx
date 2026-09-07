@@ -5,7 +5,8 @@ import type { RefObject } from 'react';
 import type { GeolocationFailure } from '@/shared/lib/geolocation/types';
 import { Crosshair, Location, Lock, SearchIcon } from '../../icons';
 import { LOCATION_PICKER_COPY as COPY } from '../copy';
-import s from '../locationPicker.module.scss';
+import controls from '../locationPicker.module.scss';
+import s from './pickerIntro.module.scss';
 
 const TITLE_ID = 'locationPickerIntroTitle';
 const BODY_ID = 'locationPickerIntroBody';
@@ -59,7 +60,7 @@ export const PickerIntro = ({
             <button
               ref={allowRef}
               type="button"
-              className={s.primaryButton}
+              className={controls.primaryButton}
               onClick={onAllow}
               aria-describedby={BODY_ID}
             >
@@ -68,7 +69,7 @@ export const PickerIntro = ({
             </button>
             <button
               type="button"
-              className={s.secondaryButton}
+              className={controls.secondaryButton}
               onClick={onSkip}
             >
               <span>{COPY.permission.skip}</span>
@@ -83,7 +84,11 @@ export const PickerIntro = ({
 
       {step === 'locating' && (
         <div className={s.introActions}>
-          <button type="button" className={s.linkButton} onClick={onSkip}>
+          <button
+            type="button"
+            className={controls.linkButton}
+            onClick={onSkip}
+          >
             <span>{COPY.locating.skip}</span>
           </button>
         </div>

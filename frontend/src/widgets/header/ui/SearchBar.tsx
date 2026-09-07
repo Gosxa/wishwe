@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { SearchIcon } from '@shared/ui/icons';
 import { Tooltip } from '@shared/ui/tooltip/Tooltip';
-import s from '../header.module.scss';
+import s from './searchBar.module.scss';
 
 const HINT_ID = 'search-disabled-hint';
 

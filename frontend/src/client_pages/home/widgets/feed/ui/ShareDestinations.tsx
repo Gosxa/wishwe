@@ -10,7 +10,7 @@ import type {
   ShareNetwork,
   SocialShareUrls,
 } from '@client_pages/home/model/shareEvent';
-import s from './shareEventModal.module.scss';
+import s from './shareDestinations.module.scss';
 
 type Props = {
   event: FeedEvent;

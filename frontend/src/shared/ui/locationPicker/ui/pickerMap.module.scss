@@ -1,0 +1,198 @@
+@use 'sass:color';
+
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as typo;
+
+$map-height: 304px;
+$map-height-short: 240px;
+$control-size: 36px;
+
+.map {
+  position: relative;
+  height: $map-height;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #e7e1d0;
+  transition: opacity 0.12s ease;
+}
+
+.mapDimmed {
+  opacity: 0.88;
+}
+
+.mapCanvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.pin {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, calc(-100% + 4px));
+  pointer-events: none;
+
+  > svg {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.32));
+  }
+}
+
+.pinGhost {
+  color: clr.$prm-dark;
+  opacity: 0.86;
+}
+
+.pinSolid {
+  color: clr.$cta;
+  animation: pin-drop 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.pinWarn {
+  color: clr.$warn;
+}
+
+.pinHalo {
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  border: 1.5px solid rgba(clr.$cta, 0.5);
+  border-radius: 50%;
+  background: rgba(clr.$cta, 0.14);
+  pointer-events: none;
+}
+
+@keyframes pin-drop {
+  from {
+    transform: translate(-50%, calc(-100% - 8px));
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, calc(-100% + 4px));
+    opacity: 1;
+  }
+}
+
+.hintChip {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  transform: translateX(-50%);
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.14);
+  @include typo.text-caption;
+  color: clr.$ns-900;
+  white-space: nowrap;
+}
+
+.hintChipWarn {
+  background: color.mix(#fff, clr.$warn, 86%);
+}
+
+.zoom {
+  position: absolute;
+  z-index: 3;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.16);
+}
+
+.zoomButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $control-size;
+  height: $control-size;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: clr.$ns-900;
+  cursor: pointer;
+
+  &:hover {
+    background: clr.$ns-100;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: -2px;
+  }
+}
+
+.zoomDivider {
+  width: $control-size;
+  height: 1px;
+  background: clr.$ns-200;
+}
+
+.locateButton {
+  position: absolute;
+  z-index: 3;
+  top: 101px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $control-size;
+  height: $control-size;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: clr.$ns-50;
+  box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.16);
+  color: clr.$prm;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background: clr.$ns-100;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+.locateButtonBlocked {
+  color: clr.$ns-500;
+}
+
+@media (max-height: 900px) {
+  .map {
+    height: $map-height-short;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pinSolid {
+    animation: none;
+  }
+}

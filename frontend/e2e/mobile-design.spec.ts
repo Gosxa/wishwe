@@ -69,6 +69,7 @@ test('Home, Friends and Activity follow the mobile layouts @mobile', async ({
     const details = me.page.getByRole('dialog', { name: plan.title });
 
     await expect(details).toBeVisible();
+    await expect.poll(async () => (await details.boundingBox())?.x).toBe(0);
     const detailsBox = (await details.boundingBox())!;
 
     expect(detailsBox.x).toBe(0);

@@ -1,0 +1,96 @@
+@use '@shared/styles/buttons' as btn;
+@use '@shared/styles/colors' as clr;
+@use '@shared/styles/typography' as tp;
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.copyLink,
+.copyImage,
+.downloadFallback {
+  flex: 1;
+  min-width: 0;
+}
+
+.copyLink {
+  @include btn.secondary(8px, 100%, 48px);
+
+  > img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.copyImage,
+.downloadFallback {
+  @include btn.primary(8px, 100%, 48px);
+
+  > img {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.copyImageMuted:not(:disabled) {
+  background: clr.$prm-light;
+}
+
+.confirmed {
+  color: clr.$ns-50;
+  background: clr.$prm;
+  box-shadow: inset 0 0 0 1px clr.$prm;
+
+  > span {
+    color: clr.$ns-50;
+  }
+
+  &:hover,
+  &:active {
+    background: clr.$prm;
+  }
+}
+
+.download {
+  @include btn.secondary(0, 48px, 48px);
+  flex: 0 0 48px;
+  padding: 0;
+
+  > img {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+  }
+}
+
+.fallbackActions {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.fallbackAction {
+  width: 100%;
+}
+
+.fallbackNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  color: clr.$ns-700;
+  @include tp.text-caption;
+
+  > img {
+    flex: 0 0 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
