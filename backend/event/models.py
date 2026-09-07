@@ -110,6 +110,7 @@ class Event(models.Model):
         choices=EventStatus.choices,
         default=EventStatus.ACTIVE,
     )
+    location_place_id = models.CharField(max_length=55, null=True, blank=True)
     expires_at = models.DateTimeField(
         blank=True,
         null=True,
