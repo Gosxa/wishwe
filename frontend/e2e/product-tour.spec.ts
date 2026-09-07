@@ -325,7 +325,15 @@ test.describe('feed onboarding tour', () => {
       const page = await context.newPage();
 
       await page.goto('/feed');
-      await page.getByRole('button', { name: /^Notifications/ }).waitFor();
+      await expect(
+        page.getByRole('navigation', { name: 'Primary' }).getByRole('link', {
+          name: 'Activity',
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Waiting for adventures?' }),
+      ).toBeVisible();
 
       await expect(welcomeCard(page)).toHaveCount(0);
 

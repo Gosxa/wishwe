@@ -275,7 +275,14 @@ test.describe('feed contents', () => {
       let details = reader.page.getByRole('dialog', { name: title });
 
       await expect(details).toBeVisible();
-      await details.getByRole('button', { name: '1/8' }).click();
+      const participantsButton = (count: number) =>
+        details.getByRole('button', {
+          name: `View all ${count} participants`,
+          exact: true,
+        });
+
+      await expect(participantsButton(1)).toContainText('1/8');
+      await participantsButton(1).click();
 
       let participants = reader.page.getByRole('dialog', {
         name: "Who's going",
@@ -298,9 +305,10 @@ test.describe('feed contents', () => {
       await expect(
         details.getByRole('button', { name: /Joined/ }),
       ).toBeVisible();
-      await expect(details.getByRole('button', { name: '2/8' })).toBeVisible();
+      await expect(participantsButton(2)).toBeVisible();
+      await expect(participantsButton(2)).toContainText('2/8');
 
-      await details.getByRole('button', { name: '2/8' }).click();
+      await participantsButton(2).click();
       participants = reader.page.getByRole('dialog', { name: "Who's going" });
 
       await expect(
@@ -332,7 +340,8 @@ test.describe('feed contents', () => {
       await expect(
         details.getByRole('button', { name: 'Join', exact: true }),
       ).toBeVisible();
-      await expect(details.getByRole('button', { name: '1/8' })).toBeVisible();
+      await expect(participantsButton(1)).toBeVisible();
+      await expect(participantsButton(1)).toContainText('1/8');
 
       await details.getByRole('button', { name: 'Close' }).click();
 

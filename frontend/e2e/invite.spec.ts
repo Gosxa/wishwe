@@ -155,7 +155,7 @@ test.describe('invitations', () => {
 
   test('logs existing accounts in through an invite and keeps the link reusable', async ({
     baseURL,
-    page,
+    browser,
   }) => {
     test.slow();
 
@@ -167,27 +167,45 @@ test.describe('invitations', () => {
       const token = await createInvite(inviter.api);
 
       for (const guest of [first, second]) {
-        await page.context().clearCookies();
-        await page.goto(`/invite/${token}/join`);
-        await startEmailOnboarding(page, guest.email);
+        const context = await browser.newContext({
+          storageState: { cookies: [], origins: [] },
+        });
+        const page = await context.newPage();
+        const errors: string[] = [];
 
-        await expect(
-          page.getByRole('heading', { name: 'Enter your password' }),
-        ).toBeVisible();
-        await expect(
-          page.getByText(
-            `Log in to your account to connect with @${inviter.username}`,
-          ),
-        ).toBeVisible();
+        page.on('pageerror', error => errors.push(error.message));
 
-        await page.locator('#password').fill(guest.password);
-        await page
-          .getByRole('button', { name: ONBOARDING.logInAndJoin })
-          .click();
+        try {
+          await page.goto(`/invite/${token}/join`);
+          await startEmailOnboarding(page, guest.email);
 
-        await expect(
-          page.getByRole('heading', { name: 'Request sent!' }),
-        ).toBeVisible();
+          await expect(
+            page.getByRole('heading', { name: 'Enter your password' }),
+          ).toBeVisible();
+          await expect(
+            page.getByText(
+              `Log in to your account to connect with @${inviter.username}`,
+            ),
+          ).toBeVisible();
+
+          await page.locator('#password').fill(guest.password);
+          await page
+            .getByRole('button', { name: ONBOARDING.logInAndJoin })
+            .click();
+
+          await expect(
+            page.getByRole('heading', { name: 'Request sent!' }),
+          ).toBeVisible();
+          await page.getByRole('link', { name: 'Go to feed' }).click();
+          await expect(page).toHaveURL(/\/feed$/);
+          await expect(
+            page.getByRole('heading', { name: 'Waiting for adventures?' }),
+          ).toBeVisible();
+        } finally {
+          await context.close();
+        }
+
+        expect(errors, 'uncaught errors in the guest session').toEqual([]);
       }
 
       const incoming = await inviter.api.get('/api/user/friendship/incoming');

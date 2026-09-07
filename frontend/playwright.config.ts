@@ -24,6 +24,7 @@ export default defineConfig({
     : [['list'], ['html', { open: 'never' }]],
   use: {
     baseURL,
+    actionTimeout: 10_000,
     locale: 'en-US',
     timezoneId: 'Europe/Kyiv',
     trace: 'on-first-retry',

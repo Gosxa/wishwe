@@ -180,12 +180,16 @@ test.describe('password recovery', () => {
     await page.getByRole('link', { name: onboarding.toFeed }).click();
 
     await expect(page).toHaveURL(/\/feed$/);
-    await expect(
-      page.getByRole('button', { name: /^Notifications/ }),
-    ).toBeVisible();
+    const emptyFeed = page.getByRole('heading', {
+      name: 'Waiting for adventures?',
+    });
+
+    // Wait for the authenticated feed data before navigating away again.
+    await expect(emptyFeed).toBeVisible();
 
     await page.reload();
     await expect(page).toHaveURL(/\/feed$/);
+    await expect(emptyFeed).toBeVisible();
 
     const settings = await openSettingsMenu(page);
 
@@ -212,6 +216,7 @@ test.describe('password recovery', () => {
       .click();
 
     await expect(page).toHaveURL(/\/feed$/);
+    await expect(emptyFeed).toBeVisible();
   });
 });
 
