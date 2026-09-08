@@ -9,6 +9,9 @@ export default function AppLayout() {
         headerShown: false,
         contentStyle: { backgroundColor: Colors.cream },
       }}
-    />
+    >
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="event/[id]" options={{ animation: 'slide_from_right' }} />
+    </Stack>
   );
 }

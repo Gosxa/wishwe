@@ -1,6 +1,7 @@
 export const Colors = {
   cream: '#F7F3E3', // Neutral/50
   creamMuted: '#E8E4D8', // Neutral/100
+  hairline: '#DBDDD4', // Neutral/200
   border: '#C2C8CF', // Neutral/300
   placeholder: '#8A9199', // Neutral/500
   muted: '#484B4F', // Neutral/700
@@ -9,6 +10,9 @@ export const Colors = {
   primaryLight: '#5D6230', // Primary light / hover
   primaryDark: '#35381B', // Primary dark / active
   primaryDisabled: '#DBDDD4', // Neutral/200
+  primaryTint: 'rgba(93, 98, 48, 0.1)', // Selected secondary button fill
+  accentPurple: '#CBBEFA', // "plan" chip
+  accentYellow: '#FFEEAA', // "wish" chip
   error: '#A32D2D',
   success: '#1E352F',
 } as const;
@@ -16,6 +20,7 @@ export const Colors = {
 export const Fonts = {
   regular: 'Sk-Modernist',
   bold: 'Sk-Modernist-Bold',
+  accent: 'InstrumentSerif-Italic',
 } as const;
 
 export const Spacing = {
@@ -31,4 +36,6 @@ export const Spacing = {
 export const Radii = {
   sm: 8,
   md: 12,
+  lg: 16,
+  pill: 72,
 } as const;

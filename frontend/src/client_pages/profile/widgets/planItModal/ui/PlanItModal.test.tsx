@@ -91,6 +91,23 @@ describe('wish to plan transition', () => {
     await act(async () => resolveConversion(wish));
   };
 
+  it('renders in a body portal so the overlay is not trapped by a transformed ancestor', () => {
+    const host = document.createElement('div');
+
+    host.style.transform = 'translateY(0)';
+    document.body.append(host);
+
+    render(
+      <PlanItModal event={wish} onClose={onClose} onConverted={onConverted} />,
+      { container: host },
+    );
+
+    const dialog = screen.getByRole('dialog');
+
+    expect(host.contains(dialog)).toBe(false);
+    expect(document.body.contains(dialog)).toBe(true);
+  });
+
   it('does not animate or submit an invalid schedule', () => {
     render(
       <PlanItModal event={wish} onClose={onClose} onConverted={onConverted} />,

@@ -15,7 +15,7 @@ $modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @mixin sheet-reveal($delay: 0s) {
-  animation: sheet-reveal 0.32s ease-out $delay both;
+  animation: sheet-reveal 0.32s ease-out $delay backwards;
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;
@@ -34,7 +34,7 @@ $modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @mixin sheet-reveal-reverse {
-  animation: sheet-reveal-reverse 0.32s ease-out both;
+  animation: sheet-reveal-reverse 0.32s ease-out backwards;
 
   @media (prefers-reduced-motion: reduce) {
     animation: none;

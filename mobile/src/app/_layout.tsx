@@ -13,6 +13,7 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     'Sk-Modernist': require('../../assets/fonts/Sk-Modernist-Regular.otf'),
     'Sk-Modernist-Bold': require('../../assets/fonts/Sk-Modernist-Bold.otf'),
+    'InstrumentSerif-Italic': require('../../assets/fonts/InstrumentSerif-Italic.ttf'),
   });
 
   if (!fontsLoaded && !fontError) {

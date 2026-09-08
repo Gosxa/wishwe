@@ -3,6 +3,7 @@
 import type { BackendEvent } from '@/shared/client_api/event';
 import { EventFormModal } from '@/features/eventForm';
 import { useModalTransition } from '@shared/hooks/useModalTransition';
+import { ModalPortal } from '@shared/ui/modalPortal/ModalPortal';
 import { useEditEvent } from '../model/useEditEvent';
 
 type Props = {
@@ -17,11 +18,13 @@ export const EditEventModal = ({ event, onClose, onSaved }: Props) => {
   const form = useEditEvent(event, () => requestCloseWith(onSaved));
 
   return (
-    <EventFormModal
-      mode="edit"
-      form={form}
-      onClose={requestClose}
-      overlayProps={modalTransitionProps}
-    />
+    <ModalPortal>
+      <EventFormModal
+        mode="edit"
+        form={form}
+        onClose={requestClose}
+        overlayProps={modalTransitionProps}
+      />
+    </ModalPortal>
   );
 };

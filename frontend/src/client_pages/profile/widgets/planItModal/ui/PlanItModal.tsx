@@ -9,6 +9,7 @@ import {
 import { useModalTransition } from '@shared/hooks/useModalTransition';
 import { EVENT_IMAGE_FALLBACK } from '@shared/lib/mediaFallbacks';
 import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
+import { ModalPortal } from '@shared/ui/modalPortal/ModalPortal';
 import { usePlanIt } from '../model/usePlanIt';
 import { usePlanConversionTransition } from '../model/usePlanConversionTransition';
 import { PlanConversionTransition } from './PlanConversionTransition';
@@ -33,7 +34,7 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
     toAbsoluteMediaUrl(event.cover_image) ?? EVENT_IMAGE_FALLBACK;
 
   return (
-    <>
+    <ModalPortal>
       <div
         inert={isConverting}
         aria-hidden={isConverting || undefined}
@@ -81,6 +82,6 @@ export const PlanItModal = ({ event, onClose, onConverted }: Props) => {
           time={when.time}
         />
       )}
-    </>
+    </ModalPortal>
   );
 };
