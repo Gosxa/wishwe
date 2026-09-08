@@ -1,10 +1,3 @@
-import { ComingSoon } from '@/components/ui/coming-soon';
+import { FriendsScreen } from '@/components/friends/friends-screen';
 
-export default function FriendsScreen() {
-  return (
-    <ComingSoon
-      title="Friends"
-      description="Finding friends, invites and requests are still under development."
-    />
-  );
-}
+export default FriendsScreen;

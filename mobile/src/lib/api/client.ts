@@ -55,6 +55,36 @@ function messageFromBody(body: unknown, fallback: string): string {
 
 const REQUEST_TIMEOUT_MS = 10_000;
 const OFFLINE_MESSAGE = 'Service temporarily unavailable';
+const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
+
+function is204ContentLengthError(error: unknown): boolean {
+  const reason = [
+    error instanceof Error ? error.message : '',
+    error instanceof Error && error.cause ? String(error.cause) : '',
+    String(error),
+  ].join(' ');
+
+  return reason.includes('204') && /content-length/i.test(reason);
+}
+
+function createEmpty204Response(): Response {
+  if (typeof Response !== 'undefined') {
+    try {
+      return new Response(null, { status: 204, statusText: 'No Content' });
+    } catch {
+      // Fallback below if constructor fails
+    }
+  }
+
+  return {
+    ok: true,
+    status: 204,
+    statusText: 'No Content',
+    text: async () => '',
+    json: async () => null,
+    headers: typeof Headers !== 'undefined' ? new Headers() : ({} as Headers),
+  } as unknown as Response;
+}
 
 async function send(
   path: string,
@@ -82,7 +112,11 @@ async function send(
       signal: controller.signal,
     });
   } catch (error) {
-    if (__DEV__) {
+    if (is204ContentLengthError(error)) {
+      return createEmpty204Response();
+    }
+
+    if (isDev) {
       console.warn(`[api] ${method} ${path} failed before reaching the server:`, error);
     }
 
@@ -92,7 +126,7 @@ async function send(
 
     const reason = error instanceof Error ? error.message : String(error);
 
-    throw new ApiError(__DEV__ ? `${OFFLINE_MESSAGE} — ${reason}` : OFFLINE_MESSAGE, 0, error);
+    throw new ApiError(isDev ? `${OFFLINE_MESSAGE} — ${reason}` : OFFLINE_MESSAGE, 0, error);
   } finally {
     clearTimeout(timeout);
   }
