@@ -1,10 +1,3 @@
-import { ComingSoon } from '@/components/ui/coming-soon';
+import { ActivityScreen } from '@/components/activity/activity-screen';
 
-export default function ActivityScreen() {
-  return (
-    <ComingSoon
-      title="Activity"
-      description="Notifications about joins, invites and updates are still under development."
-    />
-  );
-}
+export default ActivityScreen;
