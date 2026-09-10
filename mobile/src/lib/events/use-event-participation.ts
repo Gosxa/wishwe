@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 
+import { ApiError } from '@/lib/api/client';
 import { expressInterest, joinPlan, leaveEvent } from '@/lib/api/events';
 import { toFeedEvent } from '@/lib/events/mapper';
 import type { FeedEvent } from '@/lib/events/types';
@@ -7,6 +8,10 @@ import type { FeedEvent } from '@/lib/events/types';
 type Options = {
   onChange?: (event: FeedEvent) => void;
 };
+
+export function participationErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiError && error.message ? error.message : fallback;
+}
 
 export function useEventParticipation(event: FeedEvent, { onChange }: Options = {}) {
   const [isPending, setIsPending] = useState(false);
@@ -21,8 +26,8 @@ export function useEventParticipation(event: FeedEvent, { onChange }: Options = 
         onChange?.(toFeedEvent(await request()));
 
         return true;
-      } catch {
-        setError(message);
+      } catch (error) {
+        setError(participationErrorMessage(error, message));
 
         return false;
       } finally {

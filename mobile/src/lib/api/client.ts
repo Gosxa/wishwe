@@ -53,7 +53,7 @@ function messageFromBody(body: unknown, fallback: string): string {
   return fallback;
 }
 
-const REQUEST_TIMEOUT_MS = 10_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 const OFFLINE_MESSAGE = 'Service temporarily unavailable';
 const isDev = typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production';
 

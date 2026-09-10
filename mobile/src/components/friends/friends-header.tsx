@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    height: '100%',
     padding: 0,
     fontFamily: Fonts.regular,
     fontSize: 14,
-    lineHeight: 22,
     color: Colors.ink,
   },
 });

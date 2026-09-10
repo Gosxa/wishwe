@@ -51,6 +51,31 @@ describe('formatRelativeTime', () => {
     expect(formatRelativeTime(oneYearAgo, baseNow)).toBe('1 year ago');
   });
 
+  it('never reports a zero-value unit at range boundaries', () => {
+    const twentyEightDaysAgo = new Date('2026-08-11T15:30:00Z');
+    expect(formatRelativeTime(twentyEightDaysAgo, baseNow)).toBe('4 weeks ago');
+
+    const twentyNineDaysAgo = new Date('2026-08-10T15:30:00Z');
+    expect(formatRelativeTime(twentyNineDaysAgo, baseNow)).toBe('4 weeks ago');
+
+    const thirtyDaysAgo = new Date('2026-08-09T15:30:00Z');
+    expect(formatRelativeTime(thirtyDaysAgo, baseNow)).toBe('1 month ago');
+
+    const elevenMonthsAgo = new Date('2025-10-13T15:30:00Z');
+    expect(formatRelativeTime(elevenMonthsAgo, baseNow)).toBe('11 months ago');
+
+    const almostOneYearAgo = new Date('2025-09-13T15:30:00Z');
+    expect(formatRelativeTime(almostOneYearAgo, baseNow)).toBe('12 months ago');
+
+    const exactlyOneYearAgo = new Date('2025-09-08T15:30:00Z');
+    expect(formatRelativeTime(exactlyOneYearAgo, baseNow)).toBe('1 year ago');
+  });
+
+  it('treats future timestamps from clock skew as just now', () => {
+    const slightlyAhead = new Date('2026-09-08T15:31:00Z');
+    expect(formatRelativeTime(slightlyAhead, baseNow)).toBe('just now');
+  });
+
   it('returns empty string for invalid date', () => {
     expect(formatRelativeTime('not-a-date', baseNow)).toBe('');
   });

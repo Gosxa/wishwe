@@ -89,13 +89,18 @@ const styles = StyleSheet.create({
   media: {
     flex: 1,
     minWidth: 0,
-    aspectRatio: 178 / 152,
+    minHeight: 154,
     borderRadius: Radii.lg,
     borderWidth: 1,
     borderColor: Colors.primary,
     overflow: 'hidden',
   },
   image: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     width: '100%',
     height: '100%',
   },
@@ -109,7 +114,7 @@ const styles = StyleSheet.create({
   body: {
     width: 177,
     gap: Spacing.four,
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
   },
   details: {
     gap: Spacing.two,

@@ -14,51 +14,49 @@ export type ActivityItem = {
   timeAgo: string;
 };
 
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+const MONTH = 30 * DAY;
+const YEAR = 365 * DAY;
+
+const UNITS: [label: string, duration: number][] = [
+  ['year', YEAR],
+  ['month', MONTH],
+  ['week', WEEK],
+  ['day', DAY],
+  ['hour', HOUR],
+  ['minute', MINUTE],
+];
+
 export function formatRelativeTime(
   dateInput: string | Date,
   nowInput: Date = new Date(),
 ): string {
   const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
-  const now = nowInput.getTime();
   const timestamp = date.getTime();
 
   if (Number.isNaN(timestamp)) {
     return '';
   }
 
-  const diffMs = now - timestamp;
+  const diffMs = nowInput.getTime() - timestamp;
 
-  if (diffMs < 60_000) {
+  if (diffMs < MINUTE) {
     return 'just now';
   }
 
-  const minutes = Math.floor(diffMs / 60_000);
-  if (minutes < 60) {
-    return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  const unit = UNITS.find(([, duration]) => diffMs >= duration);
+
+  if (!unit) {
+    return 'just now';
   }
 
-  const hours = Math.floor(diffMs / 3_600_000);
-  if (hours < 24) {
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  }
+  const [label, duration] = unit;
+  const value = Math.floor(diffMs / duration);
 
-  const days = Math.floor(diffMs / 86_400_000);
-  if (days < 7) {
-    return `${days} day${days === 1 ? '' : 's'} ago`;
-  }
-
-  const weeks = Math.floor(days / 7);
-  if (weeks < 4) {
-    return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
-  }
-
-  const months = Math.floor(days / 30);
-  if (months < 12) {
-    return `${months} month${months === 1 ? '' : 's'} ago`;
-  }
-
-  const years = Math.floor(days / 365);
-  return `${years} year${years === 1 ? '' : 's'} ago`;
+  return `${value} ${label}${value === 1 ? '' : 's'} ago`;
 }
 
 export function mapNotification(
