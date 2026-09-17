@@ -95,6 +95,7 @@ class EventSerializer(serializers.ModelSerializer):
             "description",
             "cover_image",
             "location",
+            "location_place_id",
             "external_link",
             "event_date",
             "event_time",
