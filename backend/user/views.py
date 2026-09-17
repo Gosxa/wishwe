@@ -421,17 +421,25 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
             active_events_count=Count(
                 "user__event_participations__event",
                 filter=Q(
+                    user__event_participations__status__in=(
+                        ParticipationStatus.JOINED,
+                        ParticipationStatus.INTERESTED,
+                    ),
                     user__event_participations__event__status__in=(
                         EventStatus.ACTIVE,
                         EventStatus.CLOSED,
-                    )
+                    ),
                 ),
                 distinct=True,
             ),
             archived_events_count=Count(
                 "user__event_participations__event",
                 filter=Q(
-                    user__event_participations__event__status=EventStatus.COMPLETED
+                    user__event_participations__status__in=(
+                        ParticipationStatus.JOINED,
+                        ParticipationStatus.INTERESTED,
+                    ),
+                    user__event_participations__event__status=EventStatus.COMPLETED,
                 ),
                 distinct=True,
             ),
