@@ -1,0 +1,23 @@
+name: Deploy Celery to Oracle VM
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type “deploy” to confirm the start'
+        required: true
+        default: ''
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.confirm == 'deploy' }}
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: |
+            bash /opt/wishwe/scripts/deploy.sh
