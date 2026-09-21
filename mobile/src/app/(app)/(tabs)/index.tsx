@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import Animated, { FadeIn, FadeInLeft, FadeInRight } from 'react-native-reanimated';
 
 import { FeedEmptyState } from '@/components/feed/feed-empty-state';
 import { FeedErrorState } from '@/components/feed/feed-error-state';
@@ -11,6 +12,16 @@ import { FeedToolbar } from '@/components/feed/feed-toolbar';
 import { Colors, Spacing } from '@/constants/theme';
 import { useFeedEvents } from '@/lib/events/use-feed-events';
 import type { FeedEvent } from '@/lib/events/types';
+
+const FILTER_ENTERING = {
+  all: FadeInLeft,
+  plans: FadeIn,
+  wishes: FadeInRight,
+} as const;
+
+const ITEM_ENTER_DURATION = 260;
+const ITEM_ENTER_STAGGER = 45;
+const ITEM_ENTER_MAX_INDEX = 6;
 
 export default function FeedScreen() {
   const insets = useSafeAreaInsets();
@@ -44,10 +55,16 @@ export default function FeedScreen() {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: FeedEvent }) => (
-      <FeedEventCard event={item} onOpen={openEvent} onChange={applyEvent} />
+    ({ item, index }: { item: FeedEvent; index: number }) => (
+      <Animated.View
+        entering={FILTER_ENTERING[filter]
+          .duration(ITEM_ENTER_DURATION)
+          .delay(Math.min(index, ITEM_ENTER_MAX_INDEX) * ITEM_ENTER_STAGGER)}
+      >
+        <FeedEventCard event={item} onOpen={openEvent} onChange={applyEvent} />
+      </Animated.View>
     ),
-    [applyEvent, openEvent],
+    [applyEvent, filter, openEvent],
   );
 
   const listEmpty = () => {

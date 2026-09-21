@@ -3,7 +3,11 @@ import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ChevronDownIcon } from '@/components/icons';
 import { FeedSortSheet, type SortMenuAnchor } from '@/components/feed/feed-sort-sheet';
-import { Colors, Fonts, Radii, Spacing } from '@/constants/theme';
+import {
+  SegmentedControl,
+  type SegmentedControlOption,
+} from '@/components/ui/segmented-control';
+import { Colors, Fonts, Spacing } from '@/constants/theme';
 import type { FeedFilter, FeedReach, SortOption } from '@/lib/events/types';
 
 type Props = {
@@ -15,10 +19,10 @@ type Props = {
   onSortChange: (sort: SortOption) => void;
 };
 
-const FILTERS: { key: FeedFilter; label: string }[] = [
-  { key: 'all', label: 'All' },
-  { key: 'plans', label: 'Plans' },
-  { key: 'wishes', label: 'Wishes' },
+const FILTERS: SegmentedControlOption<FeedFilter>[] = [
+  { value: 'all', label: 'All' },
+  { value: 'plans', label: 'Plans' },
+  { value: 'wishes', label: 'Wishes' },
 ];
 
 export function FeedToolbar({
@@ -42,27 +46,12 @@ export function FeedToolbar({
 
   return (
     <View style={styles.row}>
-      <View style={styles.filters}>
-        {FILTERS.map(({ key, label }) => {
-          const isActive = filter === key;
-
-          return (
-            <Pressable
-              key={key}
-              onPress={() => onFilterChange(key)}
-              accessibilityRole="tab"
-              accessibilityState={{ selected: isActive }}
-              style={({ pressed }) => [
-                styles.filter,
-                isActive ? styles.filterActive : styles.filterIdle,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={isActive ? styles.filterActiveLabel : styles.filterLabel}>{label}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      <SegmentedControl
+        options={FILTERS}
+        value={filter}
+        onChange={onFilterChange}
+        selectedLabelStyle={styles.segmentedSelectedLabel}
+      />
 
       <Pressable
         ref={sortRef}
@@ -97,40 +86,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.two,
   },
-  filters: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  filter: {
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.three,
-    borderRadius: Radii.sm,
-  },
-  filterIdle: {
-    borderWidth: 1,
-    borderColor: Colors.creamMuted,
-  },
-  filterActive: {
-    backgroundColor: Colors.primary,
-  },
   pressed: {
     opacity: 0.7,
   },
-  filterLabel: {
-    fontFamily: Fonts.regular,
-    fontSize: 14,
-    lineHeight: 22,
-    color: Colors.muted,
-  },
-  filterActiveLabel: {
-    fontFamily: Fonts.bold,
-    fontSize: 16,
-    lineHeight: 19,
+  segmentedSelectedLabel: {
     letterSpacing: 0.32,
-    color: Colors.cream,
   },
   sort: {
     flexDirection: 'row',
