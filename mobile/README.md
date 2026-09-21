@@ -159,8 +159,15 @@ npx expo run:android
 After that first native build, start Metro for the installed development client:
 
 ```bash
-npx expo start --dev-client
+npx expo start --dev-client --localhost
 ```
+
+> **Note on Android Emulator networking**: Use `--localhost` when developing with
+> the Android Emulator. Metro will configure `adb reverse` to route requests to
+> `localhost:8081`. By default, Metro uses `--host lan` (`http://<lan-ip>:8081`),
+> which may be unreachable from the emulator due to virtual network routing or
+> host firewall rules. Ensure Wi-Fi/network is enabled inside the emulator.
+
 
 Alternatively, create an installable EAS development build with
 `npx eas-cli build --platform android --profile development`.

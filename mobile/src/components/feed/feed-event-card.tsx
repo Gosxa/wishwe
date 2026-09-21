@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { EventCard } from '@/components/feed/event-card';
-import { LeaveEventDialog } from '@/components/ui/leave-event-dialog';
 import { Colors, Fonts, Spacing } from '@/constants/theme';
+import { confirmLeaveEvent } from '@/lib/events/leave-event-confirmation';
 import { useEventParticipation } from '@/lib/events/use-event-participation';
 import type { FeedEvent } from '@/lib/events/types';
 
@@ -14,25 +13,27 @@ type Props = {
 };
 
 export function FeedEventCard({ event, onOpen, onChange }: Props) {
-  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const participation = useEventParticipation(event, { onChange });
+  const isPlan = event.type === 'plan';
+
+  const handleLeave = async () => {
+    if (!(await confirmLeaveEvent(isPlan))) {
+      return;
+    }
+
+    await participation.leave();
+  };
 
   const handleAction = () => {
     participation.clearError();
 
     if (participation.isParticipating) {
-      setIsLeaveOpen(true);
+      void handleLeave();
 
       return;
     }
 
     void participation.join();
-  };
-
-  const handleLeave = async () => {
-    if (await participation.leave()) {
-      setIsLeaveOpen(false);
-    }
   };
 
   return (
@@ -49,16 +50,6 @@ export function FeedEventCard({ event, onOpen, onChange }: Props) {
           {participation.error}
         </Text>
       ) : null}
-
-      <LeaveEventDialog
-        visible={isLeaveOpen}
-        isPlan={event.type === 'plan'}
-        isPending={participation.isPending}
-        onCancel={() => {
-          if (!participation.isPending) setIsLeaveOpen(false);
-        }}
-        onConfirm={handleLeave}
-      />
     </View>
   );
 }

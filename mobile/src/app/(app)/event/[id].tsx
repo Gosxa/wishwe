@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
@@ -25,9 +24,9 @@ import { Avatar } from '@/components/ui/avatar';
 import { AvatarStack } from '@/components/ui/avatar-stack';
 import { EventImage } from '@/components/ui/event-image';
 import { EventTags } from '@/components/ui/event-tags';
-import { LeaveEventDialog } from '@/components/ui/leave-event-dialog';
 import { ParticipationButton } from '@/components/ui/participation-button';
 import { Colors, Fonts, Radii, Spacing } from '@/constants/theme';
+import { confirmLeaveEvent } from '@/lib/events/leave-event-confirmation';
 import { useEventDetails } from '@/lib/events/use-event-details';
 import { useEventParticipation } from '@/lib/events/use-event-participation';
 import type { FeedEvent } from '@/lib/events/types';
@@ -103,27 +102,29 @@ type DetailsProps = {
 };
 
 function EventDetails({ event, onChange, bottomInset }: DetailsProps) {
-  const [isLeaveOpen, setIsLeaveOpen] = useState(false);
   const participation = useEventParticipation(event, { onChange });
 
   const showChat = participation.isParticipating && Boolean(event.chatLink);
+  const isPlan = event.type === 'plan';
+
+  const handleLeave = async () => {
+    if (!(await confirmLeaveEvent(isPlan))) {
+      return;
+    }
+
+    await participation.leave();
+  };
 
   const handleAction = () => {
     participation.clearError();
 
     if (participation.isParticipating) {
-      setIsLeaveOpen(true);
+      void handleLeave();
 
       return;
     }
 
     void participation.join();
-  };
-
-  const handleLeave = async () => {
-    if (await participation.leave()) {
-      setIsLeaveOpen(false);
-    }
   };
 
   const openChat = () => {
@@ -220,16 +221,6 @@ function EventDetails({ event, onChange, bottomInset }: DetailsProps) {
           </Pressable>
         ) : null}
       </View>
-
-      <LeaveEventDialog
-        visible={isLeaveOpen}
-        isPlan={event.type === 'plan'}
-        isPending={participation.isPending}
-        onCancel={() => {
-          if (!participation.isPending) setIsLeaveOpen(false);
-        }}
-        onConfirm={handleLeave}
-      />
     </>
   );
 }
