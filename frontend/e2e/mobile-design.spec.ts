@@ -65,6 +65,18 @@ test('Home, Friends and Activity follow the mobile layouts @mobile', async ({
     });
     await me.page.keyboard.press('Escape');
 
+    const sortButton = me.page.getByRole('button', {
+      name: 'Sort',
+      exact: true,
+    });
+    const sortButtonY = (await sortButton.boundingBox())!.y;
+
+    await me.page.evaluate(() => window.scrollTo(0, 400));
+    await expect
+      .poll(async () => (await sortButton.boundingBox())?.y)
+      .toBeCloseTo(sortButtonY, 0);
+    await me.page.evaluate(() => window.scrollTo(0, 0));
+
     await card.getByRole('button', { name: plan.title }).click();
     const details = me.page.getByRole('dialog', { name: plan.title });
 

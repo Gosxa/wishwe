@@ -5,6 +5,7 @@ import {
   EventFeedItem,
   EventFeedLayout,
   useEventReveal,
+  type EventFeedItemEnter,
 } from '@widgets/eventFeed';
 import { DeepLinkCard, EventCard } from '@widgets/eventCard';
 import { useEventDeepLink } from '@shared/hooks/useEventDeepLink';
@@ -12,11 +13,18 @@ import { useSearchDisabledSync } from '@shared/hooks/useSearchDisabledSync';
 import { useFeedEvents } from '@client_pages/home/model/useFeedEvents';
 import { useFeedToolbar } from '@client_pages/home/model/useFeedToolbar';
 import { SEARCH_PARAM } from '@client_pages/home/model/useFeedSearch';
+import type { FeedFilter } from '@client_pages/home/model/types';
 import { FeedEmptyState } from './FeedEmptyState';
 import { FeedToolbar } from './FeedToolbar';
 
 type Props = {
   onSearchDisabledChange?: (disabled: boolean) => void;
+};
+
+const ENTER_BY_FILTER: Record<FeedFilter, EventFeedItemEnter> = {
+  all: 'left',
+  plans: 'fade',
+  wishes: 'right',
 };
 
 export const Feed = ({ onSearchDisabledChange }: Props) => {
@@ -63,7 +71,12 @@ export const Feed = ({ onSearchDisabledChange }: Props) => {
       loadMore={loadMore}
     >
       {events.map((event, position) => (
-        <EventFeedItem key={event.id} reveal={event.id === revealEventId}>
+        <EventFeedItem
+          key={event.id}
+          reveal={event.id === revealEventId}
+          enter={ENTER_BY_FILTER[filter]}
+          enterIndex={position}
+        >
           <EventCard
             event={event}
             compactMobile

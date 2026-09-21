@@ -165,3 +165,87 @@ $modal-ease: cubic-bezier(0.22, 1, 0.36, 1);
     animation: none;
   }
 }
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@mixin fade-in($duration: 0.24s, $delay: 0s, $ease: ease-out) {
+  animation: fade-in $duration $ease $delay both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+$row-enter-duration: 0.26s;
+$row-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$row-enter-distance: 24px;
+
+@keyframes row-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-$row-enter-distance);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes row-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX($row-enter-distance);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes row-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@mixin list-row-enter($direction: left, $stagger: 45ms, $max-index: 6) {
+  > * {
+    animation-duration: $row-enter-duration;
+    animation-timing-function: $row-enter-ease;
+    animation-fill-mode: both;
+
+    @if $direction == right {
+      animation-name: row-enter-right;
+    } @else if $direction == fade {
+      animation-name: row-enter-fade;
+    } @else {
+      animation-name: row-enter-left;
+    }
+  }
+
+  @for $index from 0 through $max-index {
+    > *:nth-child(#{$index + 1}) {
+      animation-delay: $index * $stagger;
+    }
+  }
+
+  > *:nth-child(n + #{$max-index + 2}) {
+    animation-delay: $max-index * $stagger;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    > * {
+      animation: none;
+    }
+  }
+}

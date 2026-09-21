@@ -69,6 +69,78 @@ $list-gap: 24px;
   }
 }
 
+$item-enter-duration: 0.26s;
+$item-enter-ease: cubic-bezier(0.22, 1, 0.36, 1);
+$item-enter-distance: 24px;
+
+.itemEnterLeft,
+.itemEnterFade,
+.itemEnterRight {
+  overflow-x: clip;
+
+  > .itemBody {
+    animation-duration: $item-enter-duration;
+    animation-timing-function: $item-enter-ease;
+    animation-fill-mode: both;
+    animation-delay: var(--item-enter-delay, 0ms);
+  }
+}
+
+.itemEnterLeft > .itemBody {
+  animation-name: feed-item-enter-left;
+}
+
+.itemEnterFade > .itemBody {
+  animation-name: feed-item-enter-fade;
+}
+
+.itemEnterRight > .itemBody {
+  animation-name: feed-item-enter-right;
+}
+
+@keyframes feed-item-enter-left {
+  from {
+    opacity: 0;
+    transform: translateX(-$item-enter-distance);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes feed-item-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes feed-item-enter-right {
+  from {
+    opacity: 0;
+    transform: translateX($item-enter-distance);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .itemEnterLeft,
+  .itemEnterFade,
+  .itemEnterRight {
+    overflow-x: visible;
+
+    > .itemBody {
+      animation: none;
+    }
+  }
+}
+
 .emptySlot {
   grid-column: 1 / -1;
 }
@@ -128,6 +200,9 @@ $list-gap: 24px;
 
 @media (max-width: 767px) {
   .home {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding-top: 16px;
     padding-inline: 16px;
 
@@ -137,6 +212,20 @@ $list-gap: 24px;
     .errorSlot,
     .statusSlot {
       max-width: 560px;
+    }
+
+    .toolbarSlot {
+      position: sticky;
+      top: calc(76px + env(safe-area-inset-top) + 16px);
+      z-index: 10;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: -16px 0;
+        z-index: -1;
+        background: clr.$ns-50;
+      }
     }
 
     .list {

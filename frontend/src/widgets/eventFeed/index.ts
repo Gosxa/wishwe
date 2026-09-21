@@ -1,5 +1,5 @@
 export { EventFeedLayout } from './ui/EventFeedLayout';
-export { EventFeedItem } from './ui/EventFeedItem';
+export { EventFeedItem, type EventFeedItemEnter } from './ui/EventFeedItem';
 export {
   EventFeedDropdown,
   EventFeedToolbar,
