@@ -9,6 +9,7 @@ type BackendEvent = Parameters<typeof toFeedEvent>[0];
 function makeEvent(overrides: Partial<BackendEvent> = {}): BackendEvent {
   return {
     id: 7,
+    uuid: 'e8a54b94-2812-4f03-b709-d6a76f42e7d5',
     creator: 'anastasiiabb',
     creator_avatar: 'media/avatars/a.jpg',
     mutual_friend: null,
@@ -41,7 +42,7 @@ describe('toFeedEvent', () => {
   it('maps a plan with its date, hashtag and absolute media urls', () => {
     const event = toFeedEvent(makeEvent());
 
-    expect(event.id).toBe('7');
+    expect(event.id).toBe('e8a54b94-2812-4f03-b709-d6a76f42e7d5');
     expect(event.type).toBe('plan');
     expect(event.hashtag).toBe('#games');
     expect(event.host.username).toBe('@anastasiiabb');

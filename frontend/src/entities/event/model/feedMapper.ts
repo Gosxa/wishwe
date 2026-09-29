@@ -55,7 +55,7 @@ export const toFeedEvents = (events: BackendEvent[]): FeedEvent[] =>
     const startDate = eventStartDate(event);
 
     return {
-      id: String(event.id),
+      id: event.uuid,
       type: event.event_type,
       hashtag: event.category
         ? formatCategoryHashtag(event.category)

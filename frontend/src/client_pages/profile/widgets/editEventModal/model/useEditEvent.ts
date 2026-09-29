@@ -31,7 +31,7 @@ export const useEditEvent = (event: BackendEvent, onSaved: () => void) => {
     initialCategoryName: event.category,
     initialCoverUrl: toAbsoluteMediaUrl(event.cover_image),
     submitEvent: (_type, payload) =>
-      updateEvent(String(event.id), event.event_type, payload),
+      updateEvent(event.uuid, event.event_type, payload),
     submitErrorBody: error =>
       error instanceof UpdateEventError ? error.body : {},
     onSuccess: onSaved,

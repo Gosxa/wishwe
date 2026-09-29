@@ -116,7 +116,7 @@ export const CreateEventModal = ({
       reportCreated(created);
 
       if (!isOnboarding) {
-        deferRefresh(String(created.id));
+        deferRefresh(created.uuid);
         openCreatedEventShare(created);
       }
 

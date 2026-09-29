@@ -46,7 +46,7 @@ export function toFeedEvent(event: BackendEvent): FeedEvent {
   const startDate = eventStartDate(event);
 
   return {
-    id: String(event.id),
+    id: event.uuid,
     type: event.event_type,
     hashtag: event.category ? formatCategoryHashtag(event.category) : undefined,
     image: toAbsoluteMediaUrl(event.cover_image),

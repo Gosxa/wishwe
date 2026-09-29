@@ -44,6 +44,7 @@ import { DeepLinkCard } from './DeepLinkCard';
 
 const event: BackendEvent = {
   id: 73,
+  uuid: 'e8a54b94-2812-4f03-b709-d6a76f42e7d5',
   creator: 'nina',
   creator_avatar: null,
   mutual_friend: null,
