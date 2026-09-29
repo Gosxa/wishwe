@@ -40,7 +40,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
-            "id", "user", "user_id", "username", "first_name", "last_name",
+            "id", "uuid", "user", "user_id", "username", "first_name",
+            "last_name",
             "bio", "date_of_birth", "city", "gender", "avatar",
             "social_media_url", "is_private", "has_seen_feed_tour",
             "active_events_count", "archived_events_count",
@@ -180,6 +181,7 @@ class PublicProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = (
+            "uuid",
             "user_id",
             "username",
             "avatar",
