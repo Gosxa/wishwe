@@ -107,6 +107,7 @@ def upload_profile_picture(instance, filename):
 
 
 class Profile(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
