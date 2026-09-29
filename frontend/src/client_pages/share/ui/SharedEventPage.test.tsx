@@ -65,6 +65,7 @@ import SharedEventPage from './SharedEventPage';
 
 const event: BackendEvent = {
   id: 42,
+  uuid: 'e8a54b94-2812-4f03-b709-d6a76f42e7d5',
   creator: 'maya',
   creator_avatar: null,
   mutual_friend: null,

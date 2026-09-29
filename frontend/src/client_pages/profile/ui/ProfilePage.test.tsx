@@ -236,6 +236,7 @@ const feedEvent = {
 
 const backendEvent: BackendEvent = {
   id: 7,
+  uuid: 'e8a54b94-2812-4f03-b709-d6a76f42e7d5',
   creator: 'alice',
   creator_avatar: null,
   mutual_friend: null,

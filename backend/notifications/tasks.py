@@ -46,7 +46,7 @@ def send_interested_event_email(event_id: str, actor_id: str):
     context = {
         "name": actor.profile.username,
         "wish_name": event.title,
-        "wish_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+        "wish_url": f"{settings.FRONTEND_URL}/feed?event={event.uuid}",
     }
 
     html = render_to_string(
@@ -76,7 +76,7 @@ def send_joined_event_email(event_id: str, actor_id: str) -> None:
     context = {
         "name": actor.profile.username,
         "plan_name": event.title,
-        "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+        "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.uuid}",
     }
 
     html_message = render_to_string(
@@ -119,7 +119,7 @@ def send_event_confirm_reminder_email(event_id: str) -> None:
         context = {
             "name": creator_profile.username,
             "plan_name": event.title,
-            "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.id}",
+            "plan_url": f"{settings.FRONTEND_URL}/feed?event={event.uuid}",
         }
 
         html_message = render_to_string(

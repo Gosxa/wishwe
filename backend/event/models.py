@@ -42,6 +42,7 @@ def upload_cover_image(instance, filename):
 
 
 class Event(models.Model):
+    uuid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     creator = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

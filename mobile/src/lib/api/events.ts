@@ -16,6 +16,7 @@ export type ParticipantPreview = {
 
 export type BackendEvent = {
   id: number;
+  uuid: string;
   creator: string | null;
   creator_avatar: string | null;
   mutual_friend: MutualFriend | null;

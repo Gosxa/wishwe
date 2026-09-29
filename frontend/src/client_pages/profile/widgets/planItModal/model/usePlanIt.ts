@@ -98,7 +98,7 @@ export const usePlanIt = (
     options.onSubmitStart?.();
 
     try {
-      await convertToPlan(String(event.id), {
+      await convertToPlan(event.uuid, {
         event_date: eventDate,
         event_time: eventTime,
         min_participants: minParticipants,

@@ -54,6 +54,8 @@ class EventViewSet(
     viewsets.GenericViewSet
 ):
     serializer_class = EventSerializer
+    lookup_field = "uuid"
+    lookup_url_kwarg = "pk"
     permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
     pagination_class = DefaultPagination
 
@@ -222,7 +224,7 @@ class EventViewSet(
     def retrieve(self, request, *args, **kwargs):
         event = get_object_or_404(
             Event.objects.select_related("creator"),
-            pk=kwargs["pk"],
+            uuid=kwargs["pk"],
         )
 
         if not EventService.can_view(request.user, event):

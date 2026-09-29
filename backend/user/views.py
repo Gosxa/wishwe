@@ -412,6 +412,8 @@ def logout_user(request):
 
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Profile.objects.select_related("user", "city")
+    lookup_field = "uuid"
+    lookup_url_kwarg = "pk"
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
     pagination_class = DefaultPagination

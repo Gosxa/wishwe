@@ -83,6 +83,7 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = (
             "id",
+            "uuid",
             "creator",
             "creator_avatar",
             "mutual_friend",
