@@ -15,6 +15,7 @@ from event.models import (
 from user.models import (
     Friendship,
     FriendshipStatus,
+    Profile,
 )
 
 User = get_user_model()
@@ -42,6 +43,14 @@ class EventFeedTests(APITestCase):
             email="stranger@test.com",
             password="testpass123",
         )
+
+        for user, username in (
+            (self.user, "user"),
+            (self.friend, "friend"),
+            (self.friend_of_friend, "fof"),
+            (self.stranger, "stranger"),
+        ):
+            Profile.objects.create(user=user, username=username)
 
         Friendship.objects.create(
             sender=self.user,
@@ -136,6 +145,14 @@ class EventFeedTests(APITestCase):
             self.friend_event.title,
             titles,
         )
+
+    def test_event_detail_uses_uuid_lookup(self):
+        response = self.client.get(
+            reverse("events:event-detail", args=[self.friend_event.uuid])
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["uuid"], str(self.friend_event.uuid))
 
     def test_user_sees_friend_of_friend_event(self):
         response = self.client.get(
@@ -241,7 +258,7 @@ class EventFeedTests(APITestCase):
         response = self.client.post(
             reverse(
                 "events:event-join-plan",
-                args=[self.plan_event.id],
+                args=[self.plan_event.uuid],
             )
         )
 
@@ -276,7 +293,7 @@ class EventFeedTests(APITestCase):
         response = self.client.post(
             reverse(
                 "events:event-interested-in-wish",
-                args=[self.friend_event.id],
+                args=[self.friend_event.uuid],
             )
         )
 
@@ -320,7 +337,7 @@ class EventFeedTests(APITestCase):
         response = self.client.post(
             reverse(
                 "events:event-leave-event",
-                args=[self.plan_event.id],
+                args=[self.plan_event.uuid],
             )
         )
 
@@ -354,7 +371,7 @@ class EventFeedTests(APITestCase):
         response = self.client.post(
             reverse(
                 "events:event-copy-wish",
-                args=[self.friend_event.id],
+                args=[self.friend_event.uuid],
             )
         )
 
@@ -394,7 +411,7 @@ class EventFeedTests(APITestCase):
         response = self.client.post(
             reverse(
                 "events:event-convert-to-plan",
-                args=[own_wish.id],
+                args=[own_wish.uuid],
             ),
             {
                 "event_date": "2026-07-20",
@@ -473,7 +490,8 @@ class EventFeedTests(APITestCase):
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(
-                reverse("events:event-list")
+                reverse("events:event-list"),
+                {"page_size": 100},
             )
 
         self.assertEqual(
@@ -496,7 +514,8 @@ class EventFeedTests(APITestCase):
 
         with CaptureQueriesContext(connection) as ctx:
             response = self.client.get(
-                reverse("events:event-list")
+                reverse("events:event-list"),
+                {"page_size": 100},
             )
 
         self.assertEqual(

@@ -8,6 +8,7 @@ const fetchMock =
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
 const COOKIE = 'access_token=access; refresh_token=refresh; theme=dark';
 const BODY = { value: 'payload', nested: { enabled: true } };
+const EVENT_UUID = '11111111-1111-4111-8111-111111111111';
 
 const jsonRequest = (
   method: 'POST' | 'PATCH',
@@ -231,14 +232,14 @@ const cases: BoundaryCase[] = [
   },
   {
     name: 'gets an event',
-    call: () => beApi.event.get('201', COOKIE),
-    path: '/api/event/events/201/',
+    call: () => beApi.event.get(EVENT_UUID, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/`,
     init: cookieRequest(COOKIE),
   },
   {
     name: 'deletes an event',
-    call: () => beApi.event.remove('202', COOKIE),
-    path: '/api/event/events/202/',
+    call: () => beApi.event.remove(EVENT_UUID, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/`,
     init: cookieRequest(COOKIE, 'DELETE'),
   },
   {
@@ -249,14 +250,14 @@ const cases: BoundaryCase[] = [
   },
   {
     name: 'performs an event action',
-    call: () => beApi.event.action('203', 'join_plan', COOKIE),
-    path: '/api/event/events/203/join_plan/',
+    call: () => beApi.event.action(EVENT_UUID, 'join_plan', COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/join_plan/`,
     init: cookieRequest(COOKIE, 'POST'),
   },
   {
     name: 'gets event participants',
-    call: () => beApi.event.participants('204', COOKIE),
-    path: '/api/event/events/204/participants/',
+    call: () => beApi.event.participants(EVENT_UUID, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/participants/`,
     init: cookieRequest(COOKIE),
   },
   {
@@ -273,8 +274,8 @@ const cases: BoundaryCase[] = [
   },
   {
     name: 'creates an event share link',
-    call: () => beApi.event.createShareLink('205', COOKIE),
-    path: '/api/event/events/205/share/',
+    call: () => beApi.event.createShareLink(EVENT_UUID, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/share/`,
     init: cookieRequest(COOKIE, 'POST'),
   },
   {
@@ -296,14 +297,14 @@ const cases: BoundaryCase[] = [
   },
   {
     name: 'updates a JSON wish',
-    call: () => beApi.event.update('206', 'wish', BODY, COOKIE),
-    path: '/api/event/events/206/update_wish/',
+    call: () => beApi.event.update(EVENT_UUID, 'wish', BODY, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/update_wish/`,
     init: jsonRequest('PATCH', BODY, COOKIE),
   },
   {
     name: 'updates a multipart plan without overriding the boundary',
-    call: () => beApi.event.update('207', 'plan', formData, COOKIE),
-    path: '/api/event/events/207/update_plan/',
+    call: () => beApi.event.update(EVENT_UUID, 'plan', formData, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/update_plan/`,
     init: {
       method: 'PATCH',
       headers: { cookie: COOKIE },
@@ -313,8 +314,8 @@ const cases: BoundaryCase[] = [
   },
   {
     name: 'converts a wish to a plan',
-    call: () => beApi.event.convert('208', BODY, COOKIE),
-    path: '/api/event/events/208/convert_to_plan/',
+    call: () => beApi.event.convert(EVENT_UUID, BODY, COOKIE),
+    path: `/api/event/events/${EVENT_UUID}/convert_to_plan/`,
     init: jsonRequest('POST', BODY, COOKIE),
   },
   {

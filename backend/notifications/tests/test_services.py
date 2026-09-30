@@ -37,6 +37,7 @@ class NotificationServiceTests(TestCase):
             email="creator@test.com",
             password="testpass123",
         )
+        Profile.objects.create(user=self.event_creator, username="creator")
 
         self.category = Category.objects.create(
             name="Movies",
