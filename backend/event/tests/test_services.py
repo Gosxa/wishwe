@@ -11,6 +11,7 @@ from event.models import (
 )
 
 from event.services.event_service import EventService
+from user.models import Profile
 
 User = get_user_model()
 
@@ -27,6 +28,8 @@ class EventServiceTests(TestCase):
             email="second@test.com",
             password="testpass123",
         )
+        Profile.objects.create(user=self.user, username="test")
+        Profile.objects.create(user=self.second_user, username="second")
 
     def test_create_wish(self):
         event = EventService.create_wish(

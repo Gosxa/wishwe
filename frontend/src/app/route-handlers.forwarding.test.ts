@@ -250,8 +250,11 @@ describe('simple forwarding route handlers', () => {
     backendMocks.event.action.mockResolvedValueOnce(jsonResponse({ ok: true }));
 
     await runEventAction(
-      requestWithCookie(`/api/event/events/12/${action}`, 'POST'),
-      context({ id: '12', action }),
+      requestWithCookie(
+        `/api/event/events/11111111-1111-4111-8111-111111111111/${action}`,
+        'POST',
+      ),
+      context({ id: '11111111-1111-4111-8111-111111111111', action }),
     );
 
     expect(backendMocks.event.action).toHaveBeenCalledWith(
@@ -263,8 +266,14 @@ describe('simple forwarding route handlers', () => {
 
   it('rejects an unknown event action before calling Django', async () => {
     const response = await runEventAction(
-      requestWithCookie('/api/event/events/12/delete_everything', 'POST'),
-      context({ id: '12', action: 'delete_everything' }),
+      requestWithCookie(
+        '/api/event/events/11111111-1111-4111-8111-111111111111/delete_everything',
+        'POST',
+      ),
+      context({
+        id: '11111111-1111-4111-8111-111111111111',
+        action: 'delete_everything',
+      }),
     );
 
     expect(response.status).toBe(404);
@@ -377,10 +386,12 @@ describe('simple forwarding route handlers', () => {
       mock: backendMocks.event.participants,
       invoke: () =>
         getParticipants(
-          request('/api/event/events/21/participants'),
-          context({ id: '21' }),
+          request(
+            '/api/event/events/22222222-2222-4222-8222-222222222222/participants',
+          ),
+          context({ id: '22222222-2222-4222-8222-222222222222' }),
         ),
-      args: ['21', ''],
+      args: ['22222222-2222-4222-8222-222222222222', ''],
     },
   ])(
     'forwards an empty cookie string for $name',

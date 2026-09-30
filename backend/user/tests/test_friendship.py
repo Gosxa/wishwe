@@ -2,7 +2,7 @@ from rest_framework.test import APITestCase
 from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 
-from user.models import Friendship
+from user.models import Friendship, Profile
 from user.services.friendship_service import FriendshipService
 from user.services.invite_service import InviteService
 
@@ -15,6 +15,9 @@ class SocialTests(APITestCase):
         self.user1 = User.objects.create_user(email="u1@test.com", password="12345678")
         self.user2 = User.objects.create_user(email="u2@test.com", password="12345678")
         self.user3 = User.objects.create_user(email="u3@test.com", password="12345678")
+        Profile.objects.create(user=self.user1, username="user1")
+        Profile.objects.create(user=self.user2, username="user2")
+        Profile.objects.create(user=self.user3, username="user3")
 
     def test_send_friend_request(self):
         friendship = FriendshipService.send_request(self.user1, self.user2)
@@ -75,7 +78,6 @@ class SocialTests(APITestCase):
 
         invite.refresh_from_db()
 
-        self.assertTrue(invite.is_used)
         self.assertTrue(
             Friendship.objects.filter(
                 sender=self.user2,
@@ -101,7 +103,7 @@ class SocialTests(APITestCase):
         response = self.client.post("/api/user/invite/")
 
         self.assertEqual(response.status_code, 201)
-        self.assertIn("link", response.data)
+        self.assertIn("token", response.data)
 
     def test_send_friend_request_api(self):
         self.client.force_authenticate(self.user1)

@@ -77,7 +77,8 @@ class AuthFlowTests(APITestCase):
         self.assertTrue(User.objects.filter(email=self.email).exists())
 
     def test_login_jwt(self):
-        User.objects.create_user(email=self.email, password=self.password)
+        user = User.objects.create_user(email=self.email, password=self.password)
+        Profile.objects.create(user=user, username="testuser")
 
         url = reverse("user:token_obtain_pair")
 
@@ -87,7 +88,9 @@ class AuthFlowTests(APITestCase):
         })
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("access", response.data)
+        self.assertIn("is_onboarded", response.data)
+        self.assertIn("access_token", response.cookies)
+        self.assertIn("refresh_token", response.cookies)
 
     def test_reset_password_sends_email(self):
         User.objects.create_user(email=self.email, password=self.password)
@@ -261,3 +264,18 @@ class ProfileTests(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["username"], "private-profile")
         self.assertTrue(response.data["is_private"])
+
+    def test_profile_detail_uses_uuid_lookup(self):
+        user = User.objects.create_user(
+            email="profile-uuid@test.com",
+            password="testpass123",
+        )
+        profile = Profile.objects.create(user=user, username="profile-uuid")
+        self.client.force_authenticate(user=user)
+
+        response = self.client.get(
+            reverse("user:profile-detail", kwargs={"pk": profile.uuid})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["uuid"], str(profile.uuid))
