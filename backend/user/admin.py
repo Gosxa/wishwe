@@ -1,11 +1,14 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.db import transaction
+from django.utils import timezone
 from .models import (
     City,
     EmailVerification,
     FriendInvite,
     Friendship,
     Profile,
+    ModerationViolation,
     SocialAccount,
     User,
 )
@@ -85,12 +88,16 @@ class ProfileAdmin(admin.ModelAdmin):
         "city",
         "gender",
         "is_private",
+        "violation_count",
+        "is_banned",
+        "last_violation_at",
         "is_onboarded",
         "updated_at",
     )
     list_filter = (
         "gender",
         "is_private",
+        "violation_count",
         "is_onboarded",
         "city",
     )
@@ -110,6 +117,78 @@ class ProfileAdmin(admin.ModelAdmin):
         "city",
     )
     readonly_fields = ("updated_at",)
+
+    @admin.display(boolean=True, description="Banned")
+    def is_banned(self, obj):
+        return obj.is_banned
+
+
+@admin.register(ModerationViolation)
+class ModerationViolationAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "field_name",
+        "categories",
+        "status",
+        "strike_applied",
+        "occurred_at",
+        "resolved_at",
+    )
+    list_filter = ("status", "occurred_at")
+    search_fields = (
+        "user__email",
+        "user__profile__username",
+        "field_name",
+        "content_excerpt",
+    )
+    list_select_related = ("user", "event")
+    actions = ("overturn_violations",)
+    readonly_fields = (
+        "user",
+        "event",
+        "event_uuid",
+        "field_name",
+        "categories",
+        "matched_terms",
+        "content_excerpt",
+        "status",
+        "strike_applied",
+        "occurred_at",
+        "resolved_at",
+    )
+
+    @admin.action(description="Overturn selected confirmed violations")
+    @transaction.atomic
+    def overturn_violations(self, request, queryset):
+        now = timezone.now()
+        selected = list(queryset.filter(
+            status=ModerationViolation.Status.CONFIRMED,
+        ))
+        by_user = {}
+        for violation in selected:
+            violation.status = ModerationViolation.Status.OVERTURNED
+            violation.resolved_at = now
+            violation.save(update_fields=("status", "resolved_at"))
+            by_user[violation.user_id] = violation.user
+
+        for user in by_user.values():
+            profile = Profile.objects.get(user=user)
+            overturned_count = sum(
+                item.user_id == user.id for item in selected
+            )
+            profile.violation_count = max(
+                0,
+                profile.violation_count - overturned_count,
+            )
+            remaining = ModerationViolation.objects.filter(
+                user=user,
+                status__in=(
+                    ModerationViolation.Status.CONFIRMED,
+                    ModerationViolation.Status.PENDING,
+                ),
+            ).order_by("-occurred_at").first()
+            profile.last_violation_at = remaining.occurred_at if remaining else None
+            profile.save(update_fields=("violation_count", "last_violation_at", "updated_at"))
 
 
 @admin.register(City)

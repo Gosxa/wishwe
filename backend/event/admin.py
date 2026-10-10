@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Event, Category, EventParticipant
+from user.services.moderation_service import ModerationService
 
 
 @admin.register(Event)
@@ -54,6 +55,17 @@ class EventAdmin(admin.ModelAdmin):
     )
 
     date_hierarchy = "created_at"
+    actions = ("approve_moderated_events", "reject_moderated_events")
+
+    @admin.action(description="Approve selected events pending moderation")
+    def approve_moderated_events(self, request, queryset):
+        for event in queryset.filter(status="moderate"):
+            ModerationService.resolve_event(event, approved=True)
+
+    @admin.action(description="Reject selected events pending moderation")
+    def reject_moderated_events(self, request, queryset):
+        for event in queryset.filter(status="moderate"):
+            ModerationService.resolve_event(event, approved=False)
 
     fieldsets = (
         (
