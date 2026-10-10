@@ -52,7 +52,7 @@ vi.mock('@/features/eventForm', () => ({
 
 import { CreateEventModal } from './CreateEventModal';
 
-const createdEvent = { id: 42 } as BackendEvent;
+const createdEvent = { id: 42, uuid: '42' } as BackendEvent;
 
 const makeForm = () =>
   ({
@@ -181,6 +181,37 @@ describe('CreateEventModal launch transition', () => {
 
     expect(reportCreated).toHaveBeenCalledWith(createdEvent);
     expect(useCreatedEventShareStore.getState().event).toBe(createdEvent);
+    expect(onCreated).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the moderation state and skips sharing for a queued event', () => {
+    const onCreated = vi.fn();
+    const queuedEvent = {
+      ...createdEvent,
+      status: 'moderate',
+    } as BackendEvent;
+
+    render(<CreateEventModal onClose={vi.fn()} onCreated={onCreated} />);
+
+    act(() => {
+      submitStartedCallback();
+      createdCallback(queuedEvent);
+      submitSettledCallback();
+      vi.advanceTimersByTime(1100);
+    });
+
+    expect(screen.getByText('Your event is under review')).toBeTruthy();
+    expect(
+      screen.getByText(
+        'It is hidden from the feed until a moderator reviews it. We will notify you when the review is complete.',
+      ),
+    ).toBeTruthy();
+    expect(useCreatedEventShareStore.getState().event).toBeNull();
+    expect(useEventsRefreshStore.getState().isDeferred).toBe(false);
+    expect(reportCreated).not.toHaveBeenCalled();
+
+    act(() => vi.advanceTimersByTime(1400));
+
     expect(onCreated).toHaveBeenCalledTimes(1);
   });
 

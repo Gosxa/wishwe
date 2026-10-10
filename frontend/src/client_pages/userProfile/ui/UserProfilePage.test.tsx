@@ -149,6 +149,7 @@ const profile = (overrides: Partial<PublicProfile> = {}): PublicProfile => ({
   username: 'bob',
   avatar: null,
   bio: 'Say yes to more plans',
+  is_banned: false,
   is_private: true,
   friendship_status: 'none',
   ...overrides,
@@ -238,6 +239,22 @@ describe('UserProfilePage', () => {
       screen.getByRole('heading', { name: 'Friends-only profile' }),
     ).toBeTruthy();
     expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('shows a banned profile placeholder without actions or event feed', () => {
+    mocks.events = [event];
+
+    render(<UserProfilePage profile={profile({ is_banned: true })} />);
+
+    expect(screen.getByRole('heading', { name: 'Banned user' })).toBeTruthy();
+    expect(
+      screen.getByText(
+        'This profile was restricted for violating the platform rules.',
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Become friends' })).toBeNull();
+    expect(screen.queryByText('Board games')).toBeNull();
+    expect(mocks.useProfileEvents).not.toHaveBeenCalled();
   });
 
   it('updates friendship status and feed when profile prop changes', () => {
