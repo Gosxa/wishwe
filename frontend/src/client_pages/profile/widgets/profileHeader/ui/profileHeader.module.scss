@@ -60,6 +60,13 @@
   @include tp.text-body;
 }
 
+.bannedNotice {
+  margin-top: 8px;
+  color: clr.$ns-700;
+
+  @include tp.text-body;
+}
+
 .stats {
   display: flex;
   gap: 12px;

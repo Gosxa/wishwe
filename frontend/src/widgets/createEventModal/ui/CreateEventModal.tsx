@@ -75,6 +75,7 @@ export const CreateEventModal = ({
 }: Props) => {
   const isOnboarding = useOnboardingStore(state => state.step !== null);
   const reportCreated = useOnboardingStore(state => state.reportCreated);
+  const endOnboarding = useOnboardingStore(state => state.end);
   const openCreatedEventShare = useCreatedEventShareStore(state => state.open);
   const deferRefresh = useEventsRefreshStore(state => state.deferRefresh);
   const { requestClose, modalTransitionProps } = useModalTransition(onClose);
@@ -113,9 +114,15 @@ export const CreateEventModal = ({
 
       if (!created) return;
 
+      if (created.status === 'moderate') {
+        if (isOnboarding) endOnboarding();
+        onCreated();
+        return;
+      }
+
       reportCreated(created);
 
-      if (!isOnboarding) {
+      if (!isOnboarding && created.status !== 'moderate') {
         deferRefresh(created.uuid);
         openCreatedEventShare(created);
       }
@@ -204,6 +211,9 @@ export const CreateEventModal = ({
         state={launchState}
         eventType={form.isPlan ? 'plan' : 'wish'}
         title={form.titleInput.value}
+        isModerationPending={
+          pendingCreatedRef.current?.status === 'moderate'
+        }
       />
     </>,
     document.body,

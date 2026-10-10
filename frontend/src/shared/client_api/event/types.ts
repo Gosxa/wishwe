@@ -25,7 +25,7 @@ type BackendEvent = {
   category: string | null;
   event_type: BackendEventType;
   event_visibility: string;
-  status: string;
+  status: 'active' | 'moderate' | 'closed' | 'completed';
   title: string;
   description: string;
   cover_image: string | null;

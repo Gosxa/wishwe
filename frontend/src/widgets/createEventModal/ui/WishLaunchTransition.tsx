@@ -11,6 +11,7 @@ type Props = {
   state: WishLaunchState;
   eventType: BackendEventType;
   title: string;
+  isModerationPending?: boolean;
 };
 
 const COPY = {
@@ -28,7 +29,12 @@ const COPY = {
   },
 } as const;
 
-export const WishLaunchTransition = ({ state, eventType, title }: Props) => {
+export const WishLaunchTransition = ({
+  state,
+  eventType,
+  title,
+  isModerationPending = false,
+}: Props) => {
   if (state === 'idle') return null;
 
   const copy = COPY[eventType];
@@ -81,12 +87,18 @@ export const WishLaunchTransition = ({ state, eventType, title }: Props) => {
         data-state={state}
       >
         <p className={s.heading}>
-          {isSuccess ? copy.successTitle : copy.publishingTitle}
+          {isSuccess && isModerationPending
+            ? 'Your event is under review'
+            : isSuccess
+              ? copy.successTitle
+              : copy.publishingTitle}
         </p>
         <p className={s.body}>
-          {isSuccess
-            ? 'One more beat—getting it ready to share.'
-            : copy.publishingBody}
+          {isSuccess && isModerationPending
+            ? 'It is hidden from the feed until a moderator reviews it. We will notify you when the review is complete.'
+            : isSuccess
+              ? 'One more beat—getting it ready to share.'
+              : copy.publishingBody}
         </p>
         <span className={s.progress} aria-hidden="true">
           <span />

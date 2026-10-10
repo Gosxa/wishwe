@@ -10,10 +10,11 @@ export type NotificationItem = {
     | 'event_planned'
     | 'event_start_reminder'
     | 'event_updated'
-    | 'event_cancelled';
+    | 'event_cancelled'
+    | 'moderation_warning';
   recipient: string;
   creator: string;
-  related_object_type: 'event' | 'friendship';
+  related_object_type: 'event' | 'friendship' | 'profile';
   related_object_id: number;
   is_read: boolean;
   created_at: string;

@@ -36,15 +36,28 @@ export const UserProfileHeader = ({
         </span>
 
         <div className={s.identityBody}>
-          {username && <h1 className={s.username}>@{username}</h1>}
-          {bio && <p className={s.bio}>{bio}</p>}
+          {profile.is_banned ? (
+            <>
+              <h1 className={s.username}>Banned user</h1>
+              <p className={s.bannedNotice}>
+                This profile was restricted for violating the platform rules.
+              </p>
+            </>
+          ) : (
+            <>
+              {username && <h1 className={s.username}>@{username}</h1>}
+              {bio && <p className={s.bio}>{bio}</p>}
+            </>
+          )}
 
-          <UserProfileFriendButton
-            userId={profile.user_id}
-            username={username}
-            status={friendshipStatus}
-            onStatusChange={onFriendshipStatusChange}
-          />
+          {!profile.is_banned && (
+            <UserProfileFriendButton
+              userId={profile.user_id}
+              username={username}
+              status={friendshipStatus}
+              onStatusChange={onFriendshipStatusChange}
+            />
+          )}
         </div>
       </div>
     </section>

@@ -7,7 +7,7 @@ export type ActivityItem = {
   type: string;
   recipient: string;
   creator: string;
-  relatedObjectType: 'event' | 'friendship';
+  relatedObjectType: 'event' | 'friendship' | 'profile';
   relatedObjectId: number;
   isRead: boolean;
   createdAt: string;

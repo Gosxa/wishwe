@@ -26,5 +26,6 @@ export type PublicProfile = {
   avatar: string | null;
   bio: string | null;
   is_private: boolean;
+  is_banned?: boolean;
   friendship_status: FriendshipStatus;
 };
