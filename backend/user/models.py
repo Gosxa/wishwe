@@ -132,9 +132,60 @@ class Profile(models.Model):
     is_onboarded = models.BooleanField(default=False)
     is_private = models.BooleanField(default=False)
     has_seen_feed_tour = models.BooleanField(default=False)
+    violation_count = models.PositiveSmallIntegerField(default=0)
+    last_violation_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        db_index=True,
+    )
 
     def __str__(self):
         return self.username
+
+    @property
+    def is_banned(self):
+        return self.violation_count >= 3
+
+
+class ModerationViolation(models.Model):
+    class Status(models.TextChoices):
+        CONFIRMED = "confirmed", "Confirmed"
+        PENDING = "pending", "Pending review"
+        OVERTURNED = "overturned", "Overturned"
+        EXPIRED = "expired", "Expired"
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="moderation_violations",
+    )
+    event = models.ForeignKey(
+        "event.Event",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="moderation_violations",
+    )
+    event_uuid = models.UUIDField(null=True, blank=True, db_index=True)
+    field_name = models.CharField(max_length=64)
+    categories = models.JSONField(default=list)
+    matched_terms = models.JSONField(default=list)
+    content_excerpt = models.CharField(max_length=500, blank=True)
+    status = models.CharField(
+        max_length=16,
+        choices=Status.choices,
+        default=Status.CONFIRMED,
+        db_index=True,
+    )
+    strike_applied = models.BooleanField(default=True)
+    occurred_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-occurred_at",)
+
+    def __str__(self):
+        return f"{self.user} — {self.field_name} — {self.status}"
 
 
 class EmailVerification(models.Model):

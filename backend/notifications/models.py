@@ -20,11 +20,13 @@ class NotificationType(models.TextChoices):
 
     EVENT_UPDATED = "event_updated", "Event Updated"
     EVENT_CANCELLED = "event_cancelled", "Event Cancelled"
+    MODERATION_WARNING = "moderation_warning", "Moderation Warning"
 
 
 class RelatedObjectType(models.TextChoices):
     EVENT = "event", "Event"
     FRIENDSHIP = "friendship", "Friendship"
+    PROFILE = "profile", "Profile"
 
 
 class Notification(models.Model):

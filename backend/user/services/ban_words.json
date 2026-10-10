@@ -1,0 +1,68 @@
+{
+  "_variants": {
+    "nigger": ["nigga"],
+    "faggot": ["fag"],
+    "kill yourself": ["kys", "go kill yourself"],
+    "retard": ["retarded"]
+  },
+  "sexual_content": [
+    "sex", "sexual", "sexual assault", "sexual abuse", "sexual violence",
+    "sexual exploitation", "rape", "raping", "molest", "molestation",
+    "pedophile", "child porn", "child pornography", "csam",
+    "child sexual abuse material", "child exploitation", "child grooming",
+    "underage sex", "underage nudes", "minor nudes", "minor porn",
+    "onlyfans", "only fans", "blowjob", "handjob", "oral sex", "anal sex",
+    "porn", "porno", "pornography", "pornographic", "xxx", "adult content",
+    "explicit content", "erotic content", "sex tape", "sexting", "nude",
+    "nudity", "nude pics", "nudes", "topless", "dick pic", "dick pics",
+    "cock", "pussy", "penis", "vagina", "cum", "semen", "orgasm",
+    "masturbate", "masturbating", "masturbation", "dildo", "vibrator",
+    "blowjob video", "sex worker", "prostitute", "prostitution", "escort",
+    "escort service", "brothel", "whore", "slut", "bitch", "fuck",
+    "fucking", "motherfucker", "cunt", "horny teens", "teen sex"
+  ],
+  "harassment": [
+    "kill yourself", "go die", "you should die",
+    "you deserve to die", "worthless piece of shit", "piece of shit",
+    "stupid bitch", "dumbass", "dumb ass", "idiot", "moron", "retard",
+    "scumbag", "loser", "worthless", "shut up",
+    "nobody likes you", "you are disgusting", "you are pathetic",
+    "i will find you", "i am going to hurt you", "i will hurt you",
+    "i will kill you", "you are dead", "watch your back",
+    "send them death threats", "dox them", "doxxing", "swat them",
+    "harass them", "bully them", "bullying", "stalk them", "stalking"
+  ],
+  "hate_and_discrimination": [
+    "nigger", "faggot", "dyke", "tranny", "kike", "spic", "chink",
+    "wetback", "beaner", "gook", "coon", "cracker", "raghead", "towelhead",
+    "zipperhead", "white power", "white supremacy", "heil hitler", "sieg heil",
+    "go back to your country", "go back to africa", "gas the jews",
+    "death to all [group]", "kill all [group]", "exterminate [group]",
+    "racial purity", "race war", "ethnic cleansing", "homophobic slur",
+    "transphobic slur", "hate [group]", "lynch [group]", "inferior race",
+    "subhuman [group]", "[group] are vermin"
+  ],
+  "targeted_violence": [
+    "beat them up", "beat up homeless people", "go beat homeless people",
+    "let's go beat up homeless people", "go beat up", "let's beat up",
+    "beat up [group]", "attack [group]", "assault them", "stab them",
+    "stab [group]", "shoot them", "shoot [group]", "kill them", "kill [group]",
+    "murder them", "murder [group]", "bomb the", "bomb [place]", "rape them",
+    "hunt down", "lynch them", "lynch [group]", "run them over",
+    "burn them alive", "hang them", "poison them", "make a bomb",
+    "build a bomb", "shooting spree", "mass shooting", "school shooting",
+    "assassinate", "terrorist attack", "suicide bombing", "weapon dealer",
+    "sell weapons", "buy illegal weapons"
+  ],
+  "drugs": [
+    "cocaine", "heroin", "methamphetamine", "meth", "crystal meth", "ice",
+    "crack cocaine", "fentanyl", "opioid abuse", "mdma", "ecstasy", "lsd",
+    "ketamine", "pcp", "ghb", "xanax abuse", "buy drugs", "sell drugs",
+    "drug dealer", "drug dealing", "sell cocaine", "buy cocaine", "sell heroin",
+    "buy heroin", "sell meth", "buy meth", "weed dealer", "buy weed",
+    "sell weed", "marijuana dealer", "cannabis dealer", "drug trafficking",
+    "drug smuggling", "make meth", "cook meth", "how to make drugs",
+    "overdose challenge", "get high", "getting high", "snort cocaine",
+    "shoot heroin", "inject drugs"
+  ]
+}
