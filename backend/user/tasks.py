@@ -7,6 +7,7 @@ from django.template.loader import render_to_string
 from django.utils import timezone
 
 from user.models import FriendInvite, Friendship, FriendshipStatus
+from user.services.moderation_service import ModerationService
 
 
 @shared_task
@@ -14,6 +15,12 @@ def delete_expired_invites():
     FriendInvite.objects.filter(
         expires_at__lt=timezone.now()
     ).delete()
+
+
+@shared_task
+def expire_moderation_violations():
+    """Expire one warning per eligible profile after 30 days."""
+    return ModerationService.expire_monthly_violations()
 
 
 @shared_task(
