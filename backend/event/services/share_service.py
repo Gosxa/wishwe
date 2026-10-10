@@ -1,8 +1,9 @@
 import uuid
 
 from django.db import transaction
+from rest_framework.exceptions import ValidationError
 
-from event.models import Event
+from event.models import Event, EventStatus
 
 
 class EventShareService:
@@ -14,6 +15,9 @@ class EventShareService:
 
         If a share link already exists, returns the event unchanged.
         """
+
+        if event.status == EventStatus.MODERATE:
+            raise ValidationError("Events pending moderation cannot be shared.")
 
         if event.share_token:
             return event
@@ -30,6 +34,9 @@ class EventShareService:
         Generates a new share link.
         The previous link becomes invalid immediately.
         """
+
+        if event.status == EventStatus.MODERATE:
+            raise ValidationError("Events pending moderation cannot be shared.")
 
         event.share_token = uuid.uuid4()
         event.save(update_fields=["share_token"])
@@ -59,5 +66,6 @@ class EventShareService:
             Event.objects
             .select_related("creator")
             .filter(share_token=token)
+            .exclude(status=EventStatus.MODERATE)
             .first()
         )

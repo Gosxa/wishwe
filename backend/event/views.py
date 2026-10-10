@@ -21,7 +21,7 @@ from event.models import (
     EventVisibility,
     ParticipationStatus,
 )
-from event.permissions import IsOwnerOrReadOnly
+from event.permissions import IsOwnerOrReadOnly, CanUsePlatformUnlessBanned
 from event.serializers import (
     CategorySerializer,
     EventSerializer,
@@ -56,7 +56,11 @@ class EventViewSet(
     serializer_class = EventSerializer
     lookup_field = "uuid"
     lookup_url_kwarg = "pk"
-    permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+    permission_classes = (
+        permissions.IsAuthenticated,
+        IsOwnerOrReadOnly,
+        CanUsePlatformUnlessBanned,
+    )
     pagination_class = DefaultPagination
 
     def get_queryset(self):
@@ -85,13 +89,16 @@ class EventViewSet(
                 ),
             )
 
+        visible_statuses = Q(status__in=(EventStatus.ACTIVE, EventStatus.CLOSED))
+        if self.action != "list":
+            visible_statuses |= Q(
+                status=EventStatus.MODERATE,
+                creator=self.request.user,
+            )
+
         queryset = Event.objects.filter(
             query_filter,
-            status__in=(
-                EventStatus.ACTIVE,
-                EventStatus.CLOSED,
-            ),
-        ).select_related(
+        ).filter(visible_statuses).select_related(
             "creator__profile",
             "category",
         ).prefetch_related(
