@@ -45,6 +45,7 @@ from .models import (
 )
 
 from .permissions import IsOwnerOrReadOnly, IsSelf
+from event.permissions import CanUsePlatformUnlessBanned
 from .serializers import (
     EmailSerializer,
     VerifyCodeSerializer,
@@ -68,6 +69,10 @@ from .serializers import (
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
 from .services.invite_service import InviteService
+from .services.moderation_service import (
+    ModerationService,
+    find_ban_word_matches,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -141,8 +146,6 @@ def google_auth(request):
 
                 Profile.objects.create(
                     user=user,
-                    first_name=first_name,
-                    last_name=last_name,
                 )
 
             else:
@@ -159,11 +162,24 @@ def google_auth(request):
 
         updated = False
 
+        imported_names = {}
         if first_name and not profile.first_name:
+            imported_names["first_name"] = first_name
+        if last_name and not profile.last_name:
+            imported_names["last_name"] = last_name
+
+        name_matches = find_ban_word_matches(imported_names)
+        if name_matches:
+            ModerationService.record_violation(
+                user=user,
+                matches=name_matches,
+            )
+
+        if first_name and not profile.first_name and not name_matches:
             profile.first_name = first_name
             updated = True
 
-        if last_name and not profile.last_name:
+        if last_name and not profile.last_name and not name_matches:
             profile.last_name = last_name
             updated = True
 
@@ -448,7 +464,10 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         if self.action != "me":
-            queryset = queryset.filter(is_private=False)
+            queryset = queryset.filter(
+                is_private=False,
+                violation_count__lt=3,
+            )
 
         username = self.request.query_params.get("username")
 
@@ -612,7 +631,7 @@ class FriendshipViewSet(
 ):
     queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
     serializer_class = FriendshipSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, CanUsePlatformUnlessBanned)
     pagination_class = DefaultPagination
 
     def get_queryset(self):
@@ -852,7 +871,7 @@ class InviteViewSet(
     viewsets.GenericViewSet,
 ):
     queryset = FriendInvite.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanUsePlatformUnlessBanned]
     serializer_class = InviteSerializer
 
     def create(self, request, *args, **kwargs):
