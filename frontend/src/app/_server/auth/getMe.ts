@@ -4,7 +4,10 @@ import { cookies, headers } from 'next/headers';
 import { Profile } from '@/shared/client_api/auth/types';
 import { USER_ID_HEADER } from '@/shared/lib/nextPath';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND =
+  process.env.BACKEND_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_BACKEND_URL ??
+  'http://localhost:8000';
 
 const authUser = cache(async (): Promise<Profile | null> => {
   const headerStore = await headers();

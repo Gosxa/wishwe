@@ -178,6 +178,8 @@ pyrightconfig.json
 # ---------------- DEVOPS ----------------
 
 infra/docker/certbot/
+infra/docker/.env.test
+infra/docker/.env.test
 
 # Terraform state — never commit these
 *.tfstate

@@ -2,7 +2,10 @@ import { cookies } from 'next/headers';
 
 import { PublicProfile } from '@/shared/client_api/user/types';
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND =
+  process.env.BACKEND_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_BACKEND_URL ??
+  'http://localhost:8000';
 
 /**
  * Resolve a public profile by its exact username.

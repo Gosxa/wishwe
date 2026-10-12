@@ -69,3 +69,7 @@ Automated tests mock both OCR and the OpenAI HTTP response, so they need no API
 key, no network access, and no harmful image samples. A manual smoke test can
 use a few benign and policy-approved images; verify the safe, review, rejection,
 and retry paths in Admin → User → Image moderations.
+
+For manual frontend + backend testing in Docker, see
+`infra/docker/README-test.md`. That stack includes PostgreSQL, Redis, the
+Tesseract-enabled backend/worker image, and local filesystem media storage.
