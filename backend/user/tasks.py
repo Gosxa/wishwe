@@ -8,6 +8,11 @@ from django.utils import timezone
 
 from user.models import FriendInvite, Friendship, FriendshipStatus
 from user.services.moderation_service import ModerationService
+from user.services.image_moderation_service import (
+    ImageModerationError,
+    mark_image_moderation_failed,
+    process_image_moderation_request,
+)
 
 
 @shared_task
@@ -21,6 +26,18 @@ def delete_expired_invites():
 def expire_moderation_violations():
     """Expire one warning per eligible profile after 30 days."""
     return ModerationService.expire_monthly_violations()
+
+
+@shared_task(bind=True, max_retries=5)
+def process_image_moderation(self, moderation_id: int):
+    """Check staged profile/event images and retry transient failures."""
+    try:
+        return process_image_moderation_request(moderation_id)
+    except ImageModerationError as error:
+        if self.request.retries >= self.max_retries:
+            mark_image_moderation_failed(moderation_id, error)
+            return "failed"
+        raise self.retry(exc=error, countdown=2 ** (self.request.retries + 1))
 
 
 @shared_task(
