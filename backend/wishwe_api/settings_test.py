@@ -31,6 +31,10 @@ STORAGES = {
 }
 MEDIA_ROOT = BASE_DIR / "media"  # noqa: F405
 MEDIA_URL = "/media/"
+STATIC_URL = "/static/"
+AWS_S3_CUSTOM_DOMAIN = None
+AWS_STORAGE_BUCKET_NAME = None
+AWS_S3_ENDPOINT_URL = None
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]

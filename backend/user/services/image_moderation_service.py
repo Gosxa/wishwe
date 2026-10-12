@@ -238,7 +238,9 @@ def _attach_image(request, image_bytes):
 
 @transaction.atomic
 def process_image_result(request_id, *, result, image_bytes, ocr_text):
-    request = ImageModeration.objects.select_for_update().select_related(
+    request = ImageModeration.objects.select_for_update(
+        of=("self",),
+    ).select_related(
         "user",
         "event",
     ).get(pk=request_id)
@@ -336,7 +338,9 @@ def process_image_moderation_request(request_id):
 
 @transaction.atomic
 def resolve_image_moderation(request_id, *, approved):
-    request = ImageModeration.objects.select_for_update().select_related(
+    request = ImageModeration.objects.select_for_update(
+        of=("self",),
+    ).select_related(
         "user",
         "event",
         "violation",
