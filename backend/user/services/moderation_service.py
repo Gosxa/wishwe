@@ -17,6 +17,7 @@ from notifications.models import (
 )
 from user.models import (
     Friendship,
+    ImageModeration,
     ModerationViolation,
     Profile,
 )
@@ -102,6 +103,7 @@ class ModerationService:
     @transaction.atomic
     def record_violation(
         *, user, matches, event=None, pending=False, apply_strike=True,
+        image_violation=False,
     ):
         profile = Profile.objects.select_for_update().get(user=user)
         if apply_strike:
@@ -135,22 +137,46 @@ class ModerationService:
             creator=user,
             type=NotificationType.MODERATION_WARNING,
             title=(
+                "Event image sent for review"
+                if image_violation and pending and event else
+                "Profile image sent for review"
+                if image_violation and pending else
+                "Event image removed"
+                if image_violation and event else
+                "Profile image rejected"
+                if image_violation else
                 "Event sent for review"
-                if pending else "Profile update rejected"
+                if pending and event else
+                "Profile update rejected"
             ),
             message=(
-                (
-                    "Your previously published event is hidden while an "
-                    "administrator reviews its content. No violation is counted "
-                    "while it is under review."
-                    if not apply_strike else
-                    "Your event is hidden while an administrator reviews its "
-                    "content. If it is approved, this warning will be removed."
-                )
-                if pending else
-                "Your profile change was rejected for violating the content rules. "
-                "Warnings expire after 30 days below three violations. You can "
+                "Your event image is held for administrator review. No "
+                "violation is counted while it is under review."
+                if image_violation and pending and event else
+                "Your new profile image is held for administrator review. "
+                "Your current avatar remains visible. No violation is "
+                "counted while it is under review."
+                if image_violation and pending else
+                "Your event image was rejected and removed. A warning has "
+                "been recorded. Warnings expire after 30 days below three "
+                "violations. You can appeal by contacting support from "
+                "your account email."
+                if image_violation and event else
+                "Your profile image was rejected. Your previous avatar "
+                "remains visible. A warning has been recorded. Warnings "
+                "expire after 30 days below three violations. You can "
                 "appeal by contacting support from your account email."
+                if image_violation else
+                "Your previously published event is hidden while an "
+                "administrator reviews its content. No violation is counted "
+                "while it is under review."
+                if pending and event and not apply_strike else
+                "Your event is hidden while an administrator reviews its "
+                "content. If it is approved, this warning will be removed."
+                if pending and event else
+                "Your profile change was rejected for violating the content "
+                "rules. Warnings expire after 30 days below three violations. "
+                "You can appeal by contacting support from your account email."
             ),
             related_object_type=(
                 RelatedObjectType.EVENT if event else RelatedObjectType.PROFILE
@@ -179,6 +205,19 @@ class ModerationService:
             status=ModerationViolation.Status.CONFIRMED,
             resolved_at=timezone.now(),
         )
+        pending_images = ImageModeration.objects.select_for_update().filter(
+            user=user,
+            status__in=(
+                ImageModeration.Status.QUEUED,
+                ImageModeration.Status.REVIEW,
+                ImageModeration.Status.FAILED,
+            ),
+        )
+        for image_review in pending_images:
+            image_review.image.delete(save=False)
+            image_review.status = ImageModeration.Status.CANCELLED
+            image_review.resolved_at = timezone.now()
+            image_review.save(update_fields=("image", "status", "resolved_at"))
         Event.objects.filter(creator=user).delete()
         EventParticipant.objects.filter(user=user).delete()
         Friendship.objects.filter(Q(sender=user) | Q(receiver=user)).delete()

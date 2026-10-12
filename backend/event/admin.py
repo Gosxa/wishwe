@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib import messages
 from .models import Event, Category, EventParticipant
 from user.services.moderation_service import ModerationService
 
@@ -57,15 +58,44 @@ class EventAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     actions = ("approve_moderated_events", "reject_moderated_events")
 
+    @staticmethod
+    def _events_ready_for_text_review(queryset):
+        unresolved_image_statuses = (
+            "queued",
+            "review",
+            "failed",
+        )
+        return queryset.filter(status="moderate").exclude(
+            image_moderations__status__in=unresolved_image_statuses,
+        ).distinct()
+
     @admin.action(description="Approve selected events pending moderation")
     def approve_moderated_events(self, request, queryset):
-        for event in queryset.filter(status="moderate"):
+        ready_events = self._events_ready_for_text_review(queryset)
+        for event in ready_events:
             ModerationService.resolve_event(event, approved=True)
+        skipped = queryset.filter(status="moderate").count() - ready_events.count()
+        if skipped:
+            self.message_user(
+                request,
+                f"{skipped} event(s) have an unresolved image check. "
+                "Review them in User → Image moderations first.",
+                messages.WARNING,
+            )
 
     @admin.action(description="Reject selected events pending moderation")
     def reject_moderated_events(self, request, queryset):
-        for event in queryset.filter(status="moderate"):
+        ready_events = self._events_ready_for_text_review(queryset)
+        for event in ready_events:
             ModerationService.resolve_event(event, approved=False)
+        skipped = queryset.filter(status="moderate").count() - ready_events.count()
+        if skipped:
+            self.message_user(
+                request,
+                f"{skipped} event(s) have an unresolved image check. "
+                "Review them in User → Image moderations first.",
+                messages.WARNING,
+            )
 
     fieldsets = (
         (

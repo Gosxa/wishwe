@@ -41,7 +41,8 @@ from .models import (
     SocialAccount,
     Profile,
     Friendship,
-    FriendInvite
+    FriendInvite,
+    ImageModeration,
 )
 
 from .permissions import IsOwnerOrReadOnly, IsSelf
@@ -68,6 +69,7 @@ from .serializers import (
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
+from .services.image_moderation_service import queue_image
 from .services.invite_service import InviteService
 from .services.moderation_service import (
     ModerationService,
@@ -551,13 +553,32 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["patch"], url_path="avatar")
     def upload_avatar(self, request):
+        profile = request.user.profile
+        if profile.is_banned:
+            raise PermissionDenied("Banned profiles cannot upload images.")
+
         serializer = self.get_serializer(
-            request.user.profile,
+            profile,
             data=request.data,
             partial=True
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+
+        image = serializer.validated_data.get("avatar")
+        if image:
+            queue_image(
+                user=request.user,
+                target=ImageModeration.Target.AVATAR,
+                image=image,
+            )
+
+            return Response(
+                {
+                    "avatar": profile.avatar.url if profile.avatar else None,
+                    "moderation_status": ImageModeration.Status.QUEUED,
+                },
+                status=status.HTTP_202_ACCEPTED,
+            )
 
         return Response(serializer.data)
 
