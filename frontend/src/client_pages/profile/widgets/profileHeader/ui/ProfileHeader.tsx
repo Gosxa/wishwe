@@ -50,6 +50,15 @@ export const ProfileHeader = ({
 
         <div className={s.identityBody}>
           {username && <h1 className={s.username}>@{username}</h1>}
+          {user?.is_banned && (
+            <p className={s.bannedNotice} role="status">
+              Your account is restricted for violating the platform rules. You
+              cannot create events, send friend requests, or upload images. If
+              you think this is a mistake, contact{' '}
+              <a href="mailto:support@wishwe.online">support</a> from the email
+              linked to your account to appeal.
+            </p>
+          )}
           {bio && <p className={s.bio}>{bio}</p>}
 
           {hasStats && (

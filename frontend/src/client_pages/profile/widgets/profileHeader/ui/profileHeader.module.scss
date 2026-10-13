@@ -61,10 +61,20 @@
 }
 
 .bannedNotice {
-  margin-top: 8px;
-  color: clr.$ns-700;
+  margin-top: 12px;
+  padding: 12px 16px;
+  border: 1px solid clr.$err;
+  border-radius: 10px;
+  background: rgba(clr.$err, 0.08);
+  color: clr.$ns-900;
 
   @include tp.text-body;
+
+  a {
+    color: clr.$ns-900;
+    font-weight: 700;
+    text-decoration: underline;
+  }
 }
 
 .stats {
