@@ -20,4 +20,8 @@ app.conf.beat_schedule = {
         "task": "user.tasks.expire_moderation_violations",
         "schedule": crontab(hour=2, minute=30),
     },
+    "delete-expired-image-moderation-uploads-hourly": {
+        "task": "user.tasks.delete_expired_image_moderation_uploads",
+        "schedule": crontab(minute=0),
+    },
 }

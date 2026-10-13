@@ -28,6 +28,25 @@ def expire_moderation_violations():
     return ModerationService.expire_monthly_violations()
 
 
+@shared_task
+def delete_expired_image_moderation_uploads():
+    """Remove staged images seven days after their moderation decision."""
+    from user.models import ImageModeration
+
+    retention_cutoff = timezone.now() - timedelta(days=7)
+    expired = ImageModeration.objects.filter(
+        resolved_at__lte=retention_cutoff,
+    ).exclude(image="")
+
+    deleted = 0
+    for moderation in expired.iterator():
+        moderation.image.delete(save=False)
+        ImageModeration.objects.filter(pk=moderation.pk).update(image="")
+        deleted += 1
+
+    return deleted
+
+
 @shared_task(bind=True, max_retries=5)
 def process_image_moderation(self, moderation_id: int):
     """Check staged profile/event images and retry transient failures."""

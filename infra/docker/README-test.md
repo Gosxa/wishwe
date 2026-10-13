@@ -33,7 +33,13 @@ environment uses the console email backend.
 
 The test settings use a separate PostgreSQL database and filesystem media
 storage. Django and Celery share a Docker volume at `/app/media`; staged images
-are not exposed through a public CDN. The named volumes persist between starts.
+are not exposed through a public CDN. Images held for review or rejected by
+moderation remain visible in Django admin under **User → Image moderations**
+for seven days after resolution. While an event cover is under review, its
+creator can preview it on their feed and profile; other users cannot see it.
+The files live in the `test_media` Docker volume and are served from
+`http://localhost:8000/media/`. Celery Beat cleans expired copies hourly. The
+named volumes persist between starts.
 To reset the local database, media, and frontend cache, stop the stack and run:
 
 ```powershell

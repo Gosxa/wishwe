@@ -16,6 +16,7 @@ from notifications.models import (
     RelatedObjectType,
 )
 from user.models import ImageModeration, ModerationViolation, Profile
+from user.services.image_storage import delete_staged_image
 from user.services.moderation_service import (
     ModerationService,
     find_ban_word_matches,
@@ -143,7 +144,7 @@ def queue_image(*, user, target, image, event=None):
             old_request.violation.status = ModerationViolation.Status.OVERTURNED
             old_request.violation.resolved_at = timezone.now()
             old_request.violation.save(update_fields=("status", "resolved_at"))
-        old_request.image.delete(save=False)
+        delete_staged_image(old_request.image)
         old_request.status = ImageModeration.Status.CANCELLED
         old_request.resolved_at = timezone.now()
         old_request.save(update_fields=("image", "status", "resolved_at"))
@@ -259,7 +260,7 @@ def process_image_result(request_id, *, result, image_bytes, ocr_text):
         _attach_image(request, image_bytes)
         request.status = ImageModeration.Status.APPROVED
         request.resolved_at = timezone.now()
-        request.image.delete(save=False)
+        delete_staged_image(request.image)
         request.save(update_fields=(
             "status", "resolved_at", "image", "ocr_text", "categories",
             "category_scores", "model_name", "error_message",
@@ -278,6 +279,7 @@ def process_image_result(request_id, *, result, image_bytes, ocr_text):
         pending=decision == ImageModeration.Status.REVIEW,
         apply_strike=decision == ImageModeration.Status.REJECTED,
         image_violation=True,
+        preserve_image_moderation_id=request.pk,
     )
     request.violation = violation
     request.status = decision
@@ -285,8 +287,8 @@ def process_image_result(request_id, *, result, image_bytes, ocr_text):
         timezone.now()
         if decision == ImageModeration.Status.REJECTED else None
     )
-    if decision == ImageModeration.Status.REJECTED:
-        request.image.delete(save=False)
+    # Keep flagged images available to administrators during the retention
+    # window. The periodic cleanup removes them seven days after resolution.
     request.save(update_fields=(
         "status", "resolved_at", "image", "violation", "ocr_text",
         "categories", "category_scores", "model_name", "error_message",
@@ -307,7 +309,7 @@ def process_image_moderation_request(request_id):
         (request.target == ImageModeration.Target.EVENT_COVER and not request.event)
         or request.user.profile.is_banned
     ):
-        request.image.delete(save=False)
+        delete_staged_image(request.image)
         request.status = ImageModeration.Status.CANCELLED
         request.resolved_at = timezone.now()
         request.save(update_fields=("image", "status", "resolved_at"))
@@ -361,7 +363,6 @@ def resolve_image_moderation(request_id, *, approved):
             violation.status = ModerationViolation.Status.OVERTURNED
             violation.resolved_at = now
             violation.save(update_fields=("status", "resolved_at"))
-        request.image.delete(save=False)
         request.status = ImageModeration.Status.APPROVED
     else:
         if violation:
@@ -377,10 +378,13 @@ def resolve_image_moderation(request_id, *, approved):
             "violation_count", "last_violation_at", "updated_at",
         ))
         request.status = ImageModeration.Status.REJECTED
-        request.image.delete(save=False)
 
         if profile.is_banned:
-            ModerationService.enforce_ban(user=request.user, profile=profile)
+            ModerationService.enforce_ban(
+                user=request.user,
+                profile=profile,
+                preserve_image_moderation_id=request.pk,
+            )
 
     request.resolved_at = now
     request.save(update_fields=("status", "resolved_at", "image"))

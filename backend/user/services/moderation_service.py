@@ -21,6 +21,7 @@ from user.models import (
     ModerationViolation,
     Profile,
 )
+from user.services.image_storage import delete_staged_image
 
 
 LEXICON_PATH = Path(__file__).with_name("ban_words.json")
@@ -103,7 +104,7 @@ class ModerationService:
     @transaction.atomic
     def record_violation(
         *, user, matches, event=None, pending=False, apply_strike=True,
-        image_violation=False,
+        image_violation=False, preserve_image_moderation_id=None,
     ):
         profile = Profile.objects.select_for_update().get(user=user)
         if apply_strike:
@@ -185,13 +186,19 @@ class ModerationService:
         )
 
         if not pending and profile.is_banned:
-            ModerationService.enforce_ban(user=user, profile=profile)
+            ModerationService.enforce_ban(
+                user=user,
+                profile=profile,
+                preserve_image_moderation_id=preserve_image_moderation_id,
+            )
 
         return violation
 
     @staticmethod
     @transaction.atomic
-    def enforce_ban(*, user, profile=None):
+    def enforce_ban(
+        *, user, profile=None, preserve_image_moderation_id=None
+    ):
         profile = profile or Profile.objects.select_for_update().get(user=user)
         if not profile.is_banned:
             return
@@ -213,8 +220,12 @@ class ModerationService:
                 ImageModeration.Status.FAILED,
             ),
         )
+        if preserve_image_moderation_id is not None:
+            pending_images = pending_images.exclude(
+                pk=preserve_image_moderation_id,
+            )
         for image_review in pending_images:
-            image_review.image.delete(save=False)
+            delete_staged_image(image_review.image)
             image_review.status = ImageModeration.Status.CANCELLED
             image_review.resolved_at = timezone.now()
             image_review.save(update_fields=("image", "status", "resolved_at"))
