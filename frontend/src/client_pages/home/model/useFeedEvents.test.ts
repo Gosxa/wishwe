@@ -30,6 +30,7 @@ type ToolbarState = {
 
 const event = (id: number): BackendEvent => ({
   id,
+  uuid: `event-${id}`,
   creator: `user-${id}`,
   creator_avatar: null,
   mutual_friend: null,
@@ -103,7 +104,10 @@ describe('useFeedEvents', () => {
 
     await act(async () => apiMocks.listEvents.mock.results[0].value);
 
-    expect(result.current.events.map(item => item.id)).toEqual(['1', '2']);
+    expect(result.current.events.map(item => item.id)).toEqual([
+      'event-1',
+      'event-2',
+    ]);
     expect(result.current.events[0].title).toBe('Event 1');
     expect(result.current.hasMore).toBe(true);
   });
@@ -147,6 +151,6 @@ describe('useFeedEvents', () => {
       await refreshRequest;
     });
 
-    expect(result.current.events.map(item => item.id)).toEqual(['2']);
+    expect(result.current.events.map(item => item.id)).toEqual(['event-2']);
   });
 });

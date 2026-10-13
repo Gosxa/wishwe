@@ -44,6 +44,19 @@ describe('resilient media', () => {
     expect(document.querySelector('svg')?.getAttribute('width')).toBe('48');
   });
 
+  it('rewrites Docker-internal backend URLs to the browser backend URL', () => {
+    render(
+      <AvatarImage
+        src="http://django:8000/media/uploads/avatars/alice.jpg"
+        alt="Alice"
+      />,
+    );
+
+    expect(screen.getByRole('img', { name: 'Alice' }).getAttribute('src')).toBe(
+      'http://localhost:8000/media/uploads/avatars/alice.jpg',
+    );
+  });
+
   it('recovers from failures that happen before React attaches handlers', async () => {
     vi.spyOn(HTMLImageElement.prototype, 'complete', 'get').mockReturnValue(
       true,
@@ -68,7 +81,7 @@ describe('resilient media', () => {
     rerender(<AvatarImage src="/media/new-avatar.webp" alt="Alice" />);
 
     expect(screen.getByRole('img', { name: 'Alice' }).getAttribute('src')).toBe(
-      '/media/new-avatar.webp',
+      'http://localhost:8000/media/new-avatar.webp',
     );
   });
 });

@@ -87,6 +87,7 @@ const feedEvent = (overrides: Partial<FeedEvent> = {}): FeedEvent => ({
 
 const backendEvent = (overrides: Partial<BackendEvent> = {}): BackendEvent => ({
   id: 42,
+  uuid: 'event-42',
   creator: 'host',
   creator_avatar: null,
   mutual_friend: null,
@@ -460,6 +461,23 @@ describe('EventCard', () => {
 
     expect(screen.queryByRole('button', { name: 'Plan it' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Edit' })).toBeTruthy();
+  });
+
+  it('labels an owner event while its cover is under review', () => {
+    renderCard({
+      event: feedEvent({ status: 'moderate' }),
+      isOwn: true,
+    });
+
+    expect(screen.getByText('Under review')).toBeTruthy();
+  });
+
+  it('does not show moderation status to other viewers', () => {
+    renderCard({
+      event: feedEvent({ status: 'moderate' }),
+    });
+
+    expect(screen.queryByText('Under review')).toBeNull();
   });
 
   it('keeps an archived recap open until its close control is used', async () => {

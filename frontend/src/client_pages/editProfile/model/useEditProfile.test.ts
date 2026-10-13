@@ -11,6 +11,7 @@ const navigationMocks = vi.hoisted(() => ({
 const userApiMocks = vi.hoisted(() => ({
   changeAvatar: vi.fn(),
   checkUsername: vi.fn(),
+  getAvatarModeration: vi.fn(),
   updateProfile: vi.fn(),
 }));
 
@@ -26,6 +27,7 @@ vi.mock('@/shared/client_api/user', async importOriginal => {
     ...actual,
     changeAvatar: userApiMocks.changeAvatar,
     checkUsername: userApiMocks.checkUsername,
+    getAvatarModeration: userApiMocks.getAvatarModeration,
     updateProfile: userApiMocks.updateProfile,
   };
 });
@@ -77,6 +79,11 @@ describe('useEditProfile', () => {
     userApiMocks.checkUsername.mockResolvedValue({ available: true });
     userApiMocks.updateProfile.mockResolvedValue(profile);
     userApiMocks.changeAvatar.mockResolvedValue({
+      avatar: 'https://cdn.example/old-avatar.png',
+      moderation_status: 'queued',
+    });
+    userApiMocks.getAvatarModeration.mockResolvedValue({
+      status: 'approved',
       avatar: 'https://cdn.example/new-avatar.png',
     });
     useLoadingStore.setState({ isLoading: false, setLoading });
@@ -236,10 +243,12 @@ describe('useEditProfile', () => {
     expect(userApiMocks.changeAvatar).toHaveBeenCalledWith(
       'data:image/png;base64,cropped',
     );
-    expect(setUser).toHaveBeenCalledWith({
-      ...profile,
-      avatar: 'https://cdn.example/new-avatar.png',
-    });
+    await waitFor(() =>
+      expect(setUser).toHaveBeenLastCalledWith({
+        ...profile,
+        avatar: 'https://cdn.example/new-avatar.png',
+      }),
+    );
     expect(navigationMocks.push).toHaveBeenCalledWith('/profile');
     expect(setLoading.mock.calls).toEqual([[true], [false]]);
   });

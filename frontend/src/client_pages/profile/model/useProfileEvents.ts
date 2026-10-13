@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { listUserEvents } from '@/shared/client_api/user';
 import { usePaginatedList } from '@shared/hooks/usePaginatedList';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
+import { useModerationRefresh } from '@shared/hooks/useModerationRefresh';
 import { toFeedEvents } from '@entities/event';
 import { toProfileEventListParams } from './profileEventsQuery';
 import { SEARCH_PARAM } from './useProfileSearch';
@@ -51,6 +52,9 @@ export const useProfileEvents = ({
     errorMessage: 'Failed to load events',
   });
   const { items: events, ...state } = pagination;
+  useModerationRefresh(
+    active && events.some(event => event.status === 'moderate'),
+  );
 
   return { ...state, events };
 };

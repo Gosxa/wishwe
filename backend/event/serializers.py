@@ -13,7 +13,7 @@ from event.models import (
     ParticipationStatus,
 )
 from event.services.event_service import EventService
-from user.models import Profile
+from user.models import ImageModeration, Profile
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -62,6 +62,7 @@ class ParticipantPreviewSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
+    cover_image = serializers.SerializerMethodField()
     creator = serializers.CharField(
         source="creator.profile.username",
         read_only=True,
@@ -77,6 +78,37 @@ class EventSerializer(serializers.ModelSerializer):
     mutual_friend = serializers.SerializerMethodField()
     user_participation_status = serializers.SerializerMethodField()
     participants_preview = serializers.SerializerMethodField()
+
+    def get_cover_image(self, obj):
+        if obj.cover_image:
+            return serializers.ImageField().to_representation(obj.cover_image)
+
+        request = self.context.get("request")
+        if (
+            obj.status != EventStatus.MODERATE
+            or request is None
+            or not request.user.is_authenticated
+            or request.user.pk != obj.creator_id
+        ):
+            return None
+
+        pending_images = getattr(obj, "pending_moderation_images", None)
+        if pending_images is None:
+            moderation = obj.image_moderations.filter(
+                target=ImageModeration.Target.EVENT_COVER,
+                status__in=(
+                    ImageModeration.Status.QUEUED,
+                    ImageModeration.Status.REVIEW,
+                    ImageModeration.Status.FAILED,
+                ),
+            ).order_by("-created_at")
+            moderation = moderation.first()
+        else:
+            moderation = next(iter(pending_images), None)
+        if moderation is None or not moderation.image:
+            return None
+
+        return serializers.ImageField().to_representation(moderation.image)
 
 
     class Meta:

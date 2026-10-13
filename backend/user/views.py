@@ -41,10 +41,12 @@ from .models import (
     SocialAccount,
     Profile,
     Friendship,
-    FriendInvite
+    FriendInvite,
+    ImageModeration,
 )
 
 from .permissions import IsOwnerOrReadOnly, IsSelf
+from event.permissions import CanUsePlatformUnlessBanned
 from .serializers import (
     EmailSerializer,
     VerifyCodeSerializer,
@@ -67,7 +69,12 @@ from .serializers import (
 )
 from .services.auth_service import AuthService
 from .services.friendship_service import FriendshipService
+from .services.image_moderation_service import queue_image
 from .services.invite_service import InviteService
+from .services.moderation_service import (
+    ModerationService,
+    find_ban_word_matches,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -141,8 +148,6 @@ def google_auth(request):
 
                 Profile.objects.create(
                     user=user,
-                    first_name=first_name,
-                    last_name=last_name,
                 )
 
             else:
@@ -159,11 +164,24 @@ def google_auth(request):
 
         updated = False
 
+        imported_names = {}
         if first_name and not profile.first_name:
+            imported_names["first_name"] = first_name
+        if last_name and not profile.last_name:
+            imported_names["last_name"] = last_name
+
+        name_matches = find_ban_word_matches(imported_names)
+        if name_matches:
+            ModerationService.record_violation(
+                user=user,
+                matches=name_matches,
+            )
+
+        if first_name and not profile.first_name and not name_matches:
             profile.first_name = first_name
             updated = True
 
-        if last_name and not profile.last_name:
+        if last_name and not profile.last_name and not name_matches:
             profile.last_name = last_name
             updated = True
 
@@ -448,7 +466,10 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
         )
 
         if self.action != "me":
-            queryset = queryset.filter(is_private=False)
+            queryset = queryset.filter(
+                is_private=False,
+                violation_count__lt=3,
+            )
 
         username = self.request.query_params.get("username")
 
@@ -532,15 +553,46 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=["patch"], url_path="avatar")
     def upload_avatar(self, request):
+        profile = request.user.profile
+        if profile.is_banned:
+            raise PermissionDenied("Banned profiles cannot upload images.")
+
         serializer = self.get_serializer(
-            request.user.profile,
+            profile,
             data=request.data,
             partial=True
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+
+        image = serializer.validated_data.get("avatar")
+        if image:
+            queue_image(
+                user=request.user,
+                target=ImageModeration.Target.AVATAR,
+                image=image,
+            )
+
+            return Response(
+                {
+                    "avatar": profile.avatar.url if profile.avatar else None,
+                    "moderation_status": ImageModeration.Status.QUEUED,
+                },
+                status=status.HTTP_202_ACCEPTED,
+            )
 
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"], url_path="avatar-moderation")
+    def avatar_moderation(self, request):
+        moderation = ImageModeration.objects.filter(
+            user=request.user,
+            target=ImageModeration.Target.AVATAR,
+        ).order_by("-created_at").first()
+        return Response({
+            "status": moderation.status if moderation else None,
+            "avatar": request.user.profile.avatar.url
+            if request.user.profile.avatar else None,
+        })
 
     @action(detail=False, methods=["post"], url_path="change-password")
     def change_password(self, request):
@@ -612,7 +664,7 @@ class FriendshipViewSet(
 ):
     queryset = Friendship.objects.select_related("sender__profile", "receiver__profile")
     serializer_class = FriendshipSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated, CanUsePlatformUnlessBanned)
     pagination_class = DefaultPagination
 
     def get_queryset(self):
@@ -779,6 +831,18 @@ class UserViewSet(
             "creator__profile",
         ).prefetch_related(
             Prefetch(
+                "image_moderations",
+                queryset=ImageModeration.objects.filter(
+                    target=ImageModeration.Target.EVENT_COVER,
+                    status__in=(
+                        ImageModeration.Status.QUEUED,
+                        ImageModeration.Status.REVIEW,
+                        ImageModeration.Status.FAILED,
+                    ),
+                ).order_by("-created_at"),
+                to_attr="pending_moderation_images",
+            ),
+            Prefetch(
                 "participants",
                 queryset=EventParticipant.objects.filter(
                     status__in=(
@@ -796,6 +860,10 @@ class UserViewSet(
                 to_attr="current_user_participation",
             ),
         ).distinct()
+        is_own_profile = user.pk == request.user.pk
+        if not is_own_profile:
+            events = events.exclude(status=EventStatus.MODERATE)
+
         tab = self.request.query_params.get("tab")
         sort = self.request.query_params.get("sort")
         title = self.request.query_params.get("title")
@@ -807,14 +875,20 @@ class UserViewSet(
             )
 
         if tab == "plans":
+            plan_statuses = [EventStatus.ACTIVE, EventStatus.CLOSED]
+            if is_own_profile:
+                plan_statuses.append(EventStatus.MODERATE)
             events = events.filter(
-                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                status__in=plan_statuses,
                 event_type=EventType.PLAN
             )
 
         if tab == "wishes":
+            wish_statuses = [EventStatus.ACTIVE, EventStatus.CLOSED]
+            if is_own_profile:
+                wish_statuses.append(EventStatus.MODERATE)
             events = events.filter(
-                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                status__in=wish_statuses,
                 event_type=EventType.WISH
             )
 
@@ -852,7 +926,7 @@ class InviteViewSet(
     viewsets.GenericViewSet,
 ):
     queryset = FriendInvite.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CanUsePlatformUnlessBanned]
     serializer_class = InviteSerializer
 
     def create(self, request, *args, **kwargs):

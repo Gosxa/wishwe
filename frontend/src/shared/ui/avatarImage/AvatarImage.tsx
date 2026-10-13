@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { Avatar } from '@shared/ui/icons';
+import { toAbsoluteMediaUrl } from '@shared/lib/mediaUrl';
 
 type Props = Omit<ComponentPropsWithoutRef<'img'>, 'alt' | 'src'> & {
   src?: string | null;
@@ -24,9 +25,10 @@ export const AvatarImage = ({
   onError,
   ...props
 }: Props) => {
+  const imageSrc = toAbsoluteMediaUrl(src);
   const [failedSource, setFailedSource] = useState<string | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const hasFailed = !src || failedSource === src;
+  const hasFailed = !imageSrc || failedSource === imageSrc;
 
   useEffect(() => {
     const image = imageRef.current;
@@ -36,17 +38,17 @@ export const AvatarImage = ({
     let isMounted = true;
 
     queueMicrotask(() => {
-      if (isMounted) setFailedSource(src);
+      if (isMounted) setFailedSource(imageSrc);
     });
 
     return () => {
       isMounted = false;
     };
-  }, [hasFailed, src]);
+  }, [hasFailed, imageSrc]);
 
   const handleError = (event: SyntheticEvent<HTMLImageElement>) => {
     onError?.(event);
-    setFailedSource(src ?? null);
+    setFailedSource(imageSrc);
   };
 
   if (hasFailed) {
@@ -55,6 +57,12 @@ export const AvatarImage = ({
 
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img {...props} ref={imageRef} src={src} alt={alt} onError={handleError} />
+    <img
+      {...props}
+      ref={imageRef}
+      src={imageSrc ?? undefined}
+      alt={alt}
+      onError={handleError}
+    />
   );
 };

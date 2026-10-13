@@ -29,6 +29,7 @@ class EventVisibility(models.TextChoices):
 
 class EventStatus(models.TextChoices):
     ACTIVE = "active", "Active"
+    MODERATE = "moderate", "Pending moderation"
     CLOSED = "closed", "Closed"
     COMPLETED = "completed", "Completed"
 

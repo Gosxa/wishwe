@@ -12,6 +12,7 @@ export type Profile = {
   avatar: string | null;
   social_media_url: string | null;
   is_private: boolean;
+  is_banned?: boolean;
   has_seen_feed_tour: boolean;
   active_events_count?: number;
   archived_events_count?: number;

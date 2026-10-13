@@ -15,6 +15,10 @@ class FriendshipService:
         if sender == receiver:
             raise ValidationError("Cannot add yourself")
 
+        receiver_profile = getattr(receiver, "profile", None)
+        if receiver_profile and receiver_profile.is_banned:
+            raise ValidationError("Cannot send a request to a banned user")
+
         existing = Friendship.objects.filter(
             Q(sender=sender, receiver=receiver) |
             Q(sender=receiver, receiver=sender)

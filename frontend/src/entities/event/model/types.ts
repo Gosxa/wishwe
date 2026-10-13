@@ -14,6 +14,7 @@ export type ParticipantAvatar = {
 
 export type FeedEvent = {
   id: string;
+  status?: 'active' | 'moderate' | 'closed' | 'completed';
   type: EventType;
   hashtag?: string;
   image: string;

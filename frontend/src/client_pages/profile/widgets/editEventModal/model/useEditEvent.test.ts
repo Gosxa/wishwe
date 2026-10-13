@@ -43,6 +43,7 @@ const futureDate = '2099-01-02';
 
 const makeEvent = (overrides: Partial<BackendEvent> = {}): BackendEvent => ({
   id: 42,
+  uuid: 'event-42',
   creator: 'maya',
   creator_avatar: null,
   mutual_friend: null,

@@ -7,7 +7,7 @@ export type BackendNotification = {
   type: string;
   recipient: string;
   creator: string;
-  related_object_type: 'event' | 'friendship';
+  related_object_type: 'event' | 'friendship' | 'profile';
   related_object_id: number;
   is_read: boolean;
   created_at: string;

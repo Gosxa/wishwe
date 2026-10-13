@@ -1,6 +1,7 @@
 import os
 
 from celery import Celery
+from celery.schedules import crontab
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wishwe_api.settings", )
@@ -13,3 +14,14 @@ app.config_from_object(
 )
 
 app.autodiscover_tasks()
+
+app.conf.beat_schedule = {
+    "expire-moderation-violations-daily": {
+        "task": "user.tasks.expire_moderation_violations",
+        "schedule": crontab(hour=2, minute=30),
+    },
+    "delete-expired-image-moderation-uploads-hourly": {
+        "task": "user.tasks.delete_expired_image_moderation_uploads",
+        "schedule": crontab(minute=0),
+    },
+}

@@ -16,6 +16,7 @@ import {
   AcceptInviteError,
   acceptRequest,
   changeAvatar,
+  getAvatarModeration,
   changePassword,
   ChangePasswordError,
   checkUsername,
@@ -163,6 +164,20 @@ describe('user client API', () => {
       method: 'PATCH',
       body: avatarData,
     });
+  });
+
+  it('gets the current avatar moderation status', async () => {
+    fetchMock.mockResolvedValueOnce(
+      jsonResponse({ status: 'approved', avatar: '/media/avatar.jpg' }),
+    );
+
+    await expect(getAvatarModeration()).resolves.toEqual({
+      status: 'approved',
+      avatar: 'http://localhost:8000/media/avatar.jpg',
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/next_api/user/avatar-moderation',
+    );
   });
 
   it('updates a profile with a JSON PATCH request', async () => {

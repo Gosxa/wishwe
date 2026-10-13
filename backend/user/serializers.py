@@ -4,6 +4,48 @@ from rest_framework import serializers
 
 from common.validators import validate_image_type, validate_image_size
 from user.models import Profile, Friendship, FriendInvite, FriendshipStatus
+from user.services.moderation_service import (
+    ModerationService,
+    find_ban_word_matches,
+)
+
+
+PROFILE_TEXT_FIELDS = (
+    "username",
+    "first_name",
+    "last_name",
+    "bio",
+    "social_media_url",
+)
+
+
+def validate_profile_content(profile, attrs):
+    if profile is None:
+        return
+
+    if (
+        profile.is_banned
+        and attrs.get("is_private") is False
+    ):
+        raise serializers.ValidationError({
+            "is_private": "Banned profiles must remain private."
+        })
+
+    fields = {
+        name: attrs.get(name, getattr(profile, name, None))
+        for name in PROFILE_TEXT_FIELDS
+    }
+    matches = find_ban_word_matches(fields)
+    if matches:
+        ModerationService.record_violation(
+            user=profile.user,
+            matches=matches,
+        )
+        raise serializers.ValidationError(
+            "Profile changes were rejected due to a content rule. "
+            "A warning has been recorded; contact support from your "
+            "account email if you believe this was a mistake."
+        )
 
 
 class EmailSerializer(serializers.Serializer):
@@ -36,6 +78,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
     active_events_count = serializers.IntegerField(read_only=True)
     archived_events_count = serializers.IntegerField(read_only=True)
+    is_banned = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Profile
@@ -45,8 +88,13 @@ class ProfileSerializer(serializers.ModelSerializer):
             "bio", "date_of_birth", "city", "gender", "avatar",
             "social_media_url", "is_private", "has_seen_feed_tour",
             "active_events_count", "archived_events_count",
+            "is_banned",
         )
         read_only_fields = ("avatar",)
+
+    def validate(self, attrs):
+        validate_profile_content(self.instance, attrs)
+        return attrs
 
 
 class ProfileReadSerializer(ProfileSerializer):
@@ -57,6 +105,10 @@ class OnboardingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("username", "first_name", "last_name")
+
+    def validate(self, attrs):
+        validate_profile_content(self.instance, attrs)
+        return attrs
 
 
 class AvatarSerializer(serializers.ModelSerializer):
@@ -177,6 +229,7 @@ class FriendshipRequestSerializer(
 class PublicProfileSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(source="user.id", read_only=True)
     friendship_status = serializers.SerializerMethodField()
+    is_banned = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = Profile
@@ -188,9 +241,12 @@ class PublicProfileSerializer(serializers.ModelSerializer):
             "bio",
             "is_private",
             "friendship_status",
+            "is_banned",
         )
 
     def get_friendship_status(self, obj):
+        if obj.is_banned:
+            return "none"
         request = self.context.get("request")
 
         if request is None or request.user.is_anonymous:
@@ -219,3 +275,14 @@ class PublicProfileSerializer(serializers.ModelSerializer):
             return "incoming_request"
 
         return "none"
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if instance.is_banned:
+            data.update({
+                "username": "Banned user",
+                "avatar": None,
+                "bio": None,
+                "friendship_status": "none",
+            })
+        return data

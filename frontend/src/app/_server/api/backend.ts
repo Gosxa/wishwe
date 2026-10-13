@@ -1,4 +1,7 @@
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND =
+  process.env.BACKEND_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_BACKEND_URL ??
+  'http://localhost:8000';
 
 // eslint-disable-next-line no-console
 console.log('DEBUG BACKEND VALUE:', BACKEND);
@@ -82,6 +85,12 @@ export const beApi = {
         method: 'PATCH',
         headers: { cookie: cookieHeader },
         body,
+        cache: 'no-store',
+      }),
+
+    avatarModeration: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/avatar-moderation/`, {
+        headers: { cookie: cookieHeader },
         cache: 'no-store',
       }),
 

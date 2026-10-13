@@ -24,6 +24,12 @@ from notifications.tasks import (
 )
 from user.models import FriendshipStatus, Friendship
 from user.services.friendship_service import FriendshipService
+from user.services.moderation_service import (
+    ModerationService,
+    find_ban_word_matches,
+)
+from user.models import ImageModeration
+from user.services.image_moderation_service import queue_image
 
 IMPORTANT_PLAN_FIELDS = {
     "event_date",
@@ -35,6 +41,21 @@ IMPORTANT_PLAN_FIELDS = {
 
 
 class EventService:
+    @staticmethod
+    def _moderation_matches(validated_data, event=None):
+        fields = (
+            "title",
+            "description",
+            "location",
+            "timeframe_text",
+            "external_link",
+        )
+        values = {
+            name: validated_data.get(name, getattr(event, name, None))
+            for name in fields
+        }
+        return find_ban_word_matches(values)
+
     @staticmethod
     def calculate_plan_expiration(*, event_date, event_time,):
         event_datetime = datetime.combine(
@@ -63,11 +84,36 @@ class EventService:
     @staticmethod
     @transaction.atomic
     def create_wish(*, creator, validated_data):
+        validated_data = validated_data.copy()
+        cover_image = validated_data.pop("cover_image", None)
+        matches = EventService._moderation_matches(validated_data)
+        violation = (
+            ModerationService.record_violation(
+                user=creator,
+                matches=matches,
+                pending=True,
+            )
+            if matches else None
+        )
         event = Event.objects.create(
             creator=creator,
             event_type=EventType.WISH,
+            **({
+                "status": EventStatus.MODERATE,
+            } if matches or cover_image else {}),
             **validated_data,
         )
+        if cover_image:
+            queue_image(
+                user=creator,
+                event=event,
+                target=ImageModeration.Target.EVENT_COVER,
+                image=cover_image,
+            )
+        if violation:
+            violation.event = event
+            violation.event_uuid = event.uuid
+            violation.save(update_fields=("event", "event_uuid"))
 
         EventParticipant.objects.create(
             event=event,
@@ -83,12 +129,37 @@ class EventService:
     @staticmethod
     @transaction.atomic
     def create_plan(*, creator, validated_data):
+        validated_data = validated_data.copy()
+        cover_image = validated_data.pop("cover_image", None)
+        matches = EventService._moderation_matches(validated_data)
+        violation = (
+            ModerationService.record_violation(
+                user=creator,
+                matches=matches,
+                pending=True,
+            )
+            if matches else None
+        )
         event = Event.objects.create(
             creator=creator,
             event_type=EventType.PLAN,
             participants_count=1,
+            **({
+                "status": EventStatus.MODERATE,
+            } if matches or cover_image else {}),
             **validated_data,
         )
+        if cover_image:
+            queue_image(
+                user=creator,
+                event=event,
+                target=ImageModeration.Target.EVENT_COVER,
+                image=cover_image,
+            )
+        if violation:
+            violation.event = event
+            violation.event_uuid = event.uuid
+            violation.save(update_fields=("event", "event_uuid"))
 
         EventParticipant.objects.create(
             event=event,
@@ -195,10 +266,36 @@ class EventService:
     @transaction.atomic
     def update_wish(*, event, validated_data):
         EventService._validate_wish_event(event)
+        validated_data = validated_data.copy()
+        cover_image = validated_data.pop("cover_image", None)
+        matches = EventService._moderation_matches(validated_data, event)
+        violation = (
+            ModerationService.record_violation(
+                user=event.creator,
+                matches=matches,
+                pending=True,
+            )
+            if matches else None
+        )
         for field, value in validated_data.items():
             setattr(event, field, value)
 
+        if matches or cover_image:
+            event.status = EventStatus.MODERATE
+
         event.save()
+        if violation:
+            violation.event = event
+            violation.event_uuid = event.uuid
+            violation.save(update_fields=("event", "event_uuid"))
+
+        if cover_image:
+            queue_image(
+                user=event.creator,
+                event=event,
+                target=ImageModeration.Target.EVENT_COVER,
+                image=cover_image,
+            )
 
         return event
 
@@ -206,6 +303,19 @@ class EventService:
     @transaction.atomic
     def update_plan(*, event, validated_data):
         EventService._validate_plan_event(event)
+        validated_data = validated_data.copy()
+
+        cover_image = validated_data.pop("cover_image", None)
+
+        matches = EventService._moderation_matches(validated_data, event)
+        violation = (
+            ModerationService.record_violation(
+                user=event.creator,
+                matches=matches,
+                pending=True,
+            )
+            if matches else None
+        )
 
         should_notify = EventService.has_important_plan_changes(
             event,
@@ -215,7 +325,22 @@ class EventService:
         for field, value in validated_data.items():
             setattr(event, field, value)
 
+        if matches or cover_image:
+            event.status = EventStatus.MODERATE
+
         event.save()
+        if violation:
+            violation.event = event
+            violation.event_uuid = event.uuid
+            violation.save(update_fields=("event", "event_uuid"))
+
+        if cover_image:
+            queue_image(
+                user=event.creator,
+                event=event,
+                target=ImageModeration.Target.EVENT_COVER,
+                image=cover_image,
+            )
 
         if should_notify:
             event_participants = EventParticipant.objects.filter(
@@ -396,6 +521,15 @@ class EventService:
     def convert_wish_to_plan(*, event, validated_data,):
         EventService._validate_wish_event(event)
         EventService._validate_active_event(event)
+        matches = EventService._moderation_matches({}, event)
+        violation = (
+            ModerationService.record_violation(
+                user=event.creator,
+                matches=matches,
+                pending=True,
+            )
+            if matches else None
+        )
 
         event.event_type = EventType.PLAN
         event.event_date = validated_data["event_date"]
@@ -404,11 +538,17 @@ class EventService:
         event.max_participants = (validated_data["max_participants"])
         event.participants_count = 1
         event.interested_count -= 1
+        if matches:
+            event.status = EventStatus.MODERATE
         event.expires_at = EventService.calculate_plan_expiration(
             event_date=event.event_date,
             event_time=event.event_time,
         )
         event.save()
+        if violation:
+            violation.event = event
+            violation.event_uuid = event.uuid
+            violation.save(update_fields=("event", "event_uuid"))
 
         creator_participant = (
             EventParticipant.objects.get(
@@ -418,6 +558,9 @@ class EventService:
         )
         creator_participant.status = ParticipationStatus.JOINED
         creator_participant.save(update_fields=["status"])
+
+        if matches:
+            return event
 
         event_datetime = make_aware(
             datetime.combine(
@@ -461,6 +604,23 @@ class EventService:
                 "Users cannot copy their own wishes."
             )
 
+        values = {
+            "title": event.title,
+            "description": event.description,
+            "location": event.location,
+            "timeframe_text": event.timeframe_text,
+            "external_link": event.external_link,
+        }
+        matches = find_ban_word_matches(values)
+        violation = (
+            ModerationService.record_violation(
+                user=user,
+                matches=matches,
+                pending=True,
+            )
+            if matches else None
+        )
+
         copied_event = Event.objects.create(
             creator=user,
             category=event.category,
@@ -473,7 +633,12 @@ class EventService:
             timeframe_text=event.timeframe_text,
             expires_at=event.expires_at,
             interested_count=1,
+            **({"status": EventStatus.MODERATE} if matches else {}),
         )
+        if violation:
+            violation.event = copied_event
+            violation.event_uuid = copied_event.uuid
+            violation.save(update_fields=("event", "event_uuid"))
 
         EventParticipant.objects.create(
             event=copied_event,
@@ -511,6 +676,9 @@ class EventService:
     @staticmethod
     def can_view(user, event) -> bool:
         if not user.is_authenticated:
+            return False
+
+        if event.status == EventStatus.MODERATE and event.creator_id != user.id:
             return False
 
         if event.creator_id == user.id:

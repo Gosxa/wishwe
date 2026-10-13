@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.test import override_settings
 from django.urls import reverse
 
 from rest_framework import status
@@ -15,6 +16,7 @@ from event.models import (
 from user.models import (
     Friendship,
     FriendshipStatus,
+    ImageModeration,
     Profile,
 )
 
@@ -145,6 +147,65 @@ class EventFeedTests(APITestCase):
             self.friend_event.title,
             titles,
         )
+
+    @override_settings(
+        DEBUG=True,
+        MIDDLEWARE=[],
+        MEDIA_URL="/media/",
+        STORAGES={
+            "default": {
+                "BACKEND": "django.core.files.storage.FileSystemStorage",
+            },
+            "staticfiles": {
+                "BACKEND": (
+                    "django.contrib.staticfiles.storage.StaticFilesStorage"
+                ),
+            },
+        },
+    )
+    def test_owner_sees_pending_event_and_cover_preview_in_feed(self):
+        pending = Event.objects.create(
+            creator=self.user,
+            event_type=EventType.WISH,
+            title="Pending cover",
+            description="desc",
+            location="Kyiv",
+            timeframe_text="Tomorrow",
+            status=EventStatus.MODERATE,
+        )
+        ImageModeration.objects.create(
+            user=self.user,
+            event=pending,
+            target=ImageModeration.Target.EVENT_COVER,
+            image="uploads/moderation/pending.jpg",
+            status=ImageModeration.Status.QUEUED,
+        )
+
+        response = self.client.get(reverse("events:event-list"))
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        item = next(
+            event for event in response.data["results"]
+            if event["uuid"] == str(pending.uuid)
+        )
+        self.assertEqual(item["status"], EventStatus.MODERATE)
+        self.assertIsNotNone(item["cover_image"])
+
+    def test_other_users_do_not_see_pending_events_in_feed(self):
+        pending = Event.objects.create(
+            creator=self.friend,
+            event_type=EventType.WISH,
+            title="Friend pending event",
+            description="desc",
+            location="Kyiv",
+            timeframe_text="Tomorrow",
+            status=EventStatus.MODERATE,
+        )
+
+        response = self.client.get(reverse("events:event-list"))
+
+        titles = [event["title"] for event in response.data["results"]]
+        self.assertNotIn(pending.title, titles)
 
     def test_event_detail_uses_uuid_lookup(self):
         response = self.client.get(

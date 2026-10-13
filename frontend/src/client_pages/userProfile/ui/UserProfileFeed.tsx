@@ -19,6 +19,8 @@ type Props = {
 };
 
 export const UserProfileFeed = ({ profile, friendshipStatus }: Props) => {
+  if (profile.is_banned) return null;
+
   const { tab, sort, setTab, setSort } = useProfileToolbar();
 
   const canSeeEvents =
