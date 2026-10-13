@@ -25,6 +25,10 @@ export type PublicProfile = {
   username: string | null;
   avatar: string | null;
   bio: string | null;
+  first_name?: string | null;
+  last_name?: string | null;
+  date_of_birth?: string | null;
+  social_media_url?: string | null;
   is_private: boolean;
   is_banned?: boolean;
   friendship_status: FriendshipStatus;

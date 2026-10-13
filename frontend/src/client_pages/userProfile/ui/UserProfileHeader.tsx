@@ -6,7 +6,9 @@ import type {
 } from '@/shared/client_api/user/types';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import s from '@client_pages/profile/widgets/profileHeader/ui/profileHeader.module.scss';
+import { UserProfileAbout } from './UserProfileAbout';
 import { UserProfileFriendButton } from './UserProfileFriendButton';
+import u from './userProfileHeader.module.scss';
 
 type Props = {
   profile: PublicProfile;
@@ -45,7 +47,10 @@ export const UserProfileHeader = ({
             </>
           ) : (
             <>
-              {username && <h1 className={s.username}>@{username}</h1>}
+              <div className={u.nameRow}>
+                {username && <h1 className={s.username}>@{username}</h1>}
+                <UserProfileAbout profile={profile} />
+              </div>
               {bio && <p className={s.bio}>{bio}</p>}
             </>
           )}

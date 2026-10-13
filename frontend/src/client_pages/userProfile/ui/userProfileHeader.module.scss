@@ -1,6 +1,26 @@
 @use '@shared/styles/buttons' as btn;
 @use '@shared/styles/colors' as clr;
 
+.nameRow {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  min-width: 0;
+
+  > h1 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 520px) {
+  .nameRow {
+    justify-content: center;
+  }
+}
+
 .friends,
 .requested {
   @include btn.secondary(8px, 100%, 40px);
