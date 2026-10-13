@@ -582,6 +582,18 @@ class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
         return Response(serializer.data)
 
+    @action(detail=False, methods=["get"], url_path="avatar-moderation")
+    def avatar_moderation(self, request):
+        moderation = ImageModeration.objects.filter(
+            user=request.user,
+            target=ImageModeration.Target.AVATAR,
+        ).order_by("-created_at").first()
+        return Response({
+            "status": moderation.status if moderation else None,
+            "avatar": request.user.profile.avatar.url
+            if request.user.profile.avatar else None,
+        })
+
     @action(detail=False, methods=["post"], url_path="change-password")
     def change_password(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -819,6 +831,18 @@ class UserViewSet(
             "creator__profile",
         ).prefetch_related(
             Prefetch(
+                "image_moderations",
+                queryset=ImageModeration.objects.filter(
+                    target=ImageModeration.Target.EVENT_COVER,
+                    status__in=(
+                        ImageModeration.Status.QUEUED,
+                        ImageModeration.Status.REVIEW,
+                        ImageModeration.Status.FAILED,
+                    ),
+                ).order_by("-created_at"),
+                to_attr="pending_moderation_images",
+            ),
+            Prefetch(
                 "participants",
                 queryset=EventParticipant.objects.filter(
                     status__in=(
@@ -836,6 +860,10 @@ class UserViewSet(
                 to_attr="current_user_participation",
             ),
         ).distinct()
+        is_own_profile = user.pk == request.user.pk
+        if not is_own_profile:
+            events = events.exclude(status=EventStatus.MODERATE)
+
         tab = self.request.query_params.get("tab")
         sort = self.request.query_params.get("sort")
         title = self.request.query_params.get("title")
@@ -847,14 +875,20 @@ class UserViewSet(
             )
 
         if tab == "plans":
+            plan_statuses = [EventStatus.ACTIVE, EventStatus.CLOSED]
+            if is_own_profile:
+                plan_statuses.append(EventStatus.MODERATE)
             events = events.filter(
-                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                status__in=plan_statuses,
                 event_type=EventType.PLAN
             )
 
         if tab == "wishes":
+            wish_statuses = [EventStatus.ACTIVE, EventStatus.CLOSED]
+            if is_own_profile:
+                wish_statuses.append(EventStatus.MODERATE)
             events = events.filter(
-                status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+                status__in=wish_statuses,
                 event_type=EventType.WISH
             )
 

@@ -108,6 +108,9 @@ export const EventCardContent = ({
           alt={title}
           loading="lazy"
         />
+        {event.status === 'moderate' && isOwn && (
+          <span className={s.moderationBadge}>Under review</span>
+        )}
         <div className={s.tags}>
           {showEventType && (
             <span

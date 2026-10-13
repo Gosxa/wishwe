@@ -28,6 +28,7 @@ type HookProps = {
 
 const event = (id: number): BackendEvent => ({
   id,
+  uuid: `event-${id}`,
   creator: `profile-${id}`,
   creator_avatar: null,
   mutual_friend: null,
@@ -108,7 +109,10 @@ describe('useProfileEvents', () => {
 
     await act(async () => apiMocks.listUserEvents.mock.results[0].value);
 
-    expect(result.current.events.map(item => item.id)).toEqual(['1', '2']);
+    expect(result.current.events.map(item => item.id)).toEqual([
+      'event-1',
+      'event-2',
+    ]);
     expect(result.current.events[0].title).toBe('Profile event 1');
   });
 
@@ -183,7 +187,7 @@ describe('useProfileEvents', () => {
     rerender({ ...defaultProps, enabled: true });
     await act(async () => apiMocks.listUserEvents.mock.results[1].value);
 
-    expect(result.current.events.map(item => item.id)).toEqual(['2']);
+    expect(result.current.events.map(item => item.id)).toEqual(['event-2']);
     expect(apiMocks.listUserEvents).toHaveBeenCalledTimes(2);
   });
 });

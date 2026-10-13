@@ -95,7 +95,7 @@ export const WishLaunchTransition = ({
         </p>
         <p className={s.body}>
           {isSuccess && isModerationPending
-            ? 'It is hidden from the feed until a moderator reviews it. We will notify you when the review is complete.'
+            ? 'Only you can see it while the image is checked. If all checks pass, it will appear in the feed automatically.'
             : isSuccess
               ? 'One more beat—getting it ready to share.'
               : copy.publishingBody}

@@ -126,6 +126,42 @@ class UserEventsTests(APITestCase):
             [self.own_wish.title],
         )
 
+    def test_own_pending_event_is_included_in_its_type_tab(self):
+        pending = Event.objects.create(
+            creator=self.user,
+            event_type=EventType.WISH,
+            title="Pending wish",
+            description="desc",
+            location="Kyiv",
+            timeframe_text="Someday",
+            status=EventStatus.MODERATE,
+        )
+
+        self.assertIn(
+            pending.title,
+            self.get_titles({"tab": "wishes"}),
+        )
+
+    def test_other_users_pending_events_are_hidden(self):
+        pending = Event.objects.create(
+            creator=self.friend,
+            event_type=EventType.WISH,
+            title="Private pending wish",
+            description="desc",
+            location="Kyiv",
+            timeframe_text="Someday",
+            status=EventStatus.MODERATE,
+        )
+        url = reverse("user:user-events", kwargs={"pk": self.friend.pk})
+
+        response = self.client.get(url, {"tab": "wishes"})
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotIn(
+            pending.title,
+            [event["title"] for event in response.data["results"]],
+        )
+
     def test_title_filter(self):
         self.assertEqual(
             self.get_titles({"title": "own"}),

@@ -122,7 +122,7 @@ export const CreateEventModal = ({
 
       reportCreated(created);
 
-      if (!isOnboarding && created.status !== 'moderate') {
+      if (!isOnboarding) {
         deferRefresh(created.uuid);
         openCreatedEventShare(created);
       }

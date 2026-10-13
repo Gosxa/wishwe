@@ -89,12 +89,12 @@ class EventViewSet(
                 ),
             )
 
-        visible_statuses = Q(status__in=(EventStatus.ACTIVE, EventStatus.CLOSED))
-        if self.action != "list":
-            visible_statuses |= Q(
-                status=EventStatus.MODERATE,
-                creator=self.request.user,
-            )
+        visible_statuses = Q(
+            status__in=(EventStatus.ACTIVE, EventStatus.CLOSED),
+        ) | Q(
+            status=EventStatus.MODERATE,
+            creator=self.request.user,
+        )
 
         queryset = Event.objects.filter(
             query_filter,

@@ -203,7 +203,7 @@ describe('CreateEventModal launch transition', () => {
     expect(screen.getByText('Your event is under review')).toBeTruthy();
     expect(
       screen.getByText(
-        'It is hidden from the feed until a moderator reviews it. We will notify you when the review is complete.',
+        'Only you can see it while the image is checked. If all checks pass, it will appear in the feed automatically.',
       ),
     ).toBeTruthy();
     expect(useCreatedEventShareStore.getState().event).toBeNull();

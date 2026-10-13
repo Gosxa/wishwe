@@ -26,6 +26,7 @@ const restoreEnvironmentVariable = (
 
 const makeEvent = (overrides: Partial<BackendEvent> = {}): BackendEvent => ({
   id: 42,
+  uuid: '00000000-0000-4000-8000-000000000042',
   creator: 'alice',
   creator_avatar: '/media/avatars/alice.png',
   mutual_friend: { id: 7, username: 'dana' },
@@ -73,7 +74,8 @@ describe('feedMapper', () => {
   it('maps every plan field used by a feed card', () => {
     expect(toFeedEvents([makeEvent()])).toEqual([
       {
-        id: '42',
+        id: '00000000-0000-4000-8000-000000000042',
+        status: 'active',
         type: 'plan',
         hashtag: '#travel',
         image: 'https://api.wishwe.test/media/covers/picnic.jpg',
