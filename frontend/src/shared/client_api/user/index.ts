@@ -1,5 +1,6 @@
 import { handleUnauthorized } from '@/shared/client_api/handleResponse';
 import { avatarFormData } from '@/shared/lib/avatarFormData';
+import { toAbsoluteMediaUrl } from '@/shared/lib/mediaUrl';
 
 import type { Profile } from '../auth/types';
 import type { BackendEvent, Paginated } from '../event';
@@ -96,7 +97,7 @@ export const markFeedTourSeen = async (): Promise<void> => {
 
 export const changeAvatar = async (
   avatar: string,
-): Promise<{ avatar: string }> => {
+): Promise<{ avatar: string | null; moderation_status?: string }> => {
   const res = await fetch('/next_api/user/avatar', {
     method: 'PATCH',
     body: await avatarFormData(avatar),
@@ -107,7 +108,31 @@ export const changeAvatar = async (
     throw new Error('Failed to upload avatar');
   }
 
-  return res.json();
+  const data = (await res.json()) as {
+    avatar: string | null;
+    moderation_status?: string;
+  };
+
+  return { ...data, avatar: toAbsoluteMediaUrl(data.avatar) };
+};
+
+export const getAvatarModeration = async (): Promise<{
+  status: string | null;
+  avatar: string | null;
+}> => {
+  const res = await fetch('/next_api/user/avatar-moderation');
+
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to get avatar moderation status');
+  }
+
+  const data = (await res.json()) as {
+    status: string | null;
+    avatar: string | null;
+  };
+
+  return { ...data, avatar: toAbsoluteMediaUrl(data.avatar) };
 };
 
 export type UpdateProfilePayload = Partial<

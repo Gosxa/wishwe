@@ -9,6 +9,7 @@ import type { Profile } from '@/shared/client_api/auth/types';
 import {
   changeAvatar,
   checkUsername,
+  getAvatarModeration,
   updateProfile,
   UpdateProfileError,
   type UpdateProfilePayload,
@@ -21,6 +22,37 @@ const PUBLIC_PROFILE_HELPER_ON =
   'Your profile can be found by other users via search.';
 const PUBLIC_PROFILE_HELPER_OFF =
   'If disabled, your profile is hidden from search and can only be seen by your direct friends.';
+const AVATAR_MODERATION_POLL_MS = 5000;
+const AVATAR_MODERATION_MAX_POLLS = 36;
+
+const refreshAvatarAfterModeration = async (
+  currentAvatar: string | null,
+  profile: Profile,
+  setUser: (profile: Profile) => void,
+) => {
+  for (let attempt = 0; attempt < AVATAR_MODERATION_MAX_POLLS; attempt += 1) {
+    try {
+      const result = await getAvatarModeration();
+
+      if (result.status === 'approved') {
+        if (result.avatar !== currentAvatar) {
+          setUser({ ...profile, avatar: result.avatar });
+        }
+        return;
+      }
+
+      if (['rejected', 'cancelled'].includes(result.status ?? '')) return;
+    } catch {
+      // A transient network error should not stop the pending moderation check.
+    }
+
+    if (attempt < AVATAR_MODERATION_MAX_POLLS - 1) {
+      await new Promise(resolve =>
+        window.setTimeout(resolve, AVATAR_MODERATION_POLL_MS),
+      );
+    }
+  }
+};
 
 export const useEditProfile = (initialUser: Profile | null) => {
   const router = useRouter();
@@ -172,13 +204,20 @@ export const useEditProfile = (initialUser: Profile | null) => {
     try {
       if (Object.keys(diff).length > 0) await updateProfile(diff);
 
-      let newAvatar: string | undefined;
+      let newAvatar: string | null | undefined;
 
       if (avatarChanged && avatarUrl) {
         ({ avatar: newAvatar } = await changeAvatar(avatarUrl));
       }
 
       setUser({ ...user, ...diff, avatar: newAvatar ?? user.avatar });
+      if (avatarChanged && avatarUrl) {
+        void refreshAvatarAfterModeration(
+          user.avatar,
+          { ...user, ...diff, avatar: user.avatar },
+          setUser,
+        );
+      }
       router.push('/profile');
     } catch (e) {
       if (e instanceof UpdateProfileError && e.body.username) {

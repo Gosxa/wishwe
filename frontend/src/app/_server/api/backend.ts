@@ -88,6 +88,12 @@ export const beApi = {
         cache: 'no-store',
       }),
 
+    avatarModeration: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/profile/avatar-moderation/`, {
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     feedTourSeen: (cookieHeader: string) =>
       fetch(`${BACKEND}/api/user/profile/feed-tour-seen/`, {
         method: 'POST',
