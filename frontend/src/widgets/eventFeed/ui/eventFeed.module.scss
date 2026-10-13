@@ -222,7 +222,7 @@ $item-enter-distance: 24px;
       &::before {
         content: '';
         position: absolute;
-        inset: -16px 0;
+        inset: -16px 0 0;
         z-index: -1;
         background: clr.$ns-50;
       }

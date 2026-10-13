@@ -45,25 +45,29 @@ export function FeedToolbar({
   };
 
   return (
-    <View style={styles.row}>
-      <SegmentedControl
-        options={FILTERS}
-        value={filter}
-        onChange={onFilterChange}
-        selectedLabelStyle={styles.segmentedSelectedLabel}
-      />
+    <View>
+      <View style={styles.row}>
+        <SegmentedControl
+          options={FILTERS}
+          value={filter}
+          onChange={onFilterChange}
+          selectedLabelStyle={styles.segmentedSelectedLabel}
+        />
 
-      <Pressable
-        ref={sortRef}
-        onPress={openSheet}
-        accessibilityRole="button"
-        accessibilityLabel="Sort and filter events"
-        accessibilityState={{ expanded: isSheetOpen }}
-        style={({ pressed }) => [styles.sort, pressed && styles.pressed]}
-      >
-        <Text style={styles.sortLabel}>Sort</Text>
-        <ChevronDownIcon size={12} color={Colors.muted} />
-      </Pressable>
+        <Pressable
+          ref={sortRef}
+          onPress={openSheet}
+          accessibilityRole="button"
+          accessibilityLabel="Sort and filter events"
+          accessibilityState={{ expanded: isSheetOpen }}
+          style={({ pressed }) => [styles.sort, pressed && styles.pressed]}
+        >
+          <Text style={styles.sortLabel}>Sort</Text>
+          <ChevronDownIcon size={12} color={Colors.muted} />
+        </Pressable>
+      </View>
+
+      <View style={styles.divider} />
 
       <FeedSortSheet
         visible={isSheetOpen}
@@ -85,6 +89,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two,
+  },
+  divider: {
+    height: 2,
+    marginTop: Spacing.three,
+    borderRadius: 1,
+    backgroundColor: Colors.hairline,
   },
   pressed: {
     opacity: 0.7,

@@ -138,11 +138,11 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: Spacing.three,
-    paddingBottom: Spacing.four,
     gap: Spacing.four,
   },
   list: {
     paddingHorizontal: Spacing.three,
+    paddingTop: Spacing.four,
     paddingBottom: Spacing.five,
   },
   listEmpty: {
