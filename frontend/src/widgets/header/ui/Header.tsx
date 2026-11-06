@@ -141,6 +141,15 @@ export const Header = ({
     };
   }, [scheduleToastDismiss]);
 
+  useEffect(() => {
+    const handleFeedChanged = () => requestRefresh();
+    window.addEventListener('wishwe:feed-changed', handleFeedChanged);
+
+    return () => {
+      window.removeEventListener('wishwe:feed-changed', handleFeedChanged);
+    };
+  }, [requestRefresh]);
+
   const closeToast = (id: number) => {
     dismissToast(id);
   };
