@@ -17,7 +17,12 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "wishwe_api.settings")
 
 django_asgi_app = get_asgi_application()
 
-from notifications.routing import websocket_urlpatterns
+from event.routing import (
+    websocket_urlpatterns as event_websocket_urlpatterns,
+)
+from notifications.routing import (
+    websocket_urlpatterns as notification_websocket_urlpatterns,
+)
 from notifications.ws_auth import CookieJWTAuthMiddleware
 
 
@@ -25,7 +30,14 @@ application = ProtocolTypeRouter(
     {
         "http": django_asgi_app,
         "websocket": AllowedHostsOriginValidator(
-            CookieJWTAuthMiddleware(URLRouter(websocket_urlpatterns))
+            CookieJWTAuthMiddleware(
+                URLRouter(
+                    [
+                        *notification_websocket_urlpatterns,
+                        *event_websocket_urlpatterns,
+                    ]
+                )
+            )
         ),
     }
 )
