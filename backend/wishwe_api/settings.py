@@ -41,6 +41,7 @@ ALLOWED_HOSTS = [
 
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
     "event.apps.EventConfig",
     "storages",
     "notifications",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -92,6 +94,34 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "wishwe_api.wsgi.application"
+ASGI_APPLICATION = "wishwe_api.asgi.application"
+
+CHANNEL_REDIS_URL = os.getenv("CHANNEL_REDIS_URL")
+if CHANNEL_REDIS_URL:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": [CHANNEL_REDIS_URL]},
+        },
+    }
+elif DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+    }
+else:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [
+                    os.getenv(
+                        "CELERY_BROKER_URL",
+                        "redis://localhost:6379/1",
+                    )
+                ],
+            },
+        },
+    }
 
 
 # Database

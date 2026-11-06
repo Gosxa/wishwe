@@ -56,4 +56,12 @@ export const readAllNotifications = async (
   ensureOk(response, 'Failed to mark notifications as read');
 };
 
+export const deleteNotification = async (id: number): Promise<void> => {
+  const response = await fetch(`/api/notifications/${id}`, {
+    method: 'DELETE',
+  });
+
+  ensureOk(response, 'Failed to delete notification');
+};
+
 export type { NotificationItem, NotificationsPage } from './types';

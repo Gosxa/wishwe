@@ -35,6 +35,13 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
 
         return queryset
 
+    def destroy(self, request, *args, **kwargs):
+        # get_object() uses the recipient-filtered queryset above, so another
+        # user's notification is indistinguishable from a missing one.
+        notification = self.get_object()
+        notification.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True, methods=["post"])
     def mark_as_read(self, request, pk=None):
         notification = self.get_object()

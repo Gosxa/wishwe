@@ -3,21 +3,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNotificationCountStore } from '@/shared/store/useNotificationCountStore';
 import {
+  deleteNotification as deleteNotificationRequest,
   getNotifications,
   getUnreadCount,
   readAllNotifications,
   type NotificationItem,
 } from '@/shared/client_api/notifications';
+import { subscribeToNotificationSocket } from '@/shared/client_api/notifications/socket';
 
-// How often (ms) to poll the server for a new unread count when everything is working fine.
-const POLL_INTERVAL = 60_000;
-// Back-off delays after consecutive poll failures: 1 min; 2 min; 4 min; 5 min.
-const ERROR_DELAYS = [60_000, 120_000, 240_000, 300_000] as const;
-// Maximum number of notifications to show in the dropdown (most recent first).
 const MAX_NOTIFICATIONS = 10;
-
-const isAbortError = (error: unknown) =>
-  error instanceof Error && error.name === 'AbortError';
 
 const latestNotifications = (notifications: NotificationItem[]) =>
   [...notifications]
@@ -28,22 +22,12 @@ const latestNotifications = (notifications: NotificationItem[]) =>
     )
     .slice(0, MAX_NOTIFICATIONS);
 
-const createTimeout = (callback: () => void, delay: number) => {
-  const timer = setTimeout(callback, delay);
-
-  return () => clearTimeout(timer);
-};
-
-export const useNotifications = (isOpen: boolean, pollUnread = true) => {
+export const useNotifications = (isOpen: boolean) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [listRefresh, setListRefresh] = useState(0);
-
-  useEffect(() => {
-    useNotificationCountStore.getState().setUnreadCount(unreadCount);
-  }, [unreadCount]);
 
   const isOpenRef = useRef(isOpen);
   const unreadCountRef = useRef(unreadCount);
@@ -51,165 +35,58 @@ export const useNotifications = (isOpen: boolean, pollUnread = true) => {
   const listControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    useNotificationCountStore.getState().setUnreadCount(unreadCount);
+  }, [unreadCount]);
+
+  useEffect(() => {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
   useEffect(() => {
-    if (!pollUnread) return;
-
-    let cancelTimer: (() => void) | null = null;
-    let controller: AbortController | null = null;
     let disposed = false;
-    let inFlight = false;
-    let refreshAfterFlight = false;
-    let consecutiveErrors = 0;
-    let lastResumeRequest = Number.NEGATIVE_INFINITY;
 
-    const isActive = () =>
-      document.visibilityState === 'visible' && navigator.onLine;
-
-    const clearTimer = () => {
-      cancelTimer?.();
-      cancelTimer = null;
+    const syncUnreadCount = () => {
+      void getUnreadCount()
+        .then(count => {
+          if (disposed) return;
+          unreadCountRef.current = count;
+          setUnreadCount(count);
+        })
+        .catch(() => undefined);
     };
 
-    const schedule = (delay: number) => {
-      clearTimer();
-      cancelTimer = createTimeout(() => {
-        void poll();
-      }, delay);
-    };
-
-    // One tick of the polling cycle. Fetches the unread count, updates state if it changed,
-    // then schedules the next tick.
-    const poll = async () => {
-      clearTimer();
-
-      // Skip if the component was unmounted or the tab is hidden / offline.
-      if (disposed || !isActive()) return;
-
-      // Another request is already running - set a flag so we re-poll immediately after it finishes.
-      if (inFlight) {
-        refreshAfterFlight = true;
-
+    const unsubscribe = subscribeToNotificationSocket(event => {
+      if (event.type === 'connected') {
+        syncUnreadCount();
         return;
       }
 
-      inFlight = true;
-      const requestController = new AbortController();
-
-      controller = requestController;
-      let nextDelay = POLL_INTERVAL;
-
-      try {
-        const nextCount = await getUnreadCount(requestController.signal);
-
-        // Exit early if the component has been unmounted or the request was aborted during execution.
-        if (disposed || requestController.signal.aborted) return;
-
-        consecutiveErrors = 0;
-
-        // Only re-render if the count actually changed.
-        if (nextCount !== unreadCountRef.current) {
-          unreadCountRef.current = nextCount;
-          setUnreadCount(nextCount);
-
-          // If the dropdown is already open, also refresh the notification list.
-          if (isOpenRef.current) {
-            setListRefresh(current => current + 1);
-          }
-        }
-      } catch (requestError) {
-        if (!isAbortError(requestError)) {
-          // Network/server error - back off exponentially up to the last ERROR_DELAYS entry.
-          consecutiveErrors += 1;
-          nextDelay =
-            ERROR_DELAYS[
-              Math.min(consecutiveErrors - 1, ERROR_DELAYS.length - 1)
-            ];
-        }
-      } finally {
-        if (controller === requestController) {
-          controller = null;
-        }
-
-        inFlight = false;
-
-        if (disposed || !isActive()) return;
-
-        // A poll was requested while we were in-flight - run it now instead of waiting.
-        if (refreshAfterFlight) {
-          refreshAfterFlight = false;
-          void poll();
-
-          return;
-        }
-
-        // Schedule the next tick
-        schedule(nextDelay);
+      if (!event.notification.is_read) {
+        unreadCountRef.current += 1;
+        setUnreadCount(unreadCountRef.current);
       }
-    };
 
-    const refreshImmediately = () => {
-      if (!isActive()) return;
-
-      const now = Date.now();
-
-      if (now - lastResumeRequest < 250) return;
-      lastResumeRequest = now;
-
-      clearTimer();
-      void poll();
-    };
-
-    const pause = () => {
-      clearTimer();
-      refreshAfterFlight = false;
-      controller?.abort();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        pause();
-      } else {
-        refreshImmediately();
+      if (isOpenRef.current) {
+        setListRefresh(current => current + 1);
       }
-    };
+    });
 
-    const handleOnline = () => refreshImmediately();
-    const handleOffline = () => pause();
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', refreshImmediately);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    void poll();
+    syncUnreadCount();
 
     return () => {
       disposed = true;
-      cancelTimer?.();
-      cancelTimer = null;
-      controller?.abort();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', refreshImmediately);
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      unsubscribe();
     };
-  }, [pollUnread]);
+  }, []);
 
   const fetchNotifications = useCallback(async () => {
     if (!isOpenRef.current) return;
 
     listControllerRef.current?.abort();
     const controller = new AbortController();
-
     listControllerRef.current = controller;
 
-    if (!hasLoadedRef.current) {
-      setIsLoading(true);
-    }
-
+    if (!hasLoadedRef.current) setIsLoading(true);
     setError(null);
 
     try {
@@ -226,29 +103,19 @@ export const useNotifications = (isOpen: boolean, pollUnread = true) => {
         nextNotifications.some(notification => !notification.is_read);
 
       if (shouldMarkAllRead) {
-        try {
-          await readAllNotifications(controller.signal);
-        } catch (markError) {
-          if (!isAbortError(markError)) {
-            setError("We couldn't mark notifications as read.");
-          }
-
-          return;
-        }
-
+        await readAllNotifications(controller.signal);
         if (controller.signal.aborted) return;
 
         const readNotifications = nextNotifications.map(notification => ({
           ...notification,
           is_read: true,
         }));
-
         unreadCountRef.current = 0;
         setUnreadCount(0);
         setNotifications(readNotifications);
       }
-    } catch (requestError) {
-      if (!isAbortError(requestError)) {
+    } catch {
+      if (!controller.signal.aborted) {
         setError("We couldn't load notifications.");
       }
     } finally {
@@ -262,14 +129,10 @@ export const useNotifications = (isOpen: boolean, pollUnread = true) => {
   useEffect(() => {
     if (!isOpen) {
       listControllerRef.current?.abort();
-
       return;
     }
 
-    const fetchTimer = setTimeout(() => {
-      void fetchNotifications();
-    }, 0);
-
+    const fetchTimer = setTimeout(() => void fetchNotifications(), 0);
     return () => {
       clearTimeout(fetchTimer);
       listControllerRef.current?.abort();
@@ -277,10 +140,7 @@ export const useNotifications = (isOpen: boolean, pollUnread = true) => {
   }, [fetchNotifications, isOpen, listRefresh]);
 
   useEffect(() => {
-    const abortListRequest = () => {
-      listControllerRef.current?.abort();
-    };
-
+    const abortListRequest = () => listControllerRef.current?.abort();
     const refreshOpenList = () => {
       if (
         isOpenRef.current &&
@@ -290,7 +150,6 @@ export const useNotifications = (isOpen: boolean, pollUnread = true) => {
         setListRefresh(current => current + 1);
       }
     };
-
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'hidden') {
         abortListRequest();
@@ -310,11 +169,28 @@ export const useNotifications = (isOpen: boolean, pollUnread = true) => {
     };
   }, []);
 
+  const removeNotification = useCallback(async (id: number) => {
+    try {
+      await deleteNotificationRequest(id);
+      const removedNotification = notifications.find(item => item.id === id);
+      setNotifications(current => current.filter(item => item.id !== id));
+
+      if (removedNotification && !removedNotification.is_read) {
+        unreadCountRef.current = Math.max(0, unreadCountRef.current - 1);
+        setUnreadCount(unreadCountRef.current);
+      }
+      setError(null);
+    } catch {
+      setError("We couldn't delete the notification.");
+    }
+  }, [notifications]);
+
   return {
     unreadCount,
     notifications,
     isLoading,
     error,
     retry: fetchNotifications,
+    removeNotification,
   };
 };
