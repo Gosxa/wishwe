@@ -5,11 +5,13 @@ services:
     restart: unless-stopped
     env_file:
       - /var/www/app/backend/.env
+    environment:
+      CHANNEL_REDIS_URL: redis://redis:6379/1
     expose:
       - "8000"
     networks:
       - backend
-    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && gunicorn wishwe_api.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 120 --worker-tmp-dir /tmp --access-logfile - --error-logfile -"
+    command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate --noinput && daphne -b 0.0.0.0 -p 8000 wishwe_api.asgi:application"
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import socket; s=socket.socket(); s.connect((\"localhost\", 8000))'"]
       interval: 30s
@@ -108,6 +110,8 @@ services:
         condition: service_started
     env_file:
       - /var/www/app/backend/.env
+    environment:
+      CHANNEL_REDIS_URL: redis://redis:6379/1
     networks:
       - backend
 
@@ -122,6 +126,8 @@ services:
         condition: service_started
     env_file:
       - /var/www/app/backend/.env
+    environment:
+      CHANNEL_REDIS_URL: redis://redis:6379/1
     networks:
       - backend
 

@@ -46,6 +46,7 @@ services:
       DB_PORT: "5432"
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
+      CHANNEL_REDIS_URL: redis://redis:6379/1
       SERVE_MEDIA_LOCALLY: "true"
     env_file:
       - path: .env.test
@@ -120,6 +121,7 @@ services:
     command: sh -c "npm ci && npm run dev -- --hostname 0.0.0.0"
     environment:
       NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000
       BACKEND_INTERNAL_URL: http://django:8000
       NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID: ""
       GOOGLE_MAPS_KEY: ""
