@@ -145,9 +145,8 @@
 .notificationItemButton {
   width: 100%;
   margin: 0;
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
+  padding: 0;
+  border: 0;
   background: none;
   text-align: left;
   cursor: pointer;
@@ -160,6 +159,41 @@
   &:hover p,
   &:focus-visible p {
     color: clr.$prm;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid clr.$prm;
+    outline-offset: 2px;
+  }
+}
+
+.notificationRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.notificationMessage {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.deleteNotification {
+  flex: 0 0 auto;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: clr.$ns-500;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: clr.$err;
     text-decoration: underline;
   }
 

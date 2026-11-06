@@ -6,10 +6,8 @@ import { NotificationsDropdown } from './NotificationsDropdown';
 
 export const ActivityFeed = () => {
   const router = useRouter();
-  const { notifications, isLoading, error, retry } = useNotifications(
-    true,
-    false,
-  );
+  const { notifications, isLoading, error, retry, removeNotification } =
+    useNotifications(true);
 
   return (
     <NotificationsDropdown
@@ -20,6 +18,7 @@ export const ActivityFeed = () => {
       isLoading={isLoading}
       error={error}
       onRetry={retry}
+      onDelete={id => void removeNotification(id)}
       onEventClick={id => router.push(`/feed?event=${id}`)}
       onUserClick={username =>
         router.push(

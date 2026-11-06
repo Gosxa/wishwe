@@ -10,6 +10,7 @@ type Props = {
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
+  onDelete?: (id: number) => void;
   onEventClick: (eventId: number) => void;
   onUserClick: (username: string) => void;
   presentation?: 'dropdown' | 'page';
@@ -45,6 +46,7 @@ export const NotificationsDropdown = ({
   isLoading,
   error,
   onRetry,
+  onDelete = () => undefined,
   onEventClick,
   onUserClick,
   presentation = 'dropdown',
@@ -98,36 +100,13 @@ export const NotificationsDropdown = ({
               </>
             );
 
-            if (notification.related_object_type === 'event') {
-              return (
-                <button
-                  key={notification.id}
-                  type="button"
-                  className={clsx(s.notificationItem, s.notificationItemButton)}
-                  style={itemStyle}
-                  onClick={() => onEventClick(notification.related_object_id)}
-                >
-                  {body}
-                </button>
-              );
-            }
-
-            if (
-              notification.related_object_type === 'friendship' &&
-              notification.creator
-            ) {
-              return (
-                <button
-                  key={notification.id}
-                  type="button"
-                  className={clsx(s.notificationItem, s.notificationItemButton)}
-                  style={itemStyle}
-                  onClick={() => onUserClick(notification.creator)}
-                >
-                  {body}
-                </button>
-              );
-            }
+            const clickNotification =
+              notification.related_object_type === 'event'
+                ? () => onEventClick(notification.related_object_id)
+                : notification.related_object_type === 'friendship' &&
+                    notification.creator
+                  ? () => onUserClick(notification.creator)
+                  : null;
 
             return (
               <article
@@ -135,7 +114,30 @@ export const NotificationsDropdown = ({
                 className={s.notificationItem}
                 style={itemStyle}
               >
-                {body}
+                <div className={s.notificationRow}>
+                  {clickNotification ? (
+                    <button
+                      type="button"
+                      className={clsx(
+                        s.notificationItemButton,
+                        s.notificationMessage,
+                      )}
+                      onClick={clickNotification}
+                    >
+                      {body}
+                    </button>
+                  ) : (
+                    <div className={s.notificationMessage}>{body}</div>
+                  )}
+                  <button
+                    type="button"
+                    className={s.deleteNotification}
+                    aria-label={`Delete notification: ${notification.title}`}
+                    onClick={() => onDelete(notification.id)}
+                  >
+                    ×
+                  </button>
+                </div>
               </article>
             );
           })}

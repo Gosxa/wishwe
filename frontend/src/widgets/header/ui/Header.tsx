@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BellDot, ExternalLink, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
 import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
+import type { NotificationItem } from '@/shared/client_api/notifications';
 import { CreateEventModal } from '@widgets/createEventModal';
 import { SearchBar, type SearchBarProps } from './SearchBar';
 import { CreateButton } from './CreateButton';
@@ -42,6 +43,18 @@ export const Header = ({
     null,
   );
   const actionsRef = useRef<HTMLDivElement>(null);
+  const toastTimersRef = useRef(
+    new Map<
+      number,
+      {
+        start?: ReturnType<typeof setTimeout>;
+        finish?: ReturnType<typeof setTimeout>;
+      }
+    >(),
+  );
+  const [toasts, setToasts] = useState<NotificationItem[]>([]);
+  const toastsRef = useRef(toasts);
+  const [fadingToasts, setFadingToasts] = useState<Set<number>>(new Set());
   const isNotificationsOpen = openMenu === 'notifications';
   const isSettingsOpen = openMenu === 'settings';
   const {
@@ -50,7 +63,96 @@ export const Header = ({
     isLoading: areNotificationsLoading,
     error: notificationsError,
     retry: retryNotifications,
+    removeNotification,
   } = useNotifications(isNotificationsOpen);
+
+  const clearToastTimers = useCallback((id: number) => {
+    const timers = toastTimersRef.current.get(id);
+    if (timers?.start) clearTimeout(timers.start);
+    if (timers?.finish) clearTimeout(timers.finish);
+    toastTimersRef.current.delete(id);
+  }, []);
+
+  const dismissToast = useCallback((id: number) => {
+    clearToastTimers(id);
+    toastsRef.current = toastsRef.current.filter(item => item.id !== id);
+    setToasts(toastsRef.current);
+    setFadingToasts(current => {
+      const next = new Set(current);
+      next.delete(id);
+      return next;
+    });
+  }, [clearToastTimers]);
+
+  const scheduleToastDismiss = useCallback((id: number) => {
+    clearToastTimers(id);
+    if (document.visibilityState !== 'visible') return;
+
+    const start = setTimeout(() => {
+      setFadingToasts(current => new Set(current).add(id));
+      const finish = setTimeout(() => dismissToast(id), 2000);
+      toastTimersRef.current.set(id, { finish });
+    }, 2000);
+    toastTimersRef.current.set(id, { start });
+  }, [clearToastTimers, dismissToast]);
+
+  useEffect(() => {
+    toastsRef.current = toasts;
+  }, [toasts]);
+
+  useEffect(() => {
+    const handleNotification = (event: Event) => {
+      const notification = (event as CustomEvent<NotificationItem>).detail;
+      const next = [
+        notification,
+        ...toastsRef.current.filter(item => item.id !== notification.id),
+      ].slice(0, 4);
+      toastsRef.current = next;
+      setToasts(next);
+      scheduleToastDismiss(notification.id);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        toastTimersRef.current.forEach(timers => {
+          if (timers.start) clearTimeout(timers.start);
+          if (timers.finish) clearTimeout(timers.finish);
+        });
+        toastTimersRef.current.clear();
+        setFadingToasts(new Set());
+        return;
+      }
+
+      toastsRef.current.forEach(notification =>
+        scheduleToastDismiss(notification.id),
+      );
+    };
+
+    window.addEventListener('wishwe:notification', handleNotification);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('wishwe:notification', handleNotification);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      toastTimersRef.current.forEach(timers => {
+        if (timers.start) clearTimeout(timers.start);
+        if (timers.finish) clearTimeout(timers.finish);
+      });
+      toastTimersRef.current.clear();
+    };
+  }, [scheduleToastDismiss]);
+
+  const closeToast = (id: number) => {
+    dismissToast(id);
+  };
+
+  const pauseToast = (id: number) => {
+    clearToastTimers(id);
+    setFadingToasts(current => {
+      const next = new Set(current);
+      next.delete(id);
+      return next;
+    });
+  };
 
   const settingsActions: Partial<Record<string, () => void>> = {
     'Log out': logout,
@@ -141,6 +243,7 @@ export const Header = ({
               isLoading={areNotificationsLoading}
               error={notificationsError}
               onRetry={retryNotifications}
+              onDelete={id => void removeNotification(id)}
               onEventClick={eventId => {
                 setOpenMenu(null);
                 router.push(`/feed?event=${encodeURIComponent(eventId)}`);
@@ -191,6 +294,36 @@ export const Header = ({
             </div>
           )}
         </div>
+      </div>
+      <div className={s.notificationToasts} aria-live="polite">
+        {toasts.map(notification => (
+          <article
+            className={`${s.notificationToast} ${
+              fadingToasts.has(notification.id)
+                ? s.notificationToastFading
+                : ''
+            }`}
+            key={notification.id}
+            role="status"
+            onMouseEnter={() => pauseToast(notification.id)}
+            onMouseLeave={() => scheduleToastDismiss(notification.id)}
+          >
+            <div>
+              <p className={s.notificationToastTitle}>{notification.title}</p>
+              <p className={s.notificationToastMessage}>
+                {notification.message}
+              </p>
+            </div>
+            <button
+              className={s.closeNotificationToast}
+              type="button"
+              aria-label="Close notification"
+              onClick={() => closeToast(notification.id)}
+            >
+              ×
+            </button>
+          </article>
+        ))}
       </div>
     </header>
   );

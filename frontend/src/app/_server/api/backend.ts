@@ -315,5 +315,12 @@ export const beApi = {
         headers: { cookie: cookieHeader },
         cache: 'no-store',
       }),
+
+    delete: (id: string, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/notifications/${id}/`, {
+        method: 'DELETE',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
   },
 };
