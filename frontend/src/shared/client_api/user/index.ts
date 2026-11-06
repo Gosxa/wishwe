@@ -10,6 +10,17 @@ const EVENTS_PAGE_SIZE = 5;
 const FRIENDS_PAGE_SIZE = 20;
 const PROFILE_SEARCH_PAGE_SIZE = 10;
 
+export const getMyProfile = async (): Promise<Profile> => {
+  const res = await fetch('/api/user/profile/me');
+
+  if (!res.ok) {
+    handleUnauthorized(res);
+    throw new Error('Failed to load profile');
+  }
+
+  return res.json();
+};
+
 export type UserEventsTab = 'plans' | 'wishes' | 'archive';
 
 export type UserEventListParams = {

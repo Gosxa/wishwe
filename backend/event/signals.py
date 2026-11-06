@@ -1,7 +1,16 @@
-from django.db.models.signals import pre_save, post_delete
+from django.db import transaction
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 
-from event.models import Event
+from event.models import Event, EventParticipant
+from event.realtime import publish_feed_changed
+
+
+def schedule_feed_changed(sender, instance, raw=False, **kwargs):
+    if raw:
+        return
+
+    transaction.on_commit(publish_feed_changed, robust=True)
 
 
 @receiver(pre_save, sender=Event)
@@ -40,3 +49,25 @@ def delete_cover_image_on_event_delete(
         instance.cover_image.delete(
             save=False
         )
+
+
+post_save.connect(
+    schedule_feed_changed,
+    sender=Event,
+    dispatch_uid="event.feed_changed_on_save",
+)
+post_delete.connect(
+    schedule_feed_changed,
+    sender=Event,
+    dispatch_uid="event.feed_changed_on_delete",
+)
+post_save.connect(
+    schedule_feed_changed,
+    sender=EventParticipant,
+    dispatch_uid="event.feed_changed_on_participant_save",
+)
+post_delete.connect(
+    schedule_feed_changed,
+    sender=EventParticipant,
+    dispatch_uid="event.feed_changed_on_participant_delete",
+)

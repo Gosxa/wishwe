@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   acceptRequest as acceptRequestApi,
   declineRequest as declineRequestApi,
@@ -35,16 +35,33 @@ export const useFriends = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const requestVersion = useRef(0);
+
+  const refreshRequests = useCallback(async () => {
+    const version = ++requestVersion.current;
+
+    try {
+      const requestsData = await listIncomingRequests();
+      if (requestVersion.current !== version) return;
+
+      setRequests(requestsData.map(toFriendRequest));
+    } catch {
+      // Keep the current requests visible if a background refresh fails.
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
+    const requestVersionAtStart = requestVersion.current;
 
     Promise.all([loadAllFriends(), listIncomingRequests()])
       .then(([friendsData, requestsData]) => {
         if (!active) return;
 
         setFriends(friendsData);
-        setRequests(requestsData.map(toFriendRequest));
+        if (requestVersion.current === requestVersionAtStart) {
+          setRequests(requestsData.map(toFriendRequest));
+        }
         setError(null);
       })
       .catch(() => {
@@ -58,6 +75,14 @@ export const useFriends = () => {
       active = false;
     };
   }, [attempt]);
+
+  useEffect(() => {
+    window.addEventListener('wishwe:friend-request', refreshRequests);
+
+    return () => {
+      window.removeEventListener('wishwe:friend-request', refreshRequests);
+    };
+  }, [refreshRequests]);
 
   const retry = useCallback(() => {
     setError(null);

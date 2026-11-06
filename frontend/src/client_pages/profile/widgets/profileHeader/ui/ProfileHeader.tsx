@@ -1,11 +1,13 @@
 'use client';
 
-import type { MouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import Link from 'next/link';
 import type { Profile } from '@/shared/client_api/auth/types';
+import { getMyProfile } from '@/shared/client_api/user';
 import { Pencil } from '@shared/ui/icons';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { useUserStore } from '@/shared/store/useUserStore';
+import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { useExitNavigation } from '@shared/hooks/useExitNavigation';
 import { InviteFriends } from './InviteFriends';
 import { ProfileStats } from './ProfileStats';
@@ -23,17 +25,40 @@ export const ProfileHeader = ({
   isLeaving,
 }: Props) => {
   const user = useUserStore(state => state.user) ?? initialUser;
+  const refreshToken = useEventsRefreshStore(state => state.refreshToken);
+  const [statsProfile, setStatsProfile] = useState(initialUser);
   const fallback = useExitNavigation('/edit-profile');
   const activeIsLeaving = isLeaving ?? fallback.isLeaving;
   const activeOnEditClick = onEditClick ?? fallback.handleNavigate;
+
+  useEffect(() => {
+    setStatsProfile(initialUser);
+  }, [initialUser]);
+
+  useEffect(() => {
+    if (refreshToken === 0) return;
+
+    let isCurrent = true;
+    getMyProfile()
+      .then(profile => {
+        if (isCurrent) setStatsProfile(profile);
+      })
+      .catch(() => {
+        // Keep the last known counts if the profile refresh fails.
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [refreshToken]);
 
   const username = user?.username ?? '';
   const bio = user?.bio ?? '';
   const avatar = user?.avatar ?? null;
   const activeCount =
-    user?.active_events_count ?? initialUser?.active_events_count;
+    statsProfile?.active_events_count ?? user?.active_events_count;
   const archivedCount =
-    user?.archived_events_count ?? initialUser?.archived_events_count;
+    statsProfile?.archived_events_count ?? user?.archived_events_count;
   const hasStats = activeCount != null || archivedCount != null;
 
   return (
