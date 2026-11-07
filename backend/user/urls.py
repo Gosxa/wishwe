@@ -16,6 +16,7 @@ from user.views import (
     CookieTokenObtainPairView,
     CookieTokenRefreshView,
     logout_user,
+    WebSocketTicketAPIView,
 )
 
 
@@ -27,6 +28,11 @@ router.register("users", UserViewSet, basename="user")
 router.register("invite", InviteViewSet, basename="invite")
 
 urlpatterns = [
+    path(
+        "ws-ticket/",
+        WebSocketTicketAPIView.as_view(),
+        name="websocket-ticket",
+    ),
     path("auth/token/", CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("auth/token/refresh/", CookieTokenRefreshView.as_view(), name="token_refresh"),
     path("auth/logout/", logout_user, name="logout"),

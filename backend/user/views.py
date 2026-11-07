@@ -22,6 +22,7 @@ from google.auth.transport import requests
 from django.core.files.base import ContentFile
 import requests as pyrequests
 from django.conf import settings
+from django.core import signing
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 from rest_framework.viewsets import GenericViewSet
@@ -1059,3 +1060,22 @@ class UsernameAvailabilityAPIView(APIView):
         return Response({
             "available": not is_taken
         })
+
+
+class WebSocketTicketAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        ticket = signing.dumps(
+            {
+                "purpose": "websocket",
+                "user_id": request.user.pk,
+            },
+            salt="wishwe.websocket-auth",
+            compress=True,
+        )
+        response = Response({"ticket": ticket})
+        response["Cache-Control"] = "private, no-store"
+        response["Pragma"] = "no-cache"
+
+        return response

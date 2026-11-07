@@ -14,7 +14,12 @@ class EventFeedConsumer(AsyncJsonWebsocketConsumer):
             EVENT_FEED_GROUP,
             self.channel_name,
         )
-        await self.accept()
+        subprotocol = (
+            "wishwe.v1"
+            if "wishwe.v1" in self.scope.get("subprotocols", [])
+            else None
+        )
+        await self.accept(subprotocol=subprotocol)
 
     async def disconnect(self, close_code):
         if self.scope.get("user") and self.scope["user"].is_authenticated:
