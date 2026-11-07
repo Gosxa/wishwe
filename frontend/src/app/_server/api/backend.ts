@@ -60,6 +60,13 @@ export const beApi = {
   },
 
   user: {
+    websocketTicket: (cookieHeader: string) =>
+      fetch(`${BACKEND}/api/user/ws-ticket/`, {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        cache: 'no-store',
+      }),
+
     me: (cookieHeader: string) =>
       fetch(`${BACKEND}/api/user/profile/me/`, {
         headers: { cookie: cookieHeader },
