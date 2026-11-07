@@ -26,9 +26,4 @@ RUN addgroup --system django && adduser --system --ingroup django --home /home/d
 
 USER django
 
-CMD ["gunicorn", "wishwe_api.wsgi:application", \
-     "--bind", "0.0.0.0:8000", \
-     "--workers", "3", \
-     "--timeout", "120", \
-     "--access-logfile", "-", \
-     "--error-logfile", "-"]
+CMD ["sh", "-c", "daphne -b 0.0.0.0 -p ${PORT:-8000} wishwe_api.asgi:application"]
