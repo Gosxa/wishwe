@@ -1,5 +1,19 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## WebSocket deployment
+
+The browser connects to the Django ASGI service. On Vercel, set
+`NEXT_PUBLIC_WS_URL` to `wss://wishwe.onrender.com` in the frontend project's
+environment for every deployed environment. When that variable is omitted, the
+client derives the WebSocket origin from `NEXT_PUBLIC_BACKEND_URL` or falls
+back to the current origin. The production Docker stack uses Nginx's `/ws/`
+upgrade proxy on the current origin.
+
+The backend container's default command runs Daphne against
+`wishwe_api.asgi:application`. WebSocket authentication uses a short-lived
+ticket obtained through the same-origin API; the browser does not send the
+long-lived access token to the backend host.
+
 ## Tests
 
 Install the frontend packages before running tests:

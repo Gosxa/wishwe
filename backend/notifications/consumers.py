@@ -10,7 +10,12 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 
         self.group_name = f"notifications_user_{user.pk}"
         await self.channel_layer.group_add(self.group_name, self.channel_name)
-        await self.accept()
+        subprotocol = (
+            "wishwe.v1"
+            if "wishwe.v1" in self.scope.get("subprotocols", [])
+            else None
+        )
+        await self.accept(subprotocol=subprotocol)
 
     async def disconnect(self, close_code):
         group_name = getattr(self, "group_name", None)
