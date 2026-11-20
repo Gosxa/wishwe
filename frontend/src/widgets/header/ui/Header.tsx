@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BellDot, ExternalLink, Gear, Logo } from '@shared/ui/icons';
 import { logout } from '@/shared/client_api/auth';
-import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
+import { PRIVACY_POLICY_PATH } from '@/shared/lib/legal';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import type { NotificationItem } from '@/shared/client_api/notifications';
@@ -18,7 +18,7 @@ import s from '../header.module.scss';
 const settingsItems = [
   { label: 'Edit profile' },
   { label: 'Support' },
-  { label: 'Terms of Use', external: true },
+  { label: 'Privacy Policy', external: true },
   { label: 'Log out', variant: 'danger' },
 ] as const;
 
@@ -173,9 +173,9 @@ export const Header = ({
       setOpenMenu(null);
       window.location.href = 'mailto:support@wishwe.online';
     },
-    'Terms of Use': () => {
+    'Privacy Policy': () => {
       setOpenMenu(null);
-      window.open(TERMS_OF_USE_URL, '_blank', 'noopener,noreferrer');
+      window.open(PRIVACY_POLICY_PATH, '_blank', 'noopener,noreferrer');
     },
   };
 

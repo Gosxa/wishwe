@@ -57,6 +57,7 @@ describe('proxy', () => {
     ['invite landings', '/invite/tok-123'],
     ['the invite join flow', '/invite/tok-123/join'],
     ['the thank-you page', '/thank-you'],
+    ['the public privacy policy', '/privacy-policy'],
     ['next api routes', '/next_api/auth/login'],
     ['backend proxy routes', '/api/user/profile'],
     ['the test playground', '/test/cropper'],
