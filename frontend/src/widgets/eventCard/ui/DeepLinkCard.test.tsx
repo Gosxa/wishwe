@@ -100,15 +100,15 @@ describe('DeepLinkCard', () => {
   it('loads the requested event and opens its details', async () => {
     const onClose = vi.fn();
 
-    render(<DeepLinkCard eventId="73" onClose={onClose} />);
+    render(<DeepLinkCard eventId={event.uuid} onClose={onClose} />);
     await flushPromises();
 
-    expect(eventApiMocks.getEvent).toHaveBeenCalledWith('73');
+    expect(eventApiMocks.getEvent).toHaveBeenCalledWith(event.uuid);
     expect(screen.getByText('Loaded event: Learn pottery')).toBeTruthy();
     expect(uiMocks.eventCard).toHaveBeenCalledWith(
       expect.objectContaining({
         event: expect.objectContaining({
-          id: '73',
+          id: event.uuid,
           title: event.title,
           participantCount: 2,
         }),

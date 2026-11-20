@@ -141,7 +141,7 @@ describe('SharedEventPage', () => {
     expect(screen.getByText('Full event: Weekend in Lviv')).toBeTruthy();
     expect(uiMocks.eventCard).toHaveBeenCalledWith(
       expect.objectContaining({
-        event: expect.objectContaining({ id: '42', title: event.title }),
+        event: expect.objectContaining({ id: event.uuid, title: event.title }),
         enableDetails: true,
         autoOpenDetails: true,
         detailsOnly: true,

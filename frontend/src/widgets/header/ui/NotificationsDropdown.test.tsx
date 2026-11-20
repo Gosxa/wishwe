@@ -162,32 +162,59 @@ describe('NotificationsDropdown', () => {
   it('renders a friendship row without a creator as plain text', () => {
     renderDropdown({
       notifications: [
-        notification({ creator: '', message: 'Someone wants to connect.' }),
+        notification({
+          creator: '',
+          message: 'Someone wants to connect.',
+          related_object_type: 'friendship',
+        }),
       ],
     });
 
-    expect(screen.queryByRole('button')).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: /Someone wants to connect/ }),
+    ).toBeNull();
+    expect(
+      screen.getByRole('button', {
+        name: 'Delete notification: New friend request',
+      }),
+    ).toBeTruthy();
     expect(screen.getByText('Someone wants to connect.')).toBeTruthy();
   });
 
   it('renders every row it is given, keyed by notification id', () => {
     renderDropdown({
       notifications: [
-        notification({ id: 1, message: 'First' }),
+        notification({
+          id: 1,
+          message: 'First',
+          related_object_type: 'friendship',
+        }),
         notification({
           id: 2,
           message: 'Second',
           related_object_type: 'event',
           related_object_id: 3,
         }),
-        notification({ id: 3, message: 'Third', creator: '' }),
+        notification({
+          id: 3,
+          message: 'Third',
+          creator: '',
+          related_object_type: 'friendship',
+        }),
       ],
     });
 
     expect(screen.getByText('First')).toBeTruthy();
     expect(screen.getByText('Second')).toBeTruthy();
     expect(screen.getByText('Third')).toBeTruthy();
-    expect(screen.getAllByRole('button')).toHaveLength(2);
+    expect(
+      screen
+        .getAllByRole('button')
+        .filter(button => !button.hasAttribute('aria-label')),
+    ).toHaveLength(2);
+    expect(
+      screen.getAllByRole('button', { name: /Delete notification:/ }),
+    ).toHaveLength(3);
   });
 
   it('assigns a staggered item index style to notification rows', () => {
@@ -198,10 +225,10 @@ describe('NotificationsDropdown', () => {
       ],
     });
 
-    const items = panel().querySelectorAll('button, article');
+    const items = panel().querySelectorAll('article');
 
-    expect(items[0].getAttribute('style')).toContain('--item-index: 0');
-    expect(items[1].getAttribute('style')).toContain('--item-index: 1');
+    expect(items[0].style.getPropertyValue('--item-index')).toBe('0');
+    expect(items[1].style.getPropertyValue('--item-index')).toBe('1');
   });
 
   it.each([

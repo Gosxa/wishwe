@@ -330,4 +330,14 @@ export const beApi = {
         cache: 'no-store',
       }),
   },
+
+  support: {
+    submit: (body: unknown, cookieHeader: string) =>
+      fetch(`${BACKEND}/api/support/requests/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', cookie: cookieHeader },
+        body: JSON.stringify(body),
+        cache: 'no-store',
+      }),
+  },
 };

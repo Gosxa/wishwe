@@ -5,7 +5,10 @@ import { beApi } from './backend';
 const fetchMock =
   vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>();
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? 'http://localhost:8000';
+const BACKEND =
+  process.env.BACKEND_INTERNAL_URL ??
+  process.env.NEXT_PUBLIC_BACKEND_URL ??
+  'http://localhost:8000';
 const COOKIE = 'access_token=access; refresh_token=refresh; theme=dark';
 const BODY = { value: 'payload', nested: { enabled: true } };
 const EVENT_UUID = '11111111-1111-4111-8111-111111111111';
@@ -359,7 +362,7 @@ describe('beApi Next/Django boundary', () => {
   });
 
   it('reads a configured backend origin when the module is initialized', async () => {
-    vi.stubEnv('NEXT_PUBLIC_BACKEND_URL', 'https://django.internal.example');
+    vi.stubEnv('BACKEND_INTERNAL_URL', 'https://django.internal.example');
     vi.resetModules();
 
     const { beApi: configuredApi } = await import('./backend');

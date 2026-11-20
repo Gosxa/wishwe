@@ -7,16 +7,30 @@ import type {
   NotificationsPage,
 } from '@/shared/client_api/notifications';
 
+type SocketEvent =
+  | { type: 'connected' }
+  | { type: 'notification'; notification: NotificationItem };
+
 const apiMocks = vi.hoisted(() => ({
   getNotifications: vi.fn(),
   getUnreadCount: vi.fn(),
   readAllNotifications: vi.fn(),
 }));
 
+const socketMocks = vi.hoisted(() => ({
+  subscribe: vi.fn(),
+  emit: vi.fn(),
+  unsubscribe: vi.fn(),
+}));
+
 vi.mock('@/shared/client_api/notifications', () => ({
   getNotifications: apiMocks.getNotifications,
   getUnreadCount: apiMocks.getUnreadCount,
   readAllNotifications: apiMocks.readAllNotifications,
+}));
+
+vi.mock('@/shared/client_api/notifications/socket', () => ({
+  subscribeToNotificationSocket: socketMocks.subscribe,
 }));
 
 import { useNotifications } from './useNotifications';
@@ -76,6 +90,13 @@ const advance = async (milliseconds: number) => {
   });
 };
 
+const emitSocketEvent = async (event: SocketEvent) => {
+  await act(async () => {
+    socketMocks.emit(event);
+    await Promise.resolve();
+  });
+};
+
 describe('useNotifications', () => {
   let visibility: DocumentVisibilityState;
   let online: boolean;
@@ -87,6 +108,16 @@ describe('useNotifications', () => {
     apiMocks.getNotifications.mockReset();
     apiMocks.getUnreadCount.mockReset();
     apiMocks.readAllNotifications.mockReset();
+    socketMocks.subscribe.mockReset();
+    socketMocks.emit.mockReset();
+    socketMocks.unsubscribe.mockReset();
+
+    socketMocks.subscribe.mockImplementation(
+      (listener: (event: SocketEvent) => void) => {
+        socketMocks.emit.mockImplementation(listener);
+        return socketMocks.unsubscribe;
+      },
+    );
 
     apiMocks.getUnreadCount.mockResolvedValue(0);
     apiMocks.getNotifications.mockResolvedValue(notificationsPage([]));
@@ -111,7 +142,7 @@ describe('useNotifications', () => {
     vi.useRealTimers();
   });
 
-  it('polls immediately and then every minute while active', async () => {
+  it('loads the unread count on mount and refreshes after socket reconnects', async () => {
     apiMocks.getUnreadCount.mockResolvedValueOnce(2).mockResolvedValueOnce(5);
 
     const { result } = renderHook(() => useNotifications(false));
@@ -122,36 +153,33 @@ describe('useNotifications', () => {
     expect(result.current.unreadCount).toBe(2);
     expect(apiMocks.getNotifications).not.toHaveBeenCalled();
 
-    await advance(59_999);
+    await emitSocketEvent({ type: 'connected' });
+    await flushPromises();
+
+    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(2);
+    expect(result.current.unreadCount).toBe(5);
+    await advance(300_000);
+    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries an unread count request after the socket reconnects', async () => {
+    apiMocks.getUnreadCount
+      .mockRejectedValueOnce(new Error('server error'))
+      .mockResolvedValueOnce(5);
+
+    const { result } = renderHook(() => useNotifications(false));
+    await flushPromises();
 
     expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(1);
 
-    await advance(1);
+    await emitSocketEvent({ type: 'connected' });
+    await flushPromises();
 
     expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(2);
     expect(result.current.unreadCount).toBe(5);
   });
 
-  it('uses exponential backoff for poll failures and caps it at five minutes', async () => {
-    apiMocks.getUnreadCount.mockRejectedValue(new Error('server error'));
-
-    renderHook(() => useNotifications(false));
-    await flushPromises();
-
-    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(1);
-
-    for (const [index, delay] of [
-      60_000, 120_000, 240_000, 300_000, 300_000,
-    ].entries()) {
-      await advance(delay - 1);
-      expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(index + 1);
-
-      await advance(1);
-      expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(index + 2);
-    }
-  });
-
-  it('resets polling backoff after a successful request', async () => {
+  it('refreshes the unread count on each socket reconnect', async () => {
     apiMocks.getUnreadCount
       .mockRejectedValueOnce(new Error('first failure'))
       .mockResolvedValueOnce(1)
@@ -161,89 +189,73 @@ describe('useNotifications', () => {
     const { result } = renderHook(() => useNotifications(false));
 
     await flushPromises();
-    await advance(60_000);
+    await emitSocketEvent({ type: 'connected' });
+    await flushPromises();
 
     expect(result.current.unreadCount).toBe(1);
 
-    await advance(60_000);
-    await advance(59_999);
-
+    await emitSocketEvent({ type: 'connected' });
+    await flushPromises();
     expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(3);
-
-    await advance(1);
+    await emitSocketEvent({ type: 'connected' });
+    await flushPromises();
 
     expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(4);
     expect(result.current.unreadCount).toBe(2);
   });
 
-  it('pauses while hidden or offline and resumes on visibility, focus, and online events', async () => {
+  it('aborts the open list while hidden and reloads it when visible or online', async () => {
+    apiMocks.getNotifications.mockImplementation((signal?: AbortSignal) =>
+      rejectOnAbort<NotificationsPage>(signal),
+    );
     visibility = 'hidden';
 
-    renderHook(() => useNotifications(false));
-    await flushPromises();
+    renderHook(() => useNotifications(true));
+    await advance(0);
 
-    expect(apiMocks.getUnreadCount).not.toHaveBeenCalled();
+    const firstSignal = apiMocks.getNotifications.mock
+      .calls[0][0] as AbortSignal;
+    expect(apiMocks.getNotifications).toHaveBeenCalledTimes(1);
+
+    visibility = 'hidden';
+    await act(async () => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      await Promise.resolve();
+    });
+    expect(firstSignal.aborted).toBe(true);
 
     visibility = 'visible';
     await act(async () => {
       document.dispatchEvent(new Event('visibilitychange'));
       await Promise.resolve();
     });
-
-    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(1);
-
-    window.dispatchEvent(new Event('focus'));
-    await flushPromises();
-
-    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(1);
-
-    await advance(251);
-    window.dispatchEvent(new Event('focus'));
-    await flushPromises();
-
-    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(2);
+    await advance(0);
+    expect(apiMocks.getNotifications).toHaveBeenCalledTimes(2);
 
     online = false;
     window.dispatchEvent(new Event('offline'));
-    await advance(300_000);
-
-    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(2);
+    const secondSignal = apiMocks.getNotifications.mock
+      .calls[1][0] as AbortSignal;
+    expect(secondSignal.aborted).toBe(true);
 
     online = true;
-    window.dispatchEvent(new Event('online'));
-    await flushPromises();
-
-    expect(apiMocks.getUnreadCount).toHaveBeenCalledTimes(3);
+    await act(async () => {
+      window.dispatchEvent(new Event('online'));
+      await Promise.resolve();
+    });
+    await advance(0);
+    expect(apiMocks.getNotifications).toHaveBeenCalledTimes(3);
   });
 
-  it('aborts polling when paused and when unmounted', async () => {
-    apiMocks.getUnreadCount.mockImplementation((signal?: AbortSignal) =>
-      rejectOnAbort<number>(signal),
-    );
-
+  it('unsubscribes from socket events when unmounted', async () => {
     const { unmount } = renderHook(() => useNotifications(false));
 
     await flushPromises();
-
-    const firstSignal = apiMocks.getUnreadCount.mock.calls[0][0] as AbortSignal;
-
-    visibility = 'hidden';
-    document.dispatchEvent(new Event('visibilitychange'));
-    await flushPromises();
-
-    expect(firstSignal.aborted).toBe(true);
-
-    await advance(251);
-    visibility = 'visible';
-    document.dispatchEvent(new Event('visibilitychange'));
-    await flushPromises();
-
-    const secondSignal = apiMocks.getUnreadCount.mock
-      .calls[1][0] as AbortSignal;
+    expect(socketMocks.subscribe).toHaveBeenCalledOnce();
 
     unmount();
 
-    expect(secondSignal.aborted).toBe(true);
+    expect(socketMocks.unsubscribe).toHaveBeenCalledOnce();
   });
 
   it('opens the list, aborts it on close, and does not retry while closed', async () => {
@@ -326,8 +338,7 @@ describe('useNotifications', () => {
     expect(result.current.notifications.every(item => item.is_read)).toBe(true);
   });
 
-  it('refreshes an open list when polling finds a new unread notification', async () => {
-    apiMocks.getUnreadCount.mockResolvedValueOnce(0).mockResolvedValueOnce(1);
+  it('refreshes an open list when a new notification arrives over the socket', async () => {
     apiMocks.getNotifications
       .mockResolvedValueOnce(notificationsPage([notification(1)]))
       .mockResolvedValueOnce(notificationsPage([notification(2, false)]));
@@ -338,7 +349,10 @@ describe('useNotifications', () => {
 
     expect(result.current.notifications.map(item => item.id)).toEqual([1]);
 
-    await advance(60_000);
+    await emitSocketEvent({
+      type: 'notification',
+      notification: notification(2, false),
+    });
     await advance(0);
 
     expect(apiMocks.getNotifications).toHaveBeenCalledTimes(2);
@@ -385,10 +399,7 @@ describe('useNotifications', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
-  it('aborts both active requests when unmounted', async () => {
-    apiMocks.getUnreadCount.mockImplementation((signal?: AbortSignal) =>
-      rejectOnAbort<number>(signal),
-    );
+  it('aborts an open list request and unsubscribes when unmounted', async () => {
     apiMocks.getNotifications.mockImplementation((signal?: AbortSignal) =>
       rejectOnAbort<NotificationsPage>(signal),
     );
@@ -397,13 +408,12 @@ describe('useNotifications', () => {
 
     await advance(0);
 
-    const pollSignal = apiMocks.getUnreadCount.mock.calls[0][0] as AbortSignal;
     const listSignal = apiMocks.getNotifications.mock
       .calls[0][0] as AbortSignal;
 
     unmount();
 
-    expect(pollSignal.aborted).toBe(true);
     expect(listSignal.aborted).toBe(true);
+    expect(socketMocks.unsubscribe).toHaveBeenCalledOnce();
   });
 });

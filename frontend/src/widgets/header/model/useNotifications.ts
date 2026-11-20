@@ -103,7 +103,15 @@ export const useNotifications = (isOpen: boolean) => {
         nextNotifications.some(notification => !notification.is_read);
 
       if (shouldMarkAllRead) {
-        await readAllNotifications(controller.signal);
+        try {
+          await readAllNotifications(controller.signal);
+        } catch {
+          if (!controller.signal.aborted) {
+            setError("We couldn't mark notifications as read.");
+          }
+          return;
+        }
+
         if (controller.signal.aborted) return;
 
         const readNotifications = nextNotifications.map(notification => ({
@@ -169,21 +177,24 @@ export const useNotifications = (isOpen: boolean) => {
     };
   }, []);
 
-  const removeNotification = useCallback(async (id: number) => {
-    try {
-      await deleteNotificationRequest(id);
-      const removedNotification = notifications.find(item => item.id === id);
-      setNotifications(current => current.filter(item => item.id !== id));
+  const removeNotification = useCallback(
+    async (id: number) => {
+      try {
+        await deleteNotificationRequest(id);
+        const removedNotification = notifications.find(item => item.id === id);
+        setNotifications(current => current.filter(item => item.id !== id));
 
-      if (removedNotification && !removedNotification.is_read) {
-        unreadCountRef.current = Math.max(0, unreadCountRef.current - 1);
-        setUnreadCount(unreadCountRef.current);
+        if (removedNotification && !removedNotification.is_read) {
+          unreadCountRef.current = Math.max(0, unreadCountRef.current - 1);
+          setUnreadCount(unreadCountRef.current);
+        }
+        setError(null);
+      } catch {
+        setError("We couldn't delete the notification.");
       }
-      setError(null);
-    } catch {
-      setError("We couldn't delete the notification.");
-    }
-  }, [notifications]);
+    },
+    [notifications],
+  );
 
   return {
     unreadCount,

@@ -39,7 +39,7 @@ const profile = {
 
 const loadGetMe = async () => {
   vi.resetModules();
-  process.env.NEXT_PUBLIC_BACKEND_URL = BACKEND;
+  vi.stubEnv('BACKEND_INTERNAL_URL', BACKEND);
 
   return import('./getMe');
 };
@@ -60,6 +60,7 @@ describe('authUser', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it('requests the profile endpoint with the forwarded cookie header and no cache', async () => {
