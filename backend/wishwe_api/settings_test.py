@@ -37,5 +37,9 @@ AWS_STORAGE_BUCKET_NAME = None
 AWS_S3_ENDPOINT_URL = None
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+SUPPORT_EMAIL_BACKEND = os.getenv(
+    "SUPPORT_EMAIL_BACKEND",
+    "django.core.mail.backends.console.EmailBackend",
+)
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
 CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]

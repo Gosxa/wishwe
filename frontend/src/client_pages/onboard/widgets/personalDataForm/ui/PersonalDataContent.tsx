@@ -4,7 +4,7 @@ import { TextInput } from '@shared/ui/textInput/TextInput';
 import { AvatarImage } from '@shared/ui/avatarImage/AvatarImage';
 import { AvatarCrop } from '@shared/ui/avatarCrop/AvatarCrop';
 import { HelperText } from '@/shared';
-import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
+import { PRIVACY_POLICY_PATH } from '@/shared/lib/legal';
 import s from './personalData.module.scss';
 
 type AvatarConfig = {
@@ -129,9 +129,13 @@ export const PersonalDataContent = ({
           required
         />
         <span>
-          <label htmlFor="terms">I agree to the</label>{' '}
-          <a href={TERMS_OF_USE_URL} target="_blank" rel="noopener noreferrer">
-            Terms of Use
+          <label htmlFor="terms">I have read and understood the</label>{' '}
+          <a
+            href={PRIVACY_POLICY_PATH}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Privacy Policy
           </a>
         </span>
       </div>

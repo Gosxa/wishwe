@@ -160,7 +160,7 @@ describe('useEditEvent', () => {
 
     await act(async () => result.current.submit.onSubmit());
 
-    expect(eventApiMocks.updateEvent).toHaveBeenCalledWith('42', 'plan', {
+    expect(eventApiMocks.updateEvent).toHaveBeenCalledWith('event-42', 'plan', {
       category: 9,
       title: 'Updated title',
       description: 'Updated description',
@@ -189,7 +189,7 @@ describe('useEditEvent', () => {
 
     expect(result.current.titleInput.error).toBeUndefined();
     expect(eventApiMocks.updateEvent).toHaveBeenCalledWith(
-      '42',
+      'event-42',
       'plan',
       expect.objectContaining({ title: maxLengthTitle }),
     );
@@ -215,7 +215,7 @@ describe('useEditEvent', () => {
 
     await act(async () => result.current.submit.onSubmit());
 
-    expect(eventApiMocks.updateEvent).toHaveBeenCalledWith('42', 'wish', {
+    expect(eventApiMocks.updateEvent).toHaveBeenCalledWith('event-42', 'wish', {
       category: 7,
       title: 'Original title',
       description: 'Original description',
@@ -239,7 +239,7 @@ describe('useEditEvent', () => {
     await act(async () => result.current.submit.onSubmit());
 
     expect(eventApiMocks.updateEvent).toHaveBeenCalledWith(
-      '42',
+      'event-42',
       'plan',
       expect.objectContaining({ location_place_id: 'ChIJ123' }),
     );

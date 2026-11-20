@@ -186,7 +186,7 @@ describe('usePlanIt', () => {
 
     await act(async () => result.current.submit.onSubmit());
 
-    expect(eventApiMocks.convertToPlan).toHaveBeenCalledWith('42', {
+    expect(eventApiMocks.convertToPlan).toHaveBeenCalledWith('event-42', {
       event_date: futureDate,
       event_time: '14:30',
       min_participants: 3,
@@ -211,7 +211,7 @@ describe('usePlanIt', () => {
     await act(async () => result.current.submit.onSubmit());
 
     expect(eventApiMocks.convertToPlan).toHaveBeenCalledWith(
-      '42',
+      'event-42',
       expect.objectContaining({
         min_participants: 999,
         max_participants: 3000,

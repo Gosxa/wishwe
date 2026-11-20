@@ -44,6 +44,10 @@ services:
       DB_PASSWORD: wishwe-local-only
       DB_HOST: postgres
       DB_PORT: "5432"
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-noreply@wishwe.test}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-${EMAIL_HOST_USER:-support@wishwe.test}}
+      SUPPORT_EMAIL_BACKEND: ${SUPPORT_EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       CHANNEL_REDIS_URL: redis://redis:6379/1
@@ -116,7 +120,7 @@ services:
       - test
 
   frontend:
-    image: node:20-alpine
+    image: node:22-alpine
     working_dir: /app
     command: sh -c "npm ci && npm run dev -- --hostname 0.0.0.0"
     environment:

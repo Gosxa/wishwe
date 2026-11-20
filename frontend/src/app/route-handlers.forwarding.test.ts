@@ -46,7 +46,7 @@ vi.mock('@/app/_server/api/backend', async () => {
 describe('route handler inventory', () => {
   it('keeps every live route in the contract suite', () => {
     expect(Object.keys(routeFiles).sort()).toEqual(coveredRouteFiles);
-    expect(coveredRouteFiles).toHaveLength(37);
+    expect(coveredRouteFiles).toHaveLength(42);
   });
 });
 
@@ -258,7 +258,7 @@ describe('simple forwarding route handlers', () => {
     );
 
     expect(backendMocks.event.action).toHaveBeenCalledWith(
-      '12',
+      '11111111-1111-4111-8111-111111111111',
       action,
       COOKIE,
     );

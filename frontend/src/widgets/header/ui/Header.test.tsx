@@ -82,7 +82,7 @@ vi.mock('./NotificationsDropdown', () => ({
 import { Header } from './Header';
 import { useCreateEventStore } from '@/shared/store/useCreateEventStore';
 import { useEventsRefreshStore } from '@/shared/store/useEventsRefreshStore';
-import { TERMS_OF_USE_URL } from '@/shared/lib/legal';
+import { PRIVACY_POLICY_PATH } from '@/shared/lib/legal';
 import s from '../header.module.scss';
 
 describe('Header', () => {
@@ -332,9 +332,11 @@ describe('Header', () => {
       render(<Header />);
       openSettings();
 
-      ['Edit profile', 'Support', 'Terms of Use', 'Log out'].forEach(label => {
-        expect(screen.getByRole('button', { name: label })).toBeTruthy();
-      });
+      ['Edit profile', 'Support', 'Privacy Policy', 'Log out'].forEach(
+        label => {
+          expect(screen.getByRole('button', { name: label })).toBeTruthy();
+        },
+      );
     });
 
     it('toggles closed on a second press', () => {
@@ -362,16 +364,17 @@ describe('Header', () => {
       expect(screen.queryByText('Log out')).toBeNull();
     });
 
-    it('opens the terms in a new tab without leaking the opener', () => {
+    it('opens the privacy policy in a new tab and closes the settings menu', () => {
       render(<Header />);
       openSettings();
-      const termsButton = screen.getByRole('button', { name: 'Terms of Use' });
+      const policyButton = screen.getByRole('button', {
+        name: 'Privacy Policy',
+      });
 
-      expect(termsButton.querySelector('svg')).toBeTruthy();
-      fireEvent.click(termsButton);
+      fireEvent.click(policyButton);
 
       expect(window.open).toHaveBeenCalledWith(
-        TERMS_OF_USE_URL,
+        PRIVACY_POLICY_PATH,
         '_blank',
         'noopener,noreferrer',
       );

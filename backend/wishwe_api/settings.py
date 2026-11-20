@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "event.apps.EventConfig",
     "storages",
     "notifications",
+    "support",
     "channels",
 ]
 
@@ -237,6 +238,8 @@ EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL") or EMAIL_HOST_USER
+SUPPORT_EMAIL_BACKEND = os.getenv("SUPPORT_EMAIL_BACKEND", EMAIL_BACKEND)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "WishWe Service API",

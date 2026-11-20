@@ -27,7 +27,7 @@ const publicProfile = {
 
 const loadModule = async () => {
   vi.resetModules();
-  process.env.NEXT_PUBLIC_BACKEND_URL = BACKEND;
+  vi.stubEnv('BACKEND_INTERNAL_URL', BACKEND);
 
   return import('./getUserByUsername');
 };
@@ -47,6 +47,7 @@ describe('getUserByUsername', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   it('forwards session cookies and disables caching', async () => {
