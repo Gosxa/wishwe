@@ -15,6 +15,7 @@ urlpatterns = [
     path("api/user/", include("user.urls", namespace="user")),
     path("api/event/", include("event.urls", namespace="events")),
     path("api/notifications/", include("notifications.urls", namespace="notifications")),
+    path("api/support/", include("support.urls", namespace="support")),
     path("api/health/", health_check, name="health_check"),
     path(
         "api/username-check/",

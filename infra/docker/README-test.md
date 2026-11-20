@@ -31,6 +31,25 @@ docker compose -f infra/docker/docker-compose-test.yml exec django python manage
 Registration email codes are printed in the Django container logs because this
 environment uses the console email backend.
 
+Support email delivery also uses the console backend by default. To test a real
+support email locally, keep the SMTP credentials in `backend/.env` and opt in
+for the support mailer only:
+
+```powershell
+$env:SUPPORT_EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+docker compose --env-file backend/.env -f infra/docker/docker-compose-test.yml up --build -d
+Remove-Item Env:SUPPORT_EMAIL_BACKEND
+```
+
+The recipient defaults to `EMAIL_HOST_USER` when `SUPPORT_EMAIL` is not set, so
+with the current local configuration the message goes to
+`wishwe.service@gmail.com`. Registration and other application emails remain
+on the console backend. Stop the test stack after sending a message:
+
+```powershell
+docker compose -f infra/docker/docker-compose-test.yml down
+```
+
 The test settings use a separate PostgreSQL database and filesystem media
 storage. Django and Celery share a Docker volume at `/app/media`; staged images
 are not exposed through a public CDN. Images held for review or rejected by

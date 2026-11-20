@@ -171,7 +171,7 @@ export const Header = ({
     },
     Support: () => {
       setOpenMenu(null);
-      window.location.href = 'mailto:support@wishwe.online';
+      router.push('/support');
     },
     'Privacy Policy': () => {
       setOpenMenu(null);
